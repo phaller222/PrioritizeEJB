@@ -1,0 +1,611 @@
+package de.hallerweb.enterprise.prioritize.view.resource;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.enterprise.context.SessionScoped;
+import javax.faces.bean.ManagedBean;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.primefaces.event.SelectEvent;
+import org.primefaces.model.chart.Axis;
+import org.primefaces.model.chart.AxisType;
+import org.primefaces.model.chart.CategoryAxis;
+import org.primefaces.model.chart.LineChartModel;
+import org.primefaces.model.chart.LineChartSeries;
+import org.primefaces.model.map.DefaultMapModel;
+import org.primefaces.model.map.LatLng;
+import org.primefaces.model.map.MapModel;
+import org.primefaces.model.map.Marker;
+import org.primefaces.model.mindmap.DefaultMindmapNode;
+import org.primefaces.model.mindmap.MindmapNode;
+
+import de.hallerweb.enterprise.prioritize.controller.CompanyController;
+import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
+import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
+import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
+import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
+import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.resource.NameValueEntry;
+import de.hallerweb.enterprise.prioritize.model.resource.Resource;
+import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
+import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
+import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
+import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
+
+/**
+ * ResourceBean - JSF Backing-Bean to store information about resources.
+ * <p>
+ * Copyright: (c) 2014
+ * </p>
+ * <p>
+ * Peter Haller
+ * </p>
+ * 
+ * @author peter
+ */
+@Named
+@SessionScoped
+@ManagedBean
+public class ResourceBean implements Serializable {
+
+	private static final long serialVersionUID = -9021544577054017322L;
+
+	@Inject
+	SessionController sessionController; 							// Reference to SessionController EJB
+	@EJB
+	ResourceController resourceController; 							// Reference to ResourceController EJB
+	@EJB
+	CompanyController companyController; 							// Reference to CompanyController EJB
+	@EJB
+	UserRoleController userController; 								// Reference to Usercontroller EJB
+	@EJB
+	AuthorizationController authController; 						// Reference to AuthorizationController EJB
+
+	Set<Resource> resources; 										// Current List with Resource objects
+	List<ResourceGroup> resourceGroups; 							// Current list of resource groups within department
+	List<Department> departments; 									// List of departments
+	String selectedDepartmentId; 									// Currently selected Department
+	String selectedResourceGroupId; 								// Currently selected ResourceGroup
+	String resourceGroupName; 										// ResourceGroup to create
+	Resource resource; 												// Current Resource to create
+	ResourceReservation resourceReservation; 						// Current Resource Reservation to create
+	List<ResourceReservation> resourceReservations; 				// Current List with Resource Reservations
+	Date from; 														// FROM-Date of ResourceReservation
+	Date until; 													// UNTIL-Date of ResourceReservation
+	String mqttDataSentAsString = ""; 								// Represents the MQTT data sent as String
+	String lastMqttValue;
+	Set<String> mqttCommands; 										// A list of commands a MQTT resource understands (e.g. ON, OFF....)
+	LineChartModel valueModel; 										// LineChartModel for the primefaces <gmap> tag (Resource location).
+
+	private MindmapNode root; 										// RootNode for agent mindmap.
+	private MindmapNode selectedNode; 								// selectedNode for agent mindmap.
+
+	Department selectedDepartment = null; 							// Department to change resource to
+	Department selectedResourceGroup = null; 						// ResourceGroup to change resource to
+
+	Set<SkillRecord> skillRecords;
+
+	public Department getSelectedDepartment() {
+		return selectedDepartment;
+	}
+
+	public void setSelectedDepartment(Department selectedDepartment) {
+		this.selectedDepartment = selectedDepartment;
+	}
+
+	ResourceReservation aquiredReservation = null;
+
+	public String getMqttDataSentAsString() {
+		return mqttDataSentAsString;
+	}
+
+	public void setMqttDataSentAsString(String mqttDataSentAsString) {
+		this.mqttDataSentAsString = mqttDataSentAsString;
+	}
+
+	public Date getUntil() {
+		return until;
+	}
+
+	public void setUntil(Date until) {
+		this.until = until;
+	}
+
+	public Date getFrom() {
+		return from;
+	}
+
+	public void setFrom(Date from) {
+		this.from = from;
+	}
+
+	@Named
+	public String createResourceReservation() {
+		resourceController.createResourceReservation(resource, from, until, sessionController.getUser());
+		return "resourcereservations";
+	}
+
+	@Named
+	public String aquireResource(Resource resource) {
+		if (this.mqttCommands == null || this.mqttCommands.isEmpty()) {
+			this.mqttCommands = resourceController.getMqttCommands(resource, sessionController.getUser());
+		}
+		Date oneMinute = new Date(System.currentTimeMillis() + 60000L);
+		this.aquiredReservation = resourceController.createResourceReservation(resource, new Date(), oneMinute,
+				sessionController.getUser());
+		return "resources";
+	}
+
+	@Named
+	public String releaseResource(Resource resource) {
+		if (aquiredReservation != null) {
+			resourceController.removeResourceReservation(aquiredReservation.getId());
+		}
+		return "resources";
+	}
+
+	@Named
+	public void setResourceReservation(ResourceReservation resourceReservation) {
+		this.resourceReservation = resourceReservation;
+	}
+
+	public ResourceReservation getResourceReservation() {
+		return resourceReservation;
+	}
+
+	public List<ResourceReservation> getResourceReservations() {
+		if (!this.selectedResourceGroupId.isEmpty()) {
+			return resourceController.getResourceReservationsForResourceGroup(Integer.parseInt(this.selectedResourceGroupId));
+		} else
+			return null;
+	}
+
+	public String removeReservation(ResourceReservation reservation) {
+		resourceController.removeResourceReservation(reservation.getId());
+		return "resourcereservations";
+	}
+
+	public String refreshReservations() {
+		return "resourcereservations";
+	}
+
+	/**
+	 * Initialize empty {@link Resource} and {@link ResourceGroup}
+	 */
+	@PostConstruct
+	public void init() {
+		resource = new Resource();
+		selectedResourceGroupId = new String();
+	}
+
+	@Named
+	public void setResource(Resource resource) {
+		this.resource = resource;
+	}
+
+	public Resource getResource() {
+		return resource;
+	}
+
+	@Named
+	public int getSlotsInUse(Resource res) {
+		return resourceController.getSlotsInUse(res);
+	}
+
+	public Set<Resource> getResources() {
+		if ((this.selectedResourceGroupId != null) && (!this.selectedResourceGroupId.isEmpty())) {
+			return resourceController.getResourcesInResourceGroup(Integer.parseInt(this.selectedResourceGroupId),
+					sessionController.getUser());
+		} else
+			return null;
+	}
+
+	@Named
+	public String createResource() {
+		int resourceGroupId = Integer.parseInt(selectedResourceGroupId);
+		System.out.println("---------------------------   " + sessionController.getUser() + "----------------");
+		if (resourceController.createResource(resource.getName(), resourceGroupId, sessionController.getUser(), resource.getDescription(),
+				resource.getIp(), resource.getMaxSlots(), resource.isStationary(), resource.isRemote()) != null) {
+
+			return "resources";
+		} else {
+			ViewUtilities.addErrorMessage("name", "A resource with the name " + resource.getName()
+					+ " already exists in this resource group. Please change name or select a different Resource Group!");
+			return "resources";
+		}
+	}
+
+	@Named
+	public void setResourceGroupName(String resourceGroup) {
+		this.resourceGroupName = resourceGroup;
+	}
+
+	public String getResourceGroupName() {
+		return resourceGroupName;
+	}
+
+	@Named
+	public List<Department> getDepartments() {
+		return companyController.getAllDepartments();
+	}
+
+	@Named
+	public String getSelectedDepartmentId() {
+		return selectedDepartmentId;
+	}
+
+	public void setSelectedDepartmentId(String departmentId) {
+		this.selectedDepartmentId = departmentId;
+		if (this.resourceGroups != null) {
+			this.resourceGroups.clear();
+		}
+		if ((departmentId != null) && (departmentId.length() > 0)) {
+
+			this.resourceGroups = resourceController.getResourceGroupsForDepartment(Integer.parseInt(departmentId));
+			String id = String.valueOf(this.resourceGroups.get(0).getId());
+			setSelectedResourceGroup(id);
+
+			this.selectedDepartment = companyController.findDepartmentById(Integer.parseInt(departmentId));
+
+		}
+	}
+
+	public String getSelectedResourceGroup() {
+		return selectedResourceGroupId;
+	}
+
+	@Named
+	public void setSelectedResourceGroup(String resourceGroupId) {
+		this.selectedResourceGroupId = resourceGroupId;
+		if (this.resources != null) {
+			this.resources.clear();
+		}
+		this.resources = resourceController.getResourcesInResourceGroup(Integer.parseInt(this.selectedResourceGroupId),
+				sessionController.getUser());
+
+	}
+
+	public List<ResourceGroup> getResourceGroups() {
+		if ((selectedDepartmentId != null) && (selectedDepartmentId.length() > 0)) {
+			List<ResourceGroup> groups = resourceController.getResourceGroupsForDepartment(Integer.parseInt(selectedDepartmentId));
+			return groups;
+		} else
+			return new ArrayList<ResourceGroup>();
+	}
+
+	@Named
+	public String createResourceGroup() {
+		if (resourceController.createResourceGroup(Integer.parseInt(selectedDepartmentId), resourceGroupName,
+				sessionController.getUser()) != null) {
+			init();
+			return "resources";
+		} else {
+			ViewUtilities.addErrorMessage("name", "A resource group with the name " + resourceGroupName + " already exists!");
+			return "resource";
+		}
+	}
+
+	public String deleteResourceGroup() {
+		resourceController.deleteResourceGroup(
+				resourceController.getResourceGroup(Integer.parseInt(this.selectedResourceGroupId), sessionController.getUser()).getId(),
+				sessionController.getUser());
+		return "documents";
+	}
+
+	public String delete(Resource res) {
+		resourceController.deleteResource(res.getId());
+		return "resources";
+	}
+
+	/**
+	 * Calls the reservations for a {@link Resource} object.
+	 * 
+	 * @param res
+	 *            - {@link Resource} object.
+	 * @return
+	 */
+	public String reservations(Resource res) {
+		this.resource = res;
+		return "resourcereservations";
+	}
+
+	/**
+	 * Calls "editresource" for the given {@link Resource} object.
+	 * 
+	 * @param resource
+	 *            {@link Resource} object to be edited.
+	 * @return
+	 */
+	@Named
+	public String edit(Resource resource) {
+		this.resource = resource;
+		return "editresource";
+	}
+
+	@Named
+	public Set<SkillRecord> getSkillRecords() {
+		return resourceController.getSkillRecordsForResource(this.resource.getId(), sessionController.getUser());
+	}
+
+	public void setSkillRecords(Set<SkillRecord> skillRecords) {
+		this.skillRecords = skillRecords;
+	}
+
+	public void removeSkillFromResource(SkillRecord skillRecord) {
+		resourceController.removeSkillFromResource(skillRecord, resource, sessionController.getUser());
+	}
+
+	/**
+	 * Commit the edits of a resource to the underlying database by using the
+	 * {@link ResourceController}.
+	 * 
+	 * @return "resources"
+	 */
+	@Named
+	public String commitEdits() {
+		selectedDepartment = companyController.findDepartmentById(Integer.parseInt(this.selectedDepartmentId));
+		ResourceGroup selectedResourceGroupObject = resourceController.getResourceGroup(Integer.parseInt(this.selectedResourceGroupId),
+				sessionController.getUser());
+		resourceController.editResource(resource, selectedDepartment, selectedResourceGroupObject, resource.getName(),
+				resource.getDescription(), resource.getIp(), resource.isStationary(), resource.isRemote(), resource.getMaxSlots(),
+				sessionController.getUser());
+		return "resources";
+	}
+
+	@Named
+	public boolean canRead(Resource res) {
+		if (res == null) {
+			return false;
+		}
+		return authController.canRead(res, sessionController.getUser());
+	}
+
+	@Named
+	public boolean canUpdate(Resource res) {
+		if (res == null) {
+			return false;
+		}
+		return authController.canUpdate(res, sessionController.getUser());
+	}
+
+	@Named
+	public boolean canDelete(Resource res) {
+		if (res == null) {
+			return false;
+		}
+		return authController.canDelete(res, sessionController.getUser());
+	}
+
+	@Named
+	public boolean canCreate() {
+		try {
+			return authController.canCreate(Integer.parseInt(this.selectedDepartmentId), Resource.class, sessionController.getUser());
+		} catch (NumberFormatException ex) {
+			return false;
+		}
+	}
+
+	public boolean isMqttResource(Resource res) {
+		if (res != null) {
+			return res.isMqttResource();
+		} else
+			return false;
+	}
+
+	public boolean isAgentResource(String valId) {
+		if (!valId.isEmpty()) {
+			Resource managedResource = resourceController.getResource(Integer.parseInt(valId), sessionController.getUser());
+			System.out.println("Resource: " + managedResource.getName() + " AGENT: " + managedResource.isAgent());
+			return managedResource.isAgent();
+		} else {
+			System.out.println("Resource is null. return false");
+		}
+		return false;
+	}
+
+	public boolean isMqttResourceOnline(Resource res) {
+		if (res != null) {
+			return res.isMqttOnline();
+		} else
+			return false;
+	}
+
+	@Named
+	public void sendDataToDevice(Resource res, String data) {
+		System.out.println("Data: " + data);
+		System.out.println("Resource: " + res.getId());
+		if (data != null) {
+			resourceController.writeMqttDataToSend(res, data.getBytes());
+		}
+	}
+
+	@Named
+	public Set<NameValueEntry> getNameValuePairs() {
+		return resourceController.getNameValueEntries(resource);
+	}
+
+	@Named
+	public String getLastMqttValue(String name) {
+		return resourceController.getLastMqttValueForResource(resource, name);
+	}
+
+	@Named
+	public String getLastMqttValueForResource(Resource res, String name) {
+		String value = resourceController.getLastMqttValueForResource(res, name);
+		if (value != null && value.contains(",")) {
+			return value.split(",")[1];
+		} else
+			return "-NO DATA-";
+	}
+
+	@Named
+	Set<String> getMqttCommands() {
+		return mqttCommands;
+	}
+
+	@Named
+	public void sendCommand(Resource resource, String command, String param) {
+		System.out.println("Sending command: " + command + " " + param + "...");
+		resourceController.sendCommand(resource, command, param);
+	}
+
+	@Named
+	public void sendCommandFromResource(Resource resource, String command, String param) {
+		System.out.println("Sending command: " + command + " " + param + "...");
+		resourceController.sendCommandToResource(resource, command, param);
+	}
+
+	@Named
+	public boolean isResourceActiveForCurrentUser(Resource res) {
+		return resourceController.getActiveSlotForUser(sessionController.getUser(), res.getReservations()) >= 0;
+	}
+
+	public int getActiveSlotForCurrentUser(Resource res) {
+		return resourceController.getActiveSlotForUser(sessionController.getUser(), res.getReservations());
+	}
+
+	public String getGMapCoordinateParameters() {
+		return resource.getLatitude() + "," + resource.getLongitude();
+	}
+
+	@Named
+	public LineChartModel getValueModel(NameValueEntry entry) {
+		createValueModel(entry);
+		return valueModel;
+	}
+
+	/**
+	 * Returns the model for a JSF(Primefaces) line chart to represent
+	 * historical data of a resource's NamedValue.
+	 * 
+	 * @param entry
+	 */
+	private void createValueModel(NameValueEntry entry) {
+		valueModel = new LineChartModel();
+
+		LineChartSeries values = new LineChartSeries();
+		values.setFill(true);
+		values.setLabel(entry.getName());
+
+		String[] propertyValues = entry.getValues().split(";");
+
+		float max = 0.0f;
+		float min = 1000.0f;
+		for (String value : propertyValues) {
+			String[] entryValue = value.split(",");
+			float fValue = Float.parseFloat(entryValue[1]);
+			Date d = new Date(Long.parseLong(entryValue[0]));
+			if (fValue > max) {
+				max = fValue;
+			}
+			if (fValue < min) {
+				min = fValue;
+			}
+			Calendar calendar = GregorianCalendar.getInstance();
+			calendar.setTime(d);
+			String hourString = calendar.get(Calendar.HOUR) < 10 ? "0" + calendar.get(Calendar.HOUR) : "" + calendar.get(Calendar.HOUR);
+			String minuteString = calendar.get(Calendar.MINUTE) < 10 ? "0" + calendar.get(Calendar.MINUTE)
+					: "" + calendar.get(Calendar.MINUTE);
+			String secondString = calendar.get(Calendar.SECOND) < 10 ? "0" + calendar.get(Calendar.SECOND)
+					: "" + calendar.get(Calendar.SECOND);
+
+			values.set(hourString + ":" + minuteString + ":" + secondString, fValue);
+		}
+
+		valueModel.addSeries(values);
+		valueModel.setTitle("Values");
+		valueModel.setShadow(true);
+		valueModel.setMouseoverHighlight(true);
+		valueModel.setShowDatatip(true);
+		valueModel.setZoom(true);
+		valueModel.setShowPointLabels(true);
+		valueModel.setTitle(entry.getName());
+
+		Axis xAxis = new CategoryAxis("Time");
+		valueModel.getAxes().put(AxisType.X, xAxis);
+		Axis yAxis = valueModel.getAxis(AxisType.Y);
+		yAxis.setLabel("Value");
+		yAxis.setMin(min);
+		yAxis.setMax(max);
+	}
+
+	/**
+	 * Returns a MapModel for a Primefaces <gmap> tag. Basically the coordinates
+	 * (Latitude / Longitude) are returned. This method checks if
+	 * latitude/longitude information is available and creates a Marker based on
+	 * that information.
+	 * 
+	 * @return
+	 */
+	public MapModel getResourcesMapModel() {
+		MapModel simpleModel = new DefaultMapModel();
+
+		// Shared coordinates
+		LatLng coord;
+		if ((resource.getLatitude() != null) && (resource.getLongitude() != null)) {
+			try {
+				coord = new LatLng(Float.valueOf(resource.getLatitude()), Float.valueOf(resource.getLongitude()));
+
+				// Basic marker
+				simpleModel.addOverlay(new Marker(coord, resource.getName()));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+
+		}
+
+		return simpleModel;
+	}
+
+	public MindmapNode getNetworkRoot() {
+		List<Resource> resources = resourceController.getAllResources(sessionController.getUser());
+		if (resources != null && this.getSelectedDepartment() != null) {
+			MindmapNode root = new DefaultMindmapNode(this.getSelectedDepartment().getName(), this.resourceGroupName, "C0C0FF", false);
+			for (Resource res : resources) {
+				if (res.isAgent()) {
+					root.addNode(new DefaultMindmapNode(res.getName(), res, res.isMqttOnline() ? "00C000" : "C0C0C0", true));
+				}
+			}
+			return root;
+		} else {
+			return new DefaultMindmapNode("No department selected");
+		}
+	}
+
+	public MindmapNode getSelectedNode() {
+		return selectedNode;
+	}
+
+	public void setSelectedNode(MindmapNode selectedNode) {
+		this.selectedNode = selectedNode;
+	}
+
+	public void onNodeDblselect(SelectEvent event) {
+		this.selectedNode = (MindmapNode) event.getObject();
+	}
+
+	@Named
+	public String getSelectedNodeData() {
+		if (this.selectedNode != null) {
+			Resource res = (Resource) this.selectedNode.getData();
+			Set<NameValueEntry> data = res.getMqttValues();
+			String currentEntry = "";
+			for (NameValueEntry entry : data) {
+				String values = entry.getValues();
+				currentEntry += entry.getName() + " : " + values.substring(values.lastIndexOf(","), values.length()) + "\n";
+			}
+			return currentEntry;
+		} else {
+			return "";
+		}
+	}
+}

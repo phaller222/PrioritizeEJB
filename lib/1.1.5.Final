@@ -1,0 +1,603 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="html">
+    <head>
+        <title>GC: arquillian-config-api-1.1.5.Final.jar - GrepCode Java Project Source</title>
+        <meta name="verify-v1" content="oDbHfknRLVnvs+1b/O61iSxPEhVr3O08Fd3QqJ1cGh8="/>
+        <meta name="verify-v1" content="d2G+nnw2Xr6jBfde7yNvdZirW9Y6K0fa+56zhEmm6YA="/>
+        <meta name="msvalidate.01" content="62B5A32F828BC27E3852FB825A5156E4" />
+        <meta name="description" content="Project: org.jboss.arquillian.config/arquillian-config-api, version: 1.1.5.Final - API for the Config Module."/>
+        <meta property="fb:app_id" content="143989634057"/>
+        <link rel="canonical" href="http://grepcode.com/snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-api/1.1.5.Final"/>
+        <link rel="search" type="application/opensearchdescription+xml" title="grepcode.com" href="/static/app/grepcodeosd.xml"/>
+        <link rel="icon" type="image/x-icon" href="/static/app/images/favicon.ico"/>
+
+        <link href="/static/app/stylesheet/site.css" rel="stylesheet" type="text/css"/>
+        <link href="/static/app/stylesheet/images-sprite.css" rel="stylesheet" type="text/css"/>
+        <link href="/static/app/stylesheet/images-site-sprite.css" rel="stylesheet" type="text/css"/>
+
+        <!-- always need these -->
+        <script type="text/javascript" src="/static/app/javascript/always.js"></script>
+
+        
+        
+            <link rel="stylesheet" type="text/css" href="/static/app/libs/yui/treeview/assets/folders.css"/>
+            <link rel="stylesheet" type="text/css" href="/static/app/libs/yui/logger/assets/skins/sam/logger.css"/>
+            <link rel="stylesheet" type="text/css" href="/static/app/libs/yui/tabview/assets/skins/sam/tabview.css"/>
+
+            <script type="text/javascript" src="/static/app/javascript/yui2.js"></script>
+        
+
+        
+        
+            <script type="text/javascript" src="/static/app/javascript/grepcode.js"></script>
+        
+
+        
+        
+    
+<script id="com-grepcode-web-entity-snapshot-ProjectSnapshotChooser-0">
+function showSiblings(tLink) {
+    var sDiv = tLink.nextSibling;
+    while (sDiv.nodeType != 1) { sDiv = sDiv.nextSibling; }
+
+    if (sDiv.style.visibility == "visible") {
+        sDiv.style.visibility = "hidden";
+    } else {
+        var x = getPageOffsetLeft(tLink) - 7;
+        var y = getPageOffsetTop(tLink) + tLink.offsetHeight + 5;
+        sDiv.style.left = x + "px";
+        sDiv.style.top = y + "px";
+        sDiv.style.visibility = "visible";
+    }
+}
+</script>
+</head>
+
+    <body>
+        <div id="header">
+            <div class="head-search">
+                <div class="head-outer">
+                    <div class="head-middle">
+                        <div class="head-inner">
+                            <div>
+    <div class="search-panel">
+        <form action="/search">
+            <span id="query-container">
+                <input id="search-field" type="text" name="query" value=""/>
+            </span>
+            <input type="hidden" name="n" value=""></input>
+            <input type="submit" value="Search"/>
+            <span id="search-field-focus-flag" style="display:none;">false</span>
+        </form>
+    </div>
+    <script>
+    YAHOO.util.Event.onDOMReady(function() {
+        var flag = document.getElementById("search-field-focus-flag");
+        if (flag && flag.innerHTML === 'true') {
+            document.getElementById("search-field").focus();
+        }
+    }, null, true)
+    </script>
+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="logo">
+                <div class="head-outer">
+                    <div class="head-middle">
+                        <div class="head-inner">
+                            <a href="/"><img src="/static/app/images/logo-rel.gif" alt="Logo" width="200" height="50"/></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="head-menu head-menu-width">
+                <div class="head-outer">
+                    <div class="head-middle">
+                        <div class="head-inner">
+                            <span>
+			                <a href="/?st=true">Stack Trace Search</a> |
+                            </span>
+                            <span>
+                            <a href="/eclipse">Eclipse</a> |
+                            <a href="/intellij">IntelliJ</a> |
+                            <a href="/contact">Contact</a> |
+                            <a href="/faq">FAQ</a>
+                            </span>
+                            
+                            <span>
+                            |
+                            <a href="http://blog.grepcode.com/" rel="nofollow"><img title="Our Blog" alt="Blog" src="/static/app/images/site/blog.png" width="16" height="16" border="0"/></a>
+                            <a href="http://twitter.com/grepcode/" rel="nofollow"><img title="Follow us on Twitter" alt="Twitter" src="/static/app/images/site/twitter.png" width="16" height="16" border="0"/></a>
+                            <a href="http://www.facebook.com/pages/GrepCode/159698964349" rel="nofollow"><img title="Follow us on FaceBook" alt="FaceBook" src="/static/app/images/site/facebook.png" width="16" height="16" border="0"/></a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+            <script type="text/javascript">
+                    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+                    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+            </script>
+            <script type="text/javascript">
+                var pageTracker = _gat._getTracker("UA-7614624-1");
+            </script>
+        
+        
+            <script>
+                function isGCEnterpriseEdition() {
+                    return false;
+                }
+            </script>
+        
+        
+    <div class="staging-page">
+        
+<div>
+    <script>
+    var projectTree = function() {
+        var tree, currentIconMode, fileParts;
+
+        function changeIconMode() {
+            var newVal = parseInt(this.value);
+            if (newVal != currentIconMode) {
+                currentIconMode = newVal;
+            }
+            buildTree();
+        }
+
+        function loadNodeData(node, fnLoadComplete)  {
+            var entityidParam = encodeURI(node.data.cb_entityid);
+            var pathParam = encodeURI(node.data.cb_path);
+
+            var sUrl = "/service/listsourcefiles?" + getEntityType() + "=" + entityidParam + "&path=" + pathParam;
+
+            var callback = {
+
+                success: function(oResponse) {
+                    YAHOO.log("XHR transaction was successful.", "info", "example");
+                    var oResults = eval("(" + oResponse.responseText + ")");
+                    if (YAHOO.lang.isArray(oResults)) {
+                        var level = node.data.cb_level + 1;
+                        for(var i = 0; i < oResults.length; ++i) {
+                            var oRes = oResults[i];
+                            if (oRes.t == "d") {
+                                var expand = oResults.length == 1;
+                                if (isFileStagingPage() && level < fileParts.length) {
+                                    if (fileParts[level] == oRes.n) {
+                                        expand = true;
+                                    }
+                                }
+                                var tempNode = new YAHOO.widget.TextNode(oRes.n, node, expand);
+                                tempNode.data.cb_entityid = node.data.cb_entityid;
+                                tempNode.data.cb_path = node.data.cb_path + oRes.n + "/";
+                                tempNode.data.cb_level = level;
+                            } else if (oRes.t == "f") {
+                                if (isFileStagingPage() && level < fileParts.length && fileParts[level] == oRes.n) {
+                                    var tempNode = new YAHOO.widget.TextNode(oRes.n, node, false);
+                                    tempNode.isLeaf = true;
+                                    tempNode.data.cb_level = level;
+                                    tempNode.contentStyle = 'current-filename';
+                                    // VRB - TODO - Capture div.x and div.y -- scroll div so it is in the center
+                                } else {
+                                    var tempNode = new YAHOO.widget.TextNode(oRes.n, node, false);
+                                    tempNode.href = oRes.l+"?av=f";
+                                    tempNode.isLeaf = true;
+                                    tempNode.data.cb_level = level;
+                                }
+                            }
+                        }
+                    }
+                    oResponse.argument.fnLoadComplete();
+                },
+                failure: function(oResponse) {
+                    YAHOO.log("Failed to process XHR transaction.", "info", "example");
+                    oResponse.argument.fnLoadComplete();
+                },
+
+                argument: {
+                    "node": node,
+                    "fnLoadComplete": fnLoadComplete
+                },
+
+                timeout: 7000
+            };
+
+            YAHOO.util.Connect.asyncRequest('GET', sUrl, callback);
+        }
+
+        function buildTree() {
+            tree = new YAHOO.widget.TreeView("treeDiv");
+
+            tree.setDynamicLoad(loadNodeData, currentIconMode);
+
+            var root = tree.getRoot();
+
+            var entityid = document.getElementById('treerootid_hidden').innerHTML;
+            var tempNode = new YAHOO.widget.TextNode(createShortEntityIdLabel(entityid), root, true);
+            tempNode.data.cb_entityid=entityid;
+            tempNode.data.cb_path="/";
+            tempNode.data.cb_level = -1;
+
+            if (isFileStagingPage()) {
+                var filePathStart = document.getElementById("entityid_hidden").innerHTML.lastIndexOf('@');
+                var filePath = document.getElementById("entityid_hidden").innerHTML.substring(filePathStart + 1);
+                fileParts = filePath.split('$');
+            }
+
+            tree.draw();
+        }
+
+
+        return {
+            init: function() {
+                YAHOO.util.Event.on(["mode0", "mode1"], "click", changeIconMode);
+                var el = document.getElementById("mode1");
+                if (el && el.checked) {
+                    currentIconMode = parseInt(el.value);
+                } else {
+                    currentIconMode = 0;
+                }
+
+                buildTree();
+            }
+        }
+    } ();            
+    </script>
+    <div id="treerootid_hidden" style="display:none">repo1.maven.org$maven2@org.jboss.arquillian.config$arquillian-config-api@1.1.5.Final</div>
+    <div id="entityid_hidden" style="display:none">repo1.maven.org$maven2@org.jboss.arquillian.config$arquillian-config-api@1.1.5.Final</div>
+    <div id="entitytype_hidden" style="display:none">snapshot</div>
+
+    
+<div class="snapshot-staging-page">
+    <div id="entity-header" class="entity-header">
+        <div class="entity-nav">
+            <ul>
+                <li><a href="http://repo1.maven.org/maven2/" rel="nofollow" class="external-link">Maven-Central</a></li>
+                <li><span class="entity-nav-delim">/</span></li>
+                <li><a href="../../../../../project/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-api/"><span title="org.jboss.arquillian.config / arquillian-config-api">org.jboss.arquilli.....illian-config-api</span></a></li>
+                <li><span class="entity-nav-delim">/</span></li>
+                <li><span>
+    <span>
+        <a class="nav" href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-api/1.1.4.Final/"><span><img class='img_base img_jdt_elcl16_backward_nav' src='/static/app/images/1x1.gif' border='0' title='1.1.4.Final' width='16' height='16'></img></span></a>
+    </span>
+    <a title="Version"><span id="current-snapshot" class="entity-name">1.1.5.Final</span></a>
+    
+        <a href="#" class="snapshots-more"
+           onclick="this.blur();showSiblings(this);return false;"><img class='img_base img_jdt_elcl16_next_nav' src='/static/app/images/1x1.gif' border='0' title='1.0.0.Beta2&nbsp;-&nbsp;1.1.5.Final' width='16' height='16'></img></a>
+    
+    <div class="snapshots-panel" style="visibility: hidden; z-index:2">
+        <div>
+            <a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-api/1.1.5.Final/"><span class="this-snapshot">1.1.5.Final</span></a>
+        </div><div>
+            <a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-api/1.1.4.Final/"><span>1.1.4.Final</span></a>
+        </div><div>
+            <a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-api/1.1.3.Final/"><span>1.1.3.Final</span></a>
+        </div><div>
+            <a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-api/1.1.2.Final-wildfly-2/"><span>1.1.2.Final-wildfly-2</span></a>
+        </div><div>
+            <a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-api/1.1.2.Final-wildfly-1/"><span>1.1.2.Final-wildfly-1</span></a>
+        </div><div>
+            <a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-api/1.1.2.Final/"><span>1.1.2.Final</span></a>
+        </div><div>
+            <a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-api/1.1.1.Final/"><span>1.1.1.Final</span></a>
+        </div><div>
+            <a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-api/1.1.0.Final/"><span>1.1.0.Final</span></a>
+        </div><div>
+            <a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-api/1.0.0.Beta2/"><span>1.0.0.Beta2</span></a>
+        </div>
+    </div>
+    
+</span></li>
+            </ul>
+        </div>
+        <div class="entity-header-links">
+            
+            <!-- Google +1 -->
+            <div class="g-plusone" data-size="small" data-annotation="none"></div>
+        
+        </div>
+    </div>
+    <div class="entity-container">
+        <div class="snapshot-entity-panel">
+            <div id="prjid_hidden" style="display:none">repo1.maven.org$maven2@org.jboss.arquillian.config$arquillian-config-api</div>
+            <div id="entity-nav-panel" class="entity-nav-panel">
+                <div class="entity-nav-tabs-container">
+                    <div id="entity-nav-tabs" class="entity-nav-tabs yui-skin-sam"></div>
+                </div>
+            </div>
+
+            <div id="snapshot-view" class="snapshot-view">
+                <div class="snapshot-view-tabs">
+                    <div class="snapshot-view-container">
+    <div id="entity-view-panel" class="entity-view-panel">
+        <div id="entity-ads-container" class="entity-ads-container">
+
+    
+
+    <!-- TODO: FIXME -->
+    
+
+    
+        <script type="text/javascript"><!--
+        google_ad_client = "pub-8503126240019483";
+        /* 160x600, created 10/22/09 */
+        google_ad_slot = "1913415170";
+        google_ad_width = 160;
+        google_ad_height = 600;
+        //-->
+        </script>
+    
+    <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"></script>
+
+</div>
+
+	    <div id="entity-view-main" class="entity-view-main">
+        <div class="snapshot-description">API for the Config Module.</div>
+        <div class="snapshot-home-uri"><span></span><a class="external-link" href="http://arquillian.org">http://arquillian.org</a></div>
+
+        <div class="snapshot-downloads">
+            <div class="snapshot-download-entry">
+                <span>Project metadata download: </span><span><a class="external-link margin-r-s" href="http://repo1.maven.org/maven2/org/jboss/arquillian/config/arquillian-config-api/1.1.5.Final/arquillian-config-api-1.1.5.Final.pom">arquillian-config-api-1.1.5.Final.pom</a></span>
+            </div>
+            <div class="snapshot-download-entry">
+                <span>Binary download: </span><span><a class="external-link margin-r-s" href="http://repo1.maven.org/maven2/org/jboss/arquillian/config/arquillian-config-api/1.1.5.Final/arquillian-config-api-1.1.5.Final.jar">arquillian-config-api-1.1.5.Final.jar</a></span><span><a class="external-link margin-r-s" href="http://repo1.maven.org/maven2/org/jboss/arquillian/config/arquillian-config-api/1.1.5.Final/arquillian-config-api-1.1.5.Final-tests.jar">arquillian-config-api-1.1.5.Final-tests.jar</a></span>
+            </div>
+            <div class="snapshot-download-entry">
+                <span>Source download: </span><span><a class="external-link margin-r-s" href="http://repo1.maven.org/maven2/org/jboss/arquillian/config/arquillian-config-api/1.1.5.Final/arquillian-config-api-1.1.5.Final-sources.jar">arquillian-config-api-1.1.5.Final-sources.jar</a></span>
+            </div>
+            <div class="snapshot-download-entry">
+                
+            </div>
+
+            
+        </div>
+	
+        <div class="snapshot-info">
+            <div class="snapshot-info-entry">
+                <span>Release date: 25 June 2014</span>
+            </div>
+            <div class="snapshot-info-entry">
+                <span>License: </span><a class="external-link" href="http://www.apache.org/licenses/LICENSE-2.0.txt">Apache License, Version 2.0</a>
+            </div>
+            <div class="snapshot-info-entry">
+                <span>Mailing Lists: </span><span><a class="external-link margin-r-s" rel="nofollow" href="http://lists.jboss.org/pipermail/jboss-user">JBoss User List</a></span><span><a class="external-link margin-r-s" rel="nofollow" href="http://lists.jboss.org/pipermail/jboss-development">JBoss Developer List</a></span>
+            </div>
+        </div>
+	
+        <div class="snapshot-stats">
+            
+        </div>
+        <div class="snapshot-profiles">
+            <span class="profile-icon"><img class='img_base img_google_appengine' src='/static/app/images/1x1.gif' border='0' title='Google App Engine' width='16' height='16'></img></span><span class="profile-name">Google AppEngine</span>: <span class="profile-status">Full Support</span>
+        </div>
+        <div class="snapshot-dependencies">
+            <span class="snapshot-dep-label">Depends on:</span><a href="/static/data/html/repo1.maven.org$maven2/org.jboss.arquillian.config/arquillian-config-api/1.1.5.Final/visualization.svg"><span>(View as diagram)</span></a>
+            <span>
+    <ul>
+    <li class="-grp-list">
+        <div class="-grp-head">
+            <div class="-grp-name">Maven-Central / junit / junit</div>
+        </div>
+        <div class="-grp-container">
+            <span class="-grp-container-name"></span>
+            <span class="-grp-entity-list">
+    <div class="result-item"><a href="../../../../../snapshot/repo1.maven.org/maven2/junit/junit/4.8.1" class="internal-link"><span>4.8.1</span></a></div>
+</span>
+        </div>
+    </li><li class="-grp-list">
+        <div class="-grp-head">
+            <div class="-grp-name">JDK / jdk / openjdk</div>
+        </div>
+        <div class="-grp-container">
+            <span class="-grp-container-name"></span>
+            <span class="-grp-entity-list">
+    <div class="result-item"><a href="../../../../../snapshot/repository.grepcode.com/java/root/jdk/openjdk/6-b27" class="internal-link"><span>6-b27</span></a></div>
+</span>
+        </div>
+    </li>
+    </ul>
+</span>
+        </div>
+        <div class="snapshot-dependents">
+            <span class="snapshot-dep-label">Used by:</span>
+            <span>
+    <ul>
+    <li class="-grp-list">
+        <div class="-grp-head">
+            <div class="-grp-name">Maven-Central / org.jboss.arquillian.config / arquillian-config-impl-base</div>
+        </div>
+        <div class="-grp-container">
+            <span class="-grp-container-name"></span>
+            <span class="-grp-entity-list">
+    <div class="result-item"><a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-impl-base/4.7.1" class="internal-link"><span>4.7.1</span></a></div><div class="result-item"><a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-impl-base/4.7.0" class="internal-link"><span>4.7.0</span></a></div><div class="result-item"><a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-impl-base/1.7.1" class="internal-link"><span>1.7.1</span></a></div><div class="result-item"><a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-impl-base/1.7.0" class="internal-link"><span>1.7.0</span></a></div><div class="result-item"><a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-impl-base/1.6.2" class="internal-link"><span>1.6.2</span></a></div><div class="result-item"><a href="../../../../../snapshot/repo1.maven.org/maven2/org.jboss.arquillian.config/arquillian-config-impl-base/0.1.0" class="internal-link"><span>0.1.0</span></a></div>
+</span>
+        </div>
+    </li>
+    </ul>
+</span>
+        </div>
+        <div class="snapshot-dependents">
+            <span class="snapshot-dep-label">MD5 Signatures: </span>
+            <ul>
+                <li><span>0a43f567c44592fd71649ab95546b636</span></li><li><span>47c850ed6ba91834ceb88c01de4684e1</span></li><li><span>62558e36fa048b7c8b46fb161ad420af</span></li>
+            </ul>
+        </div>
+</div>
+	</div>
+    <script type="text/javascript">
+        function setPanelDimensions() {
+            setDimensions();
+            var sNavDiv = document.getElementById('entity-nav-panel');
+            var sViewPanel = document.getElementById('entity-view-panel');
+
+            var sviewDiv = document.getElementById('entity-view-main');
+            var sadscDiv = document.getElementById('entity-ads-container');
+            var sadsDiv = document.getElementById('entity-ads');
+
+            var headerDiv = document.getElementById('entity-header');
+
+            var rightBound = getPageOffsetLeft(sadscDiv);
+
+            sviewDiv.style.width = 0;
+            sviewDiv.style.height = 0;
+            sviewDiv.style.width = (rightBound - getPageOffsetRight(sNavDiv) - sviewDiv.offsetWidth - 50) + 'px';
+            sviewDiv.style.height = (getWindowHeight() - getPageOffsetBottom(headerDiv) - sviewDiv.offsetHeight - 40) + 'px';
+            sViewPanel.style.width = 0;
+            sViewPanel.style.height = 0;
+            sViewPanel.style.width = (getWindowWidth() - getPageOffsetRight(sNavDiv) - sViewPanel.offsetWidth - 30) + 'px';
+            sViewPanel.style.height = (getWindowHeight() - getPageOffsetBottom(headerDiv) - sViewPanel.offsetHeight - 40) + 'px';
+        }
+
+        YAHOO.util.Event.onDOMReady(setPanelDimensions, null, true);
+        YAHOO.util.Event.on(window, 'resize', setPanelDimensions);
+    </script>
+</div>
+                </div>
+            </div>
+	    </div>
+	</div>
+
+	<script>
+    navbarTabs = function() {
+        var leftTabView;
+
+        function addTabs() {
+            leftTabView = new YAHOO.widget.TabView();
+
+            leftTabView.addTab( new YAHOO.widget.Tab({
+                label: 'Files',
+                content: '<div class="entity-nav-tree-container"><div id="treeDiv"></div></div>',
+                cacheData: true,
+                active: true
+            }));
+
+            if (!isGCEnterpriseEdition() && !isBrowserMSIE7() && !isBrowserMSIE6()) {
+                var commentURL = window.location.protocol + "//grepcode.com" + window.location.pathname;
+
+                leftTabView.addTab(new YAHOO.widget.Tab({
+                    label: 'Comments',
+                    content: '<div class="fb-comments" data-href=' + commentURL + ' data-num-posts="20" data-width="380"></div>',
+                    cacheData: false,
+                    active: false
+                }));
+            }
+
+            leftTabView.appendTo('entity-nav-tabs');
+        }
+
+        return {
+            init: function() {
+                addTabs();
+            }
+        }
+    }();
+
+    YAHOO.util.Event.onDOMReady(navbarTabs.init, navbarTabs, true);
+
+    YAHOO.util.Event.onDOMReady(projectTree.init, projectTree,true)
+
+	function setDimensions() {
+        var sNavDiv = document.getElementById('entity-nav-panel');
+        var sSrcDiv = document.getElementById('snapshot-view');
+
+        sNavDiv.style.height = 0;
+        sNavDiv.style.height = (getWindowHeight() - getPageOffsetTop(sNavDiv) - sNavDiv.offsetHeight) + 'px';
+
+        sSrcDiv.style.left = getPageOffsetRight(sNavDiv) + 'px';
+        sSrcDiv.style.width = 0;
+        sSrcDiv.style.height = 0;
+        sSrcDiv.style.width = (getWindowWidth() - getPageOffsetRight(sNavDiv) - sSrcDiv.offsetWidth) + 'px';
+        sSrcDiv.style.height = (getWindowHeight() - getPageOffsetTop(sNavDiv) - sSrcDiv.offsetHeight) + 'px';
+    }
+    </script>
+</div>
+
+
+    
+        <div id="fb-root"></div>
+        <img id="comment-ping-back" src="/static/app/images/1x1.gif"/>
+        <script>
+            window.fbAsyncInit = function() {
+                FB.init({
+                    appId:  '143989634057',
+                    status: true,
+                    cookie: true,
+                    xfbml:  true
+                });
+
+                FB.Event.subscribe('comment.create', function(response) {
+                    document.getElementById('comment-ping-back').src = "/event?type=comment.create&url=" + window.location + "&href=" + response.href + "&commentID=" + response.commentID;
+                });
+            };
+
+            (function(d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) {return;}
+                js = d.createElement(s); js.id = id;
+                js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+        </script>
+    
+    
+</div>
+
+    </div>
+    <script>
+        YAHOO.util.Event.onDOMReady(function() {
+            var html = document.getElementById('html');
+            html.style.overflow = "hidden";
+        }, null, true);
+    </script>
+
+
+        
+        
+            <div id="notification-bar">
+                <table width="100%" border="0">
+                    <tr valign="middle">
+                        <td valign="middle"><span class="message">New to GrepCode? Check out our <a href="/faq" onclick="disableNotification(); return true;">FAQ</a></span></td>
+                        <td valign="middle"><span class="cancel"><a href="#" onclick="disableNotification(); return false;">X</a></span></td>
+                    </tr>
+                </table>
+            </div>
+            <script type="text/javascript">
+                YAHOO.util.Event.onDOMReady(doNotification);
+            </script>
+        
+        
+        
+
+        
+
+        
+
+        
+        
+            <script type="text/javascript">
+            try {
+                pageTracker._trackPageview();
+            } catch(err) {
+            }
+            </script>
+        
+
+        
+        
+            <!-- Google +1 -->
+            <script type="text/javascript">
+              (function() {
+                var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+                po.src = 'https://apis.google.com/js/plusone.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+              })();
+            </script>
+        
+
+        
+    </body>
+</html>

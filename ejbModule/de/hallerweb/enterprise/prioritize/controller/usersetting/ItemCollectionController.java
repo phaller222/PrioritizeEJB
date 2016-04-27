@@ -12,6 +12,7 @@ import javax.persistence.Query;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
+import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
@@ -51,7 +52,7 @@ public class ItemCollectionController {
 	public ItemCollection getItemCollection(User user, String name) {
 		Query q = em.createNamedQuery("findItemCollectionByUserAndName");
 		q.setParameter("name",name);
-		q.setParameter("user",user.getId());
+		q.setParameter("id",user.getId());
 		return (ItemCollection) q.getSingleResult();
 	}
 	
@@ -72,6 +73,18 @@ public class ItemCollectionController {
 		ItemCollection managedCollection = em.find(ItemCollection.class, collection.getId());
 		User managedUser = em.find(User.class, user.getId());
 		managedCollection.removeUser(managedUser);
+	}
+	
+	public void addDocumentInfo(ItemCollection collection, DocumentInfo info) {
+		ItemCollection managedCollection = em.find(ItemCollection.class, collection.getId());
+		DocumentInfo managedDocInfo = em.find(DocumentInfo.class, info.getId());
+		managedCollection.addDocument(managedDocInfo);
+	}
+	
+	public void removeDocumentInfo(ItemCollection collection, DocumentInfo info) {
+		ItemCollection managedCollection = em.find(ItemCollection.class, collection.getId());
+		DocumentInfo managedDocInfo = em.find(DocumentInfo.class, info.getId());
+		managedCollection.removeDocument(managedDocInfo);
 	}
 	
 }

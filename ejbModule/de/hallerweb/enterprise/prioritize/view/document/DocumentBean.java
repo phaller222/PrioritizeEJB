@@ -25,10 +25,13 @@ import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
+import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionController;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
+import de.hallerweb.enterprise.prioritize.model.security.User;
+import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 
 /**
@@ -63,6 +66,18 @@ public class DocumentBean implements Serializable {
 	AuthorizationController authController;
 	@EJB
 	ResourceController resourceController;
+	@EJB
+	ItemCollectionController itemCollectionController;
+	
+	String selectedItemCollectionName;
+
+	public String getSelectedItemCollectionName() {
+		return selectedItemCollectionName;
+	}
+
+	public void setSelectedItemCollectionName(String selectedItemCollectionName) {
+		this.selectedItemCollectionName = selectedItemCollectionName;
+	}
 
 	List<DocumentInfo> documentInfos; // Current List with documentInfo objects
 										// in the view.
@@ -405,6 +420,13 @@ public class DocumentBean implements Serializable {
 		} catch (NumberFormatException ex) {
 			return false;
 		}
+	}
+	
+	@Named
+	public void addDocumentToItemCollection(DocumentInfo docInfo) {
+		ItemCollection managedCollection = itemCollectionController.getItemCollection(sessionController.getUser(), selectedItemCollectionName);
+		DocumentInfo managedDocInfo = controller.getDocumentInfo(docInfo.getId(), sessionController.getUser());
+		itemCollectionController.addDocumentInfo(managedCollection, managedDocInfo);
 	}
 
 }

@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -33,6 +34,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @Entity
 @NamedQueries({
 		@NamedQuery(name = "findItemCollectionByUserAndName", query = "select c FROM ItemCollection c WHERE c.name = :name AND c.owner.id = :id"),
+		@NamedQuery(name = "findItemCollectionByUserAndId", query = "select c FROM ItemCollection c WHERE c.id = :id AND c.owner.id = :userid"),
 		@NamedQuery(name = "findItemCollectionsByUser", query = "select c FROM ItemCollection c WHERE c.owner.id = :id")})
 public class ItemCollection {
 
@@ -44,13 +46,13 @@ public class ItemCollection {
 
 	@OneToOne
 	User owner;
-	@OneToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER)
 	Set<DocumentInfo> documents;
-	@OneToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER)
 	Set<User> users;
-	@OneToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER)
 	Set<Resource> resources;
-	@OneToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER)
 	Set<Message> messages;
 
 	public ItemCollection() {
@@ -167,7 +169,7 @@ public class ItemCollection {
 		this.documents.addAll(documentlist);
 	}
 
-	public void removeDocument(Document doc) {
+	public void removeDocument(DocumentInfo doc) {
 		this.documents.remove(doc);
 	}
 }

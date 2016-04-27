@@ -17,12 +17,14 @@ import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
+import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionController;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan.TimeSpanType;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
+import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 
 /**
@@ -48,6 +50,11 @@ public class UserBean implements Serializable {
 	AuthorizationController authController;
 	@EJB
 	CompanyController companyController;
+	@EJB
+	ItemCollectionController itemCollectionController;
+	@EJB
+	UserRoleController userRoleController;
+	
 
 	User user; 														// Stores the user
 	String selectedDepartmentId; 									// Selected Department
@@ -63,8 +70,18 @@ public class UserBean implements Serializable {
 	Date illnessUntil;
 	List<TimeSpan> vacations;
 
+	String selectedItemCollectionName;
+	
 	public List<TimeSpan> getVacations() {
 		return vacations;
+	}
+
+	public String getSelectedItemCollectionName() {
+		return selectedItemCollectionName;
+	}
+
+	public void setSelectedItemCollectionName(String selectedItemCollectionName) {
+		this.selectedItemCollectionName = selectedItemCollectionName;
 	}
 
 	public void setVacations(List<TimeSpan> vacations) {
@@ -347,4 +364,13 @@ public class UserBean implements Serializable {
 		this.user.setApiKey(controller.generateApiKey(this.user, sessionController.getUser()));
 		return "edituser";
 	}
+	
+	@Named
+	public void addUserToItemCollection(User user) {
+		ItemCollection managedCollection = itemCollectionController.getItemCollection(sessionController.getUser(), selectedItemCollectionName);
+		User managedUser = userRoleController.getUserById(user.getId(), sessionController.getUser());
+		itemCollectionController.addUser(managedCollection, managedUser);
+	}
+	
+	
 }

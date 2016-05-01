@@ -95,9 +95,11 @@ public class SearchController {
 	public List<SearchResult> searchSkills(String phrase, User user) {
 		List<SearchResult> result = new ArrayList<SearchResult>();
 		List<Skill> skills = skillController.getAllSkills(user);
-		for (Skill skill : skills) {
-			if (authController.canRead(skill, user)) {
-				result.addAll(skill.find(phrase));
+		if (skills != null && !skills.isEmpty()) {
+			for (Skill skill : skills) {
+				if (authController.canRead(skill, user)) {
+					result.addAll(skill.find(phrase));
+				}
 			}
 		}
 		return result;
@@ -123,7 +125,7 @@ public class SearchController {
 		return result;
 	}
 
-	//TODO: Skills durchsuchbar machen!
+	// TODO: Skills durchsuchbar machen!
 	public List<SearchResult> search(String phrase, User user) {
 		List<SearchResult> result = new ArrayList<SearchResult>();
 		result.addAll(searchUsers(phrase, user));
@@ -131,6 +133,7 @@ public class SearchController {
 		result.addAll(searchResources(phrase, user));
 		result.addAll(searchRoles(phrase, user));
 		result.addAll(searchDepartments(phrase, user));
+		result.addAll(searchSkills(phrase, user));
 		return result;
 	}
 

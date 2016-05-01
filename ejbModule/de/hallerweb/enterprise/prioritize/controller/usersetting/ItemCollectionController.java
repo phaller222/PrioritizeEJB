@@ -6,6 +6,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
@@ -13,6 +14,7 @@ import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
+import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
@@ -50,16 +52,25 @@ public class ItemCollectionController {
 	}
 
 	public ItemCollection getItemCollection(User user, String name) {
+		try {
 		Query q = em.createNamedQuery("findItemCollectionByUserAndName");
 		q.setParameter("name",name);
 		q.setParameter("id",user.getId());
 		return (ItemCollection) q.getSingleResult();
+		} catch (NoResultException ex) {
+			return null;
+		}
 	}
 	
 	public List<ItemCollection> getItemCollections(User user) {
 		Query q = em.createNamedQuery("findItemCollectionsByUser");
 		q.setParameter("id",user.getId());
 		return  q.getResultList();
+	}
+	
+	public void deleteItemCollection(ItemCollection collection) {
+		ItemCollection c = em.find(ItemCollection.class,collection.getId());
+		em.remove(c);
 	}
 	
 	
@@ -85,6 +96,18 @@ public class ItemCollectionController {
 		ItemCollection managedCollection = em.find(ItemCollection.class, collection.getId());
 		DocumentInfo managedDocInfo = em.find(DocumentInfo.class, info.getId());
 		managedCollection.removeDocument(managedDocInfo);
+	}
+	
+	public void addResource(ItemCollection collection, Resource resource) {
+		ItemCollection managedCollection = em.find(ItemCollection.class, collection.getId());
+		Resource managedResource = em.find(Resource.class, resource.getId());
+		managedCollection.addResource(managedResource);
+	}
+	
+	public void removeResource(ItemCollection collection, Resource resource) {
+		ItemCollection managedCollection = em.find(ItemCollection.class, collection.getId());
+		Resource managedResource = em.find(Resource.class, resource.getId());
+		managedCollection.removeResource(managedResource);
 	}
 	
 }

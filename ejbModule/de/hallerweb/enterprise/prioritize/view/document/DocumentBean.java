@@ -68,7 +68,7 @@ public class DocumentBean implements Serializable {
 	ResourceController resourceController;
 	@EJB
 	ItemCollectionController itemCollectionController;
-	
+
 	String selectedItemCollectionName;
 
 	public String getSelectedItemCollectionName() {
@@ -80,9 +80,9 @@ public class DocumentBean implements Serializable {
 	}
 
 	List<DocumentInfo> documentInfos; // Current List with documentInfo objects
-										// in the view.
+										 // in the view.
 	List<DocumentGroup> documentGroups; // Current list of document groups in
-										// the view
+										 // the view
 	List<Department> departments; // List of departments in the view
 	String selectedDepartmentId; // Currently selected Department
 	String selectedDocumentGroup; // Currently selected DocumentGroup
@@ -91,11 +91,11 @@ public class DocumentBean implements Serializable {
 	DocumentInfo documentInfo; // Current edited DocumentInfo
 	String clientFilename; // Name of file to upload on the client machine
 	String tmpMimeType = "text/plain"; // Temporary mimeType of document to
-										// upload (default: text/plain)
+										 // upload (default: text/plain)
 	byte[] tmpBytes = new byte[] {}; // Temporary byte array for new documents
-										// (upload)
+									 // (upload)
 	byte[] tmpBytesDownload = new byte[] {}; // Temporary byte array of document
-												// to download (download)
+											 // to download (download)
 	private DefaultStreamedContent download; // download streamed content
 
 	Department selectedDepartment;
@@ -116,9 +116,8 @@ public class DocumentBean implements Serializable {
 	}
 
 	public List<DocumentInfo> getDocumentInfos() {
-		if (!this.selectedDocumentGroup.isEmpty()) {
-			return controller.getDocumentInfosInDocumentGroup(Integer.parseInt(this.selectedDocumentGroup),
-					sessionController.getUser());
+		if (!(this.selectedDocumentGroup == null) && (!this.selectedDocumentGroup.isEmpty())) {
+			return controller.getDocumentInfosInDocumentGroup(Integer.parseInt(this.selectedDocumentGroup), sessionController.getUser());
 		} else
 			return null;
 	}
@@ -145,8 +144,8 @@ public class DocumentBean implements Serializable {
 
 	@Named
 	public String createDocument() {
-		if (controller.createDocument(document.getName(), Integer.parseInt(selectedDocumentGroup),
-				sessionController.getUser(), tmpMimeType, false, tmpBytes, "") != null) {
+		if (controller.createDocument(document.getName(), Integer.parseInt(selectedDocumentGroup), sessionController.getUser(), tmpMimeType,
+				false, tmpBytes, "") != null) {
 			return "documents";
 		} else {
 			ViewUtilities.addErrorMessage("name",
@@ -180,8 +179,7 @@ public class DocumentBean implements Serializable {
 			this.documentGroups.clear();
 		}
 		if ((departmentId != null) && (departmentId.length() > 0)) {
-			this.documentGroups = controller.getDocumentGroupsForDepartment(Integer.parseInt(departmentId),
-					sessionController.getUser());
+			this.documentGroups = controller.getDocumentGroupsForDepartment(Integer.parseInt(departmentId), sessionController.getUser());
 			try {
 				setSelectedDocumentGroup(String.valueOf(this.documentGroups.get(0).getId()));
 			} catch (IndexOutOfBoundsException ex) {
@@ -216,8 +214,8 @@ public class DocumentBean implements Serializable {
 
 	public List<DocumentGroup> getDocumentGroups() {
 		if ((selectedDepartmentId != null) && (selectedDepartmentId.length() > 0)) {
-			List<DocumentGroup> groups = controller.getDocumentGroupsForDepartment(
-					Integer.parseInt(selectedDepartmentId), sessionController.getUser());
+			List<DocumentGroup> groups = controller.getDocumentGroupsForDepartment(Integer.parseInt(selectedDepartmentId),
+					sessionController.getUser());
 			return groups;
 		} else
 			return new ArrayList<DocumentGroup>();
@@ -243,8 +241,8 @@ public class DocumentBean implements Serializable {
 	}
 
 	public String deleteDocumentGroup() {
-		controller.deleteDocumentGroup(controller
-				.getDocumentGroup(Integer.parseInt(this.selectedDocumentGroup), sessionController.getUser()).getId(),
+		controller.deleteDocumentGroup(
+				controller.getDocumentGroup(Integer.parseInt(this.selectedDocumentGroup), sessionController.getUser()).getId(),
 				sessionController.getUser());
 		return "documents";
 	}
@@ -328,8 +326,7 @@ public class DocumentBean implements Serializable {
 		DocumentInfo docToDownload = controller.getDocumentInfo(Integer.valueOf(id), sessionController.getUser());
 		Document currentDocument = docToDownload.getCurrentDocument();
 
-		ByteArrayInputStream in = new ByteArrayInputStream(currentDocument.getData(), 0,
-				currentDocument.getData().length);
+		ByteArrayInputStream in = new ByteArrayInputStream(currentDocument.getData(), 0, currentDocument.getData().length);
 
 		setDownload(new DefaultStreamedContent(in, currentDocument.getMimeType(), currentDocument.getName()));
 	}
@@ -415,18 +412,20 @@ public class DocumentBean implements Serializable {
 	@Named
 	public boolean canCreate() {
 		try {
-			return authController.canCreate(Integer.parseInt(this.selectedDepartmentId), DocumentInfo.class,
-					sessionController.getUser());
+			return authController.canCreate(Integer.parseInt(this.selectedDepartmentId), DocumentInfo.class, sessionController.getUser());
 		} catch (NumberFormatException ex) {
 			return false;
 		}
 	}
-	
+
 	@Named
 	public void addDocumentToItemCollection(DocumentInfo docInfo) {
-		ItemCollection managedCollection = itemCollectionController.getItemCollection(sessionController.getUser(), selectedItemCollectionName);
-		DocumentInfo managedDocInfo = controller.getDocumentInfo(docInfo.getId(), sessionController.getUser());
-		itemCollectionController.addDocumentInfo(managedCollection, managedDocInfo);
+		ItemCollection managedCollection = itemCollectionController.getItemCollection(sessionController.getUser(),
+				selectedItemCollectionName);
+		if (managedCollection != null) {
+			DocumentInfo managedDocInfo = controller.getDocumentInfo(docInfo.getId(), sessionController.getUser());
+			itemCollectionController.addDocumentInfo(managedCollection, managedDocInfo);
+		}
 	}
 
 }

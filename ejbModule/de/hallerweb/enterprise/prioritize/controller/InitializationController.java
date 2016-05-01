@@ -149,7 +149,9 @@ public class InitializationController {
 
 			HashSet<PermissionRecord> records = new HashSet<PermissionRecord>();
 			PermissionRecord adminDocuments = new PermissionRecord(true, true, true, true, null);
+			PermissionRecord adminSkills = new PermissionRecord(true, true, true, true, Skill.class);
 			records.add(adminDocuments);
+			records.add(adminSkills);
 
 			Role r = userRoleController.createRole("admin", "admin Role", records, AuthorizationController.getSystemUser());
 

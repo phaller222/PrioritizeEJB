@@ -33,12 +33,15 @@ import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
+import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionController;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.resource.NameValueEntry;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
+import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
+import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 
 /**
@@ -69,6 +72,8 @@ public class ResourceBean implements Serializable {
 	UserRoleController userController; 								// Reference to Usercontroller EJB
 	@EJB
 	AuthorizationController authController; 						// Reference to AuthorizationController EJB
+	@EJB
+	ItemCollectionController itemCollectionController; 				// Reference to ItemCollectionController EJB
 
 	Set<Resource> resources; 										// Current List with Resource objects
 	List<ResourceGroup> resourceGroups; 							// Current list of resource groups within department
@@ -93,6 +98,16 @@ public class ResourceBean implements Serializable {
 	Department selectedResourceGroup = null; 						// ResourceGroup to change resource to
 
 	Set<SkillRecord> skillRecords;
+
+	String selectedItemCollectionName;								// Selected ItemCollection to add a resource to
+
+	public String getSelectedItemCollectionName() {
+		return selectedItemCollectionName;
+	}
+
+	public void setSelectedItemCollectionName(String selectedItemCollectionName) {
+		this.selectedItemCollectionName = selectedItemCollectionName;
+	}
 
 	public Department getSelectedDepartment() {
 		return selectedDepartment;
@@ -608,4 +623,15 @@ public class ResourceBean implements Serializable {
 			return "";
 		}
 	}
+
+	@Named
+	public void addResourceToItemCollection(Resource resource) {
+		ItemCollection managedCollection = itemCollectionController.getItemCollection(sessionController.getUser(),
+				selectedItemCollectionName);
+		if (managedCollection != null) {
+			Resource managedResource = resourceController.getResource(resource.getId(), sessionController.getUser());
+			itemCollectionController.addResource(managedCollection, managedResource);
+		}
+	}
+
 }

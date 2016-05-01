@@ -217,18 +217,20 @@ public class DocumentController {
 		DocumentGroup group = em.find(DocumentGroup.class, documentGroupId);
 		// ------------------ AUTH check ---------------
 		if (authController.canDelete(group, user)) {
-			Set<DocumentInfo> documents = group.getDocuments();
-			if (documents != null) {
-				for (DocumentInfo info : documents) {
-					deleteDocumentInfo(info.getId(), user);
+			if (group.getDepartment().getDocumentGroups().size() > 1) {
+				Set<DocumentInfo> documents = group.getDocuments();
+				if (documents != null) {
+					for (DocumentInfo info : documents) {
+						deleteDocumentInfo(info.getId(), user);
+					}
 				}
-			}
 
-			group.getDepartment().getDocumentGroups().remove(group);
-			group.setDepartment(null);
-			em.remove(group);
-			group = null;
-			em.flush();
+				group.getDepartment().getDocumentGroups().remove(group);
+				group.setDepartment(null);
+				em.remove(group);
+				group = null;
+				em.flush();
+			}
 		}
 	}
 

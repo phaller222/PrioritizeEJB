@@ -28,6 +28,7 @@ import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
 import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResultType;
+import de.hallerweb.enterprise.prioritize.model.skill.Skill;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 
 /**
@@ -299,6 +300,17 @@ public class User implements PAuthorizedObject, PSearchable {
 			results.add(result);
 			return results;
 		}
+		
+		for (SkillRecord record : this.skills) {
+			Skill skill = record.getSkill();
+			if ((skill.getName().indexOf(phrase) != 0) || (skill.getDescription().indexOf(phrase) != 0)) {
+				result = generateResult(this.getUsername() + " - " + skill.getName() + " - " + skill.getDescription());
+				results.add(result);
+				return results;
+			}
+		}
+		
+		
 		return results;
 	}
 

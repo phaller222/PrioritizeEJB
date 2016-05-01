@@ -54,7 +54,6 @@ public class UserBean implements Serializable {
 	ItemCollectionController itemCollectionController;
 	@EJB
 	UserRoleController userRoleController;
-	
 
 	User user; 														// Stores the user
 	String selectedDepartmentId; 									// Selected Department
@@ -71,7 +70,7 @@ public class UserBean implements Serializable {
 	List<TimeSpan> vacations;
 
 	String selectedItemCollectionName;
-	
+
 	public List<TimeSpan> getVacations() {
 		return vacations;
 	}
@@ -364,13 +363,15 @@ public class UserBean implements Serializable {
 		this.user.setApiKey(controller.generateApiKey(this.user, sessionController.getUser()));
 		return "edituser";
 	}
-	
+
 	@Named
 	public void addUserToItemCollection(User user) {
-		ItemCollection managedCollection = itemCollectionController.getItemCollection(sessionController.getUser(), selectedItemCollectionName);
-		User managedUser = userRoleController.getUserById(user.getId(), sessionController.getUser());
-		itemCollectionController.addUser(managedCollection, managedUser);
+		ItemCollection managedCollection = itemCollectionController.getItemCollection(sessionController.getUser(),
+				selectedItemCollectionName);
+		if (managedCollection != null) {
+			User managedUser = userRoleController.getUserById(user.getId(), sessionController.getUser());
+			itemCollectionController.addUser(managedCollection, managedUser);
+		}
 	}
-	
-	
+
 }

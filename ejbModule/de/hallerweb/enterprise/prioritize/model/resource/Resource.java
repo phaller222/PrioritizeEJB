@@ -28,6 +28,10 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.event.Event;
+import de.hallerweb.enterprise.prioritize.model.event.PEventConsumer;
+import de.hallerweb.enterprise.prioritize.model.event.PEventProducer;
+import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
 import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
@@ -60,7 +64,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 		@NamedQuery(name = "findAllMqttResourceUuids", query = "select r.mqttUUID FROM Resource r WHERE r.mqttUUID IS NOT NULL"),
 		@NamedQuery(name = "findAllOnlineMqttResources", query = "select r FROM Resource r WHERE r.mqttUUID IS NOT NULL AND r.mqttOnline = TRUE"),
 		@NamedQuery(name = "findAllResources", query = "select r FROM Resource r") })
-public class Resource implements PAuthorizedObject, PSearchable, Comparable<Object> {
+public class Resource implements PAuthorizedObject, PSearchable, Comparable<Object>, PEventConsumer, PEventProducer {
 
 	@Id
 	@GeneratedValue
@@ -566,6 +570,24 @@ public class Resource implements PAuthorizedObject, PSearchable, Comparable<Obje
 		} else if (!resourceGroup.equals(other.resourceGroup))
 			return false;
 		return true;
+	}
+
+	@Override
+	public void raiseEvent(String name, Object oldValue, Object newValue) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void consumeEvent(Event evt) {
+		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
+				+ " with new Value: " + evt.getNewValue());
+
+	}
+
+	@Override
+	public PObjectType getObjectType() {
+		return PObjectType.RESOURCE;
 	}
 
 }

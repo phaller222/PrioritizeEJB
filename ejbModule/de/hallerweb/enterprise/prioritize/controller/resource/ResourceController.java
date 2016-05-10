@@ -21,21 +21,23 @@ import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
+import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan.TimeSpanType;
+import de.hallerweb.enterprise.prioritize.model.event.Event;
+import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
+import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.resource.NameValueEntry;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.model.security.User;
-import de.hallerweb.enterprise.prioritize.model.skill.Skill;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 import de.hallerweb.enterprise.prioritize.service.mqtt.MQTTService;
-import sun.security.krb5.internal.AuthContext;
 
 /**
  * ResourceController.java - Controls the creation, modification and deletion of
@@ -45,7 +47,7 @@ import sun.security.krb5.internal.AuthContext;
  * 
  */
 @Stateless
-public class ResourceController {
+public class ResourceController extends PEventConsumerProducer {
 	@PersistenceContext(unitName = "MySqlDS")
 	EntityManager em;
 
@@ -61,6 +63,8 @@ public class ResourceController {
 	LoggingController logger;
 	@Inject
 	MQTTService mqttService;
+	@Inject
+	EventRegistry eventRegistry;
 
 	public Resource createResource(String name, int groupId, User user, String description, String ip, int maxSlots, boolean isStationary,
 			boolean isRemote) {
@@ -117,8 +121,8 @@ public class ResourceController {
 			boolean isStationary, boolean isRemote, boolean agent, String uuid, String dataSendTopic, String dataReceiveTopic) {
 
 		Department departmentToAddResource = companyController.getDepartmentByToken(token);
-		if (findResourceByResourceGroupAndName(findResourceGroupByNameAndDepartment(group, departmentToAddResource.getId(), user).getId(), name,
-				user) == null) {
+		if (findResourceByResourceGroupAndName(findResourceGroupByNameAndDepartment(group, departmentToAddResource.getId(), user).getId(),
+				name, user) == null) {
 
 			Resource resource = new Resource();
 			if (authController.canCreate(resource, user)) {
@@ -359,11 +363,15 @@ public class ResourceController {
 
 	public void setMqttResourceOnline(Resource res) {
 		Resource managed = em.find(Resource.class, res.getId());
+		raiseEvent(PObjectType.RESOURCE, managed.getId(), "mqttOnline", String.valueOf(managed.isMqttOnline()), "true",
+				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		managed.setMqttOnline(true);
 	}
 
 	public void setMqttResourceOffline(Resource res) {
 		Resource managed = em.find(Resource.class, res.getId());
+		raiseEvent(PObjectType.RESOURCE, managed.getId(), "mqttOnline", String.valueOf(managed.isMqttOnline()), "false",
+				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		managed.setMqttOnline(false);
 	}
 
@@ -452,6 +460,8 @@ public class ResourceController {
 		newEntry.setName(name);
 		newEntry.setValues(value);
 		em.persist(newEntry);
+		raiseEvent(PObjectType.RESOURCE, managedResource.getId(), name, "", newEntry.getValues(),
+				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		managedResource.getMqttValues().add(newEntry);
 	}
 
@@ -641,6 +651,24 @@ public class ResourceController {
 		}
 
 		if (authController.canUpdate(managedResource, user)) {
+
+			if (!newName.equals(managedResource.getName())) {
+				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), "name", managedResource.getName(), newName, 60000);
+			}
+			if (!newDescription.equals(managedResource.getDescription())) {
+				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), "description", managedResource.getDescription(),
+						newDescription, 60000);
+			}
+			if (managedResource.getDepartment().getId() != managedDepartment.getId()) {
+				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), "department",
+						String.valueOf(managedResource.getDepartment().getId()), String.valueOf(newDept.getId()), 60000);
+			}
+			if (managedResource.getResourceGroup().getId() != managedGroup.getId()) {
+				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), "resourceGroup",
+						String.valueOf(managedResource.getResourceGroup().getId()), String.valueOf(newGroup.getId()),
+						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+			}
+
 			managedResource.setName(newName);
 			managedResource.setDescription(newDescription);
 			managedResource.setIp(newIp);
@@ -800,6 +828,8 @@ public class ResourceController {
 	 */
 	public void setCoordinates(Resource resource, String latitude, String longitude) {
 		Resource res = em.find(Resource.class, resource.getId());
+		raiseEvent(PObjectType.RESOURCE, resource.getId(), "geo", resource.getLatitude() + ":" + resource.getLongitude(),
+				latitude + ":" + longitude, InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		res.setLongitude(longitude);
 		res.setLatitude(latitude);
 	}
@@ -951,5 +981,19 @@ public class ResourceController {
 			return null;
 		}
 	}
+
+	public void raiseEvent(PObjectType type, int id, String name, String oldValue, String newValue, long lifetime) {
+		Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
+				.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
+		eventRegistry.addEvent(evt);
+	}
+	
+	@Override
+	public void consumeEvent(int id, Event evt) {
+		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
+				+ " with new Value: " + evt.getNewValue()+ "--- Resource listening: " + id );
+
+	}
+	
 
 }

@@ -64,6 +64,8 @@ public class InitializationController {
 	public final static String MQTT_MAX_DEVICE_VALUES = "MQTT_MAX_DEVICE_VALUES"; // Number of maximum allowed Name/value pair per MQTT
 	public final static String DISCOVERY_ALLOW_DEFAULT_DEPARTMENT = "DISCOVERY_ALLOW_DEFAULT_DEPARTMENT"; // Can resources be added without
 																											 // providing department token?
+	public static final String EVENT_DEFAULT_TIMEOUT = "EVENT_DEFAULT_TIMEOUT"; // Default timeout value for events
+	public static final String LISTENER_DEFAULT_TIMEOUT = "LISTENER_DEFAULT_TIMEOUT"; // Default timeout value for event listeners
 	// resource / device.
 	public final static String DEFAULT_DEPARTMENT_TOKEN = "09eb3067d0fe446bbe7788218fec9bdd";
 
@@ -93,6 +95,9 @@ public class InitializationController {
 		config.put(MQTT_PING_TIMEOUT, "60000");
 
 		config.put(DISCOVERY_ALLOW_DEFAULT_DEPARTMENT, "true");
+		
+		config.put(EVENT_DEFAULT_TIMEOUT, "120000"); // Default is 2 minutes
+		config.put(LISTENER_DEFAULT_TIMEOUT, "120000"); // Default is 2 minutes
 
 		try {
 			BufferedReader reader = new BufferedReader(
@@ -112,6 +117,14 @@ public class InitializationController {
 		}
 	}
 
+	public static String get(String name) {
+		return config.get(name);
+	}
+	
+	public static int getAsInt(String name) {
+		return Integer.parseInt(config.get(name));
+	}
+	
 	private void createAdminAccountIfNotPresent() {
 
 		RoleBean.authorizedObjects = new HashMap<String, Class<? extends PAuthorizedObject>>();

@@ -1,7 +1,6 @@
 package de.hallerweb.enterprise.prioritize.model.event;
 
-public interface PEventConsumer {
-	public void consumeEvent(Event evt);
+public interface PEventObject {
 	public int getId();
 	public PObjectType getObjectType();
 }

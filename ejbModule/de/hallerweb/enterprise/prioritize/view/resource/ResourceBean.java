@@ -29,12 +29,15 @@ import org.primefaces.model.mindmap.DefaultMindmapNode;
 import org.primefaces.model.mindmap.MindmapNode;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
+import de.hallerweb.enterprise.prioritize.controller.InitializationController;
+import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionController;
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.resource.NameValueEntry;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
@@ -74,6 +77,8 @@ public class ResourceBean implements Serializable {
 	AuthorizationController authController; 						// Reference to AuthorizationController EJB
 	@EJB
 	ItemCollectionController itemCollectionController; 				// Reference to ItemCollectionController EJB
+	@Inject
+	EventRegistry eventRegistry;
 
 	Set<Resource> resources; 										// Current List with Resource objects
 	List<ResourceGroup> resourceGroups; 							// Current list of resource groups within department
@@ -606,6 +611,13 @@ public class ResourceBean implements Serializable {
 
 	public void onNodeDblselect(SelectEvent event) {
 		this.selectedNode = (MindmapNode) event.getObject();
+	}
+
+	@Named
+	public String addTestListener(Resource res) {
+		eventRegistry.createEventListener(PObjectType.RESOURCE, res.getId(), sessionController.getUser(), "meinwert",
+				InitializationController.getAsInt(InitializationController.LISTENER_DEFAULT_TIMEOUT), false);
+		return "resources";
 	}
 
 	@Named

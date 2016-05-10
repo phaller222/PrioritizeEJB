@@ -18,6 +18,7 @@ import javax.persistence.Query;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
+import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
@@ -25,6 +26,9 @@ import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
+import de.hallerweb.enterprise.prioritize.model.event.Event;
+import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
+import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
 /**
@@ -33,7 +37,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  * 
  */
 @Stateless
-public class DocumentController {
+public class DocumentController extends PEventConsumerProducer{
 
 	@PersistenceContext(unitName = "MySqlDS")
 	EntityManager em;
@@ -48,6 +52,7 @@ public class DocumentController {
 	LoggingController logger;
 	@Inject
 	SessionController sessionController;
+	@Inject EventRegistry eventRegistry;
 
 	public DocumentInfo createDocument(String name, int groupId, User user, String mimeType, boolean encrypt, byte[] data, String changes) {
 		int maxsize = Integer.parseInt(InitializationController.config.get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
@@ -380,4 +385,19 @@ public class DocumentController {
 			return null;
 		}
 	}
+	
+	
+	public void raiseEvent(PObjectType type, int id, String name, String oldValue, String newValue, long lifetime) {
+		Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
+				.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
+		eventRegistry.addEvent(evt);
+	}
+	
+	@Override
+	public void consumeEvent(int id, Event evt) {
+		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
+				+ " with new Value: " + evt.getNewValue()+ "--- Document listening: " + id );
+
+	}
+	
 }

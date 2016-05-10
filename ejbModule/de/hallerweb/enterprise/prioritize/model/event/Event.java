@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 
 /**
  * Event Object to holf information about an occured event. It holds information
@@ -16,24 +18,26 @@ import javax.persistence.Id;
  *
  */
 @Entity
+@NamedQueries({ @NamedQuery(name = "findEventsWithLimitedLifetime", query = "select e FROM Event e WHERE e.lifetime > 0")
+})
 public class Event {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	int id;
 
-	Date when;
+	Date eventDate;
 	PObjectType sourceType;
 	int sourceId;
 	String propertyName;
-	Object oldValue;
-	Object newValue;
+	String oldValue;
+	String newValue;
 	long lifetime;
-	public Date getWhen() {
-		return when;
+	public Date getEventDate() {
+		return eventDate;
 	}
-	public void setWhen(Date when) {
-		this.when = when;
+	public void setEventDate(Date when) {
+		this.eventDate = when;
 	}
 	public PObjectType getSourceType() {
 		return sourceType;
@@ -56,13 +60,13 @@ public class Event {
 	public Object getOldValue() {
 		return oldValue;
 	}
-	public void setOldValue(Object oldValue) {
+	public void setOldValue(String oldValue) {
 		this.oldValue = oldValue;
 	}
-	public Object getNewValue() {
+	public String getNewValue() {
 		return newValue;
 	}
-	public void setNewValue(Object newValue) {
+	public void setNewValue(String newValue) {
 		this.newValue = newValue;
 	}
 	public long getLifetime() {

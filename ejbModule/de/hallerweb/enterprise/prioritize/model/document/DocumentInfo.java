@@ -22,9 +22,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.PEventConsumer;
-import de.hallerweb.enterprise.prioritize.model.event.PEventProducer;
+import de.hallerweb.enterprise.prioritize.model.event.PEventObject;
 import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
 import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
@@ -52,7 +50,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 		@NamedQuery(name = "findAllDocumentInfos", query = "select di FROM DocumentInfo di"),
 		@NamedQuery(name = "findDocumentInfoByDocumentGroupAndName", query = "select di FROM DocumentInfo di WHERE di.documentGroup.id = :groupId AND di.currentDocument.name = :name"),
 		@NamedQuery(name = "findDocumentGroupByNameAndDepartment", query = "select dg FROM DocumentGroup dg WHERE dg.name = :name AND dg.department.id = :deptId") })
-public class DocumentInfo implements PAuthorizedObject, PSearchable, PEventProducer, PEventConsumer {
+public class DocumentInfo implements PAuthorizedObject, PSearchable, PEventObject {
 
 	transient List<SearchProperty> searchProperties;
 
@@ -178,21 +176,7 @@ public class DocumentInfo implements PAuthorizedObject, PSearchable, PEventProdu
 	}
 
 	@Override
-	public void consumeEvent(Event evt) {
-		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue());
-
-	}
-
-	@Override
-	public void raiseEvent(String name, Object oldValue, Object newValue) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public PObjectType getObjectType() {
 		return PObjectType.DOCUMENTINFO;
 	}
-
 }

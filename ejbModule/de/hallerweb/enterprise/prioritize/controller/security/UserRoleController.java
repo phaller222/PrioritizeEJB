@@ -18,9 +18,13 @@ import javax.persistence.Query;
 
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
+import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
+import de.hallerweb.enterprise.prioritize.model.event.Event;
+import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
+import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
@@ -32,7 +36,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
  * {@link Role} and {@link User} objects.
  */
 @Stateless
-public class UserRoleController {
+public class UserRoleController extends PEventConsumerProducer{
 
 	@PersistenceContext(unitName = "MySqlDS")
 	EntityManager em;
@@ -45,6 +49,9 @@ public class UserRoleController {
 
 	@Inject
 	SessionController sessionController;
+	
+	@Inject
+	EventRegistry eventRegistry;
 
 	/**
 	 * Default constructor.
@@ -517,6 +524,19 @@ public class UserRoleController {
 		} else {
 			return null;
 		}
+
+	}
+	
+	public void raiseEvent(PObjectType type, int id, String name, String oldValue, String newValue, long lifetime) {
+		Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
+				.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
+		eventRegistry.addEvent(evt);
+	}
+	
+	@Override
+	public void consumeEvent(int id, Event evt) {
+		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
+				+ " with new Value: " + evt.getNewValue()+ "--- User listening: " + id );
 
 	}
 

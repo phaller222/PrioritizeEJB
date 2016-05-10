@@ -25,8 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.PEventConsumer;
-import de.hallerweb.enterprise.prioritize.model.event.PEventProducer;
+import de.hallerweb.enterprise.prioritize.model.event.PEventObject;
 import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
 import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
@@ -54,7 +53,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 		@NamedQuery(name = "findUserByUsername", query = "SELECT u FROM User u WHERE u.username=?1 ORDER BY u.name"),
 		@NamedQuery(name = "findUserByApiKey", query = "select u FROM User u WHERE u.apiKey = :apiKey") })
 @JsonIgnoreProperties(value = { "vacation", "searchProperties", })
-public class User implements PAuthorizedObject, PSearchable, PEventConsumer, PEventProducer {
+public class User implements PAuthorizedObject, PSearchable, PEventObject {
 
 	@Id
 	@GeneratedValue
@@ -362,19 +361,6 @@ public class User implements PAuthorizedObject, PSearchable, PEventConsumer, PEv
 			searchProperties.add(prop);
 		}
 		return this.searchProperties;
-	}
-
-	@Override
-	public void raiseEvent(String name, Object oldValue, Object newValue) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void consumeEvent(Event evt) {
-		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue());
-
 	}
 
 	@Override

@@ -25,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
+import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
 import de.hallerweb.enterprise.prioritize.controller.search.SearchController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
@@ -33,6 +34,8 @@ import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
+import de.hallerweb.enterprise.prioritize.model.resource.NameValueEntry;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
@@ -273,13 +276,17 @@ public class ResourceService {
 	}
 
 	private Response setResourceAttributes(Resource resource, String mqttOnline, String name, String description, String commands,
-			String geo, String set, String apiKey) {
+			String geo, String apiKey, String set) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			boolean processed = false;
 			if (mqttOnline != null) {
 				processed = true;
 				boolean online = Boolean.parseBoolean(mqttOnline);
+
+				resourceController.raiseEvent(PObjectType.RESOURCE, resource.getId(), "mqttOnline", String.valueOf(resource.isMqttOnline()),
+						mqttOnline, InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+
 				if (online) {
 					resourceController.setMqttResourceOnline(resource);
 				} else {
@@ -289,10 +296,14 @@ public class ResourceService {
 
 			if (name != null) {
 				processed = true;
+				resourceController.raiseEvent(PObjectType.RESOURCE, resource.getId(), "name", resource.getName(), name,
+						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				resourceController.setResourceName(resource, name, sessionController.getUser());
 			}
 			if (description != null) {
 				processed = true;
+				resourceController.raiseEvent(PObjectType.RESOURCE, resource.getId(), "description", resource.getDescription(), description,
+						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				resourceController.setResourceDescription(resource, description, sessionController.getUser());
 			}
 			if (commands != null) {
@@ -302,6 +313,8 @@ public class ResourceService {
 				for (String cmd : commandString) {
 					commandsForResource.add(cmd);
 				}
+				resourceController.raiseEvent(PObjectType.RESOURCE, resource.getId(), "commands", resource.getMqttCommands().toString(),
+						commands, InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				resourceController.setCommands(resource, commandsForResource);
 			}
 			if (geo != null) {
@@ -313,7 +326,21 @@ public class ResourceService {
 			if (set != null) {
 				processed = true;
 				String[] nameValuePair = set.split(":");
+
+				// ----------------- Raise event for value change
+				Set<NameValueEntry> valuesOld = resourceController.getNameValueEntries(resource);
+				String oldValue = "";
+				for (NameValueEntry entry : valuesOld) {
+					if (entry.getName().equals(nameValuePair[0])) {
+						oldValue = entry.getValues();
+					}
+				}
+				resourceController.raiseEvent(PObjectType.RESOURCE, resource.getId(), nameValuePair[0], oldValue, nameValuePair[1],
+						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				// ------------------------------------------------------
+
 				resourceController.addMqttValueForResource(resource, nameValuePair[0], nameValuePair[1]);
+
 			}
 
 			if (!processed) {

@@ -17,12 +17,16 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
+import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Address;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
+import de.hallerweb.enterprise.prioritize.model.event.Event;
+import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
+import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
@@ -34,7 +38,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  * 
  */
 @Stateless
-public class CompanyController {
+public class CompanyController extends PEventConsumerProducer {
 
 	@PersistenceContext(unitName = "MySqlDS")
 	EntityManager em;
@@ -45,6 +49,8 @@ public class CompanyController {
 	LoggingController logger;
 	@Inject
 	SessionController sessionController;
+	@Inject
+	EventRegistry eventRegistry;
 
 	public Company createCompany(String name, Address mainAddress) {
 		Company c = new Company();
@@ -78,8 +84,7 @@ public class CompanyController {
 						" New Address \"" + adr.getId() + "\" created.");
 			}
 		} catch (ContextNotActiveException ex) {
-			logger.log("SYSTEM", "Address", Action.CREATE, adr.getId(),
-					" New Address \"" + adr.getId() + "\" created.");
+			logger.log("SYSTEM", "Address", Action.CREATE, adr.getId(), " New Address \"" + adr.getId() + "\" created.");
 		}
 		return adr;
 	}
@@ -157,11 +162,10 @@ public class CompanyController {
 		// Logging
 		try {
 			logger.log(sessionController.getUser().getUsername(), "Department", Action.CREATE, c.getId(),
-					" Department \"" + dept.getName() + "\" in Company \"" + dept.getCompany().getName()
-							+ "\" created.");
+					" Department \"" + dept.getName() + "\" in Company \"" + dept.getCompany().getName() + "\" created.");
 		} catch (ContextNotActiveException ex) {
-			logger.log("SYSTEM", "Department", Action.CREATE, dept.getId(), " Department \"" + dept.getName()
-					+ "\" in Company \"" + dept.getCompany().getName() + "\" created.");
+			logger.log("SYSTEM", "Department", Action.CREATE, dept.getId(),
+					" Department \"" + dept.getName() + "\" in Company \"" + dept.getCompany().getName() + "\" created.");
 		}
 
 		return dept;
@@ -289,6 +293,23 @@ public class CompanyController {
 	public void editDepartment(Department d) throws Exception {
 		Department orig = em.find(Department.class, d.getId());
 		if (orig != null) {
+
+			// Fire events if configured
+			if (InitializationController.getAsBoolean(InitializationController.FIRE_DEPARTMENT_EVENTS)) {
+				if (!orig.getName().equals(d.getName())) {
+					this.raiseEvent(PObjectType.DEPARTMENT, orig.getId(), Department.PROPERTY_NAME, orig.getName(), d.getName(),
+							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				}
+				if (!orig.getAddress().equals(d.getAddress())) {
+					this.raiseEvent(PObjectType.DEPARTMENT, orig.getId(), Department.PROPERTY_ADDRESS, orig.getAddress().toString(),
+							d.getAddress().toString(), InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				}
+				if (!orig.getDescription().equals(d.getDescription())) {
+					this.raiseEvent(PObjectType.DEPARTMENT, orig.getId(), Department.PROPERTY_DESCRIPTION, orig.getDescription(),
+							d.getDescription(), InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				}
+			}
+
 			orig.setName(d.getName());
 			orig.setDescription(d.getDescription());
 			Address origAddress = orig.getAddress();
@@ -379,4 +400,20 @@ public class CompanyController {
 	public Department findDepartmentById(int id) {
 		return em.find(Department.class, id);
 	}
+
+	public void raiseEvent(PObjectType type, int id, String name, String oldValue, String newValue, long lifetime) {
+		if (InitializationController.getAsBoolean(InitializationController.FIRE_DEPARTMENT_EVENTS)) {
+			Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
+					.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
+			eventRegistry.addEvent(evt);
+		}
+	}
+
+	@Override
+	public void consumeEvent(int id, Event evt) {
+		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
+				+ " with new Value: " + evt.getNewValue() + "--- Document listening: " + id);
+
+	}
+
 }

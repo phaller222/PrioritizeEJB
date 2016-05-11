@@ -66,6 +66,12 @@ public class InitializationController {
 																											 // providing department token?
 	public static final String EVENT_DEFAULT_TIMEOUT = "EVENT_DEFAULT_TIMEOUT"; // Default timeout value for events
 	public static final String LISTENER_DEFAULT_TIMEOUT = "LISTENER_DEFAULT_TIMEOUT"; // Default timeout value for event listeners
+	public static final String FIRE_RESOURCE_EVENTS="FIRE_RESOURCE_EVENTS";
+	public static final String FIRE_DOCUMENT_EVENTS="FIRE_DOCUMENT_EVENTS";
+	public static final String FIRE_DEPARTMENT_EVENTS="FIRE_DEPARTMENT_EVENTS";
+	public static final String FIRE_USER_EVENTS="FIRE_USER_EVENTS";
+	
+	
 	// resource / device.
 	public final static String DEFAULT_DEPARTMENT_TOKEN = "09eb3067d0fe446bbe7788218fec9bdd";
 
@@ -98,6 +104,10 @@ public class InitializationController {
 		
 		config.put(EVENT_DEFAULT_TIMEOUT, "120000"); // Default is 2 minutes
 		config.put(LISTENER_DEFAULT_TIMEOUT, "120000"); // Default is 2 minutes
+		config.put(FIRE_RESOURCE_EVENTS, "true"); 
+		config.put(FIRE_DOCUMENT_EVENTS, "true"); 
+		config.put(FIRE_USER_EVENTS, "true"); 
+		config.put(FIRE_DEPARTMENT_EVENTS, "true"); 
 
 		try {
 			BufferedReader reader = new BufferedReader(
@@ -123,6 +133,10 @@ public class InitializationController {
 	
 	public static int getAsInt(String name) {
 		return Integer.parseInt(config.get(name));
+	}
+	
+	public static boolean getAsBoolean(String name) {
+		return Boolean.parseBoolean(config.get(name));
 	}
 	
 	private void createAdminAccountIfNotPresent() {

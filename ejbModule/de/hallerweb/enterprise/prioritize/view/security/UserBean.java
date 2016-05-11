@@ -14,6 +14,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
+import de.hallerweb.enterprise.prioritize.controller.InitializationController;
+import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
@@ -21,6 +23,8 @@ import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionC
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan.TimeSpanType;
+import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
+import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
@@ -52,8 +56,8 @@ public class UserBean implements Serializable {
 	CompanyController companyController;
 	@EJB
 	ItemCollectionController itemCollectionController;
-	@EJB
-	UserRoleController userRoleController;
+
+
 
 	User user; 														// Stores the user
 	String selectedDepartmentId; 									// Selected Department
@@ -369,9 +373,8 @@ public class UserBean implements Serializable {
 		ItemCollection managedCollection = itemCollectionController.getItemCollection(sessionController.getUser(),
 				selectedItemCollectionName);
 		if (managedCollection != null) {
-			User managedUser = userRoleController.getUserById(user.getId(), sessionController.getUser());
+			User managedUser = controller.getUserById(user.getId(), sessionController.getUser());
 			itemCollectionController.addUser(managedCollection, managedUser);
 		}
 	}
-
 }

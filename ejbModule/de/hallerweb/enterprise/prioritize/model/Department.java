@@ -51,6 +51,12 @@ import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 		@NamedQuery(name = "findDefaultDepartmentAndCompany", query = "SELECT d FROM Department d WHERE d.company.name='Default Company' and d.name = 'Default Department'") })
 public class Department implements PAuthorizedObject, PSearchable {
 
+	static final public String PROPERTY_NAME="name";
+	static final public String PROPERTY_DESCRIPTION="description";
+	static final public String PROPERTY_ADDRESS="address";
+
+	
+	
 	@Id
 	@GeneratedValue
 	int id;

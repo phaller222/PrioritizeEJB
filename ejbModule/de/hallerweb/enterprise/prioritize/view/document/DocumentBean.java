@@ -21,7 +21,6 @@ import org.primefaces.model.DefaultStreamedContent;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
-import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
@@ -30,7 +29,6 @@ import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
-import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 
@@ -60,12 +58,9 @@ public class DocumentBean implements Serializable {
 	DocumentController controller;
 	@EJB
 	CompanyController companyController;
-	@EJB
-	UserRoleController userController;
+
 	@EJB
 	AuthorizationController authController;
-	@EJB
-	ResourceController resourceController;
 	@EJB
 	ItemCollectionController itemCollectionController;
 
@@ -427,5 +422,4 @@ public class DocumentBean implements Serializable {
 			itemCollectionController.addDocumentInfo(managedCollection, managedDocInfo);
 		}
 	}
-
 }

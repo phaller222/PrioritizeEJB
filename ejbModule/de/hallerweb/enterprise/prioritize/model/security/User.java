@@ -55,6 +55,12 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 @JsonIgnoreProperties(value = { "vacation", "searchProperties", })
 public class User implements PAuthorizedObject, PSearchable, PEventObject {
 
+	static final public String PROPERTY_NAME="name";
+	static final public String PROPERTY_EMAIL="email";
+	static final public String PROPERTY_OCCUPATION="occupation";
+	static final public String PROPERTY_DEPARTMENT="department";
+	static final public String PROPERTY_USERNAME="username";
+	
 	@Id
 	@GeneratedValue
 	int id;

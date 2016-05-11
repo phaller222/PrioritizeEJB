@@ -72,13 +72,10 @@ public class ResourceBean implements Serializable {
 	@EJB
 	CompanyController companyController; 							// Reference to CompanyController EJB
 	@EJB
-	UserRoleController userController; 								// Reference to Usercontroller EJB
-	@EJB
 	AuthorizationController authController; 						// Reference to AuthorizationController EJB
 	@EJB
 	ItemCollectionController itemCollectionController; 				// Reference to ItemCollectionController EJB
-	@Inject
-	EventRegistry eventRegistry;
+
 
 	Set<Resource> resources; 										// Current List with Resource objects
 	List<ResourceGroup> resourceGroups; 							// Current list of resource groups within department
@@ -611,13 +608,6 @@ public class ResourceBean implements Serializable {
 
 	public void onNodeDblselect(SelectEvent event) {
 		this.selectedNode = (MindmapNode) event.getObject();
-	}
-
-	@Named
-	public String addTestListener(Resource res) {
-		eventRegistry.createEventListener(PObjectType.RESOURCE, res.getId(), sessionController.getUser(), "meinwert",
-				InitializationController.getAsInt(InitializationController.LISTENER_DEFAULT_TIMEOUT), false);
-		return "resources";
 	}
 
 	@Named

@@ -37,7 +37,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  * 
  */
 @Stateless
-public class DocumentController extends PEventConsumerProducer{
+public class DocumentController extends PEventConsumerProducer {
 
 	@PersistenceContext(unitName = "MySqlDS")
 	EntityManager em;
@@ -52,7 +52,8 @@ public class DocumentController extends PEventConsumerProducer{
 	LoggingController logger;
 	@Inject
 	SessionController sessionController;
-	@Inject EventRegistry eventRegistry;
+	@Inject
+	EventRegistry eventRegistry;
 
 	public DocumentInfo createDocument(String name, int groupId, User user, String mimeType, boolean encrypt, byte[] data, String changes) {
 		int maxsize = Integer.parseInt(InitializationController.config.get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
@@ -266,6 +267,30 @@ public class DocumentController extends PEventConsumerProducer{
 			document.setVersion(info.getCurrentDocument().getVersion() + 1);
 			document.setData(data);
 
+			// Fire events for changed properties if configured.
+			if (InitializationController.getAsBoolean(InitializationController.FIRE_DOCUMENT_EVENTS)) {
+				Document current = managedInfo.getCurrentDocument();
+				if (!current.getName().equals(newDocumentData.getName())) {
+					this.raiseEvent(PObjectType.DOCUMENTINFO, managedInfo.getId(), Document.PROPERTY_NAME, current.getName(), newDocumentData.getName(),
+							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				}
+				if (!current.getMimeType().equals(newDocumentData.getMimeType())) {
+					this.raiseEvent(PObjectType.DOCUMENTINFO, managedInfo.getId(), Document.PROPERTY_MIMETYPE, current.getMimeType(),
+							newDocumentData.getMimeType(),
+							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				}
+				if (!current.getChanges().equals(newDocumentData.getChanges())) {
+					this.raiseEvent(PObjectType.DOCUMENTINFO, managedInfo.getId(), Document.PROPERTY_CHANGES, current.getChanges(),
+							newDocumentData.getChanges(),
+							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				}
+				if (!current.isEncrypted() == newDocumentData.isEncrypted()) {
+					this.raiseEvent(PObjectType.DOCUMENTINFO, managedInfo.getId(), Document.PROPERTY_ENCRYPTED,String.valueOf(current.isEncrypted()),
+							String.valueOf(newDocumentData.isEncrypted()),
+							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				}
+			}
+
 			// Then edit the DocumentInfo information
 			if (managedInfo.getRecentDocuments() == null) {
 				managedInfo.setRecentDocuments(new TreeSet<Document>());
@@ -295,6 +320,10 @@ public class DocumentController extends PEventConsumerProducer{
 			logger.log(sessionController.getUser().getUsername(), "Document", Action.UPDATE, document.getId(),
 					" Document \"" + document.getName() + "\" has been tagged: " + tag + ".");
 		}
+
+		this.raiseEvent(PObjectType.DOCUMENTINFO, managedDocument.getId(), Document.PROPERTY_TAG, "", managedDocument.getTag(),
+				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+
 		return managedDocument;
 	}
 
@@ -385,19 +414,20 @@ public class DocumentController extends PEventConsumerProducer{
 			return null;
 		}
 	}
-	
-	
+
 	public void raiseEvent(PObjectType type, int id, String name, String oldValue, String newValue, long lifetime) {
-		Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
-				.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
-		eventRegistry.addEvent(evt);
+		if (InitializationController.getAsBoolean(InitializationController.FIRE_DOCUMENT_EVENTS)) {
+			Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
+					.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
+			eventRegistry.addEvent(evt);
+		}
 	}
-	
+
 	@Override
 	public void consumeEvent(int id, Event evt) {
 		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue()+ "--- Document listening: " + id );
+				+ " with new Value: " + evt.getNewValue() + "--- Document listening: " + id);
 
 	}
-	
+
 }

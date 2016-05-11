@@ -66,6 +66,13 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 		@NamedQuery(name = "findAllResources", query = "select r FROM Resource r") })
 public class Resource implements PAuthorizedObject, PSearchable, Comparable<Object>, PEventObject {
 
+	static final public String PROPERTY_NAME="name";
+	static final public String PROPERTY_DESCRIPTION="description";
+	static final public String PROPERTY_DEPARTMENT="department";
+	static final public String PROPERTY_RESOURCEGROUP="resourceGroup";
+	static final public String PROPERTY_GEO="geo";
+	static final public String PROPERTY_MQTTONLINE="mqttOnline";
+	
 	@Id
 	@GeneratedValue
 	int id;

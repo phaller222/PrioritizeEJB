@@ -14,12 +14,16 @@ import org.jboss.logging.Logger;
 import org.jboss.logging.Logger.Level;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
+import de.hallerweb.enterprise.prioritize.controller.InitializationController;
+import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Address;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
+import de.hallerweb.enterprise.prioritize.model.security.User;
 
 /**
  * CompanyBean - JSF Backing-Bean to store session information about companies and departments associated with them. this bean is mainly
@@ -42,9 +46,6 @@ public class CompanyBean implements Serializable {
 
 	@EJB
 	CompanyController controller;
-
-	@EJB
-	UserRoleController roleController;
 
 	@Inject
 	SessionController sessionController;
@@ -234,5 +235,4 @@ public class CompanyBean implements Serializable {
 		return authController.canCreate(-1, Company.class, sessionController.getUser());
 
 	}
-
 }

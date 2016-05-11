@@ -328,7 +328,6 @@ public class ResourceController extends PEventConsumerProducer {
 	 */
 	public void writeMqttDataToSend(Resource res, byte[] data) {
 		Resource managedResource = em.find(Resource.class, res.getId());
-		System.out.println("RESOURCE CONTR: " + managedResource.getId());
 		if (managedResource != null) {
 			managedResource.setMqttDataToSend(data);
 			mqttService.writeToTopic(managedResource.getDataReceiveTopic(), data);
@@ -363,14 +362,14 @@ public class ResourceController extends PEventConsumerProducer {
 
 	public void setMqttResourceOnline(Resource res) {
 		Resource managed = em.find(Resource.class, res.getId());
-		raiseEvent(PObjectType.RESOURCE, managed.getId(), "mqttOnline", String.valueOf(managed.isMqttOnline()), "true",
+		raiseEvent(PObjectType.RESOURCE, managed.getId(), Resource.PROPERTY_MQTTONLINE, String.valueOf(managed.isMqttOnline()), "true",
 				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		managed.setMqttOnline(true);
 	}
 
 	public void setMqttResourceOffline(Resource res) {
 		Resource managed = em.find(Resource.class, res.getId());
-		raiseEvent(PObjectType.RESOURCE, managed.getId(), "mqttOnline", String.valueOf(managed.isMqttOnline()), "false",
+		raiseEvent(PObjectType.RESOURCE, managed.getId(), Resource.PROPERTY_MQTTONLINE, String.valueOf(managed.isMqttOnline()), "false",
 				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		managed.setMqttOnline(false);
 	}
@@ -653,18 +652,18 @@ public class ResourceController extends PEventConsumerProducer {
 		if (authController.canUpdate(managedResource, user)) {
 
 			if (!newName.equals(managedResource.getName())) {
-				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), "name", managedResource.getName(), newName, 60000);
+				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), Resource.PROPERTY_NAME, managedResource.getName(), newName, 60000);
 			}
 			if (!newDescription.equals(managedResource.getDescription())) {
-				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), "description", managedResource.getDescription(),
+				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), Resource.PROPERTY_DESCRIPTION, managedResource.getDescription(),
 						newDescription, 60000);
 			}
 			if (managedResource.getDepartment().getId() != managedDepartment.getId()) {
-				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), "department",
+				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), Resource.PROPERTY_DEPARTMENT,
 						String.valueOf(managedResource.getDepartment().getId()), String.valueOf(newDept.getId()), 60000);
 			}
 			if (managedResource.getResourceGroup().getId() != managedGroup.getId()) {
-				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), "resourceGroup",
+				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), Resource.PROPERTY_RESOURCEGROUP,
 						String.valueOf(managedResource.getResourceGroup().getId()), String.valueOf(newGroup.getId()),
 						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 			}
@@ -983,17 +982,18 @@ public class ResourceController extends PEventConsumerProducer {
 	}
 
 	public void raiseEvent(PObjectType type, int id, String name, String oldValue, String newValue, long lifetime) {
-		Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
-				.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
-		eventRegistry.addEvent(evt);
+		if (InitializationController.getAsBoolean(InitializationController.FIRE_RESOURCE_EVENTS)) {
+			Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
+					.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
+			eventRegistry.addEvent(evt);
+		}
 	}
-	
+
 	@Override
 	public void consumeEvent(int id, Event evt) {
 		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue()+ "--- Resource listening: " + id );
+				+ " with new Value: " + evt.getNewValue() + "--- Resource listening: " + id);
 
 	}
-	
 
 }

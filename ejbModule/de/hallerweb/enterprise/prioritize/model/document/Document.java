@@ -33,6 +33,12 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 		@NamedQuery(name = "findDocumentByTag", query = "select d FROM Document d WHERE d.tag = :docTag") })
 public class Document implements Comparable {
 
+	static final public String PROPERTY_NAME="name";
+	static final public String PROPERTY_MIMETYPE="mimeType";
+	static final public String PROPERTY_TAG="tag";
+	static final public String PROPERTY_ENCRYPTED="encrypted";
+	static final public String PROPERTY_CHANGES="changes";
+	
 	@Id
 	@GeneratedValue
 	@JsonIgnore

@@ -16,6 +16,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
@@ -36,7 +37,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
  * {@link Role} and {@link User} objects.
  */
 @Stateless
-public class UserRoleController extends PEventConsumerProducer{
+public class UserRoleController extends PEventConsumerProducer {
 
 	@PersistenceContext(unitName = "MySqlDS")
 	EntityManager em;
@@ -49,7 +50,7 @@ public class UserRoleController extends PEventConsumerProducer{
 
 	@Inject
 	SessionController sessionController;
-	
+
 	@Inject
 	EventRegistry eventRegistry;
 
@@ -276,6 +277,34 @@ public class UserRoleController extends PEventConsumerProducer{
 			User sessionUser) {
 		User user = em.find(User.class, id);
 		if (authController.canUpdate(user, sessionUser)) {
+
+			// Raise events if configured
+			if (InitializationController.getAsBoolean(InitializationController.FIRE_USER_EVENTS)) {
+				if (!user.getName().equals(name)) {
+					this.raiseEvent(PObjectType.USER, user.getId(), User.PROPERTY_NAME, user.getName(), name,
+							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				}
+				if (!user.getUsername().equals(username)) {
+					this.raiseEvent(PObjectType.USER, user.getId(), User.PROPERTY_USERNAME, user.getUsername(), username,
+							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				}
+				if (!user.getEmail().equals(email)) {
+					this.raiseEvent(PObjectType.USER, user.getId(), User.PROPERTY_EMAIL, user.getEmail(), email,
+							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				}
+				if (!user.getOccupation().equals(occupation)) {
+					this.raiseEvent(PObjectType.USER, user.getId(), User.PROPERTY_OCCUPATION, user.getOccupation(), occupation,
+							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				}
+				if (user.getDepartment() != null) {
+					if (!(user.getDepartment().getId() == initialDepartmentId)) {
+						this.raiseEvent(PObjectType.USER, user.getId(), User.PROPERTY_DEPARTMENT,
+								String.valueOf(user.getDepartment().getId()), String.valueOf(initialDepartmentId),
+								InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					}
+				}
+			}
+
 			user.setUsername(username);
 			user.setName(name);
 			user.setEmail(email);
@@ -526,17 +555,19 @@ public class UserRoleController extends PEventConsumerProducer{
 		}
 
 	}
-	
+
 	public void raiseEvent(PObjectType type, int id, String name, String oldValue, String newValue, long lifetime) {
-		Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
-				.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
-		eventRegistry.addEvent(evt);
+		if (InitializationController.getAsBoolean(InitializationController.FIRE_USER_EVENTS)) {
+			Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
+					.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
+			eventRegistry.addEvent(evt);
+		}
 	}
-	
+
 	@Override
 	public void consumeEvent(int id, Event evt) {
 		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue()+ "--- User listening: " + id );
+				+ " with new Value: " + evt.getNewValue() + "--- User listening: " + id);
 
 	}
 

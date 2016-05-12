@@ -1,5 +1,6 @@
 package de.hallerweb.enterprise.prioritize.view.inbox;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
@@ -7,6 +8,8 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.Produces;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -72,6 +75,11 @@ public class MessageBean implements Serializable {
 	public List<Message> getMessages() {
 		return controller.getReceivedMessages(sessionController.getUser());
 	}
+	
+	@Named
+	public List<Message> getSentMessages() {
+		return controller.getSentMessages(sessionController.getUser());
+	}
 
 	public String getReadMessageSubject() {
 		return readMessageSubject;
@@ -135,6 +143,24 @@ public class MessageBean implements Serializable {
 	public String overview() {
 		return "messages";
 	}
+	
+	@Named
+	public String inbox() {
+		return "inbox";
+	}
+	
+	@Named
+	public void gotoInbox() {
+		ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+		try {
+			context.redirect(context.getApplicationContextPath() + "/client/messages/inbox.xhtml");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
 
 	@Named
 	public void setMessageRead() {

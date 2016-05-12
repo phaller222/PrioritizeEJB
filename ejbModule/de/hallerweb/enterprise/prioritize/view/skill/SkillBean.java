@@ -1,7 +1,6 @@
 package de.hallerweb.enterprise.prioritize.view.skill;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,8 +10,9 @@ import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.persistence.NamedQuery;
 
+import org.primefaces.event.NodeCollapseEvent;
+import org.primefaces.event.NodeExpandEvent;
 import org.primefaces.model.DefaultTreeNode;
 
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
@@ -431,4 +431,13 @@ public class SkillBean implements Serializable {
 		SkillRecord rec = controller.createSkillRecord(selectedSkill, propertyRecords, this.selectedEnthusiasmLevel);
 		resourceController.addSkillToResource(resourceToAssignSkill.getId(), rec.getId(), sessionController.getUser());
 	}
+	
+	public void nodeExpand(NodeExpandEvent event) {
+	    event.getTreeNode().setExpanded(true);      
+	}
+
+	public void nodeCollapse(NodeCollapseEvent event) {
+	    event.getTreeNode().setExpanded(false);     
+	}
+	
 }

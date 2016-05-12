@@ -128,7 +128,7 @@ public class LoginBean implements Serializable {
 		}
 		user.setLastLogin(new Date());
 		sessionController.setUser(user);
-		return "dashboard";
+		return "dashboard/dashboard.xhtml";
 	}
 
 	public String logout() {

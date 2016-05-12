@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -18,13 +19,15 @@ import javax.inject.Named;
 
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.DefaultTreeNode;
+import org.primefaces.model.TreeNode;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionController;
+import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
@@ -422,4 +425,40 @@ public class DocumentBean implements Serializable {
 			itemCollectionController.addDocumentInfo(managedCollection, managedDocInfo);
 		}
 	}
+
+	// --------------------------------- Client view ---------------------------------
+
+	// Create Tree for documents view
+	public TreeNode getDocumentTree() {
+		TreeNode root = new DefaultTreeNode("My Documents", null);
+
+		List<Company> companies = companyController.getAllCompanies();
+		for (Company c : companies) {
+			TreeNode company = new DefaultTreeNode(new DocumentTreeInfo(c.getName(), false, null), root);
+			List<Department> departments = c.getDepartments();
+			for (Department d : departments) {
+				TreeNode department = new DefaultTreeNode(new DocumentTreeInfo(d.getName(), false, null), company);
+				List<DocumentGroup> groups = d.getDocumentGroups();
+				for (DocumentGroup g : groups) {
+					if (authController.canRead(g, sessionController.getUser())) {
+						TreeNode group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, null), department);
+						Set<DocumentInfo> documents = g.getDocuments();
+						for (DocumentInfo docInfo : documents) {
+							if (authController.canRead(docInfo, sessionController.getUser())) {
+								TreeNode documentInfoNode = new DefaultTreeNode(
+										new DocumentTreeInfo(docInfo.getCurrentDocument().getName(), true, docInfo), group);
+							}
+						}
+
+					}
+
+				}
+
+			}
+		}
+		return root;
+	}
+
+	
+
 }

@@ -14,10 +14,14 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.bean.ManagedBean;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
 
 import org.primefaces.event.FileUploadEvent;
+import org.primefaces.event.NodeCollapseEvent;
+import org.primefaces.event.NodeExpandEvent;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.TreeNode;
@@ -69,6 +73,8 @@ public class DocumentBean implements Serializable {
 
 	String selectedItemCollectionName;
 
+	TreeNode documentTreeRoot;
+
 	public String getSelectedItemCollectionName() {
 		return selectedItemCollectionName;
 	}
@@ -102,6 +108,7 @@ public class DocumentBean implements Serializable {
 	public void init() {
 		document = new Document();
 		selectedDocumentGroup = new String();
+		this.documentTreeRoot = createDocumentTree();
 	}
 
 	@Named
@@ -273,6 +280,11 @@ public class DocumentBean implements Serializable {
 		return "editdocument";
 	}
 
+	@Named
+	public String edit(String documentInfoId) {
+		return edit(controller.getDocumentInfo(Integer.parseInt(documentInfoId), sessionController.getUser()));
+	}
+
 	/**
 	 * Calls the History of the given {@link DocumentInfo} object.
 	 * 
@@ -283,6 +295,13 @@ public class DocumentBean implements Serializable {
 	@Named
 	public String history(DocumentInfo info) {
 		this.documentInfo = info;
+		return "history";
+	}
+
+	@Named
+	public String history(String documentInfoId) {
+
+		this.documentInfo = controller.getDocumentInfo(Integer.parseInt(documentInfoId), sessionController.getUser());
 		return "history";
 	}
 
@@ -392,6 +411,16 @@ public class DocumentBean implements Serializable {
 	}
 
 	@Named
+	public boolean canRead(String documentInfoId) {
+		try {
+			System.out.println("ID: " + documentInfoId);
+			return canRead(controller.getDocumentInfo(Integer.parseInt(documentInfoId), sessionController.getUser()));
+		} catch (Exception ex) {
+			return false;
+		}
+	}
+
+	@Named
 	public boolean canUpdate(DocumentInfo info) {
 		if (info == null) {
 			return false;
@@ -400,11 +429,30 @@ public class DocumentBean implements Serializable {
 	}
 
 	@Named
+	public boolean canUpdate(String documentInfoId) {
+		try {
+			return canUpdate(controller.getDocumentInfo(Integer.parseInt(documentInfoId), sessionController.getUser()));
+		} catch (Exception ex) {
+			return false;
+		}
+
+	}
+
+	@Named
 	public boolean canDelete(DocumentInfo info) {
 		if (info == null) {
 			return false;
 		}
 		return authController.canDelete(info, sessionController.getUser());
+	}
+
+	@Named
+	public boolean canDelete(String documentInfoId) {
+		try {
+			return canDelete(controller.getDocumentInfo(Integer.parseInt(documentInfoId), sessionController.getUser()));
+		} catch (Exception ex) {
+			return false;
+		}
 	}
 
 	@Named
@@ -428,8 +476,12 @@ public class DocumentBean implements Serializable {
 
 	// --------------------------------- Client view ---------------------------------
 
-	// Create Tree for documents view
 	public TreeNode getDocumentTree() {
+		return this.documentTreeRoot;
+	}
+
+	// Create Tree for documents view
+	public TreeNode createDocumentTree() {
 		TreeNode root = new DefaultTreeNode("My Documents", null);
 
 		List<Company> companies = companyController.getAllCompanies();
@@ -459,6 +511,27 @@ public class DocumentBean implements Serializable {
 		return root;
 	}
 
-	
+	public void updateDocumentTree() {
+		if (isNewRequest()) {
+			System.out.println("Updating document tree");
+			this.documentTreeRoot = createDocumentTree();
+		}
+	}
+
+	public void nodeExpand(NodeExpandEvent event) {
+		event.getTreeNode().setExpanded(true);
+	}
+
+	public void nodeCollapse(NodeCollapseEvent event) {
+		event.getTreeNode().setExpanded(false);
+	}
+
+	public boolean isNewRequest() {
+		final FacesContext fc = FacesContext.getCurrentInstance();
+		final boolean getMethod = ((HttpServletRequest) fc.getExternalContext().getRequest()).getMethod().equals("GET");
+		final boolean ajaxRequest = fc.getPartialViewContext().isAjaxRequest();
+		final boolean validationFailed = fc.isValidationFailed();
+		return getMethod && !ajaxRequest && !validationFailed;
+	}
 
 }

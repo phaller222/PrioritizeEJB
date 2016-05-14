@@ -3,7 +3,9 @@ package de.hallerweb.enterprise.prioritize.model.document;
 import java.util.Arrays;
 import java.util.Date;
 
+import javax.persistence.Basic;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
@@ -58,6 +60,7 @@ public class Document implements Comparable {
 	private User encryptedBy; // Who encrypted this document
 	@Lob
 	@JsonIgnore
+	@Basic(fetch = FetchType.LAZY)
 	private byte[] data; // the data of the document (e.G. binary MS-word data).
 
 	@Version

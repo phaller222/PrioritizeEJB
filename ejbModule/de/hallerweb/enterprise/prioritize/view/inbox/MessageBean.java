@@ -2,6 +2,7 @@ package de.hallerweb.enterprise.prioritize.view.inbox;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -75,7 +76,7 @@ public class MessageBean implements Serializable {
 	public List<Message> getMessages() {
 		return controller.getReceivedMessages(sessionController.getUser());
 	}
-	
+
 	@Named
 	public List<Message> getSentMessages() {
 		return controller.getSentMessages(sessionController.getUser());
@@ -115,6 +116,18 @@ public class MessageBean implements Serializable {
 		return userRoleController.getAllUsers(sessionController.getUser());
 	}
 
+	public List<String> completeRecipiantList(String query) {
+		List<String> users = userRoleController.getAllUserNames(sessionController.getUser());
+		List<String> result = new ArrayList<String>();
+		for (String username : users) {
+			if (username.startsWith(query)) {
+				result.add(username);
+			}
+		}
+		return result;
+
+	}
+
 	@Named
 	public String getTo() {
 		return to;
@@ -134,8 +147,8 @@ public class MessageBean implements Serializable {
 
 	@Named
 	public String sendMessage() {
-		controller.createMessage(sessionController.getUser(), userRoleController.findUserById(Integer.parseInt(this.to)), this.subject,
-				this.message);
+		controller.createMessage(sessionController.getUser(), userRoleController.findUserByUsername(this.to, sessionController.getUser()),
+				this.subject, this.message);
 		return "messages";
 	}
 
@@ -143,12 +156,12 @@ public class MessageBean implements Serializable {
 	public String overview() {
 		return "messages";
 	}
-	
+
 	@Named
 	public String inbox() {
 		return "inbox";
 	}
-	
+
 	@Named
 	public void gotoInbox() {
 		ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
@@ -159,18 +172,16 @@ public class MessageBean implements Serializable {
 			e.printStackTrace();
 		}
 	}
-	
-	
 
 	@Named
 	public void setMessageRead() {
 		Message msg = controller.findMessageById(Integer.parseInt(readMessageId));
 		controller.setMessageRead(msg, true);
 	}
-	
+
 	@Named
 	public List<Message> getUnreadMessages() {
-		 return (List<Message>) controller.getUnreadMessages(sessionController.getUser());
+		return (List<Message>) controller.getUnreadMessages(sessionController.getUser());
 	}
-	
+
 }

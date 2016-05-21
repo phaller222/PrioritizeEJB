@@ -20,12 +20,6 @@ public class CleanupJob {
 
 	@EJB
 	ResourceController resourceController;
-	@EJB
-	CompanyController companyController;
-	@EJB
-	UserRoleController userRoleController;
-	@EJB
-	SessionController sessionController;
 
 	/**
 	 * Default constructor.

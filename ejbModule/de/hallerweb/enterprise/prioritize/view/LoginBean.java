@@ -1,11 +1,14 @@
 package de.hallerweb.enterprise.prioritize.view;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -128,7 +131,14 @@ public class LoginBean implements Serializable {
 		}
 		user.setLastLogin(new Date());
 		sessionController.setUser(user);
-		return "dashboard/dashboard.xhtml";
+		ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+		try {
+			context.redirect(context.getApplicationContextPath() + "/client/dashboard/dashboard.xhtml");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "dashboard";
 	}
 
 	public String logout() {

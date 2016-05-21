@@ -333,6 +333,12 @@ public class UserRoleController extends PEventConsumerProducer {
 		}
 
 	}
+	
+	public List<String> getAllUserNames(User sessionUser) throws EJBException {
+		Query query = em.createNamedQuery("findAllUserNames");
+		List<String> users = query.getResultList();
+		return users;
+	}
 
 	public User getUserById(int id, User sessionUser) {
 		User user = em.find(User.class, id);

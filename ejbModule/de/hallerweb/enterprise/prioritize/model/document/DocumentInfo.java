@@ -20,6 +20,7 @@ import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.event.PEventObject;

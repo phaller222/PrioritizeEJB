@@ -124,6 +124,10 @@ public class CompanyBean implements Serializable {
 	public String createDepartment() {
 		Department createdDepartment = controller.createDepartment(company, department.getName(), department.getDescription(),
 				department.getAddress(), sessionController.getUser());
+		if (createdDepartment == null) {
+			ViewUtilities.addErrorMessage("messages", "The department " + department.getName() + " already exists or could not be created. Department has not been created!");
+			return "editcompanies";
+		}
 		company.addDepartment(createdDepartment);
 		department = new Department();
 		return "editcompanies";

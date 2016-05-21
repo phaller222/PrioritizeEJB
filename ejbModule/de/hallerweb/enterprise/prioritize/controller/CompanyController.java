@@ -96,6 +96,14 @@ public class CompanyController extends PEventConsumerProducer {
 		Company c = em.find(Company.class, company.getId());
 		dept.setCompany(c);
 
+		if (c.getDepartments() != null) {
+			for (Department d : c.getDepartments()) {
+				if (d.getName().equals(name)) {
+					return null;
+				}
+			}
+		}
+
 		// Set Company Address as Address of Department.
 		Address companyAddress = company.getMainAddress();
 

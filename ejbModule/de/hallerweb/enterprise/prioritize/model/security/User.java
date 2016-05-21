@@ -50,6 +50,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 @Entity
 @NamedQueries({ @NamedQuery(name = "findUserByDepartment", query = "select u FROM User u WHERE u.department.id = :deptId"),
 		@NamedQuery(name = "findAllUsers", query = "SELECT u FROM User u ORDER BY u.name"),
+		@NamedQuery(name = "findAllUserNames", query = "SELECT u.name FROM User u ORDER BY u.name"),
 		@NamedQuery(name = "findUserByUsername", query = "SELECT u FROM User u WHERE u.username=?1 ORDER BY u.name"),
 		@NamedQuery(name = "findUserByApiKey", query = "select u FROM User u WHERE u.apiKey = :apiKey") })
 @JsonIgnoreProperties(value = { "vacation", "searchProperties", })

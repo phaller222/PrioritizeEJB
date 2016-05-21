@@ -12,10 +12,16 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.bean.ManagedBean;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
 
+import org.primefaces.event.NodeCollapseEvent;
+import org.primefaces.event.NodeExpandEvent;
 import org.primefaces.event.SelectEvent;
+import org.primefaces.model.DefaultTreeNode;
+import org.primefaces.model.TreeNode;
 import org.primefaces.model.chart.Axis;
 import org.primefaces.model.chart.AxisType;
 import org.primefaces.model.chart.CategoryAxis;
@@ -36,7 +42,10 @@ import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationContr
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionController;
+import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
+import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.resource.NameValueEntry;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
@@ -46,6 +55,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
+
 
 /**
  * ResourceBean - JSF Backing-Bean to store information about resources.
@@ -102,6 +112,9 @@ public class ResourceBean implements Serializable {
 	Set<SkillRecord> skillRecords;
 
 	String selectedItemCollectionName;								// Selected ItemCollection to add a resource to
+	
+	TreeNode resourceTreeRoot;
+	
 
 	public String getSelectedItemCollectionName() {
 		return selectedItemCollectionName;
@@ -202,6 +215,7 @@ public class ResourceBean implements Serializable {
 	public void init() {
 		resource = new Resource();
 		selectedResourceGroupId = new String();
+		this.resourceTreeRoot = createResourceTree();
 	}
 
 	@Named
@@ -635,5 +649,70 @@ public class ResourceBean implements Serializable {
 			itemCollectionController.addResource(managedCollection, managedResource);
 		}
 	}
+	
+	// --------------------------------- Client view ---------------------------------
 
+	public TreeNode getResourceTree() {
+		return this.resourceTreeRoot;
+	}
+
+	// Create Tree for resources view
+	public TreeNode createResourceTree() {
+		TreeNode root = new DefaultTreeNode("My Devices", null);
+
+		List<Company> companies = companyController.getAllCompanies();
+		for (Company c : companies) {
+			TreeNode company = new DefaultTreeNode(new ResourceTreeInfo(c.getName(), false, null), root);
+			List<Department> departments = c.getDepartments();
+			for (Department d : departments) {
+				TreeNode department = new DefaultTreeNode(new ResourceTreeInfo(d.getName(), false, null), company);
+				List<ResourceGroup> groups = d.getResourceGroups();
+				for (ResourceGroup g : groups) {
+					if (authController.canRead(g, sessionController.getUser())) {
+						TreeNode group = new DefaultTreeNode(new ResourceTreeInfo(g.getName(), false, null), department);
+						Set<Resource> resources = g.getResources();
+						for (Resource res : resources) {
+							if (authController.canRead(res, sessionController.getUser())) {
+								TreeNode resourceInfoNode = new DefaultTreeNode(
+										new ResourceTreeInfo(res.getName(), true, res), group);
+							}
+						}
+
+					}
+
+				}
+
+			}
+		}
+		return root;
+	}
+
+	public void updateResourceTree() {
+		if (isNewRequest()) {
+			this.resourceTreeRoot = createResourceTree();
+		}
+	}
+
+	public void nodeExpand(NodeExpandEvent event) {
+		event.getTreeNode().setExpanded(true);
+	}
+
+	public void nodeCollapse(NodeCollapseEvent event) {
+		event.getTreeNode().setExpanded(false);
+	}
+
+	public boolean isNewRequest() {
+		final FacesContext fc = FacesContext.getCurrentInstance();
+		final boolean getMethod = ((HttpServletRequest) fc.getExternalContext().getRequest()).getMethod().equals("GET");
+		final boolean ajaxRequest = fc.getPartialViewContext().isAjaxRequest();
+		final boolean validationFailed = fc.isValidationFailed();
+		return getMethod && !ajaxRequest && !validationFailed;
+	}
+	
+	public String createNewResource() {
+		return "resources";
+	}
+	
+	
+	
 }

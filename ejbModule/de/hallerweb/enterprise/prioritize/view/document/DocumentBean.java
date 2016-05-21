@@ -74,6 +74,15 @@ public class DocumentBean implements Serializable {
 	String selectedItemCollectionName;
 
 	TreeNode documentTreeRoot;
+	TreeNode selectedNode;
+
+	public TreeNode getSelectedNode() {
+		return selectedNode;
+	}
+
+	public void setSelectedNode(TreeNode selectedNode) {
+		this.selectedNode = selectedNode;
+	}
 
 	public String getSelectedItemCollectionName() {
 		return selectedItemCollectionName;
@@ -532,6 +541,15 @@ public class DocumentBean implements Serializable {
 		final boolean ajaxRequest = fc.getPartialViewContext().isAjaxRequest();
 		final boolean validationFailed = fc.isValidationFailed();
 		return getMethod && !ajaxRequest && !validationFailed;
+	}
+	
+	public String createNewDocument() {
+		if (selectedNode != null) {
+			if (selectedNode.isLeaf()) {
+				return "documents";
+			}
+			else return "history";
+		} else return null;
 	}
 
 }

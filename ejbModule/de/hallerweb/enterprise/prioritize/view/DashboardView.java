@@ -1,157 +1,73 @@
 package de.hallerweb.enterprise.prioritize.view;
 
 import java.io.Serializable;
-import java.util.Calendar;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
+import javax.inject.Named;
 
-import org.primefaces.extensions.event.timeline.TimelineSelectEvent;
-import org.primefaces.extensions.model.timeline.TimelineEvent;
-import org.primefaces.extensions.model.timeline.TimelineModel;
-
-
-@ManagedBean(name = "basicTimelineView")
+import org.primefaces.event.CloseEvent;
+import org.primefaces.event.DashboardReorderEvent;
+import org.primefaces.event.ToggleEvent;
+import org.primefaces.model.DashboardColumn;
+import org.primefaces.model.DashboardModel;
+import org.primefaces.model.DefaultDashboardColumn;
+import org.primefaces.model.DefaultDashboardModel;
+ 
+@Named
 @ViewScoped
 public class DashboardView implements Serializable {
-
-	private TimelineModel model;
-
-	private boolean selectable = true;
-	private boolean zoomable = true;
-	private boolean moveable = true;
-	private boolean stackEvents = true;
-	private String eventStyle = "box";
-	private boolean axisOnTop;
-	private boolean showCurrentTime = true;
-	private boolean showNavigation = false;
-
-	@PostConstruct
-	protected void initialize() {
-		model = new TimelineModel();
-
-		Calendar cal = Calendar.getInstance();
-		cal.set(2014, Calendar.JUNE, 12, 0, 0, 0);
-		model.add(new TimelineEvent("PrimeUI 1.1", cal.getTime()));
-
-		cal.set(2014, Calendar.OCTOBER, 11, 0, 0, 0);
-		model.add(new TimelineEvent("Primefaces 5.1.3", cal.getTime()));
-
-		cal.set(2015, Calendar.DECEMBER, 8, 0, 0, 0);
-		model.add(new TimelineEvent("PrimeUI 2.2", cal.getTime()));
-
-		cal.set(2015, Calendar.MARCH, 10, 0, 0, 0);
-		model.add(new TimelineEvent("Sentinel-Layout 1.1", cal.getTime()));
-
-		cal.set(2015, Calendar.APRIL, 3, 0, 0, 0);
-		model.add(new TimelineEvent("Spark-Layout 1.0", cal.getTime()));
-
-		cal.set(2015, Calendar.MAY, 15, 0, 0, 0);
-		model.add(new TimelineEvent("Ronin-Layout 1.0", cal.getTime()));
-
-		cal.set(2015, Calendar.JULY, 10, 0, 0, 0);
-		model.add(new TimelineEvent("Modena-Layout 1.0", cal.getTime()));
-
-		cal.set(2015, Calendar.JUNE, 15, 0, 0, 0);
-		model.add(new TimelineEvent("Rio-Layout 1.0", cal.getTime()));
-
-		cal.set(2015, Calendar.SEPTEMBER, 4, 0, 0, 0);
-		model.add(new TimelineEvent("Adamantium-Layout 1.0", cal.getTime()));
-
-		cal.set(2015, Calendar.DECEMBER, 14, 0, 0, 0);
-		model.add(new TimelineEvent("Titan-Layout 1.0", cal.getTime()));
-
-		cal.set(2015, Calendar.OCTOBER, 12, 0, 0, 0);
-		model.add(new TimelineEvent("Volt-Layout 1.0", cal.getTime()));
-
-		cal.set(2016, Calendar.JANUARY, 28, 0, 0, 0);
-		model.add(new TimelineEvent("Atlas-Layout 1.0", cal.getTime()));
-
-		cal.set(2016, Calendar.FEBRUARY, 24, 0, 0, 0);
-		model.add(new TimelineEvent("PrimeUI 4.1.0", cal.getTime()));
-
-		cal.set(2016, Calendar.FEBRUARY, 29, 0, 0, 0);
-		model.add(new TimelineEvent("Primefaces 5.3.8", cal.getTime()));
-
-		cal.set(2016, Calendar.FEBRUARY, 29, 0, 0, 0);
-		model.add(new TimelineEvent("PrimeNG 0.5", cal.getTime()));
-	}
-
-	public void onSelect(TimelineSelectEvent e) {
-		TimelineEvent timelineEvent = e.getTimelineEvent();
-
-		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Selected event:", timelineEvent.getData().toString());
-		FacesContext.getCurrentInstance().addMessage(null, msg);
-	}
-
-	public TimelineModel getModel() {
-		return model;
-	}
-
-	public boolean isSelectable() {
-		return selectable;
-	}
-
-	public void setSelectable(boolean selectable) {
-		this.selectable = selectable;
-	}
-
-	public boolean isZoomable() {
-		return zoomable;
-	}
-
-	public void setZoomable(boolean zoomable) {
-		this.zoomable = zoomable;
-	}
-
-	public boolean isMoveable() {
-		return moveable;
-	}
-
-	public void setMoveable(boolean moveable) {
-		this.moveable = moveable;
-	}
-
-	public boolean isStackEvents() {
-		return stackEvents;
-	}
-
-	public void setStackEvents(boolean stackEvents) {
-		this.stackEvents = stackEvents;
-	}
-
-	public String getEventStyle() {
-		return eventStyle;
-	}
-
-	public void setEventStyle(String eventStyle) {
-		this.eventStyle = eventStyle;
-	}
-
-	public boolean isAxisOnTop() {
-		return axisOnTop;
-	}
-
-	public void setAxisOnTop(boolean axisOnTop) {
-		this.axisOnTop = axisOnTop;
-	}
-
-	public boolean isShowCurrentTime() {
-		return showCurrentTime;
-	}
-
-	public void setShowCurrentTime(boolean showCurrentTime) {
-		this.showCurrentTime = showCurrentTime;
-	}
-
-	public boolean isShowNavigation() {
-		return showNavigation;
-	}
-
-	public void setShowNavigation(boolean showNavigation) {
-		this.showNavigation = showNavigation;
-	}
+     
+    private DashboardModel model;
+     
+    @PostConstruct
+    public void init() {
+        model = new DefaultDashboardModel();
+        DashboardColumn column1 = new DefaultDashboardColumn();
+        DashboardColumn column2 = new DefaultDashboardColumn();
+        DashboardColumn column3 = new DefaultDashboardColumn();
+         
+        column1.addWidget("sports");
+        column1.addWidget("finance");
+         
+        column2.addWidget("lifestyle");
+        column2.addWidget("weather");
+         
+        column3.addWidget("politics");
+ 
+        model.addColumn(column1);
+        model.addColumn(column2);
+        model.addColumn(column3);
+    }
+     
+    public void handleReorder(DashboardReorderEvent event) {
+        FacesMessage message = new FacesMessage();
+        message.setSeverity(FacesMessage.SEVERITY_INFO);
+        message.setSummary("Reordered: " + event.getWidgetId());
+        message.setDetail("Item index: " + event.getItemIndex() + ", Column index: " + event.getColumnIndex() + ", Sender index: " + event.getSenderColumnIndex());
+         
+        addMessage(message);
+    }
+     
+    public void handleClose(CloseEvent event) {
+        FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Panel Closed", "Closed panel id:'" + event.getComponent().getId() + "'");
+         
+        addMessage(message);
+    }
+     
+    public void handleToggle(ToggleEvent event) {
+        FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, event.getComponent().getId() + " toggled", "Status:" + event.getVisibility().name());
+         
+        addMessage(message);
+    }
+     
+    private void addMessage(FacesMessage message) {
+        FacesContext.getCurrentInstance().addMessage(null, message);
+    }
+     
+    public DashboardModel getModel() {
+        return model;
+    }
 }

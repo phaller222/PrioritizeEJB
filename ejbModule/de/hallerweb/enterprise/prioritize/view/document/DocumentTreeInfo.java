@@ -8,6 +8,16 @@ public class DocumentTreeInfo {
 	private boolean leaf;
 	private String name;
 	private DocumentInfo documentInfo;
+	private String documentGroupId;
+	boolean documentGroupNode;
+
+	public boolean isDocumentGroupNode() {
+		return documentGroupNode;
+	}
+
+	public String getDocumentGroupId() {
+		return documentGroupId;
+	}
 
 	public String getName() {
 		return this.name;
@@ -21,10 +31,12 @@ public class DocumentTreeInfo {
 		return this.leaf;
 	}
 
-	public DocumentTreeInfo(String name, boolean isLeaf, DocumentInfo info) {
+	public DocumentTreeInfo(String name, boolean isLeaf, boolean isDocumentGroupNode, String documentGroupId,DocumentInfo info) {
 		this.leaf = isLeaf;
 		this.name = name;
 		this.documentInfo = info;
+		this.documentGroupId = documentGroupId;
+		this.documentGroupNode = isDocumentGroupNode;
 //		if (info == null) {
 //			info = new DocumentInfo();
 //			info.setCurrentDocument(new Document());

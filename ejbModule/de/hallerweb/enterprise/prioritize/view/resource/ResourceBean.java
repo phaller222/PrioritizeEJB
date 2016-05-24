@@ -56,7 +56,6 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 
-
 /**
  * ResourceBean - JSF Backing-Bean to store information about resources.
  * <p>
@@ -86,7 +85,6 @@ public class ResourceBean implements Serializable {
 	@EJB
 	ItemCollectionController itemCollectionController; 				// Reference to ItemCollectionController EJB
 
-
 	Set<Resource> resources; 										// Current List with Resource objects
 	List<ResourceGroup> resourceGroups; 							// Current list of resource groups within department
 	List<Department> departments; 									// List of departments
@@ -112,9 +110,8 @@ public class ResourceBean implements Serializable {
 	Set<SkillRecord> skillRecords;
 
 	String selectedItemCollectionName;								// Selected ItemCollection to add a resource to
-	
+
 	TreeNode resourceTreeRoot;
-	
 
 	public String getSelectedItemCollectionName() {
 		return selectedItemCollectionName;
@@ -246,7 +243,7 @@ public class ResourceBean implements Serializable {
 		System.out.println("---------------------------   " + sessionController.getUser() + "----------------");
 		if (resourceController.createResource(resource.getName(), resourceGroupId, sessionController.getUser(), resource.getDescription(),
 				resource.getIp(), resource.getMaxSlots(), resource.isStationary(), resource.isRemote()) != null) {
-
+			updateResourceTree();
 			return "resources";
 		} else {
 			ViewUtilities.addErrorMessage("name", "A resource with the name " + resource.getName()
@@ -336,6 +333,11 @@ public class ResourceBean implements Serializable {
 		resourceController.deleteResource(res.getId());
 		return "resources";
 	}
+	
+	public String delete(Resource res, String resourceGroupId) {
+		this.selectedResourceGroupId = resourceGroupId;
+		return delete(res);
+	}
 
 	/**
 	 * Calls the reservations for a {@link Resource} object.
@@ -361,6 +363,13 @@ public class ResourceBean implements Serializable {
 		this.resource = resource;
 		return "editresource";
 	}
+	
+	@Named
+	public String edit(Resource resource, String resourceGroupId) {
+		this.selectedResourceGroupId = resourceGroupId;
+		return edit(resource);
+	}
+	
 
 	@Named
 	public Set<SkillRecord> getSkillRecords() {
@@ -649,7 +658,7 @@ public class ResourceBean implements Serializable {
 			itemCollectionController.addResource(managedCollection, managedResource);
 		}
 	}
-	
+
 	// --------------------------------- Client view ---------------------------------
 
 	public TreeNode getResourceTree() {
@@ -662,19 +671,24 @@ public class ResourceBean implements Serializable {
 
 		List<Company> companies = companyController.getAllCompanies();
 		for (Company c : companies) {
-			TreeNode company = new DefaultTreeNode(new ResourceTreeInfo(c.getName(), false, null), root);
+			TreeNode company = new DefaultTreeNode(new ResourceTreeInfo(c.getName(), false, false, null, null), root);
 			List<Department> departments = c.getDepartments();
 			for (Department d : departments) {
-				TreeNode department = new DefaultTreeNode(new ResourceTreeInfo(d.getName(), false, null), company);
+				TreeNode department = new DefaultTreeNode(new ResourceTreeInfo(d.getName(), false, false, null, null), company);
 				List<ResourceGroup> groups = d.getResourceGroups();
 				for (ResourceGroup g : groups) {
 					if (authController.canRead(g, sessionController.getUser())) {
-						TreeNode group = new DefaultTreeNode(new ResourceTreeInfo(g.getName(), false, null), department);
+						TreeNode group = null;
+						if (authController.canCreate(g, sessionController.getUser())) {
+							group = new DefaultTreeNode(new ResourceTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null), department);
+						} else {
+							group = new DefaultTreeNode(new ResourceTreeInfo(g.getName(), false, false, null, null), department);
+						}
 						Set<Resource> resources = g.getResources();
 						for (Resource res : resources) {
 							if (authController.canRead(res, sessionController.getUser())) {
-								TreeNode resourceInfoNode = new DefaultTreeNode(
-										new ResourceTreeInfo(res.getName(), true, res), group);
+								TreeNode resourceInfoNode = new DefaultTreeNode(new ResourceTreeInfo(res.getName(), true, false, null, res),
+										group);
 							}
 						}
 
@@ -708,11 +722,13 @@ public class ResourceBean implements Serializable {
 		final boolean validationFailed = fc.isValidationFailed();
 		return getMethod && !ajaxRequest && !validationFailed;
 	}
-	
+
 	public String createNewResource() {
 		return "resources";
 	}
-	
-	
+
+	public void updateResourceGroupId(String groupId) {
+		this.selectedResourceGroupId = groupId;
+	}
 	
 }

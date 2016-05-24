@@ -38,6 +38,7 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
+import de.hallerweb.enterprise.prioritize.view.resource.ResourceTreeInfo;
 
 /**
  * DocumentBean - JSF Backing-Bean to store information about documents.
@@ -382,7 +383,7 @@ public class DocumentBean implements Serializable {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			InputStream in = event.getFile().getInputstream();
 
-			tmpMimeType = URLConnection.guessContentTypeFromName(clientFilename);
+			tmpMimeType = event.getFile().getContentType();//URLConnection.guessContentTypeFromName(clientFilename);
 			if (tmpMimeType == null) {
 				tmpMimeType = "application/unknown";
 			}
@@ -495,19 +496,24 @@ public class DocumentBean implements Serializable {
 
 		List<Company> companies = companyController.getAllCompanies();
 		for (Company c : companies) {
-			TreeNode company = new DefaultTreeNode(new DocumentTreeInfo(c.getName(), false, null), root);
+			TreeNode company = new DefaultTreeNode(new DocumentTreeInfo(c.getName(), false, false, null, null), root);
 			List<Department> departments = c.getDepartments();
 			for (Department d : departments) {
-				TreeNode department = new DefaultTreeNode(new DocumentTreeInfo(d.getName(), false, null), company);
+				TreeNode department = new DefaultTreeNode(new DocumentTreeInfo(d.getName(), false, false, null,null), company);
 				List<DocumentGroup> groups = d.getDocumentGroups();
 				for (DocumentGroup g : groups) {
 					if (authController.canRead(g, sessionController.getUser())) {
-						TreeNode group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, null), department);
+						TreeNode group = null;
+						if (authController.canCreate(g, sessionController.getUser())) {
+							group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null), department);
+						} else {
+							group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, false, null, null), department);
+						}
 						Set<DocumentInfo> documents = g.getDocuments();
 						for (DocumentInfo docInfo : documents) {
 							if (authController.canRead(docInfo, sessionController.getUser())) {
 								TreeNode documentInfoNode = new DefaultTreeNode(
-										new DocumentTreeInfo(docInfo.getCurrentDocument().getName(), true, docInfo), group);
+										new DocumentTreeInfo(docInfo.getCurrentDocument().getName(), true, false, null, docInfo), group);
 							}
 						}
 
@@ -552,4 +558,8 @@ public class DocumentBean implements Serializable {
 		} else return null;
 	}
 
+	public void updateDocumentGroupId(String groupId) {
+		this.selectedDocumentGroup = groupId;
+	}
+	
 }

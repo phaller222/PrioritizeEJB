@@ -57,32 +57,7 @@ public class BasicTimelineController implements Serializable {
 
 	@PostConstruct
 	protected void initialize() {
-
 		updateTimeline();
-
-		// cal.set(2013, Calendar.JUNE, 5, 0, 0, 0);
-		// model.add(new TimelineEvent("Primefaces-Extensions 0.7.1", cal.getTime()));
-		//
-		// cal.set(2013, Calendar.OCTOBER, 3, 0, 0, 0);
-		// model.add(new TimelineEvent("Primefaces-Extensions 1.0.0", cal.getTime()));
-		//
-		// cal.set(2013, Calendar.DECEMBER, 28, 0, 0, 0);
-		// model.add(new TimelineEvent("Primefaces-Extensions 1.2.0", cal.getTime()));
-		//
-		// cal.set(2014, Calendar.JANUARY, 1, 0, 0, 0);
-		// model.add(new TimelineEvent("Primefaces-Extensions 1.2.1", cal.getTime()));
-		//
-		// cal.set(2014, Calendar.MAY, 5, 0, 0, 0);
-		// model.add(new TimelineEvent("Primefaces-Extensions 2.0.0", cal.getTime()));
-		//
-		// cal.set(2014, Calendar.AUGUST, 22, 0, 0, 0);
-		// model.add(new TimelineEvent("Primefaces-Extensions 2.1.0", cal.getTime()));
-		//
-		// cal.set(2014, Calendar.NOVEMBER, 3, 0, 0, 0);
-		// model.add(new TimelineEvent("Primefaces-Extensions 3.0.0", cal.getTime()));
-		//
-		// cal.set(2015, Calendar.APRIL, 26, 0, 0, 0);
-		// model.add(new TimelineEvent("Primefaces-Extensions 3.1.0", cal.getTime()));
 	}
 
 	public void updateTimeline() {
@@ -130,11 +105,44 @@ public class BasicTimelineController implements Serializable {
 							if (authController.canRead(resource, sessionController.getUser())) {
 								for (ResourceReservation res : resource.getReservations()) {
 									model.add(new TimelineEvent(resource.getName(), res.getTimeSpan().getDateFrom(),
-											res.getTimeSpan().getDateUntil(),false,"","resourcereservation"));
+											res.getTimeSpan().getDateUntil(), false, "", "resourcereservation"));
 								}
 							}
 						}
 
+					}
+				}
+
+			}
+
+		}
+
+	}
+
+	public void displayAgentsTimeline() {
+		model = new TimelineModel();
+
+		Calendar cal = Calendar.getInstance();
+		// cal.set(2013, Calendar.MAY, 4, 0, 0, 0);
+		selectedTime = new TimelineEvent("TimeMachine(Beta)", cal.getTime(), true);
+		model.add(selectedTime);
+
+		List<Company> companies = companyController.getAllCompanies();
+		for (Company c : companies) {
+			List<Department> departments = c.getDepartments();
+			for (Department d : departments) {
+				if (authController.canRead(d, sessionController.getUser())) {
+					List<ResourceGroup> groups = d.getResourceGroups();
+					for (ResourceGroup g : groups) {
+						Set<Resource> resources = g.getResources();
+						for (Resource resource : resources) {
+							if (resource.isAgent()) {
+								if (authController.canRead(resource, sessionController.getUser()) && resource.getMqttLastPing() != null) {
+									model.add(new TimelineEvent(resource.getName(), resource.getMqttLastPing(), false, "",
+											"resourcereservation"));
+								}
+							}
+						}
 					}
 				}
 

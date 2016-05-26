@@ -1,5 +1,6 @@
 package de.hallerweb.enterprise.prioritize.view.resource;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -12,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.bean.ManagedBean;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -27,6 +29,13 @@ import org.primefaces.model.chart.AxisType;
 import org.primefaces.model.chart.CategoryAxis;
 import org.primefaces.model.chart.LineChartModel;
 import org.primefaces.model.chart.LineChartSeries;
+import org.primefaces.model.diagram.Connection;
+import org.primefaces.model.diagram.DefaultDiagramModel;
+import org.primefaces.model.diagram.DiagramModel;
+import org.primefaces.model.diagram.Element;
+import org.primefaces.model.diagram.connector.FlowChartConnector;
+import org.primefaces.model.diagram.endpoint.DotEndPoint;
+import org.primefaces.model.diagram.endpoint.EndPointAnchor;
 import org.primefaces.model.map.DefaultMapModel;
 import org.primefaces.model.map.LatLng;
 import org.primefaces.model.map.MapModel;
@@ -35,23 +44,16 @@ import org.primefaces.model.mindmap.DefaultMindmapNode;
 import org.primefaces.model.mindmap.MindmapNode;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
-import de.hallerweb.enterprise.prioritize.controller.InitializationController;
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionController;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
-import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
-import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.resource.NameValueEntry;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
-import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
@@ -111,7 +113,8 @@ public class ResourceBean implements Serializable {
 
 	String selectedItemCollectionName;								// Selected ItemCollection to add a resource to
 
-	TreeNode resourceTreeRoot;
+	TreeNode resourceTreeRoot;										// Tree for resources
+	TreeNode agentTreeRoot;											// Tree for agent resources
 
 	public String getSelectedItemCollectionName() {
 		return selectedItemCollectionName;
@@ -297,8 +300,10 @@ public class ResourceBean implements Serializable {
 		if (this.resources != null) {
 			this.resources.clear();
 		}
-		this.resources = resourceController.getResourcesInResourceGroup(Integer.parseInt(this.selectedResourceGroupId),
-				sessionController.getUser());
+		if (this.selectedResourceGroupId != null) {
+			this.resources = resourceController.getResourcesInResourceGroup(Integer.parseInt(this.selectedResourceGroupId),
+					sessionController.getUser());
+		}
 
 	}
 
@@ -333,7 +338,7 @@ public class ResourceBean implements Serializable {
 		resourceController.deleteResource(res.getId());
 		return "resources";
 	}
-	
+
 	public String delete(Resource res, String resourceGroupId) {
 		this.selectedResourceGroupId = resourceGroupId;
 		return delete(res);
@@ -348,6 +353,7 @@ public class ResourceBean implements Serializable {
 	 */
 	public String reservations(Resource res) {
 		this.resource = res;
+		this.selectedResourceGroupId = String.valueOf(resource.getResourceGroup().getId());
 		return "resourcereservations";
 	}
 
@@ -361,15 +367,10 @@ public class ResourceBean implements Serializable {
 	@Named
 	public String edit(Resource resource) {
 		this.resource = resource;
+		this.selectedResourceGroupId = String.valueOf(resource.getResourceGroup().getId());
+		this.selectedDepartmentId = String.valueOf(resource.getDepartment().getId());
 		return "editresource";
 	}
-	
-	@Named
-	public String edit(Resource resource, String resourceGroupId) {
-		this.selectedResourceGroupId = resourceGroupId;
-		return edit(resource);
-	}
-	
 
 	@Named
 	public Set<SkillRecord> getSkillRecords() {
@@ -608,11 +609,14 @@ public class ResourceBean implements Serializable {
 
 	public MindmapNode getNetworkRoot() {
 		List<Resource> resources = resourceController.getAllResources(sessionController.getUser());
-		if (resources != null && this.getSelectedDepartment() != null) {
-			MindmapNode root = new DefaultMindmapNode(this.getSelectedDepartment().getName(), this.resourceGroupName, "C0C0FF", false);
+		if (resources != null) {
+			MindmapNode root = new DefaultMindmapNode("Origin", "Root", "C0C0FF", false);
 			for (Resource res : resources) {
-				if (res.isAgent()) {
-					root.addNode(new DefaultMindmapNode(res.getName(), res, res.isMqttOnline() ? "00C000" : "C0C0C0", true));
+				if (authController.canRead(res, sessionController.getUser())) {
+					if (res.isAgent()) {
+						root.addNode(new DefaultMindmapNode(res.getName() + " " + res.getIp(), res,
+								res.isMqttOnline() ? "00C000" : "C0C0C0", true));
+					}
 				}
 			}
 			return root;
@@ -665,6 +669,10 @@ public class ResourceBean implements Serializable {
 		return this.resourceTreeRoot;
 	}
 
+	public TreeNode getAgentTree() {
+		return this.agentTreeRoot;
+	}
+
 	// Create Tree for resources view
 	public TreeNode createResourceTree() {
 		TreeNode root = new DefaultTreeNode("My Devices", null);
@@ -680,15 +688,57 @@ public class ResourceBean implements Serializable {
 					if (authController.canRead(g, sessionController.getUser())) {
 						TreeNode group = null;
 						if (authController.canCreate(g, sessionController.getUser())) {
-							group = new DefaultTreeNode(new ResourceTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null), department);
+							group = new DefaultTreeNode(new ResourceTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null),
+									department);
 						} else {
 							group = new DefaultTreeNode(new ResourceTreeInfo(g.getName(), false, false, null, null), department);
 						}
 						Set<Resource> resources = g.getResources();
 						for (Resource res : resources) {
-							if (authController.canRead(res, sessionController.getUser())) {
-								TreeNode resourceInfoNode = new DefaultTreeNode(new ResourceTreeInfo(res.getName(), true, false, null, res),
-										group);
+							if (!res.isAgent()) {
+								if (authController.canRead(res, sessionController.getUser())) {
+									TreeNode resourceInfoNode = new DefaultTreeNode(
+											new ResourceTreeInfo(res.getName(), true, false, null, res), group);
+								}
+							}
+						}
+
+					}
+
+				}
+
+			}
+		}
+		return root;
+	}
+
+	// Create Tree for resources view
+	public TreeNode createAgentTree() {
+		TreeNode root = new DefaultTreeNode("My Agents", null);
+
+		List<Company> companies = companyController.getAllCompanies();
+		for (Company c : companies) {
+			TreeNode company = new DefaultTreeNode(new ResourceTreeInfo(c.getName(), false, false, null, null), root);
+			List<Department> departments = c.getDepartments();
+			for (Department d : departments) {
+				TreeNode department = new DefaultTreeNode(new ResourceTreeInfo(d.getName(), false, false, null, null), company);
+				List<ResourceGroup> groups = d.getResourceGroups();
+				for (ResourceGroup g : groups) {
+					if (authController.canRead(g, sessionController.getUser())) {
+						TreeNode group = null;
+						if (authController.canCreate(g, sessionController.getUser())) {
+							group = new DefaultTreeNode(new ResourceTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null),
+									department);
+						} else {
+							group = new DefaultTreeNode(new ResourceTreeInfo(g.getName(), false, false, null, null), department);
+						}
+						Set<Resource> resources = g.getResources();
+						for (Resource res : resources) {
+							if (res.isAgent()) {
+								if (authController.canRead(res, sessionController.getUser())) {
+									TreeNode resourceInfoNode = new DefaultTreeNode(
+											new ResourceTreeInfo(res.getName(), true, false, null, res), group);
+								}
 							}
 						}
 
@@ -704,6 +754,12 @@ public class ResourceBean implements Serializable {
 	public void updateResourceTree() {
 		if (isNewRequest()) {
 			this.resourceTreeRoot = createResourceTree();
+		}
+	}
+
+	public void updateAgentTree() {
+		if (isNewRequest()) {
+			this.agentTreeRoot = createAgentTree();
 		}
 	}
 
@@ -723,12 +779,23 @@ public class ResourceBean implements Serializable {
 		return getMethod && !ajaxRequest && !validationFailed;
 	}
 
-	public String createNewResource() {
+	public String goBack() {
 		return "resources";
+	}
+
+	public String goBackToAgents() {
+		ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+		try {
+			context.redirect(context.getApplicationContextPath() + "/client/resources/agents.xhtml");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "agents";
 	}
 
 	public void updateResourceGroupId(String groupId) {
 		this.selectedResourceGroupId = groupId;
 	}
-	
+
 }

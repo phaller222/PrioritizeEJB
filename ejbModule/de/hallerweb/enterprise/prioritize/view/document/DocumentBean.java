@@ -5,8 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -38,7 +39,6 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
-import de.hallerweb.enterprise.prioritize.view.resource.ResourceTreeInfo;
 
 /**
  * DocumentBean - JSF Backing-Bean to store information about documents.
@@ -510,7 +510,25 @@ public class DocumentBean implements Serializable {
 							group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, false, null, null), department);
 						}
 						Set<DocumentInfo> documents = g.getDocuments();
-						for (DocumentInfo docInfo : documents) {
+						List<DocumentInfo> docList= new ArrayList<DocumentInfo>();
+						docList.addAll(documents);
+						Collections.sort(docList, new Comparator<DocumentInfo>() {
+				            @Override
+				            public int compare(DocumentInfo o1, DocumentInfo o2) {
+				                Integer id1= o1.getId();
+				                Integer id2= o2.getId();
+				                if(id1 == null && id2 == null) {
+				                    return 0;               
+				                }else if(id1 != null && id2 == null) {
+				                    return -1;
+				                } else if (id1 == null && id2 != null) {
+				                    return 1;
+				                } else {                
+				                    return o2.getCurrentDocument().getLastModified().compareTo(o1.getCurrentDocument().getLastModified());
+				                }
+				            }
+				        });
+						for (DocumentInfo docInfo : docList) {
 							if (authController.canRead(docInfo, sessionController.getUser())) {
 								TreeNode documentInfoNode = new DefaultTreeNode(
 										new DocumentTreeInfo(docInfo.getCurrentDocument().getName(), true, false, null, docInfo), group);
@@ -560,6 +578,10 @@ public class DocumentBean implements Serializable {
 
 	public void updateDocumentGroupId(String groupId) {
 		this.selectedDocumentGroup = groupId;
+	}
+	
+	public String goBack() {
+		return "documents";
 	}
 	
 }

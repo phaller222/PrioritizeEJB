@@ -1,13 +1,18 @@
 package de.hallerweb.enterprise.prioritize.view;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -27,6 +32,7 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
+import de.hallerweb.enterprise.prioritize.view.document.DocumentTreeInfo;
 
 @Named
 @SessionScoped
@@ -55,8 +61,13 @@ public class BasicTimelineController implements Serializable {
 	@Inject
 	private SessionController sessionController;
 
+	private TimelineEvent selectedEvent;
+
+	String contextPath;
+
 	@PostConstruct
 	protected void initialize() {
+		contextPath = FacesContext.getCurrentInstance().getExternalContext().getRequestContextPath();
 		updateTimeline();
 	}
 
@@ -102,10 +113,18 @@ public class BasicTimelineController implements Serializable {
 					for (ResourceGroup g : groups) {
 						Set<Resource> resources = g.getResources();
 						for (Resource resource : resources) {
-							if (authController.canRead(resource, sessionController.getUser())) {
-								for (ResourceReservation res : resource.getReservations()) {
-									model.add(new TimelineEvent(resource.getName(), res.getTimeSpan().getDateFrom(),
-											res.getTimeSpan().getDateUntil(), false, "", "resourcereservation"));
+							if (!resource.isAgent()) {
+								if (authController.canRead(resource, sessionController.getUser())) {
+									for (ResourceReservation res : resource.getReservations()) {
+										if (resource.isMqttResource() && resource.isMqttOnline()) {
+											model.add(new TimelineEvent(resource.getName(), res.getTimeSpan().getDateFrom(),
+													res.getTimeSpan().getDateUntil(), false, "", "resourcereservationonline"));
+										} else {
+											model.add(new TimelineEvent(resource.getName(), res.getTimeSpan().getDateFrom(),
+													res.getTimeSpan().getDateUntil(), false, "", "resourcereservationoffline"));
+										}
+
+									}
 								}
 							}
 						}
@@ -117,6 +136,18 @@ public class BasicTimelineController implements Serializable {
 
 		}
 
+	}
+
+	public Date getMin() {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MONTH, -3);
+		return cal.getTime();
+	}
+
+	public Date getMax() {
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.MONTH, 3);
+		return cal.getTime();
 	}
 
 	public void displayAgentsTimeline() {
@@ -169,7 +200,12 @@ public class BasicTimelineController implements Serializable {
 					Set<DocumentInfo> documents = g.getDocuments();
 					for (DocumentInfo docInfo : documents) {
 						if (authController.canRead(docInfo, sessionController.getUser())) {
-							model.add(new TimelineEvent(docInfo.getCurrentDocument().getName(),
+							// model.add(new TimelineEvent(docInfo.getCurrentDocument().getName(),
+							// docInfo.getCurrentDocument().getLastModified()));
+							String iconName = lookupMimeIcon(docInfo.getCurrentDocument().getMimeType());
+							model.add(new TimelineEvent(
+									"<div>" + docInfo.getCurrentDocument().getName() + "</div><img src='" + contextPath + "/images/"
+											+ iconName + ".png' style='width:26px;height:26px;'>",
 									docInfo.getCurrentDocument().getLastModified()));
 						}
 					}
@@ -179,14 +215,70 @@ public class BasicTimelineController implements Serializable {
 			}
 
 		}
+
+	}
+
+	public String lookupMimeIcon(String mimeType) {
+		switch (mimeType) {
+		case "application/msword":
+			return "icon_word";
+		case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+			return "icon_word";
+		case "application/vnd.ms-excel":
+			return "icon_excel";
+		case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+			return "icon_excel";
+		case " application/vnd.ms-powerpoint":
+			return "icon_powerpoint";
+		case " application/vnd.openxmlformats-officedocument.presentationml.presentation":
+			return "icon_powerpoint";
+		case "image/jpg":
+			return "icon_jpg";
+		case "image/jpeg":
+			return "icon_jpg";
+		case "image/png":
+			return "icon_png";
+		case "image/gif":
+			return "icon_gif";
+		case "application/pdf":
+			return "icon_pdf";
+		default:
+			return "documentsbig";
+		}
 	}
 
 	public void onSelect(TimelineSelectEvent e) {
 		TimelineEvent timelineEvent = e.getTimelineEvent();
-
+		this.selectedEvent = timelineEvent;
+		// if (selectedEvent.getData() instanceof DocumentTreeInfo) {
+		// DocumentTreeInfo info = (DocumentTreeInfo) selectedEvent.getData();
+		// DocumentInfo docInfo = info.getDocumentInfo();
+		// try {
+		// sendDocumentFromTree(info.getName(), docInfo.getCurrentDocument().getMimeType(), docInfo.getCurrentDocument().getData());
+		// } catch (IOException e1) {
+		// // TODO Auto-generated catch block
+		// e1.printStackTrace();
+		// }
+		// }
 		// FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Selected event:", timelineEvent.getData().toString());
 		// FacesContext.getCurrentInstance().addMessage(null, msg);
 	}
+
+	// public void sendDocumentFromTree(String filename,String contentType, byte[] data) throws IOException {
+	// FacesContext fc = FacesContext.getCurrentInstance();
+	// ExternalContext ec = fc.getExternalContext();
+	//
+	// ec.responseReset();
+	// ec.setResponseContentType(contentType);
+	// ec.setResponseContentLength(data.length);
+	// ec.setResponseHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+	//
+	// OutputStream output = ec.getResponseOutputStream();
+	// output.write(data);
+	//
+	// fc.responseComplete(); // Important! Otherwise JSF will attempt to render the response which obviously will fail since it's already
+	// written with a file and closed.
+	// }
 
 	public TimelineModel getModel() {
 		return model;

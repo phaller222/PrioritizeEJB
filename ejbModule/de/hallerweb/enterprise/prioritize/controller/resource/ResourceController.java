@@ -516,12 +516,14 @@ public class ResourceController extends PEventConsumerProducer {
 	public int getSlotsInUse(Resource resource) {
 		int slotsInUse = 0;
 		Resource res = em.find(Resource.class, resource.getId());
-		Set<ResourceReservation> reservations = res.getReservations();
-		if (reservations != null) {
-			for (ResourceReservation reservation : reservations) {
-				Date now = new Date(System.currentTimeMillis());
-				if (reservation.getTimeSpan().getDateFrom().before(now) && reservation.getTimeSpan().getDateUntil().after(now)) {
-					slotsInUse++;
+		if (res != null) {
+			Set<ResourceReservation> reservations = res.getReservations();
+			if (reservations != null) {
+				for (ResourceReservation reservation : reservations) {
+					Date now = new Date(System.currentTimeMillis());
+					if (reservation.getTimeSpan().getDateFrom().before(now) && reservation.getTimeSpan().getDateUntil().after(now)) {
+						slotsInUse++;
+					}
 				}
 			}
 		}
@@ -652,11 +654,12 @@ public class ResourceController extends PEventConsumerProducer {
 		if (authController.canUpdate(managedResource, user)) {
 
 			if (!newName.equals(managedResource.getName())) {
-				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), Resource.PROPERTY_NAME, managedResource.getName(), newName, 60000);
+				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), Resource.PROPERTY_NAME, managedResource.getName(), newName,
+						60000);
 			}
 			if (!newDescription.equals(managedResource.getDescription())) {
-				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), Resource.PROPERTY_DESCRIPTION, managedResource.getDescription(),
-						newDescription, 60000);
+				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), Resource.PROPERTY_DESCRIPTION,
+						managedResource.getDescription(), newDescription, 60000);
 			}
 			if (managedResource.getDepartment().getId() != managedDepartment.getId()) {
 				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), Resource.PROPERTY_DEPARTMENT,

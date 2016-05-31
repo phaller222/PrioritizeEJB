@@ -115,6 +115,16 @@ public class ResourceBean implements Serializable {
 
 	TreeNode resourceTreeRoot;										// Tree for resources
 	TreeNode agentTreeRoot;											// Tree for agent resources
+	
+	Resource currentAgent;											// If in agent view the currently select agent for viewing its data
+
+	public Resource getCurrentAgent() {
+		return currentAgent;
+	}
+
+	public void setCurrentAgent(Resource currentAgent) {
+		this.currentAgent = currentAgent;
+	}
 
 	public String getSelectedItemCollectionName() {
 		return selectedItemCollectionName;

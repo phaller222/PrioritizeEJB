@@ -422,7 +422,6 @@ public class ResourceController extends PEventConsumerProducer {
 				&& values.length() > Integer.valueOf(InitializationController.config.get(InitializationController.MQTT_MAX_VALUES_BYTES))) {
 			int firstEntryEnd = values.indexOf(";");
 			buff.append(values.substring(firstEntryEnd + 1, values.length()));
-			System.out.println(buff.toString() + ";" + value);
 			entry.setValues(buff.toString() + ";" + value);
 		} else {
 			entry.setValues(entry.getValues() + ";" + value);
@@ -611,6 +610,12 @@ public class ResourceController extends PEventConsumerProducer {
 			System.out.println(ex.getMessage());
 		}
 
+		for (NameValueEntry entry :  res.getMqttValues()) {
+			NameValueEntry managedEntry = em.find(NameValueEntry.class, entry.getId());
+			em.remove(managedEntry);
+		}
+		res.getMqttValues().clear();
+		
 		em.remove(res);
 		em.flush();
 		try {
@@ -785,7 +790,6 @@ public class ResourceController extends PEventConsumerProducer {
 	private int calcFreeSlots(Set<ResourceReservation> reservations, int maxSlots, Date from, Date to) {
 		int slots = maxSlots;
 		if (reservations == null) {
-			System.out.println("Reservations are null!");
 			return slots;
 		}
 		for (ResourceReservation reservation : reservations) {
@@ -793,7 +797,6 @@ public class ResourceController extends PEventConsumerProducer {
 				slots--;
 			}
 		}
-		System.out.println("Slots: " + slots);
 		return slots;
 	}
 

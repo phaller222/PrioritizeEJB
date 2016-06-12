@@ -48,6 +48,7 @@ import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionController;
+import de.hallerweb.enterprise.prioritize.controller.usersetting.UserPreferenceController;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.resource.NameValueEntry;
@@ -56,6 +57,7 @@ import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
+import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 
 /**
@@ -86,6 +88,8 @@ public class ResourceBean implements Serializable {
 	AuthorizationController authController; 						// Reference to AuthorizationController EJB
 	@EJB
 	ItemCollectionController itemCollectionController; 				// Reference to ItemCollectionController EJB
+	@EJB
+	UserPreferenceController preferenceController;					// Reference to UserPreferenceController.
 
 	Set<Resource> resources; 										// Current List with Resource objects
 	List<ResourceGroup> resourceGroups; 							// Current list of resource groups within department
@@ -115,7 +119,7 @@ public class ResourceBean implements Serializable {
 
 	TreeNode resourceTreeRoot;										// Tree for resources
 	TreeNode agentTreeRoot;											// Tree for agent resources
-	
+
 	Resource currentAgent;											// If in agent view the currently select agent for viewing its data
 
 	public Resource getCurrentAgent() {
@@ -253,7 +257,6 @@ public class ResourceBean implements Serializable {
 	@Named
 	public String createResource() {
 		int resourceGroupId = Integer.parseInt(selectedResourceGroupId);
-		System.out.println("---------------------------   " + sessionController.getUser() + "----------------");
 		if (resourceController.createResource(resource.getName(), resourceGroupId, sessionController.getUser(), resource.getDescription(),
 				resource.getIp(), resource.getMaxSlots(), resource.isStationary(), resource.isRemote()) != null) {
 			updateResourceTree();
@@ -455,10 +458,9 @@ public class ResourceBean implements Serializable {
 	public boolean isAgentResource(String valId) {
 		if (!valId.isEmpty()) {
 			Resource managedResource = resourceController.getResource(Integer.parseInt(valId), sessionController.getUser());
-			System.out.println("Resource: " + managedResource.getName() + " AGENT: " + managedResource.isAgent());
 			return managedResource.isAgent();
 		} else {
-			System.out.println("Resource is null. return false");
+			// Resource is null
 		}
 		return false;
 	}
@@ -472,8 +474,6 @@ public class ResourceBean implements Serializable {
 
 	@Named
 	public void sendDataToDevice(Resource res, String data) {
-		System.out.println("Data: " + data);
-		System.out.println("Resource: " + res.getId());
 		if (data != null) {
 			resourceController.writeMqttDataToSend(res, data.getBytes());
 		}
@@ -485,8 +485,18 @@ public class ResourceBean implements Serializable {
 	}
 
 	@Named
+	public Set<NameValueEntry> getNameValuePairs(Resource res) {
+		return resourceController.getNameValueEntries(res);
+	}
+
+	@Named
 	public String getLastMqttValue(String name) {
 		return resourceController.getLastMqttValueForResource(resource, name);
+	}
+
+	@Named
+	public String getLastMqttValue(Resource res, String name) {
+		return resourceController.getLastMqttValueForResource(res, name);
 	}
 
 	@Named
@@ -505,13 +515,11 @@ public class ResourceBean implements Serializable {
 
 	@Named
 	public void sendCommand(Resource resource, String command, String param) {
-		System.out.println("Sending command: " + command + " " + param + "...");
 		resourceController.sendCommand(resource, command, param);
 	}
 
 	@Named
 	public void sendCommandFromResource(Resource resource, String command, String param) {
-		System.out.println("Sending command: " + command + " " + param + "...");
 		resourceController.sendCommandToResource(resource, command, param);
 	}
 
@@ -526,6 +534,10 @@ public class ResourceBean implements Serializable {
 
 	public String getGMapCoordinateParameters() {
 		return resource.getLatitude() + "," + resource.getLongitude();
+	}
+
+	public String getGMapCoordinateParameters(Resource res) {
+		return res.getLatitude() + "," + res.getLongitude();
 	}
 
 	@Named
@@ -806,6 +818,29 @@ public class ResourceBean implements Serializable {
 
 	public void updateResourceGroupId(String groupId) {
 		this.selectedResourceGroupId = groupId;
+	}
+
+	/**
+	 * Watches or unwatches the given {@link Resource} for the current User.
+	 * @param res
+	 */
+	public void toggleWatch(Resource res) {
+		Resource managedResource = resourceController.getResource(res.getId(), sessionController.getUser());
+		UserPreference pref = sessionController.getUser().getPreference();
+		if (preferenceController.isResourceWached(pref, managedResource)) {
+			preferenceController.deleteWatchedResource(pref, managedResource);
+		} else {
+			preferenceController.addWatchedResource(pref, managedResource);
+		}
+	}
+
+	/**
+	 * Checks is the given resources is beeing watched by the current User.
+	 * @param res The {@link Resource}
+	 * @return boolean
+	 */
+	public boolean isWatched(Resource res) {
+		return preferenceController.isResourceWached(sessionController.getUser().getPreference(), res);
 	}
 
 }

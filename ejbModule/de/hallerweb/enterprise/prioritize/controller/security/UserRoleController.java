@@ -31,6 +31,7 @@ import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.Skill;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
+import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
 
 /**
  * UserRoleController.java - Controls the creation, modification and deletion of
@@ -230,6 +231,7 @@ public class UserRoleController extends PEventConsumerProducer {
 	public User createUser(String username, String password, String name, String email, Department initialDepartment, String occupation,
 			Set<Role> roles, User sessionUser) {
 		User user = new User();
+		
 		if (authController.canCreate(user, sessionUser)) {
 			if (findUserByUsername(username, AuthorizationController.getSystemUser()) == null) {
 				user.setUsername(username);
@@ -238,7 +240,11 @@ public class UserRoleController extends PEventConsumerProducer {
 				user.setOccupation(occupation);
 				user.setDepartment(initialDepartment);
 				user.setPassword(String.valueOf(password.hashCode()));
+				UserPreference preference = new UserPreference(user);
+				em.persist(preference);
+				user.setPreference(preference);
 				em.persist(user);
+				
 
 				for (Role role : roles) {
 					Role managedRole = em.find(Role.class, role.getId());

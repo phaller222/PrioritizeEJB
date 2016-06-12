@@ -36,7 +36,7 @@ public class MqttClientPing {
 	@Schedule(minute = "*/1", hour = "*", persistent = false)
 	public void checkMqttClientPings() {
 		if (Boolean.parseBoolean(InitializationController.config.get(InitializationController.ENABLE_MQTT_SERVICE))) {
-			System.out.println("Checking MQTT Clients...");
+			
 
 			// Get all online MQTT resources
 			User systemUser = new User();

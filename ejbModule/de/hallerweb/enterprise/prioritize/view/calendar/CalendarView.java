@@ -221,7 +221,6 @@ public class CalendarView implements Serializable {
 		ts.setDateFrom(evt.getStartDate());
 		ts.setDateUntil(ts.getDateUntil());
 		calendarController.mergeTimeSpan(ts);
-		System.out.println("Moved.");
 	}
 
 	public void onEventResize(ScheduleEntryResizeEvent event) {
@@ -230,7 +229,6 @@ public class CalendarView implements Serializable {
 		ts.setDateFrom(evt.getStartDate());
 		ts.setDateUntil(ts.getDateUntil());
 		calendarController.mergeTimeSpan(ts);
-		System.out.println("Resized.");
 	}
 
 }

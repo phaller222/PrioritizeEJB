@@ -3,10 +3,12 @@ package de.hallerweb.enterprise.prioritize.view;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.bean.ManagedBean;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -19,7 +21,10 @@ import org.primefaces.model.tagcloud.TagCloudModel;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
+import de.hallerweb.enterprise.prioritize.controller.usersetting.UserPreferenceController;
+import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
 
 /**
  * LoginBean - handels logins.
@@ -35,18 +40,30 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  */
 @Named
 @SessionScoped
+
 public class LoginBean implements Serializable {
 
 	@EJB
 	UserRoleController userRoleController;
+	@Inject
+	UserPreferenceController preferenceController;
 
 	@Inject
 	SessionController sessionController;
 
-	String username;
-	String password;
-	boolean loggedIn;
-	Date lastLogin;
+	private String username;
+	private String password;
+	private boolean loggedIn;
+	private Date lastLogin;
+	private User currentUser;
+	
+
+	public User getCurrentUser() {
+		this.currentUser = sessionController.getUser();
+		return currentUser;
+	}
+
+	List<Resource> watchedResources;
 
 	@PostConstruct
 	public void init() {
@@ -78,42 +95,35 @@ public class LoginBean implements Serializable {
 		return sessionController.getUser().getLastLogin();
 	}
 
+	@Named
+	public List<Resource> getWatchedResources() {
+		UserPreference prefs = sessionController.getUser().getPreference();
+		List<Resource> watchedResources = preferenceController.getWatchedResources(prefs);
+		if (!watchedResources.isEmpty()) {
+			List<Resource> watched = watchedResources;
+			return watched;
+		} else
+			return watchedResources;
+	}
+
 	public String login() {
 		User user = userRoleController.findUserByUsername(username, AuthorizationController.getSystemUser());
 		if (user == null) {
+			loggedIn = false;
 			return "login";
 		}
 
 		if (!user.getPassword().equals(password)) {
+			loggedIn = false;
 			return "login";
 		}
 
 		user.setLastLogin(new Date());
 		sessionController.setUser(user);
+		loggedIn = true;
 		return "index";
 	}
 
-	public TagCloudModel getModel() {
-		TagCloudModel model = new DefaultTagCloudModel();
-		model.addTag(new DefaultTagCloudItem("Transformers", 1));
-		model.addTag(new DefaultTagCloudItem("RIA", "#", 3));
-		model.addTag(new DefaultTagCloudItem("AJAX", 2));
-		model.addTag(new DefaultTagCloudItem("jQuery", "#", 5));
-		model.addTag(new DefaultTagCloudItem("NextGen", 4));
-		model.addTag(new DefaultTagCloudItem("JSF 2.0", "#", 2));
-		model.addTag(new DefaultTagCloudItem("FCB", 5));
-		model.addTag(new DefaultTagCloudItem("Mobile", 3));
-		model.addTag(new DefaultTagCloudItem("Themes", "#", 4));
-		model.addTag(new DefaultTagCloudItem("Rocks", "#", 1));
-		model.addTag(new DefaultTagCloudItem("iOt", 8));
-		model.addTag(new DefaultTagCloudItem("Android", "#",3));
-		model.addTag(new DefaultTagCloudItem("DevOps", "#", 7));
-		model.addTag(new DefaultTagCloudItem("Nerds", "#", 4));
-		model.addTag(new DefaultTagCloudItem("iOS", "#",3));
-		model.addTag(new DefaultTagCloudItem("NodeJS", "#", 7));
-		model.addTag(new DefaultTagCloudItem("Erlang", "#", 4));
-		return model;
-	}
 
 	/**
 	 * Perform a login for clients only.
@@ -123,14 +133,17 @@ public class LoginBean implements Serializable {
 	public String clientLogin() {
 		User user = userRoleController.findUserByUsername(username, AuthorizationController.getSystemUser());
 		if (user == null) {
+			loggedIn = false;
 			return "login";
 		}
 
 		if (!user.getPassword().equals(password)) {
+			loggedIn = false;
 			return "login";
 		}
 		user.setLastLogin(new Date());
 		sessionController.setUser(user);
+		loggedIn = true;
 		ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
 		try {
 			context.redirect(context.getApplicationContextPath() + "/client/dashboard/dashboard.xhtml");
@@ -142,14 +155,28 @@ public class LoginBean implements Serializable {
 	}
 
 	public String logout() {
-		System.out.println("LOG OUT: " + username);
 		sessionController.setUser(null);
+		loggedIn = false;
+		return "login";
+	}
+	
+	@Named
+	public String logoutClient() {
+		sessionController.setUser(null);
+		loggedIn = false;
+		ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+		try {
+			context.redirect(context.getApplicationContextPath() + "/client/login.xhtml");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return "login";
 	}
 
 	@Named
 	public boolean getLoggedIn() {
-		return sessionController.getUser() != null;
+		return loggedIn;
 	}
 
 }

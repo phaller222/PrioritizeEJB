@@ -115,9 +115,7 @@ public class InitializationController {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				if (!line.isEmpty() && !line.startsWith("#")) {
-					System.out.println(line);
 					String[] parameter = line.split("=");
-					System.out.println("Setting " + parameter[0] + " to " + parameter[1]);
 					config.put(parameter[0].trim(), parameter[1].trim());
 				}
 			}

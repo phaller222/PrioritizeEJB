@@ -87,5 +87,11 @@ public class NameValueEntry implements Comparable<Object> {
 			return false;
 		return true;
 	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return this.mqttName;
+	}
 
 }

@@ -103,7 +103,6 @@ public class MQTTService implements MqttCallback {
 				List<String> registeredResources = controller.getAllMqttUuids();
 				for (String uuid : registeredResources) {
 					Resource resource = controller.getResource(uuid, AuthorizationController.getSystemUser());
-					System.out.println("Subscribing to: " + uuid);
 					String[] subscription = new String[3];
 					subscription[0] = uuid;
 					subscription[1] = resource.getDataSendTopic();
@@ -115,7 +114,7 @@ public class MQTTService implements MqttCallback {
 				System.out.println("MQTT: error connecting...");
 				e.printStackTrace();
 			}
-			System.out.println("MQTT Connected.");
+
 		}
 	}
 
@@ -152,11 +151,9 @@ public class MQTTService implements MqttCallback {
 	@PreDestroy
 	public void shutdown() {
 		if (Boolean.parseBoolean(init.config.get(init.ENABLE_MQTT_SERVICE))) {
-			System.out.println("stopping...");
 			try {
 				List<String> registeredResources = controller.getAllMqttUuids();
 				for (String uuid : registeredResources) {
-					System.out.println("Unsubscribing to: " + uuid);
 					// client.unsubscribe(uuid);
 				}
 				client.disconnect();
@@ -178,23 +175,17 @@ public class MQTTService implements MqttCallback {
 	public void checkConnection() {
 		if (Boolean.parseBoolean(InitializationController.config.get(InitializationController.ENABLE_MQTT_SERVICE))) {
 			if (client == null) {
-				System.out.println("MQTT: client is null, creating and connecting...");
 				connect();
 			} else if (!client.isConnected()) {
-				System.out.println("MQTT: Connection broken, trying to reconnect...");
 				connect();
 			} else {
-				System.out.println("MQTT: Connection OK...");
 			}
 
 			if (clientWrite == null) {
-				System.out.println("MQTT: client to write to is null, creating and connecting...");
 				connectClientWrite();
 			} else if (!clientWrite.isConnected()) {
-				System.out.println("MQTT: Connection to client write broken, trying to reconnect...");
 				connectClientWrite();
 			} else {
-				System.out.println("MQTT: Connection client write  OK...");
 			}
 		}
 	}
@@ -202,8 +193,6 @@ public class MQTTService implements MqttCallback {
 	@Override
 	public void connectionLost(Throwable arg0) {
 		arg0.printStackTrace();
-		System.out.println("MQTT: connection lost");
-		System.out.println("MQTT: Connection broken, trying to reconnect...");
 		try {
 			Thread.sleep(3000);
 		} catch (InterruptedException e) {
@@ -219,13 +208,11 @@ public class MQTTService implements MqttCallback {
 				Thread.sleep(100);
 				if (!client.isConnected()) {
 					connect();
-					System.out.println("RECONNECTED.");
 				}
 				Thread.sleep(100);
 
 				if (!clientWrite.isConnected()) {
 					connectClientWrite();
-					System.out.println("CLIENT WRITE RECONNECTED.");
 				}
 				Thread.sleep(100);
 
@@ -237,13 +224,12 @@ public class MQTTService implements MqttCallback {
 
 	@Override
 	public void deliveryComplete(IMqttDeliveryToken arg0) {
-		System.out.println("MQTT: delivery complete");
+
 	}
 
 	@Override
 	public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
 		try {
-			System.out.println("MQTT: Message arrived: " + new String(mqttMessage.getPayload()));
 			if (topic.equalsIgnoreCase("DISCOVERY")) {
 				handleDiscovery(mqttMessage);
 			} else if (isUUID(topic)) {
@@ -259,7 +245,6 @@ public class MQTTService implements MqttCallback {
 	public void writeToTopic(String topic, byte[] data) {
 		try {
 			client.publish(topic, data, QOS, false);
-			System.out.println("TOPIC: " + topic + " DATA: " + new String(data));
 		} catch (MqttException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -290,15 +275,11 @@ public class MQTTService implements MqttCallback {
 		int slots = Integer.valueOf(data[7]);
 
 		// Create resource if not already discovered
-		System.out.println("Exists? : " + controller.exists(uuid));
 		if (!controller.exists(uuid)) {
 			User admin = userRoleController.findUserByUsername("admin", AuthorizationController.getSystemUser());
 			Resource resource = controller.createMqttResource(name, token, group, admin, desc, "", slots, false, true, false, uuid,
 					dataSendTopic, dataReceiveTopic);
 			try {
-				System.out.println("Subscribing to: " + uuid);
-
-				System.out.println("Publishing acknowledge to " + resource.getDataReceiveTopic());
 				try {
 					clientWrite.publish(resource.getDataReceiveTopic(), new MqttMessage("REGISTERED".getBytes()));
 				} catch (MqttException e) {
@@ -307,7 +288,6 @@ public class MQTTService implements MqttCallback {
 				}
 				// TODO: Neccessary?
 				client.disconnectForcibly();
-				System.out.println("OK.");
 			} catch (MqttException e) {
 				e.printStackTrace();
 			}
@@ -316,22 +296,18 @@ public class MQTTService implements MqttCallback {
 	}
 
 	private void handleDataReceivedMessage(String topic, MqttMessage message) {
-		System.out.println("Handling data...");
 		String[] topicSplit = topic.split("/");
 		String uuid = topicSplit[0];
 		String mode = topicSplit[1];
 
 		if (mode.equalsIgnoreCase("WRITE")) {
 			byte[] data = message.getPayload();
-			System.out.println("Resource " + uuid + " sending data!");
-
 			// Get Resource with UUID and write received data from device to it.
 			try {
 				Resource resource = controller.getResource(uuid, AuthorizationController.getSystemUser());
 				controller.writeMqttDataReceived(resource, data);
-				System.out.println("Data set for resource with id: " + resource.getId() + " : " + data);
 			} catch (Exception ex) {
-				System.out.println("Resource with ID " + uuid + "could not be retrieved: \n" + ex.getMessage());
+
 			}
 		} else {
 			// ignore READ
@@ -339,11 +315,7 @@ public class MQTTService implements MqttCallback {
 	}
 
 	private void handleStatusMessage(String uuid, MqttMessage message) {
-		System.out.println("Handling status...");
 		if (controller.exists(uuid)) {
-			System.out.println("exists...");
-			System.out.println("Resource " + uuid + " sending status data!");
-
 			// Get Resource with UUID
 			Resource resource = controller.getResource(uuid, AuthorizationController.getSystemUser());
 			String data = new String(message.getPayload());
@@ -354,12 +326,10 @@ public class MQTTService implements MqttCallback {
 				statusData = data;
 			}
 
-			System.out.println("Statusdata: " + statusData);
 			switch (statusData) {
 			// Remove resource
 			case COMMAND_REMOVE:
 				controller.deleteResource(resource.getId());
-				System.out.println("Publishing UNREGISTER acknowledge to " + resource.getDataReceiveTopic());
 				try {
 					clientWrite.publish(resource.getDataReceiveTopic(), new MqttMessage("UNREGISTERED".getBytes()));
 				} catch (MqttException e) {
@@ -369,7 +339,6 @@ public class MQTTService implements MqttCallback {
 				break;
 			case COMMAND_STARTUP:
 				controller.setMqttResourceOnline(resource);
-				System.out.println("Publishing STARTUP acknowledge to " + resource.getDataReceiveTopic());
 				try {
 					clientWrite.publish(resource.getDataReceiveTopic(), new MqttMessage("ONLINE".getBytes()));
 				} catch (MqttException e) {
@@ -380,7 +349,6 @@ public class MQTTService implements MqttCallback {
 				break;
 			case COMMAND_SHUTDOWN:
 				controller.setMqttResourceOffline(resource);
-				System.out.println("Publishing SHUTDOWN acknowledge to " + resource.getDataReceiveTopic());
 				try {
 					clientWrite.publish(resource.getDataReceiveTopic(), new MqttMessage("OFFLINE".getBytes()));
 				} catch (MqttException e) {
@@ -391,24 +359,18 @@ public class MQTTService implements MqttCallback {
 				break;
 			case COMMAND_SET:
 				String commandData = data.split(":")[1] + ":" + data.split(":")[2];
-				System.out.println("commandData: " + commandData);
 				String name = commandData.split(":")[0];
 				String value = commandData.split(":")[1];
-				System.out.println("Setting name: " + name + " Value: " + value + " ...");
 				controller.addMqttValueForResource(resource, name, value);
 				break;
 			case COMMAND_CLEAR:
 				String keyData = data.split(":")[1];
-				System.out.println("keyData: " + keyData);
-				System.out.println("Deleting property: " + keyData + " ...");
 				controller.clearMqttValueForResource(resource, keyData);
 				break;
 			case COMMAND_GEO:
 				commandData = data.split(":")[1] + ":" + data.split(":")[2];
-				System.out.println("commandData: " + commandData);
 				String latitude = commandData.split(":")[0];
 				String longitude = commandData.split(":")[1];
-				System.out.println("Setting geo Lat:  " + latitude + " Long: " + longitude + " ...");
 				controller.setCoordinates(resource, latitude, longitude);
 				break;
 			case COMMAND_PING:
@@ -416,12 +378,10 @@ public class MQTTService implements MqttCallback {
 				break;
 			case COMMAND_COMMANDS:
 				String[] commands = data.split(":");
-				System.out.println("Client telling us the commands recognized...");
 				controller.clearCommands(resource);
 				HashSet<String> reportedCommands = new HashSet<String>();
 				for (String cmd : commands) {
 					if (!cmd.equalsIgnoreCase("COMMANDS")) {
-						System.out.println("Submitting regognized command: " + cmd);
 						reportedCommands.add(cmd);
 					}
 				}
@@ -435,7 +395,6 @@ public class MQTTService implements MqttCallback {
 				String destParam = commandString[3];
 
 				if (controller.exists(destUuid)) {
-					System.out.println("Client " + uuid + " sending command " + destCommand + " to resource: " + destUuid);
 					Resource targetResource = controller.getResource(destUuid, AuthorizationController.getSystemUser());
 					controller.sendCommandToResource(targetResource, destCommand, destParam);
 				}
@@ -443,10 +402,8 @@ public class MQTTService implements MqttCallback {
 			case COMMAND_GET_COMMANDS:
 				String uuidToQuery = data;
 				if (controller.exists(uuidToQuery)) {
-					System.out.println("Client " + uuid + " requesting command list of resource: " + uuidToQuery);
 					Resource targetResource = controller.getResource(uuidToQuery, AuthorizationController.getSystemUser());
 					String[] targetCommandList = targetResource.getMqttCommands().toArray(new String[] {});
-					System.out.println("Target commands: " + targetCommandList.toString());
 				}
 				break;
 			case COMMAND_SCAN_DEVICES:
@@ -455,18 +412,12 @@ public class MQTTService implements MqttCallback {
 				String departmentKey = scanDevicesData[2];
 				List<Resource> devicesFound = new ArrayList<Resource>();
 				String scanResult = "";
-				System.out.println("----- Scan request from: " + deviceUuid);
 				if (controller.exists(deviceUuid)) {
-					System.out.println("----- Scan request accepted from: " + deviceUuid);
 					Department department = companyController.getDepartmentByToken(departmentKey);
-					System.out.println("----- Scan in department: " + department.getName());
 					List<ResourceGroup> groups = department.getResourceGroups();
 					for (ResourceGroup group : groups) {
-						System.out.println("----- Scan in group: " + group.getName());
 						for (Resource res : group.getResources()) {
-							System.out.println("----- Resource found: " + res.getName());
 							if (res.isMqttResource()) {
-								System.out.println("----- resource is MQTT " + res.getName());
 								if (res.getMqttUUID().equals(deviceUuid)) {
 									continue;
 								}
@@ -497,7 +448,6 @@ public class MQTTService implements MqttCallback {
 
 	private void fireScanResult(String sourceUuid, String scanResult) {
 		try {
-			System.out.println("----- FIRING SCAN RESULT: " + scanResult);
 			this.clientWrite.publish(sourceUuid + "/read", scanResult.getBytes(), QOS, false);
 			// this.clientWrite.disconnectForcibly();
 		} catch (MqttException e) {

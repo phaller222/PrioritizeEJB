@@ -33,6 +33,7 @@ import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResultType;
 import de.hallerweb.enterprise.prioritize.model.skill.Skill;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
+import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
 
 /**
  * JPA entity to represent a {@link User}. A User is usually a human beeing, but could also be artificial or a machine. A User can have one
@@ -168,6 +169,18 @@ public class User implements PAuthorizedObject, PSearchable, PEventObject {
 	@JsonIgnore
 	@OneToMany(fetch = FetchType.EAGER)
 	Set<SkillRecord> skills;
+	
+	@JsonIgnore
+	@OneToOne(fetch=FetchType.EAGER)
+	UserPreference preference;
+
+	public UserPreference getPreference() {
+		return preference;
+	}
+
+	public void setPreference(UserPreference preference) {
+		this.preference = preference;
+	}
 
 	@Version
 	private int entityVersion; // For optimistic locks

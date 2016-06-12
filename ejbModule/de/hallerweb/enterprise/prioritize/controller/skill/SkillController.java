@@ -263,14 +263,12 @@ public class SkillController {
 
 	public void deleteSkillPropertyNumeric(int propertyId) {
 		SkillPropertyNumeric prop = em.find(SkillPropertyNumeric.class, propertyId);
-		System.out.println("Found: ..." + prop.getId());
 		em.remove(prop);
 		em.flush();
 	}
 
 	public void deleteSkillPropertyText(int propertyId) {
 		SkillPropertyText prop = em.find(SkillPropertyText.class, propertyId);
-		System.out.println("Found: ..." + prop.getId());
 		em.remove(prop);
 		em.flush();
 	}

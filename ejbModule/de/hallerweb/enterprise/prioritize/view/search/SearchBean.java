@@ -103,10 +103,6 @@ public class SearchBean implements Serializable {
 	public List<SearchResult> search(String property) {
 		this.searchResults = searchController.searchUser(this.searchPhrase, new SearchProperty(property), sessionController.getUser());
 		Collections.sort(this.searchResults);
-		for (SearchResult res : this.searchResults) {
-			System.out.println(res.getExcerpt());
-		}
-		System.out.println("Found :" + searchResults.size());
 		return this.searchResults;
 	}
 

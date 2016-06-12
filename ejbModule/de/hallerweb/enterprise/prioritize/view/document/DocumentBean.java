@@ -365,17 +365,14 @@ public class DocumentBean implements Serializable {
 	 * @throws Exception
 	 */
 	public void prepDownloadHistory(int id) throws Exception {
-		System.out.println("ID: " + id);
 		Document docToDownload = controller.getDocument(Integer.valueOf(id), sessionController.getUser());
 
 		ByteArrayInputStream in = new ByteArrayInputStream(docToDownload.getData(), 0, docToDownload.getData().length);
 
 		setDownload(new DefaultStreamedContent(in, docToDownload.getMimeType(), docToDownload.getName()));
-		System.out.println("PREP = " + docToDownload.getName());
 	}
 
 	public void handleFileUpload(FileUploadEvent event) {
-		System.out.println("UPLOAd: " + event.getFile().getFileName());
 		clientFilename = event.getFile().getFileName();
 		try {
 
@@ -383,7 +380,7 @@ public class DocumentBean implements Serializable {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			InputStream in = event.getFile().getInputstream();
 
-			tmpMimeType = event.getFile().getContentType();//URLConnection.guessContentTypeFromName(clientFilename);
+			tmpMimeType = event.getFile().getContentType();// URLConnection.guessContentTypeFromName(clientFilename);
 			if (tmpMimeType == null) {
 				tmpMimeType = "application/unknown";
 			}
@@ -400,8 +397,6 @@ public class DocumentBean implements Serializable {
 			out.close();
 
 			tmpBytes = out.toByteArray();
-			System.out.println("TempBytes; " + tmpBytes.length);
-
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
@@ -423,7 +418,6 @@ public class DocumentBean implements Serializable {
 	@Named
 	public boolean canRead(String documentInfoId) {
 		try {
-			System.out.println("ID: " + documentInfoId);
 			return canRead(controller.getDocumentInfo(Integer.parseInt(documentInfoId), sessionController.getUser()));
 		} catch (Exception ex) {
 			return false;
@@ -499,35 +493,36 @@ public class DocumentBean implements Serializable {
 			TreeNode company = new DefaultTreeNode(new DocumentTreeInfo(c.getName(), false, false, null, null), root);
 			List<Department> departments = c.getDepartments();
 			for (Department d : departments) {
-				TreeNode department = new DefaultTreeNode(new DocumentTreeInfo(d.getName(), false, false, null,null), company);
+				TreeNode department = new DefaultTreeNode(new DocumentTreeInfo(d.getName(), false, false, null, null), company);
 				List<DocumentGroup> groups = d.getDocumentGroups();
 				for (DocumentGroup g : groups) {
 					if (authController.canRead(g, sessionController.getUser())) {
 						TreeNode group = null;
 						if (authController.canCreate(g, sessionController.getUser())) {
-							group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null), department);
+							group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null),
+									department);
 						} else {
 							group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, false, null, null), department);
 						}
 						Set<DocumentInfo> documents = g.getDocuments();
-						List<DocumentInfo> docList= new ArrayList<DocumentInfo>();
+						List<DocumentInfo> docList = new ArrayList<DocumentInfo>();
 						docList.addAll(documents);
 						Collections.sort(docList, new Comparator<DocumentInfo>() {
-				            @Override
-				            public int compare(DocumentInfo o1, DocumentInfo o2) {
-				                Integer id1= o1.getId();
-				                Integer id2= o2.getId();
-				                if(id1 == null && id2 == null) {
-				                    return 0;               
-				                }else if(id1 != null && id2 == null) {
-				                    return -1;
-				                } else if (id1 == null && id2 != null) {
-				                    return 1;
-				                } else {                
-				                    return o2.getCurrentDocument().getLastModified().compareTo(o1.getCurrentDocument().getLastModified());
-				                }
-				            }
-				        });
+							@Override
+							public int compare(DocumentInfo o1, DocumentInfo o2) {
+								Integer id1 = o1.getId();
+								Integer id2 = o2.getId();
+								if (id1 == null && id2 == null) {
+									return 0;
+								} else if (id1 != null && id2 == null) {
+									return -1;
+								} else if (id1 == null && id2 != null) {
+									return 1;
+								} else {
+									return o2.getCurrentDocument().getLastModified().compareTo(o1.getCurrentDocument().getLastModified());
+								}
+							}
+						});
 						for (DocumentInfo docInfo : docList) {
 							if (authController.canRead(docInfo, sessionController.getUser())) {
 								TreeNode documentInfoNode = new DefaultTreeNode(
@@ -546,7 +541,6 @@ public class DocumentBean implements Serializable {
 
 	public void updateDocumentTree() {
 		if (isNewRequest()) {
-			System.out.println("Updating document tree");
 			this.documentTreeRoot = createDocumentTree();
 		}
 	}
@@ -566,22 +560,23 @@ public class DocumentBean implements Serializable {
 		final boolean validationFailed = fc.isValidationFailed();
 		return getMethod && !ajaxRequest && !validationFailed;
 	}
-	
+
 	public String createNewDocument() {
 		if (selectedNode != null) {
 			if (selectedNode.isLeaf()) {
 				return "documents";
-			}
-			else return "history";
-		} else return null;
+			} else
+				return "history";
+		} else
+			return null;
 	}
 
 	public void updateDocumentGroupId(String groupId) {
 		this.selectedDocumentGroup = groupId;
 	}
-	
+
 	public String goBack() {
 		return "documents";
 	}
-	
+
 }

@@ -30,7 +30,6 @@ public class CleanupJob {
 
 	@Schedule(minute = "*/1", hour = "*", persistent = false)
 	public void cleanup() {
-		System.out.println("cleaning up...");
 		resourceController.cleanupReservations();
 
 		// TODO: cleanup Vacation and illness entries from the past...? Does this make sense or

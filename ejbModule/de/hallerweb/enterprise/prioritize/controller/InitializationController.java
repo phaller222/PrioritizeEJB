@@ -10,10 +10,12 @@ import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.inject.Inject;
 
 import org.jboss.logging.Logger;
 import org.jboss.logging.Logger.Level;
 
+import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
@@ -22,6 +24,7 @@ import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
+import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
@@ -46,6 +49,7 @@ public class InitializationController {
 	CompanyController companyController;
 	@EJB
 	SessionController sessionController;
+	@Inject EventRegistry eventRegistry;
 
 	public static HashMap<String, String> config = new HashMap<String, String>();
 
@@ -186,6 +190,9 @@ public class InitializationController {
 			User admin = userRoleController.createUser("admin", "admin", "admin", "", null, "", roles,
 					AuthorizationController.getSystemUser());
 			admin.setApiKey("ABCDEFG");
+			
+			eventRegistry.createEventListener(PObjectType.USER, admin.getId(), admin, "name", -1, false);
+			
 
 		} else {
 			System.out.println("Deployment OK.");

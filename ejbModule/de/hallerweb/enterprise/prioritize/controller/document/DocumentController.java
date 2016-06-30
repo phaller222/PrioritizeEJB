@@ -23,6 +23,7 @@ import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationContr
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
@@ -424,9 +425,9 @@ public class DocumentController extends PEventConsumerProducer {
 	}
 
 	@Override
-	public void consumeEvent(int id, Event evt) {
+	public void consumeEvent(PObject destination, Event evt) {
 		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue() + "--- Document listening: " + id);
+				+ " with new Value: " + evt.getNewValue() + "--- Document listening: " + destination.getClass());
 
 	}
 

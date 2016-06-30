@@ -67,8 +67,10 @@ public class UserPreference {
 	}
 
 	public boolean addWatchedResource(Resource res) {
+		if (!this.watchedResources.contains(res)) {
 		boolean added = this.watchedResources.add(res);
 		return added;
+		} else return false;
 
 	}
 

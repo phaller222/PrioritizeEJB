@@ -8,8 +8,6 @@ import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -23,8 +21,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.PEventObject;
 import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
@@ -55,17 +53,14 @@ import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
 		@NamedQuery(name = "findUserByUsername", query = "SELECT u FROM User u WHERE u.username=?1 ORDER BY u.name"),
 		@NamedQuery(name = "findUserByApiKey", query = "select u FROM User u WHERE u.apiKey = :apiKey") })
 @JsonIgnoreProperties(value = { "vacation", "searchProperties", })
-public class User implements PAuthorizedObject, PSearchable, PEventObject {
+public class User extends PObject implements PAuthorizedObject, PSearchable, PEventObject {
 
 	static final public String PROPERTY_NAME="name";
 	static final public String PROPERTY_EMAIL="email";
 	static final public String PROPERTY_OCCUPATION="occupation";
 	static final public String PROPERTY_DEPARTMENT="department";
 	static final public String PROPERTY_USERNAME="username";
-	
-	@Id
-	@GeneratedValue
-	int id;
+
 
 	String name;
 	String username;
@@ -182,8 +177,6 @@ public class User implements PAuthorizedObject, PSearchable, PEventObject {
 		this.preference = preference;
 	}
 
-	@Version
-	private int entityVersion; // For optimistic locks
 
 	public User() {
 		super();
@@ -274,7 +267,6 @@ public class User implements PAuthorizedObject, PSearchable, PEventObject {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + id;
 		return result;
 	}
 
@@ -287,8 +279,6 @@ public class User implements PAuthorizedObject, PSearchable, PEventObject {
 		if (getClass() != obj.getClass())
 			return false;
 		User other = (User) obj;
-		if (id != other.id)
-			return false;
 		return true;
 	}
 

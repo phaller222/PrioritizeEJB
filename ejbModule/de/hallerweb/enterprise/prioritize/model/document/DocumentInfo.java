@@ -20,10 +20,9 @@ import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.model.event.PEventObject;
+import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
 import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
@@ -51,7 +50,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 		@NamedQuery(name = "findAllDocumentInfos", query = "select di FROM DocumentInfo di"),
 		@NamedQuery(name = "findDocumentInfoByDocumentGroupAndName", query = "select di FROM DocumentInfo di WHERE di.documentGroup.id = :groupId AND di.currentDocument.name = :name"),
 		@NamedQuery(name = "findDocumentGroupByNameAndDepartment", query = "select dg FROM DocumentGroup dg WHERE dg.name = :name AND dg.department.id = :deptId") })
-public class DocumentInfo implements PAuthorizedObject, PSearchable, PEventObject {
+public class DocumentInfo extends PObject implements PAuthorizedObject, PSearchable {
 
 	transient List<SearchProperty> searchProperties;
 
@@ -103,10 +102,6 @@ public class DocumentInfo implements PAuthorizedObject, PSearchable, PEventObjec
 		return this.searchProperties;
 	}
 
-	@Id
-	@GeneratedValue
-	int id;
-
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	private Document currentDocument;
 
@@ -122,9 +117,6 @@ public class DocumentInfo implements PAuthorizedObject, PSearchable, PEventObjec
 
 	@OneToOne
 	private User lockedBy;
-
-	@Version
-	private int entityVersion; // For optimistic locks
 
 	public DocumentGroup getDocumentGroup() {
 		return documentGroup;
@@ -176,8 +168,4 @@ public class DocumentInfo implements PAuthorizedObject, PSearchable, PEventObjec
 		return documentGroup.getDepartment();
 	}
 
-	@Override
-	public PObjectType getObjectType() {
-		return PObjectType.DOCUMENTINFO;
-	}
 }

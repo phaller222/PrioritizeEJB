@@ -3,20 +3,17 @@ package de.hallerweb.enterprise.prioritize.view;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
-import javax.faces.bean.ManagedBean;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.primefaces.model.tagcloud.DefaultTagCloudItem;
-import org.primefaces.model.tagcloud.DefaultTagCloudModel;
-import org.primefaces.model.tagcloud.TagCloudModel;
 
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
@@ -64,6 +61,16 @@ public class LoginBean implements Serializable {
 	}
 
 	List<Resource> watchedResources;
+    int dashboardTabsActiveIndex=0;
+	
+	
+	public int getDashboardTabsActiveIndex() {
+		return dashboardTabsActiveIndex;
+	}
+
+	public void setDashboardTabsActiveIndex(int dashboardTabsActiveIndex) {
+		this.dashboardTabsActiveIndex = dashboardTabsActiveIndex;
+	}
 
 	@PostConstruct
 	public void init() {
@@ -99,7 +106,11 @@ public class LoginBean implements Serializable {
 	public List<Resource> getWatchedResources() {
 		UserPreference prefs = sessionController.getUser().getPreference();
 		List<Resource> watchedResources = preferenceController.getWatchedResources(prefs);
+		Set<Resource> depdupeResources = new LinkedHashSet<>(watchedResources);
+		watchedResources.clear();
+		watchedResources.addAll(depdupeResources);
 		if (!watchedResources.isEmpty()) {
+			//TODO: sublist is a hack!!! 
 			List<Resource> watched = watchedResources;
 			return watched;
 		} else
@@ -177,6 +188,10 @@ public class LoginBean implements Serializable {
 	@Named
 	public boolean getLoggedIn() {
 		return loggedIn;
+	}
+	
+	public void onDashboadTabChange(int tab) {
+		this.dashboardTabsActiveIndex = tab;
 	}
 
 }

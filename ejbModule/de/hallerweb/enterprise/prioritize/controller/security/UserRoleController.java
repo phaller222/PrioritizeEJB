@@ -22,6 +22,7 @@ import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
@@ -577,9 +578,9 @@ public class UserRoleController extends PEventConsumerProducer {
 	}
 
 	@Override
-	public void consumeEvent(int id, Event evt) {
-		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue() + "--- User listening: " + id);
+	public void consumeEvent(PObject o, Event evt) {
+		System.out.println("Object " + o.toString() + " raised event: " + evt.getPropertyName()
+				+ " with new Value: " + evt.getNewValue() + "--- User listening: " + ((User)o).getUsername());
 
 	}
 

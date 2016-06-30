@@ -8,14 +8,11 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
-import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -49,17 +46,12 @@ import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 		@NamedQuery(name = "findDepartmentByToken", query = "SELECT d FROM Department d WHERE d.token = :token"),
 		@NamedQuery(name = "findResourceGroupInDepartment", query = "SELECT g FROM ResourceGroup g WHERE g.department.id= :deptId AND g.name=:groupName"),
 		@NamedQuery(name = "findDefaultDepartmentAndCompany", query = "SELECT d FROM Department d WHERE d.company.name='Default Company' and d.name = 'Default Department'") })
-public class Department implements PAuthorizedObject, PSearchable {
+public class Department extends PObject implements PAuthorizedObject, PSearchable {
 
 	static final public String PROPERTY_NAME="name";
 	static final public String PROPERTY_DESCRIPTION="description";
 	static final public String PROPERTY_ADDRESS="address";
 
-	
-	
-	@Id
-	@GeneratedValue
-	int id;
 
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	Address address;
@@ -79,8 +71,6 @@ public class Department implements PAuthorizedObject, PSearchable {
 	@Column(length = 3000)
 	String description;
 
-	@Version
-	private int entityVersion; // For optimistic locks
 
 	@JsonIgnore
 	String token; // Secret token for things to be placed in this department
@@ -254,7 +244,6 @@ public class Department implements PAuthorizedObject, PSearchable {
 		result = prime * result + ((company == null) ? 0 : company.hashCode());
 		result = prime * result + ((description == null) ? 0 : description.hashCode());
 		result = prime * result + ((documentGroups == null) ? 0 : documentGroups.hashCode());
-		result = prime * result + entityVersion;
 		result = prime * result + id;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((resourceGroups == null) ? 0 : resourceGroups.hashCode());
@@ -289,8 +278,6 @@ public class Department implements PAuthorizedObject, PSearchable {
 			if (other.documentGroups != null)
 				return false;
 		} else if (!documentGroups.equals(other.documentGroups))
-			return false;
-		if (entityVersion != other.entityVersion)
 			return false;
 		if (id != other.id)
 			return false;

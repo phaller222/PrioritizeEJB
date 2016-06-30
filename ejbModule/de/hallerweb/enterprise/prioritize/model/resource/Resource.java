@@ -8,14 +8,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
-import javax.inject.Inject;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
@@ -28,11 +25,8 @@ import javax.persistence.Version;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.PEventObject;
-import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
+import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
 import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
@@ -64,7 +58,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 		@NamedQuery(name = "findAllMqttResourceUuids", query = "select r.mqttUUID FROM Resource r WHERE r.mqttUUID IS NOT NULL"),
 		@NamedQuery(name = "findAllOnlineMqttResources", query = "select r FROM Resource r WHERE r.mqttUUID IS NOT NULL AND r.mqttOnline = TRUE"),
 		@NamedQuery(name = "findAllResources", query = "select r FROM Resource r") })
-public class Resource implements PAuthorizedObject, PSearchable, Comparable<Object>, PEventObject {
+public class Resource extends PObject implements PAuthorizedObject, PSearchable, Comparable<Object> {
 
 	static final public String PROPERTY_NAME="name";
 	static final public String PROPERTY_DESCRIPTION="description";
@@ -73,9 +67,6 @@ public class Resource implements PAuthorizedObject, PSearchable, Comparable<Obje
 	static final public String PROPERTY_GEO="geo";
 	static final public String PROPERTY_MQTTONLINE="mqttOnline";
 	
-	@Id
-	@GeneratedValue
-	int id;
 
 	private String name; // Name of the resource.
 	@Column(length = 65535)
@@ -127,9 +118,6 @@ public class Resource implements PAuthorizedObject, PSearchable, Comparable<Obje
 	@JsonIgnore
 	@OneToMany(fetch = FetchType.EAGER)
 	private Set<SkillRecord> skills;
-
-	@Version
-	private int entityVersion; // For optimistic locks
 
 	transient List<SearchProperty> searchProperties;
 
@@ -458,7 +446,6 @@ public class Resource implements PAuthorizedObject, PSearchable, Comparable<Obje
 		result = prime * result + ((busyBy == null) ? 0 : busyBy.hashCode());
 		result = prime * result + ((department == null) ? 0 : department.hashCode());
 		result = prime * result + ((description == null) ? 0 : description.hashCode());
-		result = prime * result + entityVersion;
 		result = prime * result + id;
 		result = prime * result + ((ip == null) ? 0 : ip.hashCode());
 		result = prime * result + (isBusy ? 1231 : 1237);
@@ -495,8 +482,6 @@ public class Resource implements PAuthorizedObject, PSearchable, Comparable<Obje
 			if (other.description != null)
 				return false;
 		} else if (!description.equals(other.description))
-			return false;
-		if (entityVersion != other.entityVersion)
 			return false;
 		if (id != other.id)
 			return false;
@@ -578,10 +563,4 @@ public class Resource implements PAuthorizedObject, PSearchable, Comparable<Obje
 			return false;
 		return true;
 	}
-
-	@Override
-	public PObjectType getObjectType() {
-		return PObjectType.RESOURCE;
-	}
-
 }

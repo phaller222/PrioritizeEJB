@@ -26,6 +26,7 @@ import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationContr
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan.TimeSpanType;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
@@ -996,9 +997,9 @@ public class ResourceController extends PEventConsumerProducer {
 	}
 
 	@Override
-	public void consumeEvent(int id, Event evt) {
+	public void consumeEvent(PObject destination, Event evt) {
 		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue() + "--- Resource listening: " + id);
+				+ " with new Value: " + evt.getNewValue() + "--- Resource listening: " + ((Resource)destination).getId());
 
 	}
 

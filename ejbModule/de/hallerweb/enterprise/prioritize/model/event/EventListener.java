@@ -8,6 +8,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
+
+import de.hallerweb.enterprise.prioritize.model.PObject;
 
 /**
  * {@link EventListener} holds information about Prioritize-Objects which are interrested
@@ -24,8 +27,9 @@ public class EventListener {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	int id;
 	
-	PObjectType destinationType;				// Type of the Prioritize-Object which is interrested in events
-	int destinationId;							// ID of the Prioritize-Object which is interrested in events.
+	@OneToOne
+	PObject destination;						// Type of the Prioritize-Object which is interrested in events
+	
 	PObjectType sourceType;						// Type of Prioritize Object to listen for events.
 	int sourceId;								// ID of the source object (Event producer)
 	String propertyName;							// Name of the property of which changes should be tracked.
@@ -33,18 +37,13 @@ public class EventListener {
 	Date createdAt;								// Date when this Listener has been created
 	long lifetime;								// Time in milliseconds until this Listener should be removed automatically. -1 if never.
 	
-	public PObjectType getDestinationType() {
-		return destinationType;
+	public PObject getDestination() {
+		return destination;
 	}
-	public void setDestinationType(PObjectType destinationType) {
-		this.destinationType = destinationType;
+	public void setDestination(PObject destination) {
+		this.destination = destination;
 	}
-	public int getDestinationId() {
-		return destinationId;
-	}
-	public void setDestinationId(int destinationId) {
-		this.destinationId = destinationId;
-	}
+	
 	public PObjectType getSourceType() {
 		return sourceType;
 	}

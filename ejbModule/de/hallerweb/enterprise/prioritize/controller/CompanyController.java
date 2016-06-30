@@ -23,6 +23,7 @@ import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController
 import de.hallerweb.enterprise.prioritize.model.Address;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
@@ -418,9 +419,9 @@ public class CompanyController extends PEventConsumerProducer {
 	}
 
 	@Override
-	public void consumeEvent(int id, Event evt) {
+	public void consumeEvent(PObject destination, Event evt) {
 		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue() + "--- Document listening: " + id);
+				+ " with new Value: " + evt.getNewValue() + "--- Dept listening: " + destination.getClass());
 
 	}
 

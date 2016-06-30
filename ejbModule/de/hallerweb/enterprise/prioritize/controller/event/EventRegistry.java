@@ -2,8 +2,10 @@ package de.hallerweb.enterprise.prioritize.controller.event;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Schedule;
@@ -17,12 +19,14 @@ import javax.persistence.Query;
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
-import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
+import de.hallerweb.enterprise.prioritize.model.PObject;
+import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.EventListener;
-import de.hallerweb.enterprise.prioritize.model.event.PEventObject;
+import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
+import de.hallerweb.enterprise.prioritize.model.security.User;
 
 /**
  * Session Bean implementation class EventRegistry. Handles Events and EventListeners and their lifecycle.
@@ -49,8 +53,17 @@ public class EventRegistry {
 	public enum EventStrategy {
 		IMMEDIATE, DELAYED
 	};
-
 	public static EventStrategy EVENT_STRATEGY = EventStrategy.IMMEDIATE;
+	
+	private HashMap<Class<? extends PObject>,PEventConsumerProducer> destinationMapping;
+
+	@PostConstruct
+	public void initialize() {
+	   	destinationMapping = new HashMap<Class<? extends PObject>,PEventConsumerProducer>();
+    	destinationMapping.put(User.class, userController);
+    	destinationMapping.put(DocumentInfo.class, documentController);
+    	System.out.println("----------------------- INITIALIZED: " + destinationMapping);
+    }
 
 	public void addEvent(Event evt) {
 		List<EventListener> listeners = getEventListenersRegisteredFor(evt.getSourceType(), evt.getSourceId(), evt.getPropertyName());
@@ -67,17 +80,8 @@ public class EventRegistry {
 	private void processEvent(Event evt, List<EventListener> listeners) {
 		if ((listeners != null) && (!listeners.isEmpty())) {
 			for (EventListener listener : listeners) {
-
-				switch (listener.getDestinationType()) {
-				case RESOURCE:
-					resourceController.consumeEvent(listener.getDestinationId(), evt);
-				case DOCUMENTINFO:
-					documentController.consumeEvent(listener.getDestinationId(), evt);
-				case USER:
-					userController.consumeEvent(listener.getDestinationId(), evt);
-				default:
-					break;
-				}
+				PObject destination = listener.getDestination();
+				destinationMapping.get(destination.getClass()).consumeEvent(destination, evt);
 			}
 		}
 	}
@@ -130,13 +134,12 @@ public class EventRegistry {
 		}
 	}
 
-	public EventListener createEventListener(PObjectType sourceType, int sourceId, PEventObject destination, String propertyName,
+	public EventListener createEventListener(PObjectType sourceType, int sourceId, PObject destination, String propertyName,
 			long lifetime, boolean oneShot) {
 		EventListener listener = new EventListener();
 		listener.setSourceId(sourceId);
 		listener.setSourceType(sourceType);
-		listener.setDestinationId(destination.getId());
-		listener.setDestinationType(destination.getObjectType());
+		listener.setDestination(destination);
 		listener.setProperyName(propertyName);
 		listener.setCreatedAt(new Date());
 		listener.setLifetime(lifetime);

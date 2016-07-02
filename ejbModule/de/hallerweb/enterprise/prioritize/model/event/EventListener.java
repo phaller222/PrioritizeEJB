@@ -18,7 +18,7 @@ import de.hallerweb.enterprise.prioritize.model.PObject;
  *
  */
 @Entity
-@NamedQueries({ @NamedQuery(name = "findEventListenersBySourceTypeAndIdAndPropertyName", query = "select el FROM EventListener el WHERE el.propertyName = :propertyName AND el.sourceId = :id AND el.sourceType = :sourceType"),
+@NamedQueries({ @NamedQuery(name = "findEventListenersBySourceAndPropertyName", query = "select el FROM EventListener el WHERE el.propertyName = :propertyName AND el.source.id = :id"),
 	@NamedQuery(name = "findEventListenersWithLimitedLifetime", query = "select el FROM EventListener el WHERE el.lifetime > 0")
 })
 public class EventListener {
@@ -29,9 +29,8 @@ public class EventListener {
 	
 	@OneToOne
 	PObject destination;						// Type of the Prioritize-Object which is interrested in events
-	
-	PObjectType sourceType;						// Type of Prioritize Object to listen for events.
-	int sourceId;								// ID of the source object (Event producer)
+	@OneToOne
+	PObject source;								// Source of the Event to listen to
 	String propertyName;							// Name of the property of which changes should be tracked.
 	boolean oneShot;							// If true, an Event(change) is only send once and then this listener is deleted.
 	Date createdAt;								// Date when this Listener has been created
@@ -44,17 +43,11 @@ public class EventListener {
 		this.destination = destination;
 	}
 	
-	public PObjectType getSourceType() {
-		return sourceType;
+	public PObject getSource() {
+		return source;
 	}
-	public void setSourceType(PObjectType sourceType) {
-		this.sourceType = sourceType;
-	}
-	public int getSourceId() {
-		return sourceId;
-	}
-	public void setSourceId(int sourceId) {
-		this.sourceId = sourceId;
+	public void setSource(PObject source) {
+		this.source = source;
 	}
 	public String getProperyName() {
 		return propertyName;

@@ -272,21 +272,19 @@ public class DocumentController extends PEventConsumerProducer {
 			if (InitializationController.getAsBoolean(InitializationController.FIRE_DOCUMENT_EVENTS)) {
 				Document current = managedInfo.getCurrentDocument();
 				if (!current.getName().equals(newDocumentData.getName())) {
-					this.raiseEvent(PObjectType.DOCUMENTINFO, managedInfo.getId(), Document.PROPERTY_NAME, current.getName(), newDocumentData.getName(),
+					this.raiseEvent(managedInfo, Document.PROPERTY_NAME, current.getName(), newDocumentData.getName(),
 							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				}
 				if (!current.getMimeType().equals(newDocumentData.getMimeType())) {
-					this.raiseEvent(PObjectType.DOCUMENTINFO, managedInfo.getId(), Document.PROPERTY_MIMETYPE, current.getMimeType(),
-							newDocumentData.getMimeType(),
+					this.raiseEvent(managedInfo, Document.PROPERTY_MIMETYPE, current.getMimeType(), newDocumentData.getMimeType(),
 							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				}
 				if (!current.getChanges().equals(newDocumentData.getChanges())) {
-					this.raiseEvent(PObjectType.DOCUMENTINFO, managedInfo.getId(), Document.PROPERTY_CHANGES, current.getChanges(),
-							newDocumentData.getChanges(),
+					this.raiseEvent(managedInfo, Document.PROPERTY_CHANGES, current.getChanges(), newDocumentData.getChanges(),
 							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				}
 				if (!current.isEncrypted() == newDocumentData.isEncrypted()) {
-					this.raiseEvent(PObjectType.DOCUMENTINFO, managedInfo.getId(), Document.PROPERTY_ENCRYPTED,String.valueOf(current.isEncrypted()),
+					this.raiseEvent(managedInfo, Document.PROPERTY_ENCRYPTED, String.valueOf(current.isEncrypted()),
 							String.valueOf(newDocumentData.isEncrypted()),
 							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				}
@@ -322,7 +320,7 @@ public class DocumentController extends PEventConsumerProducer {
 					" Document \"" + document.getName() + "\" has been tagged: " + tag + ".");
 		}
 
-		this.raiseEvent(PObjectType.DOCUMENTINFO, managedDocument.getId(), Document.PROPERTY_TAG, "", managedDocument.getTag(),
+		this.raiseEvent(managedDocument, Document.PROPERTY_TAG, "", managedDocument.getTag(),
 				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 
 		return managedDocument;
@@ -416,18 +414,18 @@ public class DocumentController extends PEventConsumerProducer {
 		}
 	}
 
-	public void raiseEvent(PObjectType type, int id, String name, String oldValue, String newValue, long lifetime) {
+	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
 		if (InitializationController.getAsBoolean(InitializationController.FIRE_DOCUMENT_EVENTS)) {
-			Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
-					.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
+			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
+					.setPropertyName(name).setLifetime(lifetime).getEvent();
 			eventRegistry.addEvent(evt);
 		}
 	}
 
 	@Override
 	public void consumeEvent(PObject destination, Event evt) {
-		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue() + "--- Document listening: " + destination.getClass());
+		System.out.println("Object " + evt.getSource() + " raised event: " + evt.getPropertyName() + " with new Value: " + evt.getNewValue()
+				+ "--- Document listening: " + destination.getClass());
 
 	}
 

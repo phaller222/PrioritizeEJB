@@ -288,24 +288,24 @@ public class UserRoleController extends PEventConsumerProducer {
 			// Raise events if configured
 			if (InitializationController.getAsBoolean(InitializationController.FIRE_USER_EVENTS)) {
 				if (!user.getName().equals(name)) {
-					this.raiseEvent(PObjectType.USER, user.getId(), User.PROPERTY_NAME, user.getName(), name,
+					this.raiseEvent(user, User.PROPERTY_NAME, user.getName(), name,
 							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				}
 				if (!user.getUsername().equals(username)) {
-					this.raiseEvent(PObjectType.USER, user.getId(), User.PROPERTY_USERNAME, user.getUsername(), username,
+					this.raiseEvent(user, User.PROPERTY_USERNAME, user.getUsername(), username,
 							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				}
 				if (!user.getEmail().equals(email)) {
-					this.raiseEvent(PObjectType.USER, user.getId(), User.PROPERTY_EMAIL, user.getEmail(), email,
+					this.raiseEvent(user, User.PROPERTY_EMAIL, user.getEmail(), email,
 							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				}
 				if (!user.getOccupation().equals(occupation)) {
-					this.raiseEvent(PObjectType.USER, user.getId(), User.PROPERTY_OCCUPATION, user.getOccupation(), occupation,
+					this.raiseEvent(user, User.PROPERTY_OCCUPATION, user.getOccupation(), occupation,
 							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				}
 				if (user.getDepartment() != null) {
 					if (!(user.getDepartment().getId() == initialDepartmentId)) {
-						this.raiseEvent(PObjectType.USER, user.getId(), User.PROPERTY_DEPARTMENT,
+						this.raiseEvent(user, User.PROPERTY_DEPARTMENT,
 								String.valueOf(user.getDepartment().getId()), String.valueOf(initialDepartmentId),
 								InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 					}
@@ -569,9 +569,9 @@ public class UserRoleController extends PEventConsumerProducer {
 
 	}
 
-	public void raiseEvent(PObjectType type, int id, String name, String oldValue, String newValue, long lifetime) {
+	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
 		if (InitializationController.getAsBoolean(InitializationController.FIRE_USER_EVENTS)) {
-			Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
+			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue)
 					.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
 			eventRegistry.addEvent(evt);
 		}

@@ -16,6 +16,7 @@ import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
 /**
@@ -33,7 +34,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @Entity
 @NamedQueries({ @NamedQuery(name = "findDocumentById", query = "select d FROM Document d WHERE d.id = :docId"),
 		@NamedQuery(name = "findDocumentByTag", query = "select d FROM Document d WHERE d.tag = :docTag") })
-public class Document implements Comparable {
+public class Document extends PObject implements Comparable {
 
 	static final public String PROPERTY_NAME="name";
 	static final public String PROPERTY_MIMETYPE="mimeType";
@@ -41,11 +42,6 @@ public class Document implements Comparable {
 	static final public String PROPERTY_ENCRYPTED="encrypted";
 	static final public String PROPERTY_CHANGES="changes";
 	
-	@Id
-	@GeneratedValue
-	@JsonIgnore
-	int id;
-
 	private String name; // Name of the document.
 	private int version; // Version of the document
 	private String mimeType; // mimeType
@@ -62,9 +58,6 @@ public class Document implements Comparable {
 	@JsonIgnore
 	@Basic(fetch = FetchType.LAZY)
 	private byte[] data; // the data of the document (e.G. binary MS-word data).
-
-	@Version
-	private int entityVersion;
 
 	public String getChanges() {
 		return changes;
@@ -173,7 +166,6 @@ public class Document implements Comparable {
 		result = prime * result + Arrays.hashCode(data);
 		result = prime * result + (encrypted ? 1231 : 1237);
 		result = prime * result + ((encryptedBy == null) ? 0 : encryptedBy.hashCode());
-		result = prime * result + entityVersion;
 		result = prime * result + id;
 		result = prime * result + ((lastModified == null) ? 0 : lastModified.hashCode());
 		result = prime * result + ((lastModifiedBy == null) ? 0 : lastModifiedBy.hashCode());
@@ -206,8 +198,6 @@ public class Document implements Comparable {
 			if (other.encryptedBy != null)
 				return false;
 		} else if (!encryptedBy.equals(other.encryptedBy))
-			return false;
-		if (entityVersion != other.entityVersion)
 			return false;
 		if (id != other.id)
 			return false;

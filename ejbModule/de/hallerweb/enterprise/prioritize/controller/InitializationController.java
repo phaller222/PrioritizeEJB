@@ -69,6 +69,7 @@ public class InitializationController {
 	public final static String DISCOVERY_ALLOW_DEFAULT_DEPARTMENT = "DISCOVERY_ALLOW_DEFAULT_DEPARTMENT"; // Can resources be added without
 																											 // providing department token?
 	public static final String EVENT_DEFAULT_TIMEOUT = "EVENT_DEFAULT_TIMEOUT"; // Default timeout value for events
+	public static final String EVENT_DEFAULT_STRATEGY = "EVENT_DEFAULT_STRATEGY"; // Default Strategy value for events
 	public static final String LISTENER_DEFAULT_TIMEOUT = "LISTENER_DEFAULT_TIMEOUT"; // Default timeout value for event listeners
 	public static final String FIRE_RESOURCE_EVENTS="FIRE_RESOURCE_EVENTS";
 	public static final String FIRE_DOCUMENT_EVENTS="FIRE_DOCUMENT_EVENTS";
@@ -107,6 +108,7 @@ public class InitializationController {
 		config.put(DISCOVERY_ALLOW_DEFAULT_DEPARTMENT, "true");
 		
 		config.put(EVENT_DEFAULT_TIMEOUT, "120000"); // Default is 2 minutes
+		config.put(EVENT_DEFAULT_STRATEGY, "IMMEDIATE"); // Default is IMMEDIATE
 		config.put(LISTENER_DEFAULT_TIMEOUT, "120000"); // Default is 2 minutes
 		config.put(FIRE_RESOURCE_EVENTS, "true"); 
 		config.put(FIRE_DOCUMENT_EVENTS, "true"); 
@@ -191,7 +193,7 @@ public class InitializationController {
 					AuthorizationController.getSystemUser());
 			admin.setApiKey("ABCDEFG");
 			
-			eventRegistry.createEventListener(PObjectType.USER, admin.getId(), admin, "name", -1, false);
+			eventRegistry.createEventListener(admin, admin, "name", 120000, true);
 			
 
 		} else {

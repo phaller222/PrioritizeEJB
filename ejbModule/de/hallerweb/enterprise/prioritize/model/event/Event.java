@@ -8,6 +8,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
+
+import de.hallerweb.enterprise.prioritize.model.PObject;
 
 /**
  * Event Object to holf information about an occured event. It holds information
@@ -18,7 +21,8 @@ import javax.persistence.NamedQuery;
  *
  */
 @Entity
-@NamedQueries({ @NamedQuery(name = "findEventsWithLimitedLifetime", query = "select e FROM Event e WHERE e.lifetime > 0")
+@NamedQueries({ @NamedQuery(name = "findEventsWithLimitedLifetime", query = "select e FROM Event e WHERE e.lifetime > 0"),
+	@NamedQuery(name = "findAllEvents", query = "select e FROM Event e")
 })
 public class Event {
 
@@ -27,8 +31,8 @@ public class Event {
 	int id;
 
 	Date eventDate;
-	PObjectType sourceType;
-	int sourceId;
+	@OneToOne
+	PObject source;
 	String propertyName;
 	String oldValue;
 	String newValue;
@@ -39,17 +43,11 @@ public class Event {
 	public void setEventDate(Date when) {
 		this.eventDate = when;
 	}
-	public PObjectType getSourceType() {
-		return sourceType;
+	public PObject getSource() {
+		return source;
 	}
-	public void setSourceType(PObjectType sourceType) {
-		this.sourceType = sourceType;
-	}
-	public int getSourceId() {
-		return sourceId;
-	}
-	public void setSourceId(int sourceId) {
-		this.sourceId = sourceId;
+	public void setSource(PObject source) {
+		this.source = source;
 	}
 	public String getPropertyName() {
 		return propertyName;

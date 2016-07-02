@@ -363,14 +363,14 @@ public class ResourceController extends PEventConsumerProducer {
 
 	public void setMqttResourceOnline(Resource res) {
 		Resource managed = em.find(Resource.class, res.getId());
-		raiseEvent(PObjectType.RESOURCE, managed.getId(), Resource.PROPERTY_MQTTONLINE, String.valueOf(managed.isMqttOnline()), "true",
+		raiseEvent(managed, Resource.PROPERTY_MQTTONLINE, String.valueOf(managed.isMqttOnline()), "true",
 				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		managed.setMqttOnline(true);
 	}
 
 	public void setMqttResourceOffline(Resource res) {
 		Resource managed = em.find(Resource.class, res.getId());
-		raiseEvent(PObjectType.RESOURCE, managed.getId(), Resource.PROPERTY_MQTTONLINE, String.valueOf(managed.isMqttOnline()), "false",
+		raiseEvent(managed, Resource.PROPERTY_MQTTONLINE, String.valueOf(managed.isMqttOnline()), "false",
 				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		managed.setMqttOnline(false);
 	}
@@ -459,7 +459,7 @@ public class ResourceController extends PEventConsumerProducer {
 		newEntry.setName(name);
 		newEntry.setValues(value);
 		em.persist(newEntry);
-		raiseEvent(PObjectType.RESOURCE, managedResource.getId(), name, "", newEntry.getValues(),
+		raiseEvent(managedResource, name, "", newEntry.getValues(),
 				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		managedResource.getMqttValues().add(newEntry);
 	}
@@ -660,19 +660,19 @@ public class ResourceController extends PEventConsumerProducer {
 		if (authController.canUpdate(managedResource, user)) {
 
 			if (!newName.equals(managedResource.getName())) {
-				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), Resource.PROPERTY_NAME, managedResource.getName(), newName,
+				this.raiseEvent(managedResource, Resource.PROPERTY_NAME, managedResource.getName(), newName,
 						60000);
 			}
 			if (!newDescription.equals(managedResource.getDescription())) {
-				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), Resource.PROPERTY_DESCRIPTION,
+				this.raiseEvent(managedResource, Resource.PROPERTY_DESCRIPTION,
 						managedResource.getDescription(), newDescription, 60000);
 			}
 			if (managedResource.getDepartment().getId() != managedDepartment.getId()) {
-				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), Resource.PROPERTY_DEPARTMENT,
+				this.raiseEvent(managedResource, Resource.PROPERTY_DEPARTMENT,
 						String.valueOf(managedResource.getDepartment().getId()), String.valueOf(newDept.getId()), 60000);
 			}
 			if (managedResource.getResourceGroup().getId() != managedGroup.getId()) {
-				this.raiseEvent(PObjectType.RESOURCE, managedResource.getId(), Resource.PROPERTY_RESOURCEGROUP,
+				this.raiseEvent(managedResource, Resource.PROPERTY_RESOURCEGROUP,
 						String.valueOf(managedResource.getResourceGroup().getId()), String.valueOf(newGroup.getId()),
 						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 			}
@@ -834,7 +834,7 @@ public class ResourceController extends PEventConsumerProducer {
 	 */
 	public void setCoordinates(Resource resource, String latitude, String longitude) {
 		Resource res = em.find(Resource.class, resource.getId());
-		raiseEvent(PObjectType.RESOURCE, resource.getId(), "geo", resource.getLatitude() + ":" + resource.getLongitude(),
+		raiseEvent(res, "geo", resource.getLatitude() + ":" + resource.getLongitude(),
 				latitude + ":" + longitude, InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		res.setLongitude(longitude);
 		res.setLatitude(latitude);
@@ -988,9 +988,9 @@ public class ResourceController extends PEventConsumerProducer {
 		}
 	}
 
-	public void raiseEvent(PObjectType type, int id, String name, String oldValue, String newValue, long lifetime) {
+	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
 		if (InitializationController.getAsBoolean(InitializationController.FIRE_RESOURCE_EVENTS)) {
-			Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
+			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue)
 					.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
 			eventRegistry.addEvent(evt);
 		}
@@ -998,7 +998,7 @@ public class ResourceController extends PEventConsumerProducer {
 
 	@Override
 	public void consumeEvent(PObject destination, Event evt) {
-		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
+		System.out.println("Object " + evt.getSource() +  " raised event: " + evt.getPropertyName()
 				+ " with new Value: " + evt.getNewValue() + "--- Resource listening: " + ((Resource)destination).getId());
 
 	}

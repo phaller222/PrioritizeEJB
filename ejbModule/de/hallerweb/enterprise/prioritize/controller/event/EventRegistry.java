@@ -11,12 +11,14 @@ import javax.ejb.LocalBean;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
+import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
@@ -25,7 +27,6 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.EventListener;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
-import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
 /**
@@ -49,11 +50,13 @@ public class EventRegistry {
 	UserRoleController userController;
 	@EJB
 	CompanyController companyController;
+	@Inject
+	InitializationController initController;
 
 	public enum EventStrategy {
 		IMMEDIATE, DELAYED
 	};
-	public static EventStrategy EVENT_STRATEGY = EventStrategy.IMMEDIATE;
+	public static EventStrategy EVENT_STRATEGY = EventStrategy.DELAYED;  // Default = DELAYED
 	
 	private HashMap<Class<? extends PObject>,PEventConsumerProducer> destinationMapping;
 
@@ -62,11 +65,17 @@ public class EventRegistry {
 	   	destinationMapping = new HashMap<Class<? extends PObject>,PEventConsumerProducer>();
     	destinationMapping.put(User.class, userController);
     	destinationMapping.put(DocumentInfo.class, documentController);
-    	System.out.println("----------------------- INITIALIZED: " + destinationMapping);
+    	
+    	// Override Event Strategy value with config
+    	if (initController.config.get(InitializationController.EVENT_DEFAULT_STRATEGY).equals("IMMEDIATE")) {
+    		EVENT_STRATEGY = EventStrategy.IMMEDIATE;
+    	} else {
+    		EVENT_STRATEGY = EventStrategy.DELAYED;
+    	}
     }
 
 	public void addEvent(Event evt) {
-		List<EventListener> listeners = getEventListenersRegisteredFor(evt.getSourceType(), evt.getSourceId(), evt.getPropertyName());
+		List<EventListener> listeners = getEventListenersRegisteredFor(evt.getSource(), evt.getPropertyName());
 		if (!listeners.isEmpty()) {
 			mng.persist(evt);
 
@@ -79,9 +88,19 @@ public class EventRegistry {
 
 	private void processEvent(Event evt, List<EventListener> listeners) {
 		if ((listeners != null) && (!listeners.isEmpty())) {
+			List<EventListener> listenersToRemove = new ArrayList<EventListener>();
 			for (EventListener listener : listeners) {
 				PObject destination = listener.getDestination();
 				destinationMapping.get(destination.getClass()).consumeEvent(destination, evt);
+				if (listener.isOneShot()) {
+					listenersToRemove.add(listener);
+				}
+			}
+			if (!listenersToRemove.isEmpty()) {
+				for (EventListener  listener : listenersToRemove) {
+					EventListener managedListener = mng.find(EventListener.class, listener.getId());
+					mng.remove(managedListener);
+				}
 			}
 		}
 	}
@@ -98,13 +117,8 @@ public class EventRegistry {
 			return EventBuilder.this;
 		}
 
-		public EventBuilder setSourceType(PObjectType sourceType) {
-			this.event.setSourceType(sourceType);
-			return this;
-		}
-
-		public EventBuilder setSourceId(int id) {
-			this.event.setSourceId(id);
+		public EventBuilder setSource(PObject source) {
+			this.event.setSource(source);
 			return this;
 		}
 
@@ -134,11 +148,10 @@ public class EventRegistry {
 		}
 	}
 
-	public EventListener createEventListener(PObjectType sourceType, int sourceId, PObject destination, String propertyName,
+	public EventListener createEventListener(PObject source, PObject destination, String propertyName,
 			long lifetime, boolean oneShot) {
 		EventListener listener = new EventListener();
-		listener.setSourceId(sourceId);
-		listener.setSourceType(sourceType);
+		listener.setSource(source);
 		listener.setDestination(destination);
 		listener.setProperyName(propertyName);
 		listener.setCreatedAt(new Date());
@@ -148,11 +161,10 @@ public class EventRegistry {
 		return listener;
 	}
 
-	public List<EventListener> getEventListenersRegisteredFor(PObjectType objectType, int id, String propertyName) {
-		Query query = mng.createNamedQuery("findEventListenersBySourceTypeAndIdAndPropertyName");
+	public List<EventListener> getEventListenersRegisteredFor(PObject source, String propertyName) {
+		Query query = mng.createNamedQuery("findEventListenersBySourceAndPropertyName");
 		query.setParameter("propertyName", propertyName);
-		query.setParameter("id", id);
-		query.setParameter("sourceType", objectType);
+		query.setParameter("id", source.getId());
 		try {
 			if (query.getResultList().isEmpty()) {
 				return new ArrayList<EventListener>();
@@ -171,7 +183,7 @@ public class EventRegistry {
 	 */
 	public void processEvents() {
 		long currentDateMillis = new Date().getTime();
-
+		System.out.println("Runnig processEvents at " + currentDateMillis + "...");
 		// Remove all events which lifetime is passed
 		List<Event> eventsToRemove = new ArrayList<Event>();
 		Query q1 = mng.createNamedQuery("findEventsWithLimitedLifetime");
@@ -183,9 +195,9 @@ public class EventRegistry {
 				}
 			}
 			for (Event evt : eventsToRemove) {
+				System.out.println("Removing event: " + evt.getLifetime());
 				mng.remove(evt);
 			}
-
 		}
 
 		// Remove all EventListeners which lifetime is passed
@@ -199,9 +211,17 @@ public class EventRegistry {
 				}
 			}
 			for (EventListener listener : listenersToRemove) {
+				System.out.println("Removing listener: " + listener.getLifetime());
 				mng.remove(listener);
 			}
 
+		}
+		// Finally process all remaining events
+		Query q3= mng.createNamedQuery("findAllEvents");
+		List<Event> events = q3.getResultList();
+		for (Event evt : events) {
+			System.out.println("Processing: " + evt.getLifetime());
+			processEvent(evt, getEventListenersRegisteredFor(evt.getSource(),evt.getPropertyName()));
 		}
 
 	}

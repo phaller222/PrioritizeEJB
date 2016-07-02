@@ -306,15 +306,15 @@ public class CompanyController extends PEventConsumerProducer {
 			// Fire events if configured
 			if (InitializationController.getAsBoolean(InitializationController.FIRE_DEPARTMENT_EVENTS)) {
 				if (!orig.getName().equals(d.getName())) {
-					this.raiseEvent(PObjectType.DEPARTMENT, orig.getId(), Department.PROPERTY_NAME, orig.getName(), d.getName(),
+					this.raiseEvent(orig, Department.PROPERTY_NAME, orig.getName(), d.getName(),
 							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				}
 				if (!orig.getAddress().equals(d.getAddress())) {
-					this.raiseEvent(PObjectType.DEPARTMENT, orig.getId(), Department.PROPERTY_ADDRESS, orig.getAddress().toString(),
+					this.raiseEvent(orig, Department.PROPERTY_ADDRESS, orig.getAddress().toString(),
 							d.getAddress().toString(), InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				}
 				if (!orig.getDescription().equals(d.getDescription())) {
-					this.raiseEvent(PObjectType.DEPARTMENT, orig.getId(), Department.PROPERTY_DESCRIPTION, orig.getDescription(),
+					this.raiseEvent(orig, Department.PROPERTY_DESCRIPTION, orig.getDescription(),
 							d.getDescription(), InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				}
 			}
@@ -410,9 +410,9 @@ public class CompanyController extends PEventConsumerProducer {
 		return em.find(Department.class, id);
 	}
 
-	public void raiseEvent(PObjectType type, int id, String name, String oldValue, String newValue, long lifetime) {
+	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
 		if (InitializationController.getAsBoolean(InitializationController.FIRE_DEPARTMENT_EVENTS)) {
-			Event evt = eventRegistry.getEventBuilder().newEvent().setSourceType(type).setSourceId(id).setOldValue(oldValue)
+			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue)
 					.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
 			eventRegistry.addEvent(evt);
 		}
@@ -420,7 +420,7 @@ public class CompanyController extends PEventConsumerProducer {
 
 	@Override
 	public void consumeEvent(PObject destination, Event evt) {
-		System.out.println("Object " + evt.getSourceType() + " with ID " + evt.getSourceId() + " raised event: " + evt.getPropertyName()
+		System.out.println("Object " + evt.getSource() +  " raised event: " + evt.getPropertyName()
 				+ " with new Value: " + evt.getNewValue() + "--- Dept listening: " + destination.getClass());
 
 	}

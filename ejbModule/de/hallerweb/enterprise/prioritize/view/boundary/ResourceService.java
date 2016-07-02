@@ -284,7 +284,7 @@ public class ResourceService {
 				processed = true;
 				boolean online = Boolean.parseBoolean(mqttOnline);
 
-				resourceController.raiseEvent(PObjectType.RESOURCE, resource.getId(), "mqttOnline", String.valueOf(resource.isMqttOnline()),
+				resourceController.raiseEvent(resource, "mqttOnline", String.valueOf(resource.isMqttOnline()),
 						mqttOnline, InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 
 				if (online) {
@@ -296,13 +296,13 @@ public class ResourceService {
 
 			if (name != null) {
 				processed = true;
-				resourceController.raiseEvent(PObjectType.RESOURCE, resource.getId(), "name", resource.getName(), name,
+				resourceController.raiseEvent(resource, "name", resource.getName(), name,
 						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				resourceController.setResourceName(resource, name, sessionController.getUser());
 			}
 			if (description != null) {
 				processed = true;
-				resourceController.raiseEvent(PObjectType.RESOURCE, resource.getId(), "description", resource.getDescription(), description,
+				resourceController.raiseEvent(resource, "description", resource.getDescription(), description,
 						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				resourceController.setResourceDescription(resource, description, sessionController.getUser());
 			}
@@ -313,7 +313,7 @@ public class ResourceService {
 				for (String cmd : commandString) {
 					commandsForResource.add(cmd);
 				}
-				resourceController.raiseEvent(PObjectType.RESOURCE, resource.getId(), "commands", resource.getMqttCommands().toString(),
+				resourceController.raiseEvent(resource, "commands", resource.getMqttCommands().toString(),
 						commands, InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				resourceController.setCommands(resource, commandsForResource);
 			}
@@ -335,7 +335,7 @@ public class ResourceService {
 						oldValue = entry.getValues();
 					}
 				}
-				resourceController.raiseEvent(PObjectType.RESOURCE, resource.getId(), nameValuePair[0], oldValue, nameValuePair[1],
+				resourceController.raiseEvent(resource, nameValuePair[0], oldValue, nameValuePair[1],
 						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				// ------------------------------------------------------
 

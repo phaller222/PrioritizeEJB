@@ -17,6 +17,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Version;
 
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
 import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
@@ -38,11 +39,8 @@ import de.hallerweb.enterprise.prioritize.model.search.SearchResultType;
 @NamedQueries({@NamedQuery(name = "findRolesForPermissionRecord", query = "select r FROM Role r JOIN r.permissions p WHERE p.id = :recId"),
 	@NamedQuery(name = "findRoleByRolename", query = "select r FROM Role r WHERE r.name=?1 ORDER BY r.name")
 })
-public class Role implements PAuthorizedObject, PSearchable {
+public class Role extends PActor implements PAuthorizedObject, PSearchable {
 
-	@Id
-	@GeneratedValue
-	int id;
 
 	String name;
 
@@ -54,9 +52,6 @@ public class Role implements PAuthorizedObject, PSearchable {
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	Set<User> users;
-
-	@Version
-	private int entityVersion; // For optimistic locks
 
 	transient List<SearchProperty> searchProperties;
 

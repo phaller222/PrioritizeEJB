@@ -14,17 +14,14 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
-import de.hallerweb.enterprise.prioritize.model.event.PEventObject;
-import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
+import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
 import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
@@ -53,8 +50,13 @@ import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
 		@NamedQuery(name = "findUserByUsername", query = "SELECT u FROM User u WHERE u.username=?1 ORDER BY u.name"),
 		@NamedQuery(name = "findUserByApiKey", query = "select u FROM User u WHERE u.apiKey = :apiKey") })
 @JsonIgnoreProperties(value = { "vacation", "searchProperties", })
-public class User extends PObject implements PAuthorizedObject, PSearchable, PEventObject {
+public class User extends PActor implements PAuthorizedObject, PSearchable {
 
+	public User(String username) {
+		this.username = username;
+		this.name = username;
+	}
+	
 	static final public String PROPERTY_NAME="name";
 	static final public String PROPERTY_EMAIL="email";
 	static final public String PROPERTY_OCCUPATION="occupation";
@@ -373,8 +375,5 @@ public class User extends PObject implements PAuthorizedObject, PSearchable, PEv
 		return this.searchProperties;
 	}
 
-	@Override
-	public PObjectType getObjectType() {
-		return PObjectType.USER;
-	}
+
 }

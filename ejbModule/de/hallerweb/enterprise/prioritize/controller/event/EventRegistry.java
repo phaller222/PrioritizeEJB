@@ -56,28 +56,33 @@ public class EventRegistry {
 	public enum EventStrategy {
 		IMMEDIATE, DELAYED
 	};
+
 	public static EventStrategy EVENT_STRATEGY = EventStrategy.DELAYED;  // Default = DELAYED
-	
-	private HashMap<Class<? extends PObject>,PEventConsumerProducer> destinationMapping;
+
+	private HashMap<Class<? extends PObject>, PEventConsumerProducer> destinationMapping;
 
 	@PostConstruct
 	public void initialize() {
-	   	destinationMapping = new HashMap<Class<? extends PObject>,PEventConsumerProducer>();
-    	destinationMapping.put(User.class, userController);
-    	destinationMapping.put(DocumentInfo.class, documentController);
-    	
-    	// Override Event Strategy value with config
-    	if (initController.config.get(InitializationController.EVENT_DEFAULT_STRATEGY).equals("IMMEDIATE")) {
-    		EVENT_STRATEGY = EventStrategy.IMMEDIATE;
-    	} else {
-    		EVENT_STRATEGY = EventStrategy.DELAYED;
-    	}
-    }
+		destinationMapping = new HashMap<Class<? extends PObject>, PEventConsumerProducer>();
+		destinationMapping.put(User.class, userController);
+		destinationMapping.put(DocumentInfo.class, documentController);
+
+		// Override Event Strategy value with config
+		try {
+		if (InitializationController.config.get(InitializationController.EVENT_DEFAULT_STRATEGY).equals("IMMEDIATE")) {
+			EVENT_STRATEGY = EventStrategy.IMMEDIATE;
+		} else {
+			EVENT_STRATEGY = EventStrategy.DELAYED;
+		}
+		} catch (NullPointerException ex) {
+			EVENT_STRATEGY = EventStrategy.IMMEDIATE;
+		}
+	}
 
 	public void addEvent(Event evt) {
+		mng.persist(evt);
 		List<EventListener> listeners = getEventListenersRegisteredFor(evt.getSource(), evt.getPropertyName());
 		if (!listeners.isEmpty()) {
-			mng.persist(evt);
 
 			// If immediate strategy, deliver event at once.
 			if (EVENT_STRATEGY == EventStrategy.IMMEDIATE) {
@@ -97,7 +102,7 @@ public class EventRegistry {
 				}
 			}
 			if (!listenersToRemove.isEmpty()) {
-				for (EventListener  listener : listenersToRemove) {
+				for (EventListener listener : listenersToRemove) {
 					EventListener managedListener = mng.find(EventListener.class, listener.getId());
 					mng.remove(managedListener);
 				}
@@ -148,8 +153,7 @@ public class EventRegistry {
 		}
 	}
 
-	public EventListener createEventListener(PObject source, PObject destination, String propertyName,
-			long lifetime, boolean oneShot) {
+	public EventListener createEventListener(PObject source, PObject destination, String propertyName, long lifetime, boolean oneShot) {
 		EventListener listener = new EventListener();
 		listener.setSource(source);
 		listener.setDestination(destination);
@@ -166,13 +170,21 @@ public class EventRegistry {
 		query.setParameter("propertyName", propertyName);
 		query.setParameter("id", source.getId());
 		try {
-			if (query.getResultList().isEmpty()) {
+			List<EventListener> result = query.getResultList();
+			if (result.isEmpty()) {
 				return new ArrayList<EventListener>();
 			} else
-				return query.getResultList();
+				return result;
 		} catch (NoResultException ex) {
 			return new ArrayList<EventListener>();
 		}
+	}
+
+	public void removeEventListener(int eventListenerId) {
+		Query query = mng.createNamedQuery("findEventListenersById");
+		query.setParameter("id", eventListenerId);
+		EventListener listener = (EventListener) query.getSingleResult();
+		mng.remove(listener);
 	}
 
 	@Schedule(second = "*/10", minute = "*", hour = "*", persistent = false)
@@ -217,11 +229,13 @@ public class EventRegistry {
 
 		}
 		// Finally process all remaining events
-		Query q3= mng.createNamedQuery("findAllEvents");
+		Query q3 = mng.createNamedQuery("findAllEvents");
 		List<Event> events = q3.getResultList();
 		for (Event evt : events) {
-			System.out.println("Processing: " + evt.getLifetime());
-			processEvent(evt, getEventListenersRegisteredFor(evt.getSource(),evt.getPropertyName()));
+			if (evt.getSource() != null) {
+				System.out.println("Processing: " + evt.getLifetime());
+				processEvent(evt, getEventListenersRegisteredFor(evt.getSource(), evt.getPropertyName()));
+			}
 		}
 
 	}

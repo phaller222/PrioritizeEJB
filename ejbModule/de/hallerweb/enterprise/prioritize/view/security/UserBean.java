@@ -14,8 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
-import de.hallerweb.enterprise.prioritize.controller.InitializationController;
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
+import de.hallerweb.enterprise.prioritize.controller.project.ActionBoardController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
@@ -23,8 +22,9 @@ import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionC
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan.TimeSpanType;
-import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
-import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
+import de.hallerweb.enterprise.prioritize.model.event.Event;
+import de.hallerweb.enterprise.prioritize.model.project.ActionBoard;
+import de.hallerweb.enterprise.prioritize.model.project.ActionBoardEntry;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
@@ -56,8 +56,8 @@ public class UserBean implements Serializable {
 	CompanyController companyController;
 	@EJB
 	ItemCollectionController itemCollectionController;
-
-
+	@EJB
+	ActionBoardController actionboardController;
 
 	User user; 														// Stores the user
 	String selectedDepartmentId; 									// Selected Department
@@ -75,6 +75,8 @@ public class UserBean implements Serializable {
 
 	String selectedItemCollectionName;
 
+	List<ActionBoardEntry> actionBoardEntries;
+	
 	public List<TimeSpan> getVacations() {
 		return vacations;
 	}
@@ -377,4 +379,19 @@ public class UserBean implements Serializable {
 			itemCollectionController.addUser(managedCollection, managedUser);
 		}
 	}
+	
+	@Named
+	public List<ActionBoardEntry> getActionBoardEntries() {
+		ActionBoard board = (ActionBoard) actionboardController.findActionBoardByOwner(sessionController.getUser().getId());
+		return board.getEntries();
+	}
+	
+
+	// TODO: TEST, REMOVE!!!
+
+	public void raiseTestEvent() {
+		actionboardController.post(actionboardController.findActionBoardByName("admin").getId(), "Testeintrag", "Dies ist ein Test!",
+				new Event());
+	}
+
 }

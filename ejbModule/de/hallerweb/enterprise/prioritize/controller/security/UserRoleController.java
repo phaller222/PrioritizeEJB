@@ -20,13 +20,14 @@ import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
+import de.hallerweb.enterprise.prioritize.controller.project.ActionBoardController;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
-import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
+import de.hallerweb.enterprise.prioritize.model.project.ActionBoard;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
@@ -55,6 +56,9 @@ public class UserRoleController extends PEventConsumerProducer {
 
 	@Inject
 	EventRegistry eventRegistry;
+
+	@EJB
+	ActionBoardController actionBoardController;
 
 	/**
 	 * Default constructor.
@@ -232,7 +236,7 @@ public class UserRoleController extends PEventConsumerProducer {
 	public User createUser(String username, String password, String name, String email, Department initialDepartment, String occupation,
 			Set<Role> roles, User sessionUser) {
 		User user = new User();
-		
+
 		if (authController.canCreate(user, sessionUser)) {
 			if (findUserByUsername(username, AuthorizationController.getSystemUser()) == null) {
 				user.setUsername(username);
@@ -245,7 +249,6 @@ public class UserRoleController extends PEventConsumerProducer {
 				em.persist(preference);
 				user.setPreference(preference);
 				em.persist(user);
-				
 
 				for (Role role : roles) {
 					Role managedRole = em.find(Role.class, role.getId());
@@ -305,8 +308,8 @@ public class UserRoleController extends PEventConsumerProducer {
 				}
 				if (user.getDepartment() != null) {
 					if (!(user.getDepartment().getId() == initialDepartmentId)) {
-						this.raiseEvent(user, User.PROPERTY_DEPARTMENT,
-								String.valueOf(user.getDepartment().getId()), String.valueOf(initialDepartmentId),
+						this.raiseEvent(user, User.PROPERTY_DEPARTMENT, String.valueOf(user.getDepartment().getId()),
+								String.valueOf(initialDepartmentId),
 								InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 					}
 				}
@@ -340,7 +343,7 @@ public class UserRoleController extends PEventConsumerProducer {
 		}
 
 	}
-	
+
 	public List<String> getAllUserNames(User sessionUser) throws EJBException {
 		Query query = em.createNamedQuery("findAllUserNames");
 		List<String> users = query.getResultList();
@@ -571,16 +574,26 @@ public class UserRoleController extends PEventConsumerProducer {
 
 	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
 		if (InitializationController.getAsBoolean(InitializationController.FIRE_USER_EVENTS)) {
-			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue)
-					.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
+			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
+					.setPropertyName(name).setLifetime(lifetime).getEvent();
 			eventRegistry.addEvent(evt);
 		}
 	}
 
 	@Override
 	public void consumeEvent(PObject o, Event evt) {
-		System.out.println("Object " + o.toString() + " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue() + "--- User listening: " + ((User)o).getUsername());
+		System.out.println("Object " + o.toString() + " raised event: " + evt.getPropertyName() + " with new Value: " + evt.getNewValue()
+				+ "--- User listening: " + ((User) o).getUsername());
+
+		PObject source = evt.getSource();
+		User destination = (User) o;
+		if (evt.getSource() instanceof ActionBoard) {
+			ActionBoard board = (ActionBoard) evt.getSource();
+			if (!board.getOwner().equals(destination)) {
+			actionBoardController.post(actionBoardController.findActionBoardByOwner(destination.getId()).getId(), evt.getPropertyName(),
+					evt.getPropertyName() + " set to " + evt.getNewValue(), evt);
+			}
+		}
 
 	}
 

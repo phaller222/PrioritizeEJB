@@ -16,6 +16,9 @@ import org.jboss.logging.Logger;
 import org.jboss.logging.Logger.Level;
 
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
+import de.hallerweb.enterprise.prioritize.controller.project.ActionBoardController;
+import de.hallerweb.enterprise.prioritize.controller.project.task.BlackboardController;
+import de.hallerweb.enterprise.prioritize.controller.project.task.TaskController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
@@ -24,7 +27,12 @@ import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
-import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
+import de.hallerweb.enterprise.prioritize.model.event.Event;
+import de.hallerweb.enterprise.prioritize.model.event.EventListener;
+import de.hallerweb.enterprise.prioritize.model.project.ActionBoard;
+import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
+import de.hallerweb.enterprise.prioritize.model.project.task.Task;
+import de.hallerweb.enterprise.prioritize.model.project.task.TaskStatus;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
@@ -47,6 +55,12 @@ public class InitializationController {
 	UserRoleController userRoleController;
 	@EJB
 	CompanyController companyController;
+	@EJB
+	ActionBoardController actionBoardController;
+	@EJB
+	TaskController taskController;
+	@EJB
+	BlackboardController blackboardController;
 	@EJB
 	SessionController sessionController;
 	@Inject EventRegistry eventRegistry;
@@ -75,6 +89,8 @@ public class InitializationController {
 	public static final String FIRE_DOCUMENT_EVENTS="FIRE_DOCUMENT_EVENTS";
 	public static final String FIRE_DEPARTMENT_EVENTS="FIRE_DEPARTMENT_EVENTS";
 	public static final String FIRE_USER_EVENTS="FIRE_USER_EVENTS";
+	public static final String FIRE_ACTIONBOARD_EVENTS="FIRE_ACTIONBOARD_EVENTS";
+	public static final String FIRE_TASK_EVENTS="FIRE_TASK_EVENTS";
 	
 	
 	// resource / device.
@@ -114,6 +130,8 @@ public class InitializationController {
 		config.put(FIRE_DOCUMENT_EVENTS, "true"); 
 		config.put(FIRE_USER_EVENTS, "true"); 
 		config.put(FIRE_DEPARTMENT_EVENTS, "true"); 
+		config.put(FIRE_ACTIONBOARD_EVENTS, "true");
+		config.put(FIRE_TASK_EVENTS, "true"); 
 
 		try {
 			BufferedReader reader = new BufferedReader(
@@ -191,10 +209,52 @@ public class InitializationController {
 
 			User admin = userRoleController.createUser("admin", "admin", "admin", "", null, "", roles,
 					AuthorizationController.getSystemUser());
+			
+			// TODO: Remove admin API-Key!
 			admin.setApiKey("ABCDEFG");
 			
+			//TODO: Test implementation, REMOVE!
 			eventRegistry.createEventListener(admin, admin, "name", 120000, true);
 			
+			ActionBoard adminBoard = actionBoardController.createActionBoard("admin","Admin's board", admin);
+			actionBoardController.addSubscriber(adminBoard.getId(), admin);
+			
+			// TODO: Test implementation, REMOVE!
+			Task task = new Task();
+			task.setName("My demo task");
+			task.setDescription("This is my first test task");
+			task.setPriority(1);
+			task.setTaskStatus(TaskStatus.ASSIGNED);
+
+			Task subtask = new Task();
+			subtask.setName("My demo subtask");
+			subtask.setDescription("This is my first test subtask");
+			subtask.setPriority(1);
+			subtask.setTaskStatus(TaskStatus.ASSIGNED);
+			
+			Task managedSubTask = taskController.createTask(subtask);
+			taskController.addTaskAssignee(managedSubTask.getId(),admin);
+			
+			Task managedTask = taskController.createTask(task);
+			taskController.addTaskAssignee(managedTask.getId(),admin);
+			
+			taskController.addSubTask(managedTask, managedSubTask);
+		
+			eventRegistry.createEventListener(managedTask,admin,"blackboard", 30000, false);
+			
+			Blackboard bb = new Blackboard();
+			bb.setTitle("My Blackboard");
+			bb.setDescription("This is my first blackboard");
+			bb.setFrozen(false);
+			
+			Blackboard managedBlackboard = blackboardController.createBlackboard(bb);
+			blackboardController.putTaskToBlackboard(managedTask.getId(), managedBlackboard.getId());
+			
+			
+			
+			
+			
+			//------------------------------------------------------
 
 		} else {
 			System.out.println("Deployment OK.");

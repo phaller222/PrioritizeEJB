@@ -13,6 +13,7 @@ import javax.persistence.OneToOne;
 
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
+import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 
@@ -44,6 +45,18 @@ public class Task extends PObject{
 	
 	@ManyToMany
 	private List<PActor> assignees;
+	
+	@OneToOne 
+	ProjectGoalRecord projectGoal;
+	
+
+	public ProjectGoalRecord getProjectGoal() {
+		return projectGoal;
+	}
+
+	public void setProjectGoal(ProjectGoalRecord projectGoal) {
+		this.projectGoal = projectGoal;
+	}
 
 	public int getPriority() {
 		return priority;

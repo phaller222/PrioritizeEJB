@@ -77,7 +77,7 @@ public class BlackboardController extends PEventConsumerProducer {
 		if (!bb.isFrozen()) {
 			Task task = taskController.findTaskById(taskId);
 			task.addAssignee(assignee);
-			bb.removeTask(task);
+			bb.removeTask(task); 
 		}
 	}
 

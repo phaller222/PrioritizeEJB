@@ -16,6 +16,26 @@ public class ProjectGoalPropertyRecord {
 	ProjectGoalProperty property;
 	
 	double value;
+
+	public ProjectGoalProperty getProperty() {
+		return property;
+	}
+
+	public void setProperty(ProjectGoalProperty property) {
+		this.property = property;
+	}
+
+	public double getValue() {
+		return value;
+	}
+
+	public void setValue(double value) {
+		this.value = value;
+	}
+
+	public int getId() {
+		return id;
+	}
 	
 	
 }

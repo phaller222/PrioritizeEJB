@@ -2,8 +2,11 @@ package de.hallerweb.enterprise.prioritize.controller;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -17,6 +20,7 @@ import org.jboss.logging.Logger.Level;
 
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.project.ActionBoardController;
+import de.hallerweb.enterprise.prioritize.controller.project.ProjectController;
 import de.hallerweb.enterprise.prioritize.controller.project.task.BlackboardController;
 import de.hallerweb.enterprise.prioritize.controller.project.task.TaskController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
@@ -27,9 +31,13 @@ import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.EventListener;
 import de.hallerweb.enterprise.prioritize.model.project.ActionBoard;
+import de.hallerweb.enterprise.prioritize.model.project.Project;
+import de.hallerweb.enterprise.prioritize.model.project.ProjectProgress;
+import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoal;
+import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalProperty;
+import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyRecord;
+import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
 import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.project.task.TaskStatus;
@@ -60,10 +68,13 @@ public class InitializationController {
 	@EJB
 	TaskController taskController;
 	@EJB
+	ProjectController projectController;
+	@EJB
 	BlackboardController blackboardController;
 	@EJB
 	SessionController sessionController;
-	@Inject EventRegistry eventRegistry;
+	@Inject
+	EventRegistry eventRegistry;
 
 	public static HashMap<String, String> config = new HashMap<String, String>();
 
@@ -85,14 +96,13 @@ public class InitializationController {
 	public static final String EVENT_DEFAULT_TIMEOUT = "EVENT_DEFAULT_TIMEOUT"; // Default timeout value for events
 	public static final String EVENT_DEFAULT_STRATEGY = "EVENT_DEFAULT_STRATEGY"; // Default Strategy value for events
 	public static final String LISTENER_DEFAULT_TIMEOUT = "LISTENER_DEFAULT_TIMEOUT"; // Default timeout value for event listeners
-	public static final String FIRE_RESOURCE_EVENTS="FIRE_RESOURCE_EVENTS";
-	public static final String FIRE_DOCUMENT_EVENTS="FIRE_DOCUMENT_EVENTS";
-	public static final String FIRE_DEPARTMENT_EVENTS="FIRE_DEPARTMENT_EVENTS";
-	public static final String FIRE_USER_EVENTS="FIRE_USER_EVENTS";
-	public static final String FIRE_ACTIONBOARD_EVENTS="FIRE_ACTIONBOARD_EVENTS";
-	public static final String FIRE_TASK_EVENTS="FIRE_TASK_EVENTS";
-	
-	
+	public static final String FIRE_RESOURCE_EVENTS = "FIRE_RESOURCE_EVENTS";
+	public static final String FIRE_DOCUMENT_EVENTS = "FIRE_DOCUMENT_EVENTS";
+	public static final String FIRE_DEPARTMENT_EVENTS = "FIRE_DEPARTMENT_EVENTS";
+	public static final String FIRE_USER_EVENTS = "FIRE_USER_EVENTS";
+	public static final String FIRE_ACTIONBOARD_EVENTS = "FIRE_ACTIONBOARD_EVENTS";
+	public static final String FIRE_TASK_EVENTS = "FIRE_TASK_EVENTS";
+
 	// resource / device.
 	public final static String DEFAULT_DEPARTMENT_TOKEN = "09eb3067d0fe446bbe7788218fec9bdd";
 
@@ -122,16 +132,16 @@ public class InitializationController {
 		config.put(MQTT_PING_TIMEOUT, "60000");
 
 		config.put(DISCOVERY_ALLOW_DEFAULT_DEPARTMENT, "true");
-		
+
 		config.put(EVENT_DEFAULT_TIMEOUT, "120000"); // Default is 2 minutes
 		config.put(EVENT_DEFAULT_STRATEGY, "IMMEDIATE"); // Default is IMMEDIATE
 		config.put(LISTENER_DEFAULT_TIMEOUT, "120000"); // Default is 2 minutes
-		config.put(FIRE_RESOURCE_EVENTS, "true"); 
-		config.put(FIRE_DOCUMENT_EVENTS, "true"); 
-		config.put(FIRE_USER_EVENTS, "true"); 
-		config.put(FIRE_DEPARTMENT_EVENTS, "true"); 
+		config.put(FIRE_RESOURCE_EVENTS, "true");
+		config.put(FIRE_DOCUMENT_EVENTS, "true");
+		config.put(FIRE_USER_EVENTS, "true");
+		config.put(FIRE_DEPARTMENT_EVENTS, "true");
 		config.put(FIRE_ACTIONBOARD_EVENTS, "true");
-		config.put(FIRE_TASK_EVENTS, "true"); 
+		config.put(FIRE_TASK_EVENTS, "true");
 
 		try {
 			BufferedReader reader = new BufferedReader(
@@ -152,15 +162,15 @@ public class InitializationController {
 	public static String get(String name) {
 		return config.get(name);
 	}
-	
+
 	public static int getAsInt(String name) {
 		return Integer.parseInt(config.get(name));
 	}
-	
+
 	public static boolean getAsBoolean(String name) {
 		return Boolean.parseBoolean(config.get(name));
 	}
-	
+
 	private void createAdminAccountIfNotPresent() {
 
 		RoleBean.authorizedObjects = new HashMap<String, Class<? extends PAuthorizedObject>>();
@@ -209,52 +219,99 @@ public class InitializationController {
 
 			User admin = userRoleController.createUser("admin", "admin", "admin", "", null, "", roles,
 					AuthorizationController.getSystemUser());
-			
+
 			// TODO: Remove admin API-Key!
 			admin.setApiKey("ABCDEFG");
-			
-			//TODO: Test implementation, REMOVE!
-			eventRegistry.createEventListener(admin, admin, "name", 120000, true);
-			
-			ActionBoard adminBoard = actionBoardController.createActionBoard("admin","Admin's board", admin);
-			actionBoardController.addSubscriber(adminBoard.getId(), admin);
-			
-			// TODO: Test implementation, REMOVE!
-			Task task = new Task();
-			task.setName("My demo task");
-			task.setDescription("This is my first test task");
-			task.setPriority(1);
-			task.setTaskStatus(TaskStatus.ASSIGNED);
 
-			Task subtask = new Task();
-			subtask.setName("My demo subtask");
-			subtask.setDescription("This is my first test subtask");
-			subtask.setPriority(1);
-			subtask.setTaskStatus(TaskStatus.ASSIGNED);
-			
-			Task managedSubTask = taskController.createTask(subtask);
-			taskController.addTaskAssignee(managedSubTask.getId(),admin);
-			
-			Task managedTask = taskController.createTask(task);
-			taskController.addTaskAssignee(managedTask.getId(),admin);
-			
-			taskController.addSubTask(managedTask, managedSubTask);
-		
-			eventRegistry.createEventListener(managedTask,admin,"blackboard", 30000, false);
-			
-			Blackboard bb = new Blackboard();
-			bb.setTitle("My Blackboard");
-			bb.setDescription("This is my first blackboard");
-			bb.setFrozen(false);
-			
-			Blackboard managedBlackboard = blackboardController.createBlackboard(bb);
-			blackboardController.putTaskToBlackboard(managedTask.getId(), managedBlackboard.getId());
-			
-			
-			
-			
-			
-			//------------------------------------------------------
+			// TODO: Test implementation, REMOVE!
+			eventRegistry.createEventListener(admin, admin, "name", 120000, true);
+
+			ActionBoard adminBoard = actionBoardController.createActionBoard("admin", "Admin's board", admin);
+			actionBoardController.addSubscriber(adminBoard.getId(), admin);
+
+			// TODO: Test implementation, REMOVE!
+//			Task task = new Task();
+//			task.setName("My demo task");
+//			task.setDescription("This is my first test task");
+//			task.setPriority(1);
+//			task.setTaskStatus(TaskStatus.ASSIGNED);
+//
+//			Task subtask = new Task();
+//			subtask.setName("My demo subtask");
+//			subtask.setDescription("This is my first test subtask");
+//			subtask.setPriority(1);
+//			subtask.setTaskStatus(TaskStatus.ASSIGNED);
+//
+//			Task managedSubTask = taskController.createTask(subtask);
+//			taskController.addTaskAssignee(managedSubTask.getId(), admin);
+//
+//			Task managedTask = taskController.createTask(task);
+//			taskController.addTaskAssignee(managedTask.getId(), admin);
+//
+//			taskController.addSubTask(managedTask, managedSubTask);
+//
+//			eventRegistry.createEventListener(managedTask, admin, "blackboard", 30000, false);
+//
+//			Blackboard bb = new Blackboard();
+//			bb.setTitle("My Blackboard");
+//			bb.setDescription("This is my first blackboard");
+//			bb.setFrozen(false);
+//
+//			Blackboard managedBlackboard = blackboardController.createBlackboard(bb);
+//			blackboardController.putTaskToBlackboard(managedTask.getId(), managedBlackboard.getId());
+
+			// Project
+			Project project = new Project();
+			project.setName("Testproject");
+			project.setDescription("Testbeschreibung");
+			project.setBeginDate(new Date());
+			project.setDueDate(new Date(new Date().getTime() + 3000000));
+			project.setManager(userRoleController.findRoleByRolename("admin", admin));
+			project.setMaxManDays(20);
+			project.setPriority(1);
+			project.setActionboard(adminBoard);
+			//project.setBlackboard(managedBlackboard);
+			Project managedProject = projectController.createProject(project);
+
+			// Project Goals
+			ProjectGoalProperty property = new ProjectGoalProperty();
+			property.setName("Nominalumsatz");
+			property.setDescription("Nominalumsatz im Unternehmen");
+			property.setMin(10000);
+			property.setMax(30000);
+			List<ProjectGoalProperty> properties = new ArrayList<ProjectGoalProperty>();
+			properties.add(property);
+
+			ProjectGoalPropertyRecord propRecord = new ProjectGoalPropertyRecord();
+			propRecord.setProperty(property);
+			propRecord.setValue(5000);
+
+			ProjectGoal goal = new ProjectGoal();
+			goal.setName("Umsatzsteigerung");
+			goal.setDescription("Wir brauchen mehr Umsatz!");
+			goal.setProperties(properties);
+
+			ProjectGoalRecord goalRecord = new ProjectGoalRecord();
+			goalRecord.setPropertyRecord(propRecord);
+			goalRecord.setProject(managedProject);
+			goalRecord.setProjectGoal(goal);
+			List<ProjectGoalRecord> projectGoalRecords = new ArrayList<ProjectGoalRecord>();
+			projectGoalRecords.add(goalRecord);
+
+			// Create initial ProjectProgress
+			ProjectProgress managedProgress = projectController.createProjectProgress(project.getId(), projectGoalRecords, 0);
+			managedProject.setProgress(managedProgress);
+
+			// Update project progress and create tasks
+			for (ProjectGoalRecord recOrig : project.getProgress().getTargetGoals()) {
+				ProjectGoalRecord updatedRecord = projectController.createTaskForProjectGoal(recOrig.getId());
+				updatedRecord.getPropertyRecord().setValue(9000);
+			}
+
+			projectController.updateProjectProgress(managedProject.getId());
+			System.out.println("-------------- Ergebnis: ----  " + managedProgress.getProgress());
+
+			// ------------------------------------------------------
 
 		} else {
 			System.out.println("Deployment OK.");

@@ -9,7 +9,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToOne; 
 
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.Document;

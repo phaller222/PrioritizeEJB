@@ -6,6 +6,8 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
@@ -18,6 +20,9 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillGroup;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 
 @Entity
+@NamedQueries({ @NamedQuery(name = "findProjectById", query = "select p FROM Project p WHERE p.id = :projectId"),
+	@NamedQuery(name = "findProjectsByManagerRole", query = "select p FROM Project p WHERE p.manager.id = :roleId"),
+	 })
 public class Project {
 
 	@GeneratedValue
@@ -185,7 +190,7 @@ public class Project {
 		this.requiredSkills = requiredSkills;
 	}
 	
-	public void addRRequiredSkill(SkillGroup group) {
+	public void addRequiredSkill(SkillGroup group) {
 		this.requiredSkills.add(group);
 	}
 	

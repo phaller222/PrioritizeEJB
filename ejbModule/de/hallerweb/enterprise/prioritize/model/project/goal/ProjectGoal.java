@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+
 
 /**
  * ProjectGoalProperty - Describes possible values of a given ProjectProperty a ProjectGoalPropertyRecord might have.
@@ -22,9 +24,20 @@ public class ProjectGoal {
 	String name;
 	String description;
 	
+	@OneToOne
+	ProjectGoalCategory category;
+	
 	@OneToMany
 	List<ProjectGoalProperty> properties;
 	
+	public ProjectGoalCategory getCategory() {
+		return category;
+	}
+
+	public void setCategory(ProjectGoalCategory category) {
+		this.category = category;
+	}
+
 	public String getName() {
 		return name;
 	}

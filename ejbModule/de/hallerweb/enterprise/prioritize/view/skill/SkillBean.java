@@ -32,7 +32,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecordProperty;
 import de.hallerweb.enterprise.prioritize.service.mqtt.MQTTService;
 
 /**
- * LoggingBean - JSF Backing-Bean to manage skills
+ * SkillBean - JSF Backing-Bean to manage skills
  * 
  * <p>
  * Copyright: (c) 2015

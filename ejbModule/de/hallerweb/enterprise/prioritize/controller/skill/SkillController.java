@@ -38,13 +38,10 @@ public class SkillController {
 
 	@EJB
 	UserRoleController userRoleController;
-
 	@EJB
 	LoggingController logger;
-
 	@Inject
 	SessionController sessionController;
-
 	@EJB
 	AuthorizationController authController;
 

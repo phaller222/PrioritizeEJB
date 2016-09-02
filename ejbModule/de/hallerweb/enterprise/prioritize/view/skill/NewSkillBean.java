@@ -23,7 +23,7 @@ import de.hallerweb.enterprise.prioritize.service.mqtt.MQTTService;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 
 /**
- * LoggingBean - JSF Backing-Bean to manage skills
+ * NewSkillBean - JSF Backing-Bean to manage new skills
  * 
  * <p>
  * Copyright: (c) 2015

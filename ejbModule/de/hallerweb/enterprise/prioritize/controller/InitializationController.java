@@ -304,7 +304,7 @@ public class InitializationController {
 
 			// Update project progress and create tasks
 			for (ProjectGoalRecord recOrig : project.getProgress().getTargetGoals()) {
-				ProjectGoalRecord updatedRecord = projectController.createTaskForProjectGoal(recOrig.getId());
+				ProjectGoalRecord updatedRecord = projectController.activateProjectGoal(recOrig.getId());
 				updatedRecord.getPropertyRecord().setValue(9000);
 			}
 

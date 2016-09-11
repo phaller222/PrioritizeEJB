@@ -5,6 +5,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
+import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
+
 @Entity
 public class ProjectGoalPropertyRecord {
 	
@@ -16,6 +18,36 @@ public class ProjectGoalPropertyRecord {
 	ProjectGoalProperty property;
 	
 	double value;
+	
+	@OneToOne
+	DocumentInfo documentInfo;
+
+	boolean documentPropertyRecord;
+	boolean numericPropertyRecord;
+	
+	public boolean isDocumentPropertyRecord() {
+		return documentPropertyRecord;
+	}
+
+	public void setDocumentPropertyRecord(boolean documentPropertyRecord) {
+		this.documentPropertyRecord = documentPropertyRecord;
+	}
+
+	public boolean isNumericPropertyRecord() {
+		return numericPropertyRecord;
+	}
+
+	public void setNumericPropertyRecord(boolean numericPropertyRecord) {
+		this.numericPropertyRecord = numericPropertyRecord;
+	}
+
+	public DocumentInfo getDocumentInfo() {
+		return documentInfo;
+	}
+
+	public void setDocumentInfo(DocumentInfo documentInfo) {
+		this.documentInfo = documentInfo;
+	}
 
 	public ProjectGoalProperty getProperty() {
 		return property;

@@ -31,12 +31,12 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
  */
 @Entity
 @NamedQueries({
-		@NamedQuery(name = "findRootProjectGoalCategories", query = "select cat FROM ProjectGoalCategory cat WHERE cat.parentCategory IS NULL"),
+		@NamedQuery(name = "findProjectGoalRootCategories", query = "select cat FROM ProjectGoalCategory cat WHERE cat.parentCategory IS NULL"),
 		@NamedQuery(name = "findAllProjectGoalCategories", query = "select cat FROM ProjectGoalCategory cat"),
 		@NamedQuery(name = "findProjectGoalCategoryByName", query = "select cat FROM ProjectGoalCategory cat WHERE cat.name = :categoryName"),
 		@NamedQuery(name = "findProjectGoalCategoryById", query = "select cat FROM ProjectGoalCategory cat WHERE cat.id = :categoryId"),
-		@NamedQuery(name = "findSubCategoriesForProjectGoalCategory", query = "select cat FROM ProjectGoalCategory cat WHERE cat.parentCategory.id = :parentCategoryId"),
-		@NamedQuery(name = "findGoalsForCategory", query = "select g FROM ProjectGoal g WHERE g.category.id = :catId") })
+		@NamedQuery(name = "findProjectGoalSubCategoriesForCategory", query = "select cat FROM ProjectGoalCategory cat WHERE cat.parentCategory.id = :parentCategoryId"),
+		@NamedQuery(name = "findProjectGoalsForCategory", query = "select g FROM ProjectGoal g WHERE g.category.id = :catId") })
 public class ProjectGoalCategory  {
 
 	@Id

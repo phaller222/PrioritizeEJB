@@ -1,5 +1,6 @@
 package de.hallerweb.enterprise.prioritize.model.document;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -77,6 +78,9 @@ public class DocumentGroup implements PAuthorizedObject {
 	}
 
 	public void addDocument(DocumentInfo info) {
+		if (this.documents== null) {
+			this.documents = new HashSet<DocumentInfo>();
+		}
 		this.documents.add(info);
 	}
 

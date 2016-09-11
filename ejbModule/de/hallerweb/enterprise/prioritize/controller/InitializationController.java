@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import org.jboss.logging.Logger;
 import org.jboss.logging.Logger.Level;
 
+import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.project.ActionBoardController;
 import de.hallerweb.enterprise.prioritize.controller.project.ProjectController;
@@ -29,18 +30,19 @@ import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController
 import de.hallerweb.enterprise.prioritize.model.Address;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.project.ActionBoard;
 import de.hallerweb.enterprise.prioritize.model.project.Project;
 import de.hallerweb.enterprise.prioritize.model.project.ProjectProgress;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoal;
+import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalCategory;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalProperty;
+import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyDocument;
+import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyNumeric;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyRecord;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
-import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
-import de.hallerweb.enterprise.prioritize.model.project.task.Task;
-import de.hallerweb.enterprise.prioritize.model.project.task.TaskStatus;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
@@ -73,6 +75,8 @@ public class InitializationController {
 	BlackboardController blackboardController;
 	@EJB
 	SessionController sessionController;
+	@EJB
+	DocumentController documentController;
 	@Inject
 	EventRegistry eventRegistry;
 
@@ -189,7 +193,7 @@ public class InitializationController {
 
 			// Create default company and default department
 			boolean createDefaultCompany = Boolean.valueOf(config.get(CREATE_DEFAULT_COMPANY));
-
+			Department d=null;
 			if (createDefaultCompany) {
 				Address adr = new Address();
 				adr.setCity("City of Admin");
@@ -199,9 +203,9 @@ public class InitializationController {
 				adr.setZipCode("00000");
 				Company c = companyController.createCompany("Default Company", adr);
 				c.setMainAddress(adr);
-
+				
 				if (Boolean.valueOf(config.get(CREATE_DEFAULT_DEPARTMENT))) {
-					Department d = companyController.createDepartment(c, "default", "Auto generated default department", adr,
+					d = companyController.createDepartment(c, "default", "Auto generated default department", adr,
 							AuthorizationController.getSystemUser());
 				}
 			}
@@ -260,7 +264,7 @@ public class InitializationController {
 //			Blackboard managedBlackboard = blackboardController.createBlackboard(bb);
 //			blackboardController.putTaskToBlackboard(managedTask.getId(), managedBlackboard.getId());
 
-			// Project
+			// ------------- TEST Project --------------------------------------
 			Project project = new Project();
 			project.setName("Testproject");
 			project.setDescription("Testbeschreibung");
@@ -272,31 +276,62 @@ public class InitializationController {
 			project.setActionboard(adminBoard);
 			//project.setBlackboard(managedBlackboard);
 			Project managedProject = projectController.createProject(project);
-
-			// Project Goals
-			ProjectGoalProperty property = new ProjectGoalProperty();
+			//-------------------------------------------------------------------------
+			
+			
+			
+			// --------------TEST Project Goals ---------------------------------------
+			ProjectGoalPropertyNumeric property = new ProjectGoalPropertyNumeric();
 			property.setName("Nominalumsatz");
 			property.setDescription("Nominalumsatz im Unternehmen");
 			property.setMin(10000);
 			property.setMax(30000);
+			
+			ProjectGoalPropertyDocument property2 = new ProjectGoalPropertyDocument();
+			property2.setName("Finale Spezifikation");
+			property2.setDescription("Feinspezifikation komplett");
+			property2.setTag("FINAL");
+			
+			
 			List<ProjectGoalProperty> properties = new ArrayList<ProjectGoalProperty>();
 			properties.add(property);
+			properties.add(property2);
 
 			ProjectGoalPropertyRecord propRecord = new ProjectGoalPropertyRecord();
 			propRecord.setProperty(property);
 			propRecord.setValue(5000);
+			propRecord.setNumericPropertyRecord(true);
+			
+			ProjectGoalPropertyRecord propRecord2 = new ProjectGoalPropertyRecord();
+			propRecord2.setProperty(property2);
+			DocumentGroup temp = documentController.createDocumentGroup(d.getId(), "test", admin);
+			DocumentInfo info = documentController.createDocument("ttt", temp.getId(), admin, "text/plain", false, new byte[]{}, "none");
+			Document document = info.getCurrentDocument();
+			document.setTag("FINAL");
+			documentController.editDocument(info,document, "1212".getBytes(),"text/plain", admin,false);
+			
+			propRecord2.setDocumentInfo(info);
+			propRecord2.setDocumentPropertyRecord(true);
 
-			ProjectGoal goal = new ProjectGoal();
-			goal.setName("Umsatzsteigerung");
-			goal.setDescription("Wir brauchen mehr Umsatz!");
-			goal.setProperties(properties);
-
+			ProjectGoalCategory cat = projectController.createProjectGoalCategory("Financial", "Financial project goals", null);
+			ProjectGoal goal = projectController.createProjectGoal("Umsatzsteigerung", "Wir brauchen mehr Umsatz!", cat, properties, admin);
+					//new ProjectGoal();
+			goal.setCategory(cat);	
+			
 			ProjectGoalRecord goalRecord = new ProjectGoalRecord();
 			goalRecord.setPropertyRecord(propRecord);
 			goalRecord.setProject(managedProject);
 			goalRecord.setProjectGoal(goal);
+			
+			ProjectGoalRecord goalRecord2 = new ProjectGoalRecord();
+			goalRecord2.setPropertyRecord(propRecord2);
+			goalRecord2.setProject(managedProject);
+			goalRecord2.setProjectGoal(goal);
+			
+			
 			List<ProjectGoalRecord> projectGoalRecords = new ArrayList<ProjectGoalRecord>();
 			projectGoalRecords.add(goalRecord);
+			projectGoalRecords.add(goalRecord2);
 
 			// Create initial ProjectProgress
 			ProjectProgress managedProgress = projectController.createProjectProgress(project.getId(), projectGoalRecords, 0);
@@ -305,13 +340,14 @@ public class InitializationController {
 			// Update project progress and create tasks
 			for (ProjectGoalRecord recOrig : project.getProgress().getTargetGoals()) {
 				ProjectGoalRecord updatedRecord = projectController.activateProjectGoal(recOrig.getId());
-				updatedRecord.getPropertyRecord().setValue(9000);
+				updatedRecord.getPropertyRecord().setValue(9800);
+				updatedRecord.getPropertyRecord().setDocumentInfo(info);
 			}
 
 			projectController.updateProjectProgress(managedProject.getId());
 			System.out.println("-------------- Ergebnis: ----  " + managedProgress.getProgress());
 
-			// ------------------------------------------------------
+			// ------------------------------------------------------------------
 
 		} else {
 			System.out.println("Deployment OK.");

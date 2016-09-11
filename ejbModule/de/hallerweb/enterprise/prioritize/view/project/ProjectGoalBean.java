@@ -149,9 +149,6 @@ public class ProjectGoalBean implements Serializable {
 
 	@Named
 	public String deleteProjectGoalItem(Object pgItem) {
-
-		ProjectGoalProperty prop = (ProjectGoalProperty) pgItem;
-		controller.deleteProjectGoalProperty(prop.getId());
 		if (pgItem instanceof ProjectGoalCategory) {
 			ProjectGoalCategory cat = (ProjectGoalCategory) pgItem;
 			controller.deleteProjectGoalCategory(cat.getId(), sessionController.getUser());
@@ -163,7 +160,7 @@ public class ProjectGoalBean implements Serializable {
 	}
 
 	public void deleteSelectedProjectGoalItem() {
-		DefaultTreeNode selectedNode = (DefaultTreeNode) this.selectedGoal;
+		DefaultTreeNode selectedNode = (DefaultTreeNode) this.selectedProjectGoalItem;
 		if (!(selectedNode.getData() instanceof DefaultTreeNode)) {
 			deleteProjectGoalItem(selectedNode.getData());
 		}

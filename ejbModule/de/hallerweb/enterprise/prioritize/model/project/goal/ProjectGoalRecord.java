@@ -49,6 +49,9 @@ public class ProjectGoalRecord {
 	@OneToOne
 	ProjectGoal projectGoal;							// The base ProjectGoal
 	
+	@OneToOne
+	ProjectGoalPropertyRecord propertyRecord;		// Property record if NumericProperty is used.
+	
 	int percentage;										// percentage of completion of this ProjectGoalRecord
 
 	public int getPercentage() {
@@ -75,9 +78,6 @@ public class ProjectGoalRecord {
 		this.project = project;
 	}
 
-	@OneToOne
-	ProjectGoalPropertyRecord propertyRecord;					// Value to achieve if target goal, otherwise current value of underlying task.
-
 	public Task getTask() {
 		return task;
 	}
@@ -93,7 +93,7 @@ public class ProjectGoalRecord {
 	public void setPropertyRecord(ProjectGoalPropertyRecord property) {
 		this.propertyRecord = property;
 	}
-
+	
 	public int getId() {
 		return id;
 	}

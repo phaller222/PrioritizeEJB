@@ -9,7 +9,9 @@ import java.util.TreeSet;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.enterprise.context.ContextNotActiveException;
 import javax.inject.Inject;
+import javax.naming.NoInitialContextException;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -29,7 +31,6 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
-import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
 /**
@@ -66,6 +67,9 @@ public class DocumentController extends PEventConsumerProducer {
 		// within the provided DocumentGroup. If yes, don't create document and
 		// return null.
 		DocumentGroup managedDocumentGroup = em.find(DocumentGroup.class, groupId);
+		if (managedDocumentGroup == null) {
+			return null;
+		}
 		if (findDocumentInfoByGroupAndName(managedDocumentGroup.getId(), name, user) != null) {
 			return null;
 		} else {
@@ -99,10 +103,12 @@ public class DocumentController extends PEventConsumerProducer {
 
 				em.persist(document);
 				em.persist(documentInfo);
-
+				try {
 				logger.log(sessionController.getUser().getUsername(), "Document", Action.CREATE, documentInfo.getId(),
 						" Document \"" + documentInfo.getCurrentDocument().getName() + "\" created.");
-
+				} catch (ContextNotActiveException ex) {
+					// Log omitted here.
+				}
 				return documentInfo;
 			} else
 				return null;
@@ -127,9 +133,12 @@ public class DocumentController extends PEventConsumerProducer {
 
 				em.persist(documentGroup);
 				managedDepartment.addDocumentGroup(documentGroup);
-
+				try {
 				logger.log(sessionController.getUser().getUsername(), "DocumentGroup", Action.CREATE, documentGroup.getId(),
 						" DocumentGroup \"" + documentGroup.getName() + "\" created.");
+				} catch (ContextNotActiveException ex) {
+					// Log omitted here...
+				}
 
 				return documentGroup;
 			} else
@@ -300,9 +309,12 @@ public class DocumentController extends PEventConsumerProducer {
 
 			em.persist(document);
 			em.flush();
-
+			try {
 			logger.log(sessionController.getUser().getUsername(), "Document", Action.UPDATE, managedInfo.getId(),
 					" Document \"" + managedInfo.getCurrentDocument().getName() + "\" changed.");
+			} catch (ContextNotActiveException ex) {
+				// Omit logging here.
+			}
 
 			return managedInfo;
 		} else

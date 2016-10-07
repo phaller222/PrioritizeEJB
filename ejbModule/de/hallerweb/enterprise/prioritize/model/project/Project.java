@@ -13,6 +13,7 @@ import javax.persistence.OneToOne;
 
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
+import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
@@ -22,6 +23,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 @Entity
 @NamedQueries({ @NamedQuery(name = "findProjectById", query = "select p FROM Project p WHERE p.id = :projectId"),
 	@NamedQuery(name = "findProjectsByManagerRole", query = "select p FROM Project p WHERE p.manager.id = :roleId"),
+	@NamedQuery(name = "findProjectsByMember", query = "select p FROM Project p WHERE :user MEMBER OF p.users")
 	 })
 public class Project {
 
@@ -29,41 +31,45 @@ public class Project {
 	@Id
 	int id;
 
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	@OneToOne
-	Role manager;
+	PActor manager;
 	
-	String name;														// Name of the project
-	String description;													// Description of the project
-	Date beginDate;														// Begin date of this project
-	Date dueDate;														// Project due date 
-	int maxManDays;														// Max. amount of man days this project should consume
-	int priority;														// The prioritiy of this project
-	
-	@OneToMany
-	List<DocumentInfo> documents;										// DocumentInfo objects assigned to this project
+	String name;										// Name of the project
+	String description;									// Description of the project
+	Date beginDate;										// Begin date of this project
+	Date dueDate;										// Project due date 
+	int maxManDays;										// Max. amount of man days this project should consume
+	int priority;										// The prioritiy of this project
 	
 	@OneToMany
-	List<Resource> resources;											// Resources assigned to this project
+	List<DocumentInfo> documents;						// DocumentInfo objects assigned to this project
+	
 	@OneToMany
-	List<User> users;													// Users assigned to this project
+	List<Resource> resources;							// Resources assigned to this project
+	@OneToMany
+	List<User> users;									// Users assigned to this project
     @OneToMany	
-	List<SkillGroup> requiredSkills;									// The skills required to fullfill this project
+	List<SkillGroup> requiredSkills;					// The skills required to fullfill this project
 	@OneToMany
-	List<SkillRecord> availableSkills;									// Skills already assigned to the project (=available)
+	List<SkillRecord> availableSkills;					// Skills already assigned to the project (=available)
 	@OneToOne
-	Blackboard blackboard;												// The blackboard with tasks for this project 
+	Blackboard blackboard;								// The blackboard with tasks for this project 
 	@OneToOne
-	ActionBoard actionboard;											// ActionBoard with up to date information on the project.
+	ActionBoard actionboard;							// ActionBoard with up to date information on the project.
 	@OneToOne
-	ProjectProgress progress;											// Observe project goals and progress.
+	ProjectProgress progress;							// Observe project goals and progress.
 	
 	
-	public Role getManager() {
+	public PActor getManager() {
 		return manager;
 	}
 
 
-	public void setManager(Role manager) {
+	public void setManager(PActor manager) {
 		this.manager = manager;
 	}
 

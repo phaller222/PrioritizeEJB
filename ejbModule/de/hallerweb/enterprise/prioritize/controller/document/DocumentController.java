@@ -104,14 +104,15 @@ public class DocumentController extends PEventConsumerProducer {
 				em.persist(document);
 				em.persist(documentInfo);
 				try {
-				logger.log(sessionController.getUser().getUsername(), "Document", Action.CREATE, documentInfo.getId(),
-						" Document \"" + documentInfo.getCurrentDocument().getName() + "\" created.");
+					logger.log(sessionController.getUser().getUsername(), "Document", Action.CREATE, documentInfo.getId(),
+							" Document \"" + documentInfo.getCurrentDocument().getName() + "\" created.");
 				} catch (ContextNotActiveException ex) {
 					// Log omitted here.
 				}
 				return documentInfo;
-			} else
+			} else {
 				return null;
+			}
 		}
 	}
 
@@ -134,8 +135,8 @@ public class DocumentController extends PEventConsumerProducer {
 				em.persist(documentGroup);
 				managedDepartment.addDocumentGroup(documentGroup);
 				try {
-				logger.log(sessionController.getUser().getUsername(), "DocumentGroup", Action.CREATE, documentGroup.getId(),
-						" DocumentGroup \"" + documentGroup.getName() + "\" created.");
+					logger.log(sessionController.getUser().getUsername(), "DocumentGroup", Action.CREATE, documentGroup.getId(),
+							" DocumentGroup \"" + documentGroup.getName() + "\" created.");
 				} catch (ContextNotActiveException ex) {
 					// Log omitted here...
 				}
@@ -169,8 +170,9 @@ public class DocumentController extends PEventConsumerProducer {
 		// ------------------ AUTH check ---------------
 		if (authController.canRead(info, user)) {
 			return info;
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	public List<DocumentInfo> getAllDocumentInfos(User user) {
@@ -310,8 +312,8 @@ public class DocumentController extends PEventConsumerProducer {
 			em.persist(document);
 			em.flush();
 			try {
-			logger.log(sessionController.getUser().getUsername(), "Document", Action.UPDATE, managedInfo.getId(),
-					" Document \"" + managedInfo.getCurrentDocument().getName() + "\" changed.");
+				logger.log(sessionController.getUser().getUsername(), "Document", Action.UPDATE, managedInfo.getId(),
+						" Document \"" + managedInfo.getCurrentDocument().getName() + "\" changed.");
 			} catch (ContextNotActiveException ex) {
 				// Omit logging here.
 			}

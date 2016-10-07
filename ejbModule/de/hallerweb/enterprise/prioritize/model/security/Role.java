@@ -8,13 +8,10 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.Version;
 
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
@@ -55,6 +52,16 @@ public class Role extends PActor implements PAuthorizedObject, PSearchable {
 
 	transient List<SearchProperty> searchProperties;
 
+	private SearchResult generateResult() {
+		SearchResult result = new SearchResult();
+		result.setResult(this);
+		result.setResultType(SearchResultType.ROLE);
+		result.setExcerpt(name + " : " + this.getDescription());
+		result.setProvidesExcerpt(true);
+		result.setSubresults(new HashSet<SearchResult>());
+		return result;
+	}
+
 	@Override
 	public List<SearchResult> find(String phrase) {
 		ArrayList<SearchResult> results = new ArrayList<SearchResult>();
@@ -73,16 +80,7 @@ public class Role extends PActor implements PAuthorizedObject, PSearchable {
 		return results;
 	}
 
-	private SearchResult generateResult() {
-		SearchResult result = new SearchResult();
-		result.setResult(this);
-		result.setResultType(SearchResultType.ROLE);
-		result.setExcerpt(name + " : " + this.getDescription());
-		result.setProvidesExcerpt(true);
-		result.setSubresults(new HashSet<SearchResult>());
-		return result;
-	}
-
+	
 	@Override
 	public List<SearchResult> find(String phrase, SearchProperty property) {
 		// TODO Auto-generated method stub

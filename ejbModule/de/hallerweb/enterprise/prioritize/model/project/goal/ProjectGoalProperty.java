@@ -36,18 +36,23 @@ public  class ProjectGoalProperty {
 	public ProjectGoal getProjectGoal() {
 		return projectGoal;
 	}
+	
 	public void setProjectGoal(ProjectGoal projectGoal) {
 		this.projectGoal = projectGoal;
 	}
+	
 	public String getName() {
 		return name;
 	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
+	
 	public String getDescription() {
 		return description;
 	}
+	
 	public void setDescription(String description) {
 		this.description = description;
 	}

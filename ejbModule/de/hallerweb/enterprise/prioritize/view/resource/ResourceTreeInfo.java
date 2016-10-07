@@ -7,6 +7,7 @@ public class ResourceTreeInfo {
 
 	private boolean leaf;
 	private boolean resourceGroupNode;
+	
 	public boolean isResourceGroupNode() {
 		return resourceGroupNode;
 	}

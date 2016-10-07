@@ -37,42 +37,55 @@ public class Event {
 	String oldValue;
 	String newValue;
 	long lifetime;
+	
 	public Date getEventDate() {
 		return eventDate;
 	}
+	
 	public void setEventDate(Date when) {
 		this.eventDate = when;
 	}
+	
 	public PObject getSource() {
 		return source;
 	}
+	
 	public void setSource(PObject source) {
 		this.source = source;
 	}
+	
 	public String getPropertyName() {
 		return propertyName;
 	}
+	
 	public void setPropertyName(String propertyName) {
 		this.propertyName = propertyName;
 	}
+	
 	public Object getOldValue() {
 		return oldValue;
 	}
+	
 	public void setOldValue(String oldValue) {
 		this.oldValue = oldValue;
 	}
+	
 	public String getNewValue() {
 		return newValue;
 	}
+	
 	public void setNewValue(String newValue) {
 		this.newValue = newValue;
 	}
+	
 	public long getLifetime() {
 		return lifetime;
 	}
+	
 	public void setLifetime(long lifetime) {
 		this.lifetime = lifetime;
 	}
+	
 	public int getId() {
 		return id;
 	}

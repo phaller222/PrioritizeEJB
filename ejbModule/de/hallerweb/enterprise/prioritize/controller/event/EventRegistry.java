@@ -55,7 +55,7 @@ public class EventRegistry {
 
 	public enum EventStrategy {
 		IMMEDIATE, DELAYED
-	};
+	}
 
 	public static EventStrategy EVENT_STRATEGY = EventStrategy.DELAYED;  // Default = DELAYED
 

@@ -39,6 +39,7 @@ public class EventListener {
 	public PObject getDestination() {
 		return destination;
 	}
+	
 	public void setDestination(PObject destination) {
 		this.destination = destination;
 	}
@@ -46,33 +47,43 @@ public class EventListener {
 	public PObject getSource() {
 		return source;
 	}
+	
 	public void setSource(PObject source) {
 		this.source = source;
 	}
+	
 	public String getProperyName() {
 		return propertyName;
 	}
+	
 	public void setProperyName(String properyName) {
 		this.propertyName = properyName;
 	}
+	
 	public boolean isOneShot() {
 		return oneShot;
 	}
+	
 	public void setOneShot(boolean oneShot) {
 		this.oneShot = oneShot;
 	}
+	
 	public Date getCreatedAt() {
 		return createdAt;
 	}
+	
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
 	}
+	
 	public long getLifetime() {
 		return lifetime;
 	}
+	
 	public void setLifetime(long lifetime) {
 		this.lifetime = lifetime;
 	}
+	
 	public int getId() {
 		return id;
 	}

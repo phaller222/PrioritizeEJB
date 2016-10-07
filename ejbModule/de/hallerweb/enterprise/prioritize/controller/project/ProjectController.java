@@ -19,6 +19,7 @@ import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.project.task.TaskController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
+import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
@@ -59,6 +60,8 @@ public class ProjectController extends PEventConsumerProducer {
 	@EJB
 	TaskController taskController;
 	@EJB
+	UserRoleController userRoleController;
+	@EJB
 	LoggingController logger;
 	@Inject
 	SessionController sessionController;
@@ -73,6 +76,18 @@ public class ProjectController extends PEventConsumerProducer {
 	public List<Project> findProjectsByManagerRole(int managerRoleId) {
 		Query q = em.createNamedQuery("findProjectsByManagerRole");
 		q.setParameter("roleId", managerRoleId);
+		List<Project> projects = (List<Project>) q.getResultList();
+		if (projects.isEmpty()) {
+			return new ArrayList<Project>();
+		} else {
+			return projects;
+		}
+	}
+
+	public List<Project> findProjectsByUser(int userId) {
+		Query q = em.createNamedQuery("findProjectsByMember");
+		User user = userRoleController.findUserById(userId);
+		q.setParameter("user", user);
 		List<Project> projects = (List<Project>) q.getResultList();
 		if (projects.isEmpty()) {
 			return new ArrayList<Project>();
@@ -387,7 +402,6 @@ public class ProjectController extends PEventConsumerProducer {
 	}
 
 	public ProjectProgress createProjectProgress(int projectId, List<ProjectGoalRecord> targetGoals, int percentFinished) {
-		Project managedProject = findProjectById(projectId);
 		ProjectProgress progress = new ProjectProgress();
 		if (!targetGoals.isEmpty()) {
 			for (ProjectGoalRecord projectGoal : targetGoals) {
@@ -395,11 +409,19 @@ public class ProjectController extends PEventConsumerProducer {
 				em.persist(projectGoal.getPropertyRecord());
 				em.persist(projectGoal.getProjectGoal());
 				em.persist(projectGoal);
+				if (projectGoal.getTask() != null) {
+					Task t = projectGoal.getTask();
+					//em.persist(t);
+					t.setProjectGoal(projectGoal);
+				}
+				
+				//em.persist(projectGoal);
 				progress.addTargetGoal(projectGoal);
 			}
 		}
 		progress.setProgress(percentFinished);
 		em.persist(progress);
+		Project managedProject = findProjectById(projectId);
 		managedProject.setProgress(progress);
 		return progress;
 	}
@@ -417,40 +439,37 @@ public class ProjectController extends PEventConsumerProducer {
 		ProjectProgress managedProgress = findProjectProgressById(managedProject.getProgress().getId());
 		int numGoals = managedProgress.getTargetGoals().size();
 		int sum = 0;
-		if (!currentProjectGoals.isEmpty()) {
-			for (ProjectGoalRecord currentProjectGoalRecord : currentProjectGoals) {
-				ProjectGoalRecord origProjectGoalRecord = findOriginalProjectGoalRecord(managedProgress, currentProjectGoalRecord);
-				if (origProjectGoalRecord != null) {
-					if (origProjectGoalRecord.getPropertyRecord().isNumericPropertyRecord()) {
-						int percentage = calcNumericGoalPercentage(currentProjectGoalRecord, origProjectGoalRecord);
-						currentProjectGoalRecord.setPercentage(percentage);
-						sum += percentage;
-					} else if (origProjectGoalRecord.getPropertyRecord().isDocumentPropertyRecord()) {
-						DocumentInfo docInfo = currentProjectGoalRecord.getPropertyRecord().getDocumentInfo();
-						String targetTag = ((ProjectGoalPropertyDocument) origProjectGoalRecord.getPropertyRecord().getProperty()).getTag();
+		for (ProjectGoalRecord currentProjectGoalRecord : currentProjectGoals) {
+			ProjectGoalRecord origProjectGoalRecord = findOriginalProjectGoalRecord(managedProgress, currentProjectGoalRecord);
+			if (origProjectGoalRecord.getPropertyRecord().isNumericPropertyRecord()) {
+				int percentage = calcNumericGoalPercentage(currentProjectGoalRecord, origProjectGoalRecord);
+				currentProjectGoalRecord.setPercentage(percentage);
+				sum += percentage;
+			} else if (origProjectGoalRecord.getPropertyRecord().isDocumentPropertyRecord()) {
+				DocumentInfo docInfo = currentProjectGoalRecord.getPropertyRecord().getDocumentInfo();
+				String targetTag = ((ProjectGoalPropertyDocument) origProjectGoalRecord.getPropertyRecord().getProperty()).getTag();
 
-						if (targetTag.equals(docInfo.getCurrentDocument().getTag())) {
-							currentProjectGoalRecord.setPercentage(100);
-							sum += 100;
-							continue;
-						} else {
-							if (docInfo.getRecentDocuments() != null) {
-								for (Document doc : docInfo.getRecentDocuments()) {
-									if (targetTag.equals(doc.getTag())) {
-										currentProjectGoalRecord.setPercentage(100);
-										sum += 100;
-										break;
-									}
-								}
+				if (targetTag.equals(docInfo.getCurrentDocument().getTag())) {
+					currentProjectGoalRecord.setPercentage(100);
+					sum += 100;
+					continue;
+				} else {
+					if (docInfo.getRecentDocuments() != null) {
+						for (Document doc : docInfo.getRecentDocuments()) {
+							if (targetTag.equals(doc.getTag())) {
+								currentProjectGoalRecord.setPercentage(100);
+								sum += 100;
+								break;
 							}
 						}
 					}
 				}
 			}
-//			System.out.println("SUMME: " + sum);
-//			System.out.println("NUMGOALS: " + numGoals);
-			managedProgress.setProgress((int) sum / numGoals);
 		}
+		// System.out.println("SUMME: " + sum);
+		// System.out.println("NUMGOALS: " + numGoals);
+		managedProgress.setProgress((int) sum / numGoals);
+
 	}
 
 	private int calcNumericGoalPercentage(ProjectGoalRecord currentProjectGoalRecord, ProjectGoalRecord origProjectGoalRecord) {

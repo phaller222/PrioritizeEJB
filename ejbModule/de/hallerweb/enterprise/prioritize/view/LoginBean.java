@@ -15,6 +15,9 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jgroups.protocols.AUTH;
+
+import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
@@ -53,7 +56,6 @@ public class LoginBean implements Serializable {
 	private boolean loggedIn;
 	private Date lastLogin;
 	private User currentUser;
-	
 
 	public User getCurrentUser() {
 		this.currentUser = sessionController.getUser();
@@ -61,9 +63,8 @@ public class LoginBean implements Serializable {
 	}
 
 	List<Resource> watchedResources;
-    int dashboardTabsActiveIndex=0;
-	
-	
+	int dashboardTabsActiveIndex = 0;
+
 	public int getDashboardTabsActiveIndex() {
 		return dashboardTabsActiveIndex;
 	}
@@ -110,7 +111,7 @@ public class LoginBean implements Serializable {
 		watchedResources.clear();
 		watchedResources.addAll(depdupeResources);
 		if (!watchedResources.isEmpty()) {
-			//TODO: sublist is a hack!!! 
+			// TODO: sublist is a hack!!!
 			List<Resource> watched = watchedResources;
 			return watched;
 		} else
@@ -135,13 +136,29 @@ public class LoginBean implements Serializable {
 		return "index";
 	}
 
-
 	/**
 	 * Perform a login for clients only.
 	 * 
 	 * @return
 	 */
 	public String clientLogin() {
+
+		boolean autoLogin = InitializationController.getAsBoolean(InitializationController.ADMIN_AUTO_LOGIN);
+		if (autoLogin) {
+			User user = userRoleController.findUserByUsername("admin", AuthorizationController.getSystemUser());
+			user.setLastLogin(new Date());
+			sessionController.setUser(user);
+			loggedIn = true;
+			ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+			try {
+				context.redirect(context.getApplicationContextPath() + "/client/dashboard/dashboard.xhtml");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return "dashboard";
+		}
+
 		User user = userRoleController.findUserByUsername(username, AuthorizationController.getSystemUser());
 		if (user == null) {
 			loggedIn = false;
@@ -170,7 +187,7 @@ public class LoginBean implements Serializable {
 		loggedIn = false;
 		return "login";
 	}
-	
+
 	@Named
 	public String logoutClient() {
 		sessionController.setUser(null);
@@ -189,7 +206,7 @@ public class LoginBean implements Serializable {
 	public boolean getLoggedIn() {
 		return loggedIn;
 	}
-	
+
 	public void onDashboadTabChange(int tab) {
 		this.dashboardTabsActiveIndex = tab;
 	}

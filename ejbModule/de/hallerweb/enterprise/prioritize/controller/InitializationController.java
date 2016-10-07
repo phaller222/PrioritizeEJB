@@ -107,6 +107,8 @@ public class InitializationController {
 	public static final String FIRE_ACTIONBOARD_EVENTS = "FIRE_ACTIONBOARD_EVENTS";
 	public static final String FIRE_TASK_EVENTS = "FIRE_TASK_EVENTS";
 
+	// !!! Use with caution! Admin auto login!
+	public final static String ADMIN_AUTO_LOGIN = "ADMIN_AUTO_LOGIN";
 	// resource / device.
 	public final static String DEFAULT_DEPARTMENT_TOKEN = "09eb3067d0fe446bbe7788218fec9bdd";
 
@@ -146,6 +148,8 @@ public class InitializationController {
 		config.put(FIRE_DEPARTMENT_EVENTS, "true");
 		config.put(FIRE_ACTIONBOARD_EVENTS, "true");
 		config.put(FIRE_TASK_EVENTS, "true");
+		
+		config.put(ADMIN_AUTO_LOGIN, "false");
 
 		try {
 			BufferedReader reader = new BufferedReader(
@@ -193,7 +197,7 @@ public class InitializationController {
 
 			// Create default company and default department
 			boolean createDefaultCompany = Boolean.valueOf(config.get(CREATE_DEFAULT_COMPANY));
-			Department d=null;
+			Department d = null;
 			if (createDefaultCompany) {
 				Address adr = new Address();
 				adr.setCity("City of Admin");
@@ -203,7 +207,7 @@ public class InitializationController {
 				adr.setZipCode("00000");
 				Company c = companyController.createCompany("Default Company", adr);
 				c.setMainAddress(adr);
-				
+
 				if (Boolean.valueOf(config.get(CREATE_DEFAULT_DEPARTMENT))) {
 					d = companyController.createDepartment(c, "default", "Auto generated default department", adr,
 							AuthorizationController.getSystemUser());
@@ -234,35 +238,35 @@ public class InitializationController {
 			actionBoardController.addSubscriber(adminBoard.getId(), admin);
 
 			// TODO: Test implementation, REMOVE!
-//			Task task = new Task();
-//			task.setName("My demo task");
-//			task.setDescription("This is my first test task");
-//			task.setPriority(1);
-//			task.setTaskStatus(TaskStatus.ASSIGNED);
-//
-//			Task subtask = new Task();
-//			subtask.setName("My demo subtask");
-//			subtask.setDescription("This is my first test subtask");
-//			subtask.setPriority(1);
-//			subtask.setTaskStatus(TaskStatus.ASSIGNED);
-//
-//			Task managedSubTask = taskController.createTask(subtask);
-//			taskController.addTaskAssignee(managedSubTask.getId(), admin);
-//
-//			Task managedTask = taskController.createTask(task);
-//			taskController.addTaskAssignee(managedTask.getId(), admin);
-//
-//			taskController.addSubTask(managedTask, managedSubTask);
-//
-//			eventRegistry.createEventListener(managedTask, admin, "blackboard", 30000, false);
-//
-//			Blackboard bb = new Blackboard();
-//			bb.setTitle("My Blackboard");
-//			bb.setDescription("This is my first blackboard");
-//			bb.setFrozen(false);
-//
-//			Blackboard managedBlackboard = blackboardController.createBlackboard(bb);
-//			blackboardController.putTaskToBlackboard(managedTask.getId(), managedBlackboard.getId());
+			// Task task = new Task();
+			// task.setName("My demo task");
+			// task.setDescription("This is my first test task");
+			// task.setPriority(1);
+			// task.setTaskStatus(TaskStatus.ASSIGNED);
+			//
+			// Task subtask = new Task();
+			// subtask.setName("My demo subtask");
+			// subtask.setDescription("This is my first test subtask");
+			// subtask.setPriority(1);
+			// subtask.setTaskStatus(TaskStatus.ASSIGNED);
+			//
+			// Task managedSubTask = taskController.createTask(subtask);
+			// taskController.addTaskAssignee(managedSubTask.getId(), admin);
+			//
+			// Task managedTask = taskController.createTask(task);
+			// taskController.addTaskAssignee(managedTask.getId(), admin);
+			//
+			// taskController.addSubTask(managedTask, managedSubTask);
+			//
+			// eventRegistry.createEventListener(managedTask, admin, "blackboard", 30000, false);
+			//
+			// Blackboard bb = new Blackboard();
+			// bb.setTitle("My Blackboard");
+			// bb.setDescription("This is my first blackboard");
+			// bb.setFrozen(false);
+			//
+			// Blackboard managedBlackboard = blackboardController.createBlackboard(bb);
+			// blackboardController.putTaskToBlackboard(managedTask.getId(), managedBlackboard.getId());
 
 			// ------------- TEST Project --------------------------------------
 			Project project = new Project();
@@ -274,25 +278,22 @@ public class InitializationController {
 			project.setMaxManDays(20);
 			project.setPriority(1);
 			project.setActionboard(adminBoard);
-			//project.setBlackboard(managedBlackboard);
+			// project.setBlackboard(managedBlackboard);
 			Project managedProject = projectController.createProject(project);
-			//-------------------------------------------------------------------------
-			
-			
-			
+			// -------------------------------------------------------------------------
+
 			// --------------TEST Project Goals ---------------------------------------
 			ProjectGoalPropertyNumeric property = new ProjectGoalPropertyNumeric();
 			property.setName("Nominalumsatz");
 			property.setDescription("Nominalumsatz im Unternehmen");
 			property.setMin(10000);
 			property.setMax(30000);
-			
+
 			ProjectGoalPropertyDocument property2 = new ProjectGoalPropertyDocument();
 			property2.setName("Finale Spezifikation");
 			property2.setDescription("Feinspezifikation komplett");
 			property2.setTag("FINAL");
-			
-			
+
 			List<ProjectGoalProperty> properties = new ArrayList<ProjectGoalProperty>();
 			properties.add(property);
 			properties.add(property2);
@@ -301,34 +302,33 @@ public class InitializationController {
 			propRecord.setProperty(property);
 			propRecord.setValue(5000);
 			propRecord.setNumericPropertyRecord(true);
-			
+
 			ProjectGoalPropertyRecord propRecord2 = new ProjectGoalPropertyRecord();
 			propRecord2.setProperty(property2);
 			DocumentGroup temp = documentController.createDocumentGroup(d.getId(), "test", admin);
-			DocumentInfo info = documentController.createDocument("ttt", temp.getId(), admin, "text/plain", false, new byte[]{}, "none");
+			DocumentInfo info = documentController.createDocument("ttt", temp.getId(), admin, "text/plain", false, new byte[] {}, "none");
 			Document document = info.getCurrentDocument();
 			document.setTag("FINAL");
-			documentController.editDocument(info,document, "1212".getBytes(),"text/plain", admin,false);
-			
+			documentController.editDocument(info, document, "1212".getBytes(), "text/plain", admin, false);
 			propRecord2.setDocumentInfo(info);
 			propRecord2.setDocumentPropertyRecord(true);
 
 			ProjectGoalCategory cat = projectController.createProjectGoalCategory("Financial", "Financial project goals", null);
 			ProjectGoal goal = projectController.createProjectGoal("Umsatzsteigerung", "Wir brauchen mehr Umsatz!", cat, properties, admin);
-					//new ProjectGoal();
-			goal.setCategory(cat);	
-			
+			// new ProjectGoal();
+			goal.setCategory(cat);
+			property2.setProjectGoal(goal);
+
 			ProjectGoalRecord goalRecord = new ProjectGoalRecord();
 			goalRecord.setPropertyRecord(propRecord);
 			goalRecord.setProject(managedProject);
 			goalRecord.setProjectGoal(goal);
-			
+
 			ProjectGoalRecord goalRecord2 = new ProjectGoalRecord();
 			goalRecord2.setPropertyRecord(propRecord2);
 			goalRecord2.setProject(managedProject);
 			goalRecord2.setProjectGoal(goal);
-			
-			
+
 			List<ProjectGoalRecord> projectGoalRecords = new ArrayList<ProjectGoalRecord>();
 			projectGoalRecords.add(goalRecord);
 			projectGoalRecords.add(goalRecord2);

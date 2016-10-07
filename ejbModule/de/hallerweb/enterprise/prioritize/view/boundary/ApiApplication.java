@@ -1,6 +1,7 @@
 /**
  * 
  */
+
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import javax.ws.rs.ApplicationPath;

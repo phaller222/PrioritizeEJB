@@ -4,8 +4,10 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -15,7 +17,6 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
 import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
-import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillGroup;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
@@ -50,7 +51,7 @@ public class Project {
 	
 	@OneToMany
 	List<Resource> resources;							// Resources assigned to this project
-	@OneToMany
+	@ManyToMany(fetch = FetchType.EAGER)
 	List<User> users;									// Users assigned to this project
     @OneToMany	
 	List<SkillGroup> requiredSkills;					// The skills required to fullfill this project

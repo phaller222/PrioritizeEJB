@@ -34,6 +34,7 @@ import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalProperty
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
 import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
+import de.hallerweb.enterprise.prioritize.model.project.task.TaskStatus;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
@@ -101,10 +102,10 @@ public class ClassicApproach implements Serializable {
 	private String resourceToAdd;				// Current Resource-Object to add to the project.
 	private String taskNameToAdd;				// Name of the task to add
 
-	private String projectName;					//  Project Name
-	private String projectDescription;			//  Project description
-	private Date projectDueDate;				//  Project due date
-	
+	private String projectName;					// Project Name
+	private String projectDescription;			// Project description
+	private Date projectDueDate;				// Project due date
+
 	public Date getProjectDueDate() {
 		return projectDueDate;
 	}
@@ -197,6 +198,7 @@ public class ClassicApproach implements Serializable {
 
 	public void save() {
 
+		// Create project object with mandatory data.
 		this.project = new Project();
 		project.setName(projectName);
 		project.setDescription(projectDescription);
@@ -206,49 +208,56 @@ public class ClassicApproach implements Serializable {
 		project.setDueDate(this.projectDueDate);
 		project.setBeginDate(new Date());
 		project.setUsers(members);
-				
-		Project managedProject = projectController.createProject(project);
-
-		List<ProjectGoalRecord> records = new ArrayList<ProjectGoalRecord>();
-		for (Task t : this.tasks) {
-
-			ProjectGoal goal = new ProjectGoal();
-			goal.setName(t.getName());
-			goal.setDescription(t.getDescription());
-			ProjectGoalPropertyNumeric prop = new ProjectGoalPropertyNumeric();
-			prop.setMin(0);
-			prop.setMax(100);
-			ArrayList<ProjectGoalProperty> props = new ArrayList<ProjectGoalProperty>();
-			props.add(prop);
-			goal.setProperties(props);
-
-			ProjectGoalRecord rec = new ProjectGoalRecord();
-			rec.setTask(t);
-			rec.setProject(managedProject);
-			ProjectGoalPropertyRecord propRec = new ProjectGoalPropertyRecord();
-			propRec.setNumericPropertyRecord(true);
-			propRec.setProperty(prop);
-		    rec.setPropertyRecord(propRec);
-			rec.setProjectGoal(goal);
-			rec.setPercentage(0);
-			records.add(rec);
-			
-			t.setProjectGoal(rec);
-			
-		}
-		ProjectProgress progress = projectController.createProjectProgress(managedProject.getId(), records, 0);
-		managedProject.setProgress(progress);
 		
-		// Create blackboard for project 
+		// Create blackboard for project
 		Blackboard bb = new Blackboard();
 		bb.setTitle(project.getName());
 		bb.setDescription(project.getDescription());
 		bb.setFrozen(false);
 		bb.setTasks(tasks);
-		Blackboard managedBlackboard = blackboardController.createBlackboard(bb);
+	   
+		Project managedProject = projectController.createProject(project,bb);
+//		Blackboard managedBlackboard = blackboardController.createBlackboard(bb);
+		
+		
+
+		List<ProjectGoalRecord> records = new ArrayList<ProjectGoalRecord>();
+		for (Task t : this.tasks) {
+			ArrayList<ProjectGoalProperty> props = new ArrayList<ProjectGoalProperty>();
+			ProjectGoalPropertyNumeric  property = new ProjectGoalPropertyNumeric();
+			property.setMin(0);
+			property.setMax(100);
+			props.add(property);
+			ProjectGoal goal = projectController.createProjectGoal(t.getName(), t.getDescription(), null, props,
+					sessionController.getUser());// new ProjectGoal();
+			
+			goal.setName(t.getName());
+			goal.setDescription(t.getDescription());
+
+			ProjectGoalRecord projectGoalRecord = new ProjectGoalRecord();
+			t.setProjectGoal(projectGoalRecord);
+			projectGoalRecord.setTask(t);
+			projectGoalRecord.setProject(managedProject);
+			projectController.createProjectGoalRecord(projectGoalRecord);
+
+			ProjectGoalPropertyRecord managedRecord = projectController.createProjectGoalPropertyRecord(new ProjectGoalPropertyRecord());
+			managedRecord.setNumericPropertyRecord(true);
+			managedRecord.setProperty(property);
+			projectGoalRecord.setPropertyRecord(managedRecord);
+			projectGoalRecord.setProjectGoal(goal);
+			projectGoalRecord.setPercentage(0);
+			records.add(projectGoalRecord);
+			
+			//projectController.createProjectGoalRecord(projectGoalRecord);
+			
+
+		}
+		ProjectProgress progress = projectController.createProjectProgress(managedProject.getId(), records, 0);
+		managedProject.setProgress(progress);
+		//managedProject.setBlackboard(managedBlackboard);
 
 		clearInputData();
-		
+
 		ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
 		try {
 			context.redirect(context.getApplicationContextPath() + "/client/projects/projects.xhtml");
@@ -314,6 +323,8 @@ public class ClassicApproach implements Serializable {
 		Task t = new Task();
 		t.setName(taskNameToAdd);
 		t.setDescription(taskDescriptionToAdd);
+		t.setTaskStatus(TaskStatus.CREATED);
+		t.setPriority(1);
 
 		Task managedTask = taskController.createTask(t);
 		this.tasks.add(managedTask);

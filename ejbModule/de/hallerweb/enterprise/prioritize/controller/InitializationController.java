@@ -35,7 +35,6 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.project.ActionBoard;
 import de.hallerweb.enterprise.prioritize.model.project.Project;
-import de.hallerweb.enterprise.prioritize.model.project.ProjectProgress;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoal;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalCategory;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalProperty;
@@ -43,6 +42,7 @@ import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalProperty
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyNumeric;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyRecord;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
+import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
@@ -260,10 +260,10 @@ public class InitializationController {
 			//
 			// eventRegistry.createEventListener(managedTask, admin, "blackboard", 30000, false);
 			//
-			// Blackboard bb = new Blackboard();
-			// bb.setTitle("My Blackboard");
-			// bb.setDescription("This is my first blackboard");
-			// bb.setFrozen(false);
+			 Blackboard bb = new Blackboard();
+			 bb.setTitle("My Blackboard");
+			 bb.setDescription("This is my first blackboard");
+			 bb.setFrozen(false);
 			//
 			// Blackboard managedBlackboard = blackboardController.createBlackboard(bb);
 			// blackboardController.putTaskToBlackboard(managedTask.getId(), managedBlackboard.getId());
@@ -279,7 +279,7 @@ public class InitializationController {
 			project.setPriority(1);
 			project.setActionboard(adminBoard);
 			// project.setBlackboard(managedBlackboard);
-			Project managedProject = projectController.createProject(project);
+			Project managedProject = projectController.createProject(project,bb);
 			// -------------------------------------------------------------------------
 
 			// --------------TEST Project Goals ---------------------------------------
@@ -333,19 +333,19 @@ public class InitializationController {
 			projectGoalRecords.add(goalRecord);
 			projectGoalRecords.add(goalRecord2);
 
-			// Create initial ProjectProgress
-			ProjectProgress managedProgress = projectController.createProjectProgress(project.getId(), projectGoalRecords, 0);
-			managedProject.setProgress(managedProgress);
-
-			// Update project progress and create tasks
-			for (ProjectGoalRecord recOrig : project.getProgress().getTargetGoals()) {
-				ProjectGoalRecord updatedRecord = projectController.activateProjectGoal(recOrig.getId());
-				updatedRecord.getPropertyRecord().setValue(9800);
-				updatedRecord.getPropertyRecord().setDocumentInfo(info);
-			}
-
-			projectController.updateProjectProgress(managedProject.getId());
-			System.out.println("-------------- Ergebnis: ----  " + managedProgress.getProgress());
+//			// Create initial ProjectProgress
+//			ProjectProgress managedProgress = projectController.createProjectProgress(project.getId(), projectGoalRecords, 0);
+//			managedProject.setProgress(managedProgress);
+//
+//			// Update project progress and create tasks
+//			for (ProjectGoalRecord recOrig : project.getProgress().getTargetGoals()) {
+//				ProjectGoalRecord updatedRecord = projectController.activateProjectGoal(recOrig.getId());
+//				updatedRecord.getPropertyRecord().setValue(9800);
+//				updatedRecord.getPropertyRecord().setDocumentInfo(info);
+//			}
+//
+//			projectController.updateProjectProgress(managedProject.getId());
+//			System.out.println("-------------- Ergebnis: ----  " + managedProgress.getProgress());
 
 			// ------------------------------------------------------------------
 

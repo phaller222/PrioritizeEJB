@@ -34,6 +34,7 @@ import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalProperty
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyNumeric;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyRecord;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
+import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.project.task.TaskStatus;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
@@ -132,9 +133,17 @@ public class ProjectController extends PEventConsumerProducer {
 		return projectProgress;
 	}
 
-	public Project createProject(Project project) {
+	public Project createProject(Project project, Blackboard bb) {
+		em.persist(bb);
 		em.persist(project);
-		return project;
+		
+		Project managedProject = em.find(Project.class, project.getId());
+		Blackboard managedBlackboard = em.find(Blackboard.class,bb.getId());
+		
+		managedProject.setBlackboard(managedBlackboard);
+		managedBlackboard.setProject(managedProject);
+				
+		return managedProject;
 	}
 
 	public void removeProject(int projectId) {
@@ -382,7 +391,7 @@ public class ProjectController extends PEventConsumerProducer {
 					ProjectGoalPropertyNumeric property = (ProjectGoalPropertyNumeric) prop;
 					property.setProjectGoal(goal);
 					em.persist(property);
-					em.flush();
+					//em.flush();
 					goal.addProjectGoalProperty(property);
 				}
 			}
@@ -401,26 +410,42 @@ public class ProjectController extends PEventConsumerProducer {
 		// }
 	}
 
+	public ProjectGoalRecord createProjectGoalRecord(ProjectGoalRecord rec) {
+		em.persist(rec);
+		return rec;
+	}
+	
+	public ProjectGoalPropertyNumeric createProjectGoalPropertyNumeric(ProjectGoalPropertyNumeric property) {
+		em.persist(property);
+		return property;
+	}
+	
+	public ProjectGoalPropertyRecord createProjectGoalPropertyRecord(ProjectGoalPropertyRecord record) {
+		em.persist(record);
+		return record;
+	}
+	
 	public ProjectProgress createProjectProgress(int projectId, List<ProjectGoalRecord> targetGoals, int percentFinished) {
 		ProjectProgress progress = new ProjectProgress();
+		em.persist(progress);
 		if (!targetGoals.isEmpty()) {
-			for (ProjectGoalRecord projectGoal : targetGoals) {
-				em.persist(projectGoal.getPropertyRecord().getProperty());
-				em.persist(projectGoal.getPropertyRecord());
-				em.persist(projectGoal.getProjectGoal());
-				em.persist(projectGoal);
-				if (projectGoal.getTask() != null) {
-					Task t = projectGoal.getTask();
+			for (ProjectGoalRecord projectGoalRecord : targetGoals) {
+				//em.persist(projectGoal.getPropertyRecord().getProperty());
+				//em.persist(projectGoal.getPropertyRecord());
+				//em.persist(projectGoal.getProjectGoal());
+				//em.persist(projectGoalRecord);
+				if (projectGoalRecord.getTask() != null) {
+					Task t = projectGoalRecord.getTask();
 					//em.persist(t);
-					t.setProjectGoal(projectGoal);
+					t.setProjectGoal(projectGoalRecord);
 				}
 				
 				//em.persist(projectGoal);
-				progress.addTargetGoal(projectGoal);
+				progress.addTargetGoal(projectGoalRecord);
 			}
 		}
 		progress.setProgress(percentFinished);
-		em.persist(progress);
+		
 		Project managedProject = findProjectById(projectId);
 		managedProject.setProgress(progress);
 		return progress;

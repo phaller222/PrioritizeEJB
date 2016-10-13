@@ -1,26 +1,17 @@
 package de.hallerweb.enterprise.prioritize.view.project;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
-import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.primefaces.model.DefaultStreamedContent;
-import org.primefaces.model.StreamedContent;
 
 import de.hallerweb.enterprise.prioritize.controller.project.ProjectController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
@@ -38,33 +29,39 @@ public class ListProjectsBean implements Serializable {
 	SessionController sessionController;
 
 	private List<Project> projects;
+	
+	private Project currentProject;		// Currently selected Project
+	
 
-	private Map<Integer, DefaultStreamedContent> projectProgressIcons;
+	public Project getCurrentProject() {
+		return currentProject;
+	}
+
+	public void setCurrentProject(Project currentProject) {
+		this.currentProject = currentProject;
+	}
 
 	@PostConstruct
 	public void init() {
-		this.projects = new ArrayList<Project>();
-		this.projectProgressIcons = new HashMap<Integer, DefaultStreamedContent>();
+		
+	}
 
-		projects = new ArrayList<Project>();
+	public List<Project> getProjects() {
+		this.projects = new ArrayList<Project>();
 		User sessionUser = sessionController.getUser();
 		if (sessionUser != null) {
 			this.projects.addAll(getProjectsForUser(sessionUser.getId()));
 			for (Role r : sessionUser.getRoles()) {
-				this.projects.addAll(getProjectsByManagerRole(r.getId()));
-			}
-
-			// Build graphic for project progress
-			for (Project p : projects) {
-				renderProgress(p);
+				List<Project> managerProjects = getProjectsByManagerRole(r.getId());
+				for (Project p : managerProjects) {
+					if (!p.getUsers().contains(sessionUser)) {
+						this.projects.add(p);
+					}
+				}
 			}
 		}
-
-	}
-
-	public List<Project> getProjects() {
-		return projectController.findProjectsByManagerRole(sessionController.getUser().getRoles().iterator().next().getId());
-
+		Collections.sort(projects, (projectA, projectB) -> projectA.getName().compareTo(projectB.getName()));
+		return projects;
 	}
 
 	public void setProjects(List<Project> projects) {
@@ -88,45 +85,18 @@ public class ListProjectsBean implements Serializable {
 			return new ArrayList<Project>();
 		}
 	}
-
-	public String showBlackboard() {
-		return "blackboard";
-	}
-
+	
 	public String editProject() {
 		return "editproject";
 	}
-
-	private DefaultStreamedContent renderProgress(Project project) {
-		
-		Project p = projectController.findProjectById(project.getId());
-		
-		int percentage = p.getProgress().getProgress();
-		BufferedImage img = new BufferedImage(130, 10, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D gc = img.createGraphics();
-		
-		gc.setColor(Color.BLACK);
-		//gc.drawLine(0, 0, 2, 10);
-		//gc.drawLine(100, 0, 2, 10);
-		
-//		gc.drawString("0%", 1, 1);
-//		gc.drawString("100%", 100, 1);
-		
-		gc.setColor(new Color(204,186,244));
-		gc.fillRect(0, 0, percentage, 10);
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		try {
-			ImageIO.write(img, "png", os);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return new DefaultStreamedContent(new ByteArrayInputStream(os.toByteArray()), "image/png");
+	
+	public String showBlackboard() {
+		return "blackboard";
 	}
-
-	public StreamedContent getProjectProgressIcon(Project project) {
-		Project p = projectController.findProjectById(project.getId());
-		return renderProgress(p);
+		
+	public String showTasks(Project p) {
+		setCurrentProject(p);
+		return "tasks";
 	}
-
+	
 }

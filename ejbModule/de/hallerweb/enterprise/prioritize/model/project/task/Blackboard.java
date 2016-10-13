@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
@@ -25,11 +26,19 @@ public class Blackboard {
 	private String description;
 	boolean frozen;
 
-	@OneToMany
+	@OneToMany(fetch = FetchType.EAGER)
 	List<Task> tasks;
 
 	@OneToOne
 	Project project;
+
+	public Project getProject() {
+		return project;
+	}
+
+	public void setProject(Project project) {
+		this.project = project;
+	}
 
 	public boolean isFrozen() {
 		return frozen;

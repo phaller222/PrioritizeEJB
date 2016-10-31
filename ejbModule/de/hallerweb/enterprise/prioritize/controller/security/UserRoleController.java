@@ -28,6 +28,7 @@ import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.project.ActionBoard;
+import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
@@ -249,6 +250,9 @@ public class UserRoleController extends PEventConsumerProducer {
 				em.persist(preference);
 				user.setPreference(preference);
 				em.persist(user);
+				
+				ActionBoard actionBoard = actionBoardController.createActionBoard(user.getName(), user.getName() + "'s board", user);
+				actionBoardController.addSubscriber(actionBoard.getId(), user);
 
 				for (Role role : roles) {
 					Role managedRole = em.find(Role.class, role.getId());
@@ -594,7 +598,16 @@ public class UserRoleController extends PEventConsumerProducer {
 					evt.getPropertyName() + " set to " + evt.getNewValue(), evt);
 			}
 		}
-
 	}
-
+	
+	public void assignTask(User user, Task task) {
+		User managedUser = findUserById(user.getId());
+		managedUser.addAssignedTask(task);
+	}
+	
+	public void removeAssignedTask(User user, Task task) {
+		User managedUser = findUserById(user.getId());
+		managedUser.removeAssignedTask(task);
+	}
+	
 }

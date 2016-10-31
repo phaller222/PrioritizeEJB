@@ -19,7 +19,6 @@ public abstract class PObject {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.SEQUENCE)
-	@JsonIgnore
 	protected int id;
 
 }

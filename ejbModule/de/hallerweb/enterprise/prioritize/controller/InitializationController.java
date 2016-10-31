@@ -43,6 +43,7 @@ import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalProperty
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyRecord;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
 import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
+import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
@@ -148,7 +149,7 @@ public class InitializationController {
 		config.put(FIRE_DEPARTMENT_EVENTS, "true");
 		config.put(FIRE_ACTIONBOARD_EVENTS, "true");
 		config.put(FIRE_TASK_EVENTS, "true");
-		
+
 		config.put(ADMIN_AUTO_LOGIN, "false");
 
 		try {
@@ -234,8 +235,9 @@ public class InitializationController {
 			// TODO: Test implementation, REMOVE!
 			eventRegistry.createEventListener(admin, admin, "name", 120000, true);
 
-			ActionBoard adminBoard = actionBoardController.createActionBoard("admin", "Admin's board", admin);
-			actionBoardController.addSubscriber(adminBoard.getId(), admin);
+			// NOW PART OF CREATEUSER!!!!
+//			ActionBoard adminBoard = actionBoardController.createActionBoard("admin", "Admin's board", admin);
+//			actionBoardController.addSubscriber(adminBoard.getId(), admin);
 
 			// TODO: Test implementation, REMOVE!
 			// Task task = new Task();
@@ -260,10 +262,10 @@ public class InitializationController {
 			//
 			// eventRegistry.createEventListener(managedTask, admin, "blackboard", 30000, false);
 			//
-			 Blackboard bb = new Blackboard();
-			 bb.setTitle("My Blackboard");
-			 bb.setDescription("This is my first blackboard");
-			 bb.setFrozen(false);
+			Blackboard bb = new Blackboard();
+			bb.setTitle("My Blackboard");
+			bb.setDescription("This is my first blackboard");
+			bb.setFrozen(false);
 			//
 			// Blackboard managedBlackboard = blackboardController.createBlackboard(bb);
 			// blackboardController.putTaskToBlackboard(managedTask.getId(), managedBlackboard.getId());
@@ -277,9 +279,9 @@ public class InitializationController {
 			project.setManager(userRoleController.findRoleByRolename("admin", admin));
 			project.setMaxManDays(20);
 			project.setPriority(1);
-			project.setActionboard(adminBoard);
+			
 			// project.setBlackboard(managedBlackboard);
-			Project managedProject = projectController.createProject(project,bb);
+			Project managedProject = projectController.createProject(project, bb, new ArrayList<Task>());
 			// -------------------------------------------------------------------------
 
 			// --------------TEST Project Goals ---------------------------------------
@@ -314,7 +316,8 @@ public class InitializationController {
 			propRecord2.setDocumentPropertyRecord(true);
 
 			ProjectGoalCategory cat = projectController.createProjectGoalCategory("Financial", "Financial project goals", null);
-			ProjectGoal goal = projectController.createProjectGoal("Umsatzsteigerung", "Wir brauchen mehr Umsatz!", cat, properties, admin);
+			ProjectGoal goal = projectController.createProjectGoal("Umsatzsteigerung", "Wir brauchen mehr Umsatz!", cat, 
+					properties, admin);
 			// new ProjectGoal();
 			goal.setCategory(cat);
 			property2.setProjectGoal(goal);
@@ -333,19 +336,19 @@ public class InitializationController {
 			projectGoalRecords.add(goalRecord);
 			projectGoalRecords.add(goalRecord2);
 
-//			// Create initial ProjectProgress
-//			ProjectProgress managedProgress = projectController.createProjectProgress(project.getId(), projectGoalRecords, 0);
-//			managedProject.setProgress(managedProgress);
-//
-//			// Update project progress and create tasks
-//			for (ProjectGoalRecord recOrig : project.getProgress().getTargetGoals()) {
-//				ProjectGoalRecord updatedRecord = projectController.activateProjectGoal(recOrig.getId());
-//				updatedRecord.getPropertyRecord().setValue(9800);
-//				updatedRecord.getPropertyRecord().setDocumentInfo(info);
-//			}
-//
-//			projectController.updateProjectProgress(managedProject.getId());
-//			System.out.println("-------------- Ergebnis: ----  " + managedProgress.getProgress());
+			// // Create initial ProjectProgress
+			// ProjectProgress managedProgress = projectController.createProjectProgress(project.getId(), projectGoalRecords, 0);
+			// managedProject.setProgress(managedProgress);
+			//
+			// // Update project progress and create tasks
+			// for (ProjectGoalRecord recOrig : project.getProgress().getTargetGoals()) {
+			// ProjectGoalRecord updatedRecord = projectController.activateProjectGoal(recOrig.getId());
+			// updatedRecord.getPropertyRecord().setValue(9800);
+			// updatedRecord.getPropertyRecord().setDocumentInfo(info);
+			// }
+			//
+			// projectController.updateProjectProgress(managedProject.getId());
+			// System.out.println("-------------- Ergebnis: ---- " + managedProgress.getProgress());
 
 			// ------------------------------------------------------------------
 

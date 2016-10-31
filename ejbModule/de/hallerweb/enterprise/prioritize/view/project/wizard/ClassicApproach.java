@@ -26,16 +26,11 @@ import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.project.Project;
-import de.hallerweb.enterprise.prioritize.model.project.ProjectProgress;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoal;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalProperty;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyNumeric;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyRecord;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
 import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.project.task.TaskStatus;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
+import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
 @Named
@@ -216,45 +211,8 @@ public class ClassicApproach implements Serializable {
 		bb.setFrozen(false);
 		bb.setTasks(tasks);
 	   
-		Project managedProject = projectController.createProject(project,bb);
-//		Blackboard managedBlackboard = blackboardController.createBlackboard(bb);
-		
-		
-
-		List<ProjectGoalRecord> records = new ArrayList<ProjectGoalRecord>();
-		for (Task t : this.tasks) {
-			ArrayList<ProjectGoalProperty> props = new ArrayList<ProjectGoalProperty>();
-			ProjectGoalPropertyNumeric  property = new ProjectGoalPropertyNumeric();
-			property.setMin(0);
-			property.setMax(100);
-			props.add(property);
-			ProjectGoal goal = projectController.createProjectGoal(t.getName(), t.getDescription(), null, props,
-					sessionController.getUser());// new ProjectGoal();
-			
-			goal.setName(t.getName());
-			goal.setDescription(t.getDescription());
-
-			ProjectGoalRecord projectGoalRecord = new ProjectGoalRecord();
-			t.setProjectGoal(projectGoalRecord);
-			projectGoalRecord.setTask(t);
-			projectGoalRecord.setProject(managedProject);
-			projectController.createProjectGoalRecord(projectGoalRecord);
-
-			ProjectGoalPropertyRecord managedRecord = projectController.createProjectGoalPropertyRecord(new ProjectGoalPropertyRecord());
-			managedRecord.setNumericPropertyRecord(true);
-			managedRecord.setProperty(property);
-			projectGoalRecord.setPropertyRecord(managedRecord);
-			projectGoalRecord.setProjectGoal(goal);
-			projectGoalRecord.setPercentage(0);
-			records.add(projectGoalRecord);
-			
-			//projectController.createProjectGoalRecord(projectGoalRecord);
-			
-
-		}
-		ProjectProgress progress = projectController.createProjectProgress(managedProject.getId(), records, 0);
-		managedProject.setProgress(progress);
-		//managedProject.setBlackboard(managedBlackboard);
+		// Create all subdata (ProjectGoal etc..) and persist project
+		projectController.createProject(project,bb, this.tasks);
 
 		clearInputData();
 
@@ -276,6 +234,7 @@ public class ClassicApproach implements Serializable {
 		this.documents = new ArrayList<DocumentInfo>();
 		this.resources = new ArrayList<Resource>();
 		this.members = new ArrayList<User>();
+		this.tasks = new ArrayList<Task>();
 	}
 
 	public void addUser() {
@@ -357,6 +316,22 @@ public class ClassicApproach implements Serializable {
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * AutoComplete method for Role
+	 * @param query
+	 * @return
+	 */
+	public List<String> completeRolesList(String query) {
+		List<Role> availableRoles = userRoleController.getAllRoles(sessionController.getUser());
+		List<String> roles = new ArrayList<String>();
+		for (Role r : availableRoles) {
+			if (r.getName().startsWith(query)) {
+				roles.add(r.getName());
+			}
+		}
+		return roles;
 	}
 
 	/**

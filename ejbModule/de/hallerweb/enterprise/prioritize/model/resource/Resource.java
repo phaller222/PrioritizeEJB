@@ -46,7 +46,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
  * @author peter
  * 
  */
-@Entity
+
 @NamedQueries({ @NamedQuery(name = "findResourcesByResourceGroup", query = "select r FROM Resource r WHERE r.resourceGroup.id = :dgid"),
 		@NamedQuery(name = "findResourcesByResourceGroupAndName", query = "select r FROM Resource r WHERE r.resourceGroup.id = :dgid AND r.name = :name"),
 		@NamedQuery(name = "findResourceGroupById", query = "select rg FROM ResourceGroup rg WHERE rg.id = :resourceGroupId"),
@@ -57,6 +57,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 		@NamedQuery(name = "findAllMqttResourceUuids", query = "select r.mqttUUID FROM Resource r WHERE r.mqttUUID IS NOT NULL"),
 		@NamedQuery(name = "findAllOnlineMqttResources", query = "select r FROM Resource r WHERE r.mqttUUID IS NOT NULL AND r.mqttOnline = TRUE"),
 		@NamedQuery(name = "findAllResources", query = "select r FROM Resource r") })
+@Entity
 public class Resource extends PActor implements PAuthorizedObject, PSearchable, Comparable<Object> {
 
 	public static final String PROPERTY_NAME = "name";
@@ -66,7 +67,7 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 	public static final String PROPERTY_GEO = "geo";
 	public static final String PROPERTY_MQTTONLINE = "mqttOnline";
 	
-
+	
 	private String name; // Name of the resource.
 	@Column(length = 65535)
 	private String description; // Human readable description of the resource.

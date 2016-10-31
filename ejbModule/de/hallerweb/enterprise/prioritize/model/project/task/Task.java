@@ -19,7 +19,8 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 
 @Entity
 @NamedQueries({ @NamedQuery(name = "findTaskById", query = "select t FROM Task t WHERE t.id = :taskId"),
-	@NamedQuery(name = "findTasksByAssignee", query = "select t FROM Task t WHERE :assigneeId MEMBER OF  t.assignees"),
+	@NamedQuery(name = "findTasksByAssignee", query = "select t FROM Task t WHERE :assignee MEMBER OF  t.assignees"),
+	@NamedQuery(name = "findTasksNotAssignedToUser", query = "select t FROM Task t WHERE NOT :assignee MEMBER OF  t.assignees")
 	 })
 public class Task extends PObject{
 	
@@ -43,19 +44,19 @@ public class Task extends PObject{
 	@OneToMany
 	private List<SkillRecord> requiredSkills;
 	
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.EAGER)
 	private List<PActor> assignees;
 	
 	@OneToOne 
-	ProjectGoalRecord projectGoal;
+	ProjectGoalRecord projectGoalRecord;
 	
 
-	public ProjectGoalRecord getProjectGoal() {
-		return projectGoal;
+	public ProjectGoalRecord getProjectGoalRecord() {
+		return projectGoalRecord;
 	}
 
-	public void setProjectGoal(ProjectGoalRecord projectGoal) {
-		this.projectGoal = projectGoal;
+	public void setProjectGoalRecord(ProjectGoalRecord projectGoalRecord) {
+		this.projectGoalRecord = projectGoalRecord;
 	}
 
 	public int getPriority() {

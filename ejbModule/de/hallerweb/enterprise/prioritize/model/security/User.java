@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
+import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
 import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
@@ -56,16 +57,38 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		this.username = username;
 		this.name = username;
 	}
-	
-	static final public String PROPERTY_NAME="name";
-	static final public String PROPERTY_EMAIL="email";
-	static final public String PROPERTY_OCCUPATION="occupation";
-	static final public String PROPERTY_DEPARTMENT="department";
-	static final public String PROPERTY_USERNAME="username";
 
+	public static final String PROPERTY_NAME = "name";
+	public static final String PROPERTY_EMAIL = "email";
+	public static final String PROPERTY_OCCUPATION = "occupation";
+	public static final String PROPERTY_DEPARTMENT = "department";
+	public static final String PROPERTY_USERNAME = "username";
 
 	String name;
 	String username;
+	
+	@ManyToMany(fetch = FetchType.EAGER)
+	List<Task> assignedTasks;
+	
+	public List<Task> getAssignedTasks() {
+		return assignedTasks;
+	}
+
+	public void setAssignedTasks(List<Task> assignedTasks) {
+		this.assignedTasks = assignedTasks;
+	}
+	
+	public void addAssignedTask(Task task) {
+		if (this.assignedTasks == null) {
+			this.assignedTasks = new ArrayList<Task>();
+		}
+		this.assignedTasks.add(task);
+	}
+	
+	public void removeAssignedTask(Task task) {
+		this.assignedTasks.remove(task);
+	}
+
 	@JsonIgnore
 	String email;
 	@JsonIgnore
@@ -76,6 +99,8 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	String apiKey;
 	@JsonIgnore
 	Date lastLogin;
+	
+	
 
 	public Date getLastLogin() {
 		return lastLogin;
@@ -166,9 +191,9 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	@JsonIgnore
 	@OneToMany(fetch = FetchType.EAGER)
 	Set<SkillRecord> skills;
-	
+
 	@JsonIgnore
-	@OneToOne(fetch=FetchType.EAGER)
+	@OneToOne(fetch = FetchType.EAGER)
 	UserPreference preference;
 
 	public UserPreference getPreference() {
@@ -178,7 +203,6 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	public void setPreference(UserPreference preference) {
 		this.preference = preference;
 	}
-
 
 	public User() {
 		super();
@@ -245,9 +269,9 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		return id;
 	}
 
-	public void addRole(Role r) {
-		if (!roles.contains(r)) {
-			roles.add(r);
+	public void addRole(Role role) {
+		if (!roles.contains(role)) {
+			roles.add(role);
 		}
 	}
 
@@ -265,24 +289,24 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		}
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		return result;
-	}
+	// @Override
+	// public int hashCode() {
+	// final int prime = 31;
+	// int result = 1;
+	// return result;
+	// }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		User other = (User) obj;
-		return true;
-	}
+	// @Override
+	// public boolean equals(Object obj) {
+	// if (this == obj)
+	// return true;
+	// if (obj == null)
+	// return false;
+	// if (getClass() != obj.getClass())
+	// return false;
+	// User other = (User) obj;
+	// return true;
+	// }
 
 	@Override
 	public List<SearchResult> find(String phrase) {
@@ -374,6 +398,11 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		}
 		return this.searchProperties;
 	}
-
+	
+	@Override
+	public String toString() {
+		return name;
+	}
+	
 
 }

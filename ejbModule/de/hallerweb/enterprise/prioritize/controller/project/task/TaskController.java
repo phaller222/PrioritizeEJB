@@ -3,6 +3,7 @@ package de.hallerweb.enterprise.prioritize.controller.project.task;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -11,14 +12,12 @@ import javax.persistence.Query;
 
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
+import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
-import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.EventListener;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
-import de.hallerweb.enterprise.prioritize.model.project.ActionBoard;
-import de.hallerweb.enterprise.prioritize.model.project.ActionBoardEntry;
+import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
 import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.project.task.TaskStatus;
@@ -38,6 +37,9 @@ public class TaskController extends PEventConsumerProducer {
 
 	@Inject
 	EventRegistry eventRegistry;
+	
+	@EJB
+	UserRoleController userRoleController;
 
 	// public ActionBoard findActionBoardByName(String name) {
 	// Query q = em.createNamedQuery("findActionBoardByName");
@@ -53,9 +55,20 @@ public class TaskController extends PEventConsumerProducer {
 		return task;
 	}
 
-	public List<Task> findTasksByAssignee(int assigneeId) {
+	public List<Task> findTasksByAssignee(PActor assignee) {
 		Query q = em.createNamedQuery("findTasksByAssignee");
-		q.setParameter("assigneeId", assigneeId);
+		q.setParameter("assignee", assignee);
+		List<Task> tasks = (List<Task>) q.getResultList();
+		if (tasks.isEmpty()) {
+			return new ArrayList<Task>();
+		} else {
+			return tasks;
+		}
+	}
+	
+	public List<Task> findTasksNotAssignedToUser(PActor assignee) {
+		Query q = em.createNamedQuery("findTasksNotAssignedToUser");
+		q.setParameter("assignee", assignee);
 		List<Task> tasks = (List<Task>) q.getResultList();
 		if (tasks.isEmpty()) {
 			return new ArrayList<Task>();
@@ -111,7 +124,8 @@ public class TaskController extends PEventConsumerProducer {
 	
 	public void removeTaskAssignee(int taskId, PActor assignee) {
 		Task task = findTaskById(taskId);
-		task.removeAssignee(assignee);
+		User user = userRoleController.findUserById(assignee.getId());
+		task.removeAssignee(user);
 	}
 	
 	public void addTaskResource(int taskId, Resource resource) {
@@ -132,6 +146,17 @@ public class TaskController extends PEventConsumerProducer {
 		Task task = findTaskById(taskId);
 		task.setTaskStatus(newStatus);
 	}
+	
+	public void resolveTask(Task task, User user) {
+		Task managedTask = findTaskById(task.getId());
+		ProjectGoalRecord rec = managedTask.getProjectGoalRecord();
+		rec.setPercentage(100);
+		
+		removeTaskAssignee(managedTask.getId(), user);
+		userRoleController.removeAssignedTask(user, managedTask);
+		updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
+	}
+	
 	
 	@Override
 	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {

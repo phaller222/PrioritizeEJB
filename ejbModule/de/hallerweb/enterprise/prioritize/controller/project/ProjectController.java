@@ -133,16 +133,56 @@ public class ProjectController extends PEventConsumerProducer {
 		return projectProgress;
 	}
 
-	public Project createProject(Project project, Blackboard bb) {
+	public Project createProject(Project project, Blackboard bb, List<Task> tasks) {
+
 		em.persist(bb);
 		em.persist(project);
-		
+
 		Project managedProject = em.find(Project.class, project.getId());
-		Blackboard managedBlackboard = em.find(Blackboard.class,bb.getId());
-		
+		Blackboard managedBlackboard = em.find(Blackboard.class, bb.getId());
+
 		managedProject.setBlackboard(managedBlackboard);
 		managedBlackboard.setProject(managedProject);
+
+		List<ProjectGoalRecord> records = new ArrayList<ProjectGoalRecord>();
+		if (managedBlackboard.getTasks() != null) {
+			for (Task t : managedBlackboard.getTasks()) {
+				ProjectGoalPropertyNumeric property = new ProjectGoalPropertyNumeric();
+				property.setName("Task completeness)");
+				property.setDescription("Indicates the percentage value of completeness of a task.");
+				property.setMin(0);
+				property.setMax(100);
+				ArrayList<ProjectGoalProperty> props = new ArrayList<ProjectGoalProperty>();
+				props.add(property);
 				
+				// Find task in db to edit original vvalues in db!
+				Task task = taskController.findTaskById(t.getId());
+				
+				ProjectGoal goal = createProjectGoal(task.getName(), task.getDescription(), null, props, sessionController.getUser());
+
+				goal.setName(task.getName());
+				goal.setDescription(task.getDescription());
+
+				ProjectGoalRecord projectGoalRecord = new ProjectGoalRecord();
+				projectGoalRecord.setTask(task);
+				projectGoalRecord.setProject(managedProject);
+				projectGoalRecord.setProjectGoal(goal);
+				projectGoalRecord = createProjectGoalRecord(projectGoalRecord);
+				task.setProjectGoalRecord(projectGoalRecord);
+
+				ProjectGoalPropertyRecord managedRecord = createProjectGoalPropertyRecord(new ProjectGoalPropertyRecord());
+				managedRecord.setNumericPropertyRecord(true);
+				managedRecord.setProperty(property);
+				projectGoalRecord.setPropertyRecord(managedRecord);
+				projectGoalRecord.setProjectGoal(goal);
+				projectGoalRecord.setPercentage(0);
+				records.add(projectGoalRecord);
+			}
+		}
+
+		ProjectProgress progress = createProjectProgress(managedProject.getId(), records, 0);
+		managedProject.setProgress(progress);
+
 		return managedProject;
 	}
 
@@ -301,8 +341,9 @@ public class ProjectController extends PEventConsumerProducer {
 		List<ProjectGoalProperty> result = query.getResultList();
 		if (!result.isEmpty()) {
 			return result;
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	public List<ProjectGoalCategory> findSubCategoriesForCategory(ProjectGoalCategory cat) {
@@ -312,8 +353,9 @@ public class ProjectController extends PEventConsumerProducer {
 		List<ProjectGoalCategory> result = query.getResultList();
 		if (!result.isEmpty()) {
 			return result;
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	/**
@@ -391,7 +433,7 @@ public class ProjectController extends PEventConsumerProducer {
 					ProjectGoalPropertyNumeric property = (ProjectGoalPropertyNumeric) prop;
 					property.setProjectGoal(goal);
 					em.persist(property);
-					//em.flush();
+					// em.flush();
 					goal.addProjectGoalProperty(property);
 				}
 			}
@@ -414,38 +456,40 @@ public class ProjectController extends PEventConsumerProducer {
 		em.persist(rec);
 		return rec;
 	}
-	
+
 	public ProjectGoalPropertyNumeric createProjectGoalPropertyNumeric(ProjectGoalPropertyNumeric property) {
 		em.persist(property);
 		return property;
 	}
-	
+
 	public ProjectGoalPropertyRecord createProjectGoalPropertyRecord(ProjectGoalPropertyRecord record) {
 		em.persist(record);
 		return record;
 	}
-	
+
 	public ProjectProgress createProjectProgress(int projectId, List<ProjectGoalRecord> targetGoals, int percentFinished) {
 		ProjectProgress progress = new ProjectProgress();
 		em.persist(progress);
 		if (!targetGoals.isEmpty()) {
 			for (ProjectGoalRecord projectGoalRecord : targetGoals) {
-				//em.persist(projectGoal.getPropertyRecord().getProperty());
-				//em.persist(projectGoal.getPropertyRecord());
-				//em.persist(projectGoal.getProjectGoal());
-				//em.persist(projectGoalRecord);
+				// em.persist(projectGoal.getPropertyRecord().getProperty());
+				// em.persist(projectGoal.getPropertyRecord());
+				// em.persist(projectGoal.getProjectGoal());
+				// em.persist(projectGoalRecord);
 				if (projectGoalRecord.getTask() != null) {
 					Task t = projectGoalRecord.getTask();
-					//em.persist(t);
-					t.setProjectGoal(projectGoalRecord);
+					// em.persist(t);
+					if (t.getProjectGoalRecord() == null) {
+						t.setProjectGoalRecord(projectGoalRecord);
+					}
 				}
-				
-				//em.persist(projectGoal);
+
+				// em.persist(projectGoal);
 				progress.addTargetGoal(projectGoalRecord);
 			}
 		}
 		progress.setProgress(percentFinished);
-		
+
 		Project managedProject = findProjectById(projectId);
 		managedProject.setProgress(progress);
 		return progress;
@@ -542,7 +586,7 @@ public class ProjectController extends PEventConsumerProducer {
 
 		ProjectGoalRecord activeGoal = new ProjectGoalRecord(managedGoal, rec, managedTask);
 		em.persist(activeGoal);
-		t.setProjectGoal(activeGoal);
+		t.setProjectGoalRecord(activeGoal);
 		return activeGoal;
 	}
 

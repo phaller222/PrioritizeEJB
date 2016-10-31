@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
@@ -50,8 +51,13 @@ public class ActionBoardController extends PEventConsumerProducer{
 	public ActionBoard findActionBoardByOwner(int ownerId) {
 		Query q = em.createNamedQuery("findActionBoardByOwner");
 		q.setParameter("ownerId",ownerId);
+		try {
 		ActionBoard board = (ActionBoard) q.getSingleResult();
 		return board;
+		} catch (NoResultException ex) {
+			return null;
+		}
+		
 	}
 	
 	public ActionBoard createActionBoard(String name, String desc, PObject owner) {

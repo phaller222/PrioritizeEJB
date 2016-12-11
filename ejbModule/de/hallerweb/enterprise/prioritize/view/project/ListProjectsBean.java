@@ -111,31 +111,34 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 		return "blackboard";
 	}
 
+//	public List<Task> getForeignTasks() {
+//		List<Task> foreignTasks = new ArrayList<Task>();
+//		List<Task> notMyTasks = taskController.findTasksNotAssignedToUser(sessionController.getUser());// taskController.findTasksByAssignee(sessionController.getUser());
+//
+//		for (Task t : currentProject.getBlackboard().getTasks()) {
+//			for (Task myTask : notMyTasks) {
+//				if (t.getId() == myTask.getId()) {
+//					foreignTasks.add(t);
+//				}
+//			}
+//		}
+//		if (foreignTasks.isEmpty()) {
+//			foreignTasks = currentProject.getBlackboard().getTasks();
+//		}
+//		return notMyTasks;
+//	}
+
 	public List<Task> getForeignTasks() {
-		List<Task> foreignTasks = new ArrayList<Task>();
-		List<Task> notMyTasks = taskController.findTasksNotAssignedToUser(sessionController.getUser());// taskController.findTasksByAssignee(sessionController.getUser());
-
-		for (Task t : currentProject.getBlackboard().getTasks()) {
-			for (Task myTask : notMyTasks) {
-				if (t.getId() == myTask.getId()) {
-					foreignTasks.add(t);
-				}
-			}
-		}
-		if (foreignTasks.isEmpty()) {
-			foreignTasks = currentProject.getBlackboard().getTasks();
-		}
-		return notMyTasks;
-	}
-
-	public List<Task> getForeignTasks2() {
 		User user = sessionController.getUser();
 		List<Task> foreignTasks = new ArrayList<Task>();
-		List<Task> notMyTasks = taskController.findTasksNotAssignedToUser(sessionController.getUser());// taskController.findTasksByAssignee(sessionController.getUser());
+		List<Task> notMyTasks = taskController.findTasksNotAssignedToUser(user);
+		// taskController.findTasksByAssignee(sessionController.getUser());
 
 		for (Task t : currentProject.getBlackboard().getTasks()) {
 			if (notMyTasks.contains(t)) {
 				foreignTasks.add(t);
+			} else {
+				notMyTasks.remove(t);
 			}
 		}
 		if (foreignTasks.isEmpty()) {
@@ -182,6 +185,11 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 //		userRoleController.removeAssignedTask(user, managedTask);
 //		taskController.updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
 		taskController.resolveTask(task, sessionController.getUser());
+		return "blackboard";
+	}
+	
+	public String setTaskProgress(Task task, int percentage) {
+		taskController.setTaskProgress(task, sessionController.getUser(), percentage);
 		return "blackboard";
 	}
 	

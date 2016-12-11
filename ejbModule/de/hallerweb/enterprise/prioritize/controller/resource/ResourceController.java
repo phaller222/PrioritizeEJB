@@ -89,7 +89,7 @@ public class ResourceController extends PEventConsumerProducer {
 				try {
 					logger.log(sessionController.getUser().getUsername(), "Resource", Action.CREATE, resource.getId(),
 							" Resource \"" + resource.getName() + "\" created.");
-				} catch (ContextNotActiveException ex) {
+				} catch (Exception ex) {
 					// Log message omitted here because this can only happen during
 					// automatic tests (no session).
 				}

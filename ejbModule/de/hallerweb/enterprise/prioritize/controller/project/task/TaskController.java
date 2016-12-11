@@ -12,6 +12,7 @@ import javax.persistence.Query;
 
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
+import de.hallerweb.enterprise.prioritize.controller.project.ProjectController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
@@ -40,6 +41,9 @@ public class TaskController extends PEventConsumerProducer {
 	
 	@EJB
 	UserRoleController userRoleController;
+	
+	@EJB
+	ProjectController projectController;
 
 	// public ActionBoard findActionBoardByName(String name) {
 	// Query q = em.createNamedQuery("findActionBoardByName");
@@ -155,6 +159,26 @@ public class TaskController extends PEventConsumerProducer {
 		removeTaskAssignee(managedTask.getId(), user);
 		userRoleController.removeAssignedTask(user, managedTask);
 		updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
+		projectController.updateProjectProgress(task.getProjectGoalRecord().getProject().getId());
+	}
+	
+	public void setTaskProgress(Task task, User user, int percentage) {
+		if (percentage < 0 || percentage > 100) {
+			return;
+		}
+		Task managedTask = findTaskById(task.getId());
+		ProjectGoalRecord rec = managedTask.getProjectGoalRecord();
+		rec.setPercentage(percentage);
+		if (percentage == 100) {
+			removeTaskAssignee(managedTask.getId(), user);
+			userRoleController.removeAssignedTask(user, managedTask);
+			updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
+		} else if (percentage > 0) {
+			updateTaskStatus(managedTask.getId(), TaskStatus.STARTED);
+		} else {
+			updateTaskStatus(managedTask.getId(), TaskStatus.STOPPED);
+		}
+		projectController.updateProjectProgress(task.getProjectGoalRecord().getProject().getId());
 	}
 	
 	

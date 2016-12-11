@@ -28,7 +28,7 @@ public class CleanupJob {
 		// TODO Auto-generated constructor stub
 	}
 
-	@Schedule(minute = "*/1", hour = "*", persistent = false)
+	@Schedule(minute = "*/5", hour = "*", persistent = false)
 	public void cleanup() {
 		resourceController.cleanupReservations();
 

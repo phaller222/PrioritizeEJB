@@ -226,7 +226,7 @@ public class InitializationController {
 			HashSet<Role> roles = new HashSet<Role>();
 			roles.add(r);
 
-			User admin = userRoleController.createUser("admin", "admin", "admin", "", null, "", roles,
+			User admin = userRoleController.createUser("admin", "13rikMyElTw", "admin", "", null, "", roles,
 					AuthorizationController.getSystemUser());
 
 			// TODO: Remove admin API-Key!

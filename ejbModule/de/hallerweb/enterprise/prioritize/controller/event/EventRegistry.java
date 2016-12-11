@@ -13,6 +13,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -187,7 +188,7 @@ public class EventRegistry {
 		mng.remove(listener);
 	}
 
-	@Schedule(second = "*/10", minute = "*", hour = "*", persistent = false)
+	@Schedule(second = "*/30", minute = "*", hour = "*", persistent = false)
 	/**
 	 * Process all event currently present in datastore. Checks if events lifetime has passed
 	 * and removes them if necessary.
@@ -199,6 +200,7 @@ public class EventRegistry {
 		// Remove all events which lifetime is passed
 		List<Event> eventsToRemove = new ArrayList<Event>();
 		Query q1 = mng.createNamedQuery("findEventsWithLimitedLifetime");
+		try {
 		List<Event> lifetimeEvents = q1.getResultList();
 		if ((lifetimeEvents != null) && (!lifetimeEvents.isEmpty())) {
 			for (Event evt : lifetimeEvents) {
@@ -210,6 +212,9 @@ public class EventRegistry {
 				System.out.println("Removing event: " + evt.getLifetime());
 				mng.remove(evt);
 			}
+		}
+		} catch (EntityNotFoundException ex) {
+			// Don't log
 		}
 
 		// Remove all EventListeners which lifetime is passed

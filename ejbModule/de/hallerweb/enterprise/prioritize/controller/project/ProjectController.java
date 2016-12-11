@@ -511,8 +511,9 @@ public class ProjectController extends PEventConsumerProducer {
 		for (ProjectGoalRecord currentProjectGoalRecord : currentProjectGoals) {
 			ProjectGoalRecord origProjectGoalRecord = findOriginalProjectGoalRecord(managedProgress, currentProjectGoalRecord);
 			if (origProjectGoalRecord.getPropertyRecord().isNumericPropertyRecord()) {
-				int percentage = calcNumericGoalPercentage(currentProjectGoalRecord, origProjectGoalRecord);
-				currentProjectGoalRecord.setPercentage(percentage);
+				int percentage = currentProjectGoalRecord.getPercentage();//calcNumericGoalPercentage(currentProjectGoalRecord, origProjectGoalRecord);
+				origProjectGoalRecord.getPropertyRecord().setValue(percentage);
+				//setPercentage(percentage);
 				sum += percentage;
 			} else if (origProjectGoalRecord.getPropertyRecord().isDocumentPropertyRecord()) {
 				DocumentInfo docInfo = currentProjectGoalRecord.getPropertyRecord().getDocumentInfo();

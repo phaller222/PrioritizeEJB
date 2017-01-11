@@ -20,7 +20,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 
 /**
  * CalendarController.java 
- * 
+ * CalenderController
  */
 @Stateless
 public class CalendarController {

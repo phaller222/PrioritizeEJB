@@ -130,7 +130,7 @@ public class InitializationController {
 		config.put(ENABLE_MQTT_SERVICE, "true");
 		config.put(MQTT_HOST, "prioritize-iot.com");
 		config.put(MQTT_PORT, "1883");
-		config.put(MQTT_HOST_WRITE, "steamrunner.info");
+		config.put(MQTT_HOST_WRITE, "prioritize-iot.com");
 		config.put(MQTT_PORT_WRITE, "1883");
 
 		config.put(MQTT_MAX_COMMUNICATION_BYTES, "5000");

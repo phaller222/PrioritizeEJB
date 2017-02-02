@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
@@ -27,9 +28,9 @@ public class ProjectProgress {
 	@GeneratedValue
 	int id;
 
-	@OneToMany
-	List<ProjectGoalRecord> targetGoals;					// Goals for this project. If concrete tasks are build for this goal,
-															// a copy of this goal is created and assigned to a task.
+	@OneToMany(fetch = FetchType.EAGER)
+	List<ProjectGoalRecord> targetGoals;		// Goals for this project. If concrete tasks are build for this goal,
+												// a copy of this goal is created and assigned to a task.
 
 	int progress;											// Project progress in percent (0-100)
 

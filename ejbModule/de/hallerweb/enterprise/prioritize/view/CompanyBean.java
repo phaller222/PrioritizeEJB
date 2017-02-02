@@ -106,16 +106,17 @@ public class CompanyBean implements Serializable {
 	@Named
 	public String createCompany() {
 		if (controller.getCompanyByName(company.getName()) == null) {
-		Address address = company.getMainAddress();
-		Address adr = controller.createAddress(address.getStreet(), address.getZipCode(), address.getCity(), address.getPhone(),
-				address.getFax());
+			Address address = company.getMainAddress();
+			Address adr = controller.createAddress(address.getStreet(), address.getZipCode(), address.getCity(), address.getPhone(),
+					address.getFax());
 
-		Company createdCompany = controller.createCompany(company.getName(), adr);
-		controller.createDepartment(createdCompany, "default", "Auto generated default department", adr, sessionController.getUser());
+			Company createdCompany = controller.createCompany(company.getName(), adr);
+			controller.createDepartment(createdCompany, "default", "Auto generated default department", adr, sessionController.getUser());
 
-		return "companies";
+			return "companies";
 		} else {
-			ViewUtilities.addErrorMessage("name","A company with name " + company.getName() + " already exists. Company has not been created!");
+			ViewUtilities.addErrorMessage("name",
+					"A company with name " + company.getName() + " already exists. Company has not been created!");
 			return "companies";
 		}
 	}
@@ -125,7 +126,8 @@ public class CompanyBean implements Serializable {
 		Department createdDepartment = controller.createDepartment(company, department.getName(), department.getDescription(),
 				department.getAddress(), sessionController.getUser());
 		if (createdDepartment == null) {
-			ViewUtilities.addErrorMessage("messages", "The department " + department.getName() + " already exists or could not be created. Department has not been created!");
+			ViewUtilities.addErrorMessage("messages",
+					"The department " + department.getName() + " already exists or could not be created. Department has not been created!");
 			return "editcompanies";
 		}
 		company.addDepartment(createdDepartment);
@@ -134,16 +136,16 @@ public class CompanyBean implements Serializable {
 	}
 
 	@Named
-	public String delete(Company c) {
-		controller.deleteCompany(c.getId(), sessionController.getUser());
+	public String delete(Company company) {
+		controller.deleteCompany(company.getId(), sessionController.getUser());
 		init();
 		return "companies";
 	}
 
 	@Named
-	public String deleteDepartment(Department d) {
-		company.getDepartments().remove(d);
-		controller.deleteDepartment(d.getId(),sessionController.getUser());
+	public String deleteDepartment(Department department) {
+		company.getDepartments().remove(department);
+		controller.deleteDepartment(department.getId(), sessionController.getUser());
 		return "editcompany";
 	}
 
@@ -155,8 +157,8 @@ public class CompanyBean implements Serializable {
 	 * @return "editcompany".
 	 */
 	@Named
-	public String edit(Company c) {
-		this.company = c;
+	public String edit(Company company) {
+		this.company = company;
 		initDepartment();
 		return "editcompany";
 
@@ -182,8 +184,8 @@ public class CompanyBean implements Serializable {
 	 * @return "editdepartment"
 	 */
 	@Named
-	public String editDepartment(Department d) {
-		this.department = d;
+	public String editDepartment(Department department) {
+		this.department = department;
 		return "editdepartment";
 	}
 
@@ -236,7 +238,7 @@ public class CompanyBean implements Serializable {
 
 	@Named
 	public boolean canCreate() {
-		return authController.canCreate(-1, Company.class, sessionController.getUser());
+		return authController.canCreate(-1, new Company(), sessionController.getUser());
 
 	}
 }

@@ -25,9 +25,11 @@ import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
+import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
+import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
@@ -148,12 +150,12 @@ public class CompanyController extends PEventConsumerProducer {
 		Set<PermissionRecord> records = new HashSet<PermissionRecord>();
 
 		PermissionRecord deptDocs = new PermissionRecord(true, true, true, true);
-		deptDocs.setTargetResourceType("DocumentInfo");
+		deptDocs.setAbsoluteObjectType(DocumentInfo.class.getCanonicalName());
 		deptDocs.setDepartment(dept);
 		records.add(deptDocs);
 
 		PermissionRecord deptResources = new PermissionRecord(true, true, true, true);
-		deptResources.setTargetResourceType("Resource");
+		deptResources.setAbsoluteObjectType(Resource.class.getCanonicalName());
 		deptResources.setDepartment(dept);
 		records.add(deptResources);
 

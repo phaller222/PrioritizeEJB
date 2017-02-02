@@ -7,6 +7,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import de.hallerweb.enterprise.prioritize.model.project.Project;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 
@@ -40,9 +42,11 @@ public class ProjectGoalRecord {
 	@GeneratedValue
 	int id;
 
+	
 	@OneToOne
 	Task task;											// null if describing target goal, Link to task if concrete progress.
 
+	@JsonBackReference
 	@OneToOne
 	Project project;									// Project this ProjectGoalRecord belongs to.
 	

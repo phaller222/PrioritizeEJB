@@ -14,6 +14,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
 import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
@@ -46,21 +48,33 @@ public class Project {
 	int maxManDays;										// Max. amount of man days this project should consume
 	int priority;										// The prioritiy of this project
 
+	@JsonIgnore
 	@ManyToMany
 	List<DocumentInfo> documents;						// DocumentInfo objects assigned to this project
 
+	@JsonIgnore
 	@ManyToMany
 	List<Resource> resources;							// Resources assigned to this project
+	
 	@ManyToMany(fetch = FetchType.EAGER)
 	List<User> users;									// Users assigned to this project
+	
+	@JsonIgnore
 	@OneToMany
 	List<SkillGroup> requiredSkills;					// The skills required to fullfill this project
+	
+	@JsonIgnore
 	@OneToMany
 	List<SkillRecord> availableSkills;					// Skills already assigned to the project (=available)
+	
+	@JsonIgnore
 	@OneToOne
 	Blackboard blackboard;								// The blackboard with tasks for this project
+	
+	@JsonIgnore
 	@OneToOne
 	ActionBoard actionboard;							// ActionBoard with up to date information on the project.
+	
 	@OneToOne
 	ProjectProgress progress;							// Observe project goals and progress.
 

@@ -35,12 +35,13 @@ public class PermissionRecord {
 	}
 
 	public PermissionRecord(boolean create, boolean read, boolean update, boolean delete,
-			Class<? extends PAuthorizedObject> targetResourceType) {
+			String absoluteObjectType) {
 		this.readPermission = read;
 		this.createPermission = create;
 		this.updatePermission = update;
 		this.deletePermission = delete;
-		this.targetResourceType = targetResourceType;
+		this.absoluteObjectType = absoluteObjectType;
+		//this.targetResourceType = targetResourceType;
 	}
 
 	public PermissionRecord(boolean create, boolean read, boolean update, boolean delete) {
@@ -90,7 +91,16 @@ public class PermissionRecord {
 	boolean readPermission;
 	boolean updatePermission;
 	boolean deletePermission;
-	Class<? extends PAuthorizedObject> targetResourceType;
+	//Class<? extends PAuthorizedObject> targetResourceType;
+	String absoluteObjectType;
+
+	public String getAbsoluteObjectType() {
+		return absoluteObjectType;
+	}
+
+	public void setAbsoluteObjectType(String absoluteObjectType) {
+		this.absoluteObjectType = absoluteObjectType;
+	}
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	Department department;
@@ -99,13 +109,13 @@ public class PermissionRecord {
 		return department;
 	}
 
-	public Class<? extends PAuthorizedObject> getTargetResourceType() {
-		return targetResourceType;
-	}
-
-	public void setTargetResourceType(String targetResource) {
-		this.targetResourceType = (Class<? extends PAuthorizedObject>) RoleBean.authorizedObjects.get(targetResource);
-	}
+//	public Class<? extends PAuthorizedObject> getTargetResourceType() {
+//		return targetResourceType;
+//	}
+//
+//	public void setTargetResourceType(String targetResource) {
+//		this.targetResourceType = (Class<? extends PAuthorizedObject>) RoleBean.authorizedObjects.get(targetResource);
+//	}
 
 	public int getId() {
 		return id;

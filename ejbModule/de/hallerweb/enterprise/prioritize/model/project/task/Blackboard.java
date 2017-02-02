@@ -12,6 +12,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import de.hallerweb.enterprise.prioritize.model.project.Project;
 
 @Entity
@@ -29,6 +31,7 @@ public class Blackboard {
 	@OneToMany(fetch = FetchType.EAGER)
 	List<Task> tasks;
 
+	@JsonBackReference
 	@OneToOne
 	Project project;
 

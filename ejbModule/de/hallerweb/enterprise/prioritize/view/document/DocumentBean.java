@@ -133,8 +133,9 @@ public class DocumentBean implements Serializable {
 	public List<DocumentInfo> getDocumentInfos() {
 		if (!(this.selectedDocumentGroup == null) && (!this.selectedDocumentGroup.isEmpty())) {
 			return controller.getDocumentInfosInDocumentGroup(Integer.parseInt(this.selectedDocumentGroup), sessionController.getUser());
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	@Named
@@ -462,7 +463,7 @@ public class DocumentBean implements Serializable {
 	@Named
 	public boolean canCreate() {
 		try {
-			return authController.canCreate(Integer.parseInt(this.selectedDepartmentId), DocumentInfo.class, sessionController.getUser());
+			return authController.canCreate(Integer.parseInt(this.selectedDepartmentId), new DocumentInfo(), sessionController.getUser());
 		} catch (NumberFormatException ex) {
 			return false;
 		}

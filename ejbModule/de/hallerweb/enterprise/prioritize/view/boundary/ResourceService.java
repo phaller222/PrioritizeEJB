@@ -34,7 +34,6 @@ import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.resource.NameValueEntry;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
@@ -284,8 +283,8 @@ public class ResourceService {
 				processed = true;
 				boolean online = Boolean.parseBoolean(mqttOnline);
 
-				resourceController.raiseEvent(resource, "mqttOnline", String.valueOf(resource.isMqttOnline()),
-						mqttOnline, InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				resourceController.raiseEvent(resource, "mqttOnline", String.valueOf(resource.isMqttOnline()), mqttOnline,
+						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 
 				if (online) {
 					resourceController.setMqttResourceOnline(resource);
@@ -313,8 +312,8 @@ public class ResourceService {
 				for (String cmd : commandString) {
 					commandsForResource.add(cmd);
 				}
-				resourceController.raiseEvent(resource, "commands", resource.getMqttCommands().toString(),
-						commands, InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				resourceController.raiseEvent(resource, "commands", resource.getMqttCommands().toString(), commands,
+						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 				resourceController.setCommands(resource, commandsForResource);
 			}
 			if (geo != null) {
@@ -364,7 +363,7 @@ public class ResourceService {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			Department dept = companyController.getDepartmentByToken(departmentToken);
-			if (authController.canCreate(dept.getId(), Resource.class, user)) {
+			if (authController.canCreate(dept.getId(), new Resource(), user)) {
 				if (ip == null) {
 					ip = "";
 				}
@@ -385,11 +384,13 @@ public class ResourceService {
 				} else {
 					return createNegativeResponse("Resource could not be created!");
 				}
-			} else
+			} else {
 				throw new NotAuthorizedException(Response.serverError());
+			}
 
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 
 	}
 

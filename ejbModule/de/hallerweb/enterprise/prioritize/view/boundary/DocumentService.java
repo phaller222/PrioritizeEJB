@@ -74,9 +74,46 @@ public class DocumentService {
 	AuthorizationController authController;
 
 	/**
-	 * Returns all the documents in the given department. Returns only the metadata, NOT the content!
-	 * 
+	 * @api {get} /documents/{departmentToken}/{group}/?apiKey={apiKey} getDocuments
+	 * @apiName getDocuments
+	 * @apiGroup /documents
+	 * @apiDescription gets all documents (metadata only) within the given department and document group.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} departmentToken The department token of the department.
+	 * @apiParam {String} group The document group name within this department to look for documents.
+	 * @apiSuccess {Document} documents JSON DocumentInfo-Objects with information about found documents.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *  [
+	 *    {
+	 *		"id" : 80,
+	 *		"currentDocument" : {
+	 *			"id" : 79,
+	 *			"name" : "testdefault",
+	 *			"version" : 1,
+	 *			"mimeType" : "image/png",
+	 *			"tag" : null,
+	 *			"lastModified" : 1485693706000,
+	 *			"encrypted" : false,
+	 *			"changes" : "",
+	 *			"lastModifiedBy" : {
+	 *				"id" : 18,
+	 *				"name" : "admin",
+	 *				"username" : "admin",
+	 *				"assignedTasks" : [ ]
+	 *			},
+	 *			"encryptedBy" : null
+	 *		},
+	 *		"recentDocuments" : [ ],
+	 *		"locked" : false,
+	 *		"lockedBy" : null,
+	 * 	 }
+	 * ]
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 *
 	 * @param departmentToken - The department token.
+	 * @param group - The document group to look for dcuments.
 	 * @return JSON object with documents in that department.
 	 */
 	@GET
@@ -109,8 +146,9 @@ public class DocumentService {
 			} else {
 				throw new NotFoundException(createNegativeResponse("Department not found or department token invalid!"));
 			}
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	/**
@@ -158,7 +196,7 @@ public class DocumentService {
 	@Path("id/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Document getDocumentByUuid(@PathParam(value = "id") String id, @QueryParam(value = "apiKey") String apiKey) {
-		User user =  accessController.checkApiKey(apiKey);
+		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			DocumentInfo docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
 			Document document = docInfo.getCurrentDocument();
@@ -250,7 +288,7 @@ public class DocumentService {
 				DocumentInfo docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
 				if (docInfo != null) {
 					if (authController.canDelete(docInfo, user)) {
-					documentController.deleteDocumentInfo(docInfo.getId(), user);
+						documentController.deleteDocumentInfo(docInfo.getId(), user);
 					} else {
 						throw new NotAuthorizedException(Response.serverError());
 					}

@@ -110,8 +110,8 @@ public class UserRoleController extends PEventConsumerProducer {
 					recNew.setDeletePermission(rec.isDeletePermission());
 
 					// Resource type can be null for ALL resource types!
-					if (rec.getTargetResourceType() != null) {
-						recNew.setTargetResourceType(rec.getTargetResourceType().getSimpleName());
+					if (rec.getAbsoluteObjectType() != null) {
+						recNew.setAbsoluteObjectType(rec.getAbsoluteObjectType());
 					}
 
 					// rec.gertDepartment() can be null if permission record set for

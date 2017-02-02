@@ -300,9 +300,9 @@ public class UserBean implements Serializable {
 	public boolean canCreate() {
 		try {
 			int deptId = Integer.parseInt(this.selectedDepartmentId);
-			return authController.canCreate(deptId, User.class, sessionController.getUser());
+			return authController.canCreate(deptId, new User(), sessionController.getUser());
 		} catch (NumberFormatException ex) {
-			return authController.canCreate(-1, User.class, sessionController.getUser());
+			return authController.canCreate(-1, new User(), sessionController.getUser());
 		}
 	}
 

@@ -119,6 +119,9 @@ public class TaskController extends PEventConsumerProducer {
 		task.setDescription(detachedTask.getDescription());
 		task.setPriority(detachedTask.getPriority());
 		task.setTaskStatus(detachedTask.getTaskStatus());
+		if (detachedTask.getAssignees() != null) {
+			task.setAssignees(detachedTask.getAssignees());
+		}
 	}
 	
 	public void addTaskAssignee(int taskId, PActor assignee) {

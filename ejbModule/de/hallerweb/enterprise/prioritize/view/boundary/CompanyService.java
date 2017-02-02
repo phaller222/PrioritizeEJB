@@ -60,10 +60,31 @@ public class CompanyService {
 	AuthorizationController authController;
 
 	/**
-	 * Return the {@link Company} object with the given Id.
-	 * 
-	 * @param id
-	 *            - The id of the {@link Company}.
+	 * @api {get} /companies/{id} getCompany
+	 * @apiName getCompany
+	 * @apiGroup /company
+	 * @apiDescription Returns the company with the given id.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiSuccess {Company} company JSON Object with the company of the given id.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *	{
+	 *    "id" : 1,
+	 *    "name" : "Default Company",
+	 *    "description" : "",
+	 *    "mainAddress" : {
+	 *    "id" : 7,
+	 *    "zipCode" : "00000",
+	 *    "phone" : "00000-00000",
+	 *    "fax" : "00000-00000",
+	 *    "city" : "City of Admin",
+	 *    "street" : "Street of Admins"
+	 *    ...many more
+	 *  }
+	 *
+	 * @apiError NotAuthorized APIKey incorrect.
+	 *
+	 * @param id - The id of the {@link Company}.
 	 * @return {@link Company} - JSON Representation of the company.
 	 */
 	@GET
@@ -72,12 +93,40 @@ public class CompanyService {
 	public Company getCompany(@PathParam(value = "id") int id, @QueryParam(value = "apiKey") String apiKey) {
 		if (accessController.checkApiKey(apiKey) != null) {
 			return companyController.findCompanyById(id);
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	/**
-	 * Returns all the departments matching the seacrh phrase.
+	 * Returns all the departments matching the seach phrase.
+	 *
+	 * @api {get} /search/departments searchDepartments
+	 * @apiName searchDepartments
+	 * @apiGroup /company
+	 * @apiDescription Searches all departments which contain the given phrase
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} phrase The search phrase used in the search.
+	 * @apiSuccess {Department} department JSON department Objects which contained the search phrase.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * [
+     *   {
+     *     "id" : 6,
+     *     "address" : {
+     *     "id" : 5,
+     *     "zipCode" : "00000",
+     *     "phone" : "00000-00000",
+     *     "fax" : "00000-00000",
+     *     "city" : "City of Admin",
+     *     "street" : "Street of Admins"
+     *     ...many more
+     *    }
+     * ]
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 *
+	 * @param id - The id of the {@link Company}.
 	 *
 	 * @return JSON object with departments in that company.
 	 */

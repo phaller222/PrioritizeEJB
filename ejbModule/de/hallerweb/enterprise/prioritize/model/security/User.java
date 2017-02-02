@@ -67,6 +67,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	String name;
 	String username;
 	
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.EAGER)
 	List<Task> assignedTasks;
 	

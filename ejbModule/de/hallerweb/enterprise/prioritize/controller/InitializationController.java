@@ -217,7 +217,7 @@ public class InitializationController {
 
 			HashSet<PermissionRecord> records = new HashSet<PermissionRecord>();
 			PermissionRecord adminDocuments = new PermissionRecord(true, true, true, true, null);
-			PermissionRecord adminSkills = new PermissionRecord(true, true, true, true, Skill.class);
+			PermissionRecord adminSkills = new PermissionRecord(true, true, true, true, Skill.class.getCanonicalName());
 			records.add(adminDocuments);
 			records.add(adminSkills);
 
@@ -271,71 +271,76 @@ public class InitializationController {
 			// blackboardController.putTaskToBlackboard(managedTask.getId(), managedBlackboard.getId());
 
 			// ------------- TEST Project --------------------------------------
-			Project project = new Project();
-			project.setName("Testproject");
-			project.setDescription("Testbeschreibung");
-			project.setBeginDate(new Date());
-			project.setDueDate(new Date(new Date().getTime() + 3000000));
-			project.setManager(userRoleController.findRoleByRolename("admin", admin));
-			project.setMaxManDays(20);
-			project.setPriority(1);
+//			Project project = new Project();
+//			project.setName("Testproject");
+//			project.setDescription("Testbeschreibung");
+//			project.setBeginDate(new Date());
+//			project.setDueDate(new Date(new Date().getTime() + 3000000));
+//			project.setManager(userRoleController.findRoleByRolename("admin", admin));
+//			project.setMaxManDays(20);
+//			project.setPriority(1);
+//			
+//			// project.setBlackboard(managedBlackboard);
+//			Project managedProject = projectController.createProject(project, bb, new ArrayList<Task>());
+//			// -------------------------------------------------------------------------
+//
+//			// --------------TEST Project Goals ---------------------------------------
+//			ProjectGoalPropertyNumeric property = new ProjectGoalPropertyNumeric();
+//			property.setName("Nominalumsatz");
+//			property.setDescription("Nominalumsatz im Unternehmen");
+//			property.setMin(10000);
+//			property.setMax(30000);
+//
+//			ProjectGoalPropertyDocument property2 = new ProjectGoalPropertyDocument();
+//			property2.setName("Finale Spezifikation");
+//			property2.setDescription("Feinspezifikation komplett");
+//			property2.setTag("FINAL");
+//
+//			List<ProjectGoalProperty> properties = new ArrayList<ProjectGoalProperty>();
+//			properties.add(property);
+//			properties.add(property2);
+//
+//			ProjectGoalPropertyRecord propRecord = new ProjectGoalPropertyRecord();
+//			propRecord.setProperty(property);
+//			propRecord.setValue(5000);
+//			propRecord.setNumericPropertyRecord(true);
+//
+//			ProjectGoalPropertyRecord propRecord2 = new ProjectGoalPropertyRecord();
+//			propRecord2.setProperty(property2);
+//			DocumentGroup temp = documentController.createDocumentGroup(d.getId(), "test", admin);
+//			DocumentInfo info = documentController.createDocument("ttt", temp.getId(), admin, "text/plain", false, new byte[] {}, "none");
+//			Document document = info.getCurrentDocument();
+//			document.setTag("FINAL");
+//			documentController.editDocument(info, document, "1212".getBytes(), "text/plain", admin, false);
+//			propRecord2.setDocumentInfo(info);
+//			propRecord2.setDocumentPropertyRecord(true);
+//
+//			ProjectGoalCategory cat = projectController.createProjectGoalCategory("Financial", "Financial project goals", null);
+//			ProjectGoal goal = projectController.createProjectGoal("Umsatzsteigerung", "Wir brauchen mehr Umsatz!", cat, 
+//					properties, admin);
+//			// new ProjectGoal();
+//			goal.setCategory(cat);
+//			property2.setProjectGoal(goal);
+//
+//			ProjectGoalRecord goalRecord = new ProjectGoalRecord();
+//			goalRecord.setPropertyRecord(propRecord);
+//			goalRecord.setProject(managedProject);
+//			goalRecord.setProjectGoal(goal);
+//
+//			ProjectGoalRecord goalRecord2 = new ProjectGoalRecord();
+//			goalRecord2.setPropertyRecord(propRecord2);
+//			goalRecord2.setProject(managedProject);
+//			goalRecord2.setProjectGoal(goal);
+//
+//			List<ProjectGoalRecord> projectGoalRecords = new ArrayList<ProjectGoalRecord>();
+//			projectGoalRecords.add(goalRecord);
+//			projectGoalRecords.add(goalRecord2);
+
 			
-			// project.setBlackboard(managedBlackboard);
-			Project managedProject = projectController.createProject(project, bb, new ArrayList<Task>());
-			// -------------------------------------------------------------------------
-
-			// --------------TEST Project Goals ---------------------------------------
-			ProjectGoalPropertyNumeric property = new ProjectGoalPropertyNumeric();
-			property.setName("Nominalumsatz");
-			property.setDescription("Nominalumsatz im Unternehmen");
-			property.setMin(10000);
-			property.setMax(30000);
-
-			ProjectGoalPropertyDocument property2 = new ProjectGoalPropertyDocument();
-			property2.setName("Finale Spezifikation");
-			property2.setDescription("Feinspezifikation komplett");
-			property2.setTag("FINAL");
-
-			List<ProjectGoalProperty> properties = new ArrayList<ProjectGoalProperty>();
-			properties.add(property);
-			properties.add(property2);
-
-			ProjectGoalPropertyRecord propRecord = new ProjectGoalPropertyRecord();
-			propRecord.setProperty(property);
-			propRecord.setValue(5000);
-			propRecord.setNumericPropertyRecord(true);
-
-			ProjectGoalPropertyRecord propRecord2 = new ProjectGoalPropertyRecord();
-			propRecord2.setProperty(property2);
-			DocumentGroup temp = documentController.createDocumentGroup(d.getId(), "test", admin);
-			DocumentInfo info = documentController.createDocument("ttt", temp.getId(), admin, "text/plain", false, new byte[] {}, "none");
-			Document document = info.getCurrentDocument();
-			document.setTag("FINAL");
-			documentController.editDocument(info, document, "1212".getBytes(), "text/plain", admin, false);
-			propRecord2.setDocumentInfo(info);
-			propRecord2.setDocumentPropertyRecord(true);
-
-			ProjectGoalCategory cat = projectController.createProjectGoalCategory("Financial", "Financial project goals", null);
-			ProjectGoal goal = projectController.createProjectGoal("Umsatzsteigerung", "Wir brauchen mehr Umsatz!", cat, 
-					properties, admin);
-			// new ProjectGoal();
-			goal.setCategory(cat);
-			property2.setProjectGoal(goal);
-
-			ProjectGoalRecord goalRecord = new ProjectGoalRecord();
-			goalRecord.setPropertyRecord(propRecord);
-			goalRecord.setProject(managedProject);
-			goalRecord.setProjectGoal(goal);
-
-			ProjectGoalRecord goalRecord2 = new ProjectGoalRecord();
-			goalRecord2.setPropertyRecord(propRecord2);
-			goalRecord2.setProject(managedProject);
-			goalRecord2.setProjectGoal(goal);
-
-			List<ProjectGoalRecord> projectGoalRecords = new ArrayList<ProjectGoalRecord>();
-			projectGoalRecords.add(goalRecord);
-			projectGoalRecords.add(goalRecord2);
-
+			
+			
+			//OLD
+			
 			// // Create initial ProjectProgress
 			// ProjectProgress managedProgress = projectController.createProjectProgress(project.getId(), projectGoalRecords, 0);
 			// managedProject.setProgress(managedProgress);

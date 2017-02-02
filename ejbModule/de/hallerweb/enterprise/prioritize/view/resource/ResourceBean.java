@@ -442,7 +442,7 @@ public class ResourceBean implements Serializable {
 	@Named
 	public boolean canCreate() {
 		try {
-			return authController.canCreate(Integer.parseInt(this.selectedDepartmentId), Resource.class, sessionController.getUser());
+			return authController.canCreate(Integer.parseInt(this.selectedDepartmentId), new Resource(), sessionController.getUser());
 		} catch (NumberFormatException ex) {
 			return false;
 		}

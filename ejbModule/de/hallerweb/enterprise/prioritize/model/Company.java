@@ -14,6 +14,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Version;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 
 /**
@@ -47,6 +49,7 @@ public class Company implements PAuthorizedObject {
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	Address mainAddress;
 
+	@JsonIgnore
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "company", cascade = CascadeType.ALL)
 	List<Department> departments;
 
@@ -117,37 +120,50 @@ public class Company implements PAuthorizedObject {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		Company other = (Company) obj;
 		if (departments == null) {
-			if (other.departments != null)
+			if (other.departments != null) {
 				return false;
-		} else if (!departments.equals(other.departments))
+			}
+		} else if (!departments.equals(other.departments)) {
 			return false;
+		}
 		if (description == null) {
-			if (other.description != null)
+			if (other.description != null) {
 				return false;
-		} else if (!description.equals(other.description))
+			}
+		} else if (!description.equals(other.description)) {
 			return false;
-		if (entityVersion != other.entityVersion)
+		}
+		if (entityVersion != other.entityVersion) {
 			return false;
-		if (id != other.id)
+		}
+		if (id != other.id) {
 			return false;
+		}
 		if (mainAddress == null) {
-			if (other.mainAddress != null)
+			if (other.mainAddress != null) {
 				return false;
-		} else if (!mainAddress.equals(other.mainAddress))
+			}
+		} else if (!mainAddress.equals(other.mainAddress)) {
 			return false;
+		}
 		if (name == null) {
-			if (other.name != null)
+			if (other.name != null) {
 				return false;
-		} else if (!name.equals(other.name))
+			}
+		} else if (!name.equals(other.name)) {
 			return false;
+		}
 		return true;
 	}
 

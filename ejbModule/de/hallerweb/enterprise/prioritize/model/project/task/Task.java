@@ -9,7 +9,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne; 
+import javax.persistence.OneToOne;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
@@ -35,18 +37,22 @@ public class Task extends PObject{
 	@OneToMany(fetch=FetchType.EAGER)
 	private List<Task> subTasks;
 	
+	@JsonIgnore
 	@OneToMany
 	private List<Resource> resources;
 	
+	@JsonIgnore
 	@OneToMany
 	private List<Document> documents;
 	
+	@JsonIgnore
 	@OneToMany
 	private List<SkillRecord> requiredSkills;
 	
 	@ManyToMany(fetch = FetchType.EAGER)
 	private List<PActor> assignees;
 	
+	@JsonIgnore
 	@OneToOne 
 	ProjectGoalRecord projectGoalRecord;
 	

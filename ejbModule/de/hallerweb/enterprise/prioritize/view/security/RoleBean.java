@@ -113,18 +113,18 @@ public class RoleBean implements Serializable {
 	@PostConstruct
 	public void init() {
 		resourceTypes.clear();
-		resourceTypes.add(Company.class.getSimpleName());
-		resourceTypes.add(DocumentInfo.class.getSimpleName());
-		resourceTypes.add(DocumentGroup.class.getSimpleName());
-		resourceTypes.add(User.class.getSimpleName());
-		resourceTypes.add(Role.class.getSimpleName());
-		resourceTypes.add(Resource.class.getSimpleName());
-		resourceTypes.add(ResourceGroup.class.getSimpleName());
-		resourceTypes.add(Skill.class.getSimpleName());
-		
+		resourceTypes.add(Company.class.getCanonicalName());
+		resourceTypes.add(DocumentInfo.class.getCanonicalName());
+		resourceTypes.add(DocumentGroup.class.getCanonicalName());
+		resourceTypes.add(User.class.getCanonicalName());
+		resourceTypes.add(Role.class.getCanonicalName());
+		resourceTypes.add(Resource.class.getCanonicalName());
+		resourceTypes.add(ResourceGroup.class.getCanonicalName());
+		resourceTypes.add(Skill.class.getCanonicalName());
+
 		role = new Role();
 
-		PermissionRecord rec = new PermissionRecord(false, false, false, false, DocumentInfo.class);
+		PermissionRecord rec = new PermissionRecord(false, false, false, false, DocumentInfo.class.getCanonicalName());
 		role.setName(" ");
 
 		role.addPermission(rec);
@@ -168,43 +168,41 @@ public class RoleBean implements Serializable {
 	@Named
 	public String createRole() {
 		if (controller.findRoleByRolename(role.getName(), sessionController.getUser()) == null) {
-		Set<PermissionRecord> permissionRecords = role.getPermissions();
-		PermissionRecord rec;
-		if (permissionRecords.isEmpty()) {
-			rec = new PermissionRecord(false, false, false, false,
-					(Class<? extends PAuthorizedObject>) authorizedObjects.get(targetResourceType));
+			Set<PermissionRecord> permissionRecords = role.getPermissions();
+			PermissionRecord rec;
+			if (permissionRecords.isEmpty()) {
+				rec = new PermissionRecord(false, false, false, false, targetResourceType);
+			} else {
+				rec = role.getPermissions().iterator().next();
+			}
+			rec.setCreatePermission(createPermission);
+			rec.setReadPermission(readPermission);
+			rec.setUpdatePermission(updatePermission);
+			rec.setDeletePermission(deletePermission);
+
+			rec.setAbsoluteObjectType(targetResourceType);
+
+			// Set department only if permission record is not set for ALL departments!
+			if (selectedDepartmentId != null) {
+				Department d = companyController.findDepartmentById(Integer.valueOf(selectedDepartmentId));
+				rec.setDepartment(d);
+			}
+
+			role.getPermissions().clear();
+			role.addPermission(rec);
+
+			controller.createRole(role.getName(), role.getDescription(), role.getPermissions(), sessionController.getUser());
+			init();
+			return "roles";
 		} else {
-			rec = role.getPermissions().iterator().next();
-		}
-		rec.setCreatePermission(createPermission);
-		rec.setReadPermission(readPermission);
-		rec.setUpdatePermission(updatePermission);
-		rec.setDeletePermission(deletePermission);
-
-		rec.setTargetResourceType(targetResourceType);
-
-		// Set department only if permission record is not set for ALL departments!
-		if (selectedDepartmentId != null) {
-			Department d = companyController.findDepartmentById(Integer.valueOf(selectedDepartmentId));
-			rec.setDepartment(d);
-		}
-
-		role.getPermissions().clear();
-		role.addPermission(rec);
-
-		controller.createRole(role.getName(), role.getDescription(), role.getPermissions(), sessionController.getUser());
-		init();
-		return "roles";
-		} else {
-			ViewUtilities.addErrorMessage("rolename",
-					"The Rolename " + role.getName() + " already exists. Role has not been created!");
+			ViewUtilities.addErrorMessage("rolename", "The Rolename " + role.getName() + " already exists. Role has not been created!");
 			return "roles";
 		}
 	}
 
 	@Named
 	public String delete(Role r) {
-		controller.deleteRole(r.getId(),sessionController.getUser());
+		controller.deleteRole(r.getId(), sessionController.getUser());
 		init();
 		return "roles";
 	}
@@ -252,7 +250,7 @@ public class RoleBean implements Serializable {
 		rec.setUpdatePermission(updatePermission);
 		rec.setReadPermission(readPermission);
 
-		rec.setTargetResourceType(targetResourceType);
+		rec.setAbsoluteObjectType(targetResourceType);
 
 		// Only set department if record is for a specific department
 		if (selectedDepartmentId != null) {
@@ -293,9 +291,9 @@ public class RoleBean implements Serializable {
 	public boolean canCreate() {
 		try {
 			int deptId = Integer.parseInt(this.selectedDepartmentId);
-			return authController.canCreate(deptId, Role.class, sessionController.getUser());
+			return authController.canCreate(deptId, new Role(), sessionController.getUser());
 		} catch (NumberFormatException ex) {
-			return authController.canCreate(-1, Role.class, sessionController.getUser());
+			return authController.canCreate(-1, new Role(), sessionController.getUser());
 
 		}
 	}

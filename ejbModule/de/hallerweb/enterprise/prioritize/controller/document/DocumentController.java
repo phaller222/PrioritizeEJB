@@ -11,7 +11,6 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.enterprise.context.ContextNotActiveException;
 import javax.inject.Inject;
-import javax.naming.NoInitialContextException;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -130,7 +129,7 @@ public class DocumentController extends PEventConsumerProducer {
 			documentGroup.setDepartment(managedDepartment);
 
 			// ------------------ AUTH check --------------
-			if (authController.canCreate(departmentId, DocumentInfo.class, user)) {
+			if (authController.canCreate(departmentId, documentGroup, user)) {
 
 				em.persist(documentGroup);
 				managedDepartment.addDocumentGroup(documentGroup);
@@ -142,8 +141,9 @@ public class DocumentController extends PEventConsumerProducer {
 				}
 
 				return documentGroup;
-			} else
+			} else {
 				return null;
+			}
 		}
 	}
 
@@ -156,10 +156,12 @@ public class DocumentController extends PEventConsumerProducer {
 			// ------------- AUTH check ----------------
 			if (authController.canRead(result.get(0), user)) {
 				return result;
-			} else
+			} else {
 				return null;
-		} else
+			}
+		} else {
 			return null;
+		}
 	}
 
 	public DocumentInfo getDocumentInfo(int id, User user) {

@@ -80,7 +80,7 @@ public class CompanyBean implements Serializable {
 	@Produces
 	@Named
 	public List<Company> getCompanies() {
-		return controller.getAllCompanies();
+		return controller.getAllCompanies(sessionController.getUser());
 	}
 
 	@Named
@@ -105,12 +105,12 @@ public class CompanyBean implements Serializable {
 
 	@Named
 	public String createCompany() {
-		if (controller.getCompanyByName(company.getName()) == null) {
+		if (controller.getCompanyByName(company.getName(), sessionController.getUser()) == null) {
 			Address address = company.getMainAddress();
 			Address adr = controller.createAddress(address.getStreet(), address.getZipCode(), address.getCity(), address.getPhone(),
 					address.getFax());
 
-			Company createdCompany = controller.createCompany(company.getName(), adr);
+			Company createdCompany = controller.createCompany(company.getName(), adr,sessionController.getUser());
 			controller.createDepartment(createdCompany, "default", "Auto generated default department", adr, sessionController.getUser());
 
 			return "companies";
@@ -171,7 +171,7 @@ public class CompanyBean implements Serializable {
 	 */
 	@Named
 	public String save() {
-		controller.editCompany(company);
+		controller.editCompany(company, sessionController.getUser());
 		init();
 		return "companies";
 	}
@@ -197,7 +197,7 @@ public class CompanyBean implements Serializable {
 	@Named
 	public String saveDepartment() {
 		try {
-			controller.editDepartment(department);
+			controller.editDepartment(department, sessionController.getUser());
 		} catch (Exception ex) {
 			Logger.getLogger(CompanyBean.class).log(Level.ERROR, "Could not edit Department");
 		}
@@ -238,7 +238,7 @@ public class CompanyBean implements Serializable {
 
 	@Named
 	public boolean canCreate() {
-		return authController.canCreate(-1, new Company(), sessionController.getUser());
+		return authController.canCreate(-1, AuthorizationController.COMPANY_TYPE, sessionController.getUser());
 
 	}
 }

@@ -173,7 +173,7 @@ public class InboxService {
 			@QueryParam(value = "subject") String subject, @QueryParam(value = "message") String message) {
 		User from = accessController.checkApiKey(apiKey);
 		if (from != null) {
-			User to = userRoleController.findUserById(Integer.parseInt(id));
+			User to = userRoleController.findUserById(Integer.parseInt(id), from);
 			if (to != null) {
 				messagController.createMessage(from, to, subject, message);
 				return createPositiveResponse(
@@ -207,8 +207,9 @@ public class InboxService {
 				}
 			}
 			return createNegativeResponse("Message with ID " + messageId + " not found. Nothing removed!");
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	private Response createPositiveResponse(String responseText) {

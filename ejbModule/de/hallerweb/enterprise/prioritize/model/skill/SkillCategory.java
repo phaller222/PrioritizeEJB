@@ -17,6 +17,9 @@ import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
+
 /**
  * JPA entity to represent a {@link SkillCategory}. Skills can be grouped into categories.
  * 
@@ -37,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 		@NamedQuery(name = "findCategoryById", query = "select cat FROM SkillCategory cat WHERE cat.id = :categoryId"),
 		@NamedQuery(name = "findSubCategoriesForCategory", query = "select cat FROM SkillCategory cat WHERE cat.parentCategory.id = :parentCategoryId"),
 		@NamedQuery(name = "findSkillsForCategory", query = "select s FROM Skill s WHERE s.category.id = :catId") })
-public class SkillCategory implements SkillType {
+public class SkillCategory implements PAuthorizedObject, SkillType {
 
 	@Id
 	@GeneratedValue
@@ -133,6 +136,11 @@ public class SkillCategory implements SkillType {
 
 	public String getType() {
 		return "CATEGORY";
+	}
+
+	@Override
+	public Department getDepartment() {
+		return null;
 	}
 
 }

@@ -28,7 +28,7 @@ import de.hallerweb.enterprise.prioritize.view.security.RoleBean;
 @Entity
 @NamedQueries(@NamedQuery(name = "findPermissionRecordsByDepartment", query = "select p FROM PermissionRecord p "
 		+ "WHERE p.department.id = :deptId"))
-public class PermissionRecord {
+public class PermissionRecord implements PAuthorizedObject{
 
 	public PermissionRecord() {
 

@@ -321,8 +321,9 @@ public class DocumentController extends PEventConsumerProducer {
 			}
 
 			return managedInfo;
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	public Document setDocumentTag(Document document, String tag, User user) {

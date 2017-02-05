@@ -85,9 +85,9 @@ public class ProjectController extends PEventConsumerProducer {
 		}
 	}
 
-	public List<Project> findProjectsByUser(int userId) {
+	public List<Project> findProjectsByUser(int userId, User sessionUser) {
 		Query q = em.createNamedQuery("findProjectsByMember");
-		User user = userRoleController.findUserById(userId);
+		User user = userRoleController.findUserById(userId, sessionUser);
 		q.setParameter("user", user);
 		List<Project> projects = (List<Project>) q.getResultList();
 		if (projects.isEmpty()) {

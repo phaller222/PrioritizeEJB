@@ -39,8 +39,8 @@ public class MessageController {
 
 	public Message createMessage(User from, User to, String subject, String message) {
 		Message msg = new Message();
-		msg.setFrom(userRoleController.findUserById(from.getId()));
-		msg.setTo(userRoleController.findUserById(to.getId()));
+		msg.setFrom(userRoleController.findUserById(from.getId(),from));
+		msg.setTo(userRoleController.findUserById(to.getId(),from));
 		msg.setSubject(subject);
 		msg.setMessage(message);
 		msg.setMessageRead(false);

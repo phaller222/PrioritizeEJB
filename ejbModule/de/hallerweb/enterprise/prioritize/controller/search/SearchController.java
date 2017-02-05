@@ -116,7 +116,7 @@ public class SearchController {
 
 	public List<SearchResult> searchDepartments(String phrase, User user) {
 		List<SearchResult> result = new ArrayList<SearchResult>();
-		List<Department> departments = companyController.getAllDepartments();
+		List<Department> departments = companyController.getAllDepartments(sessionController.getUser());
 		for (Department dept : departments) {
 			if (authController.canRead(dept, user)) {
 				result.addAll(dept.find(phrase));

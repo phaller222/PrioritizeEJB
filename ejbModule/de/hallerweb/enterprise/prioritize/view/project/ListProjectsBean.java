@@ -61,7 +61,7 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 		this.projects = new ArrayList<Project>();
 		User sessionUser = sessionController.getUser();
 		if (sessionUser != null) {
-			this.projects.addAll(getProjectsForUser(sessionUser.getId()));
+			this.projects.addAll(getProjectsForUser(sessionUser.getId(),sessionUser));
 			for (Role r : sessionUser.getRoles()) {
 				List<Project> managerProjects = getProjectsByManagerRole(r.getId());
 				for (Project p : managerProjects) {
@@ -88,8 +88,8 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 		}
 	}
 
-	private List<Project> getProjectsForUser(int userId) {
-		List<Project> projects = projectController.findProjectsByUser(userId);
+	private List<Project> getProjectsForUser(int userId, User sessionUser) {
+		List<Project> projects = projectController.findProjectsByUser(userId, sessionUser);
 		if (projects != null && !projects.isEmpty()) {
 			return projects;
 		} else {
@@ -168,8 +168,8 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 		Task managedTask = taskController.findTaskById(task.getId());
 		User user = sessionController.getUser();
 		taskController.updateTaskStatus(managedTask.getId(), TaskStatus.OPEN);
-		taskController.removeTaskAssignee(managedTask.getId(), user);
-		userRoleController.removeAssignedTask(user, managedTask);
+		taskController.removeTaskAssignee(managedTask.getId(), user, user);
+		userRoleController.removeAssignedTask(user, managedTask, user);
 		return "blackboard";
 	}
 	

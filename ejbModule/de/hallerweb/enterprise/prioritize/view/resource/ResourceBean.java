@@ -279,7 +279,7 @@ public class ResourceBean implements Serializable {
 
 	@Named
 	public List<Department> getDepartments() {
-		return companyController.getAllDepartments();
+		return companyController.getAllDepartments(sessionController.getUser());
 	}
 
 	@Named
@@ -699,7 +699,7 @@ public class ResourceBean implements Serializable {
 	public TreeNode createResourceTree() {
 		TreeNode root = new DefaultTreeNode("My Devices", null);
 
-		List<Company> companies = companyController.getAllCompanies();
+		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
 		for (Company c : companies) {
 			TreeNode company = new DefaultTreeNode(new ResourceTreeInfo(c.getName(), false, false, null, null), root);
 			List<Department> departments = c.getDepartments();
@@ -738,7 +738,7 @@ public class ResourceBean implements Serializable {
 	public TreeNode createAgentTree() {
 		TreeNode root = new DefaultTreeNode("My Agents", null);
 
-		List<Company> companies = companyController.getAllCompanies();
+		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
 		for (Company c : companies) {
 			TreeNode company = new DefaultTreeNode(new ResourceTreeInfo(c.getName(), false, false, null, null), root);
 			List<Department> departments = c.getDepartments();

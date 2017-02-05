@@ -1,7 +1,5 @@
 package de.hallerweb.enterprise.prioritize.view;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,7 +9,6 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -32,7 +29,6 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
-import de.hallerweb.enterprise.prioritize.view.document.DocumentTreeInfo;
 
 @Named
 @SessionScoped
@@ -81,7 +77,7 @@ public class BasicTimelineController implements Serializable {
 			model.add(selectedTime);
 
 			// Add the current Users vacation to the Timeline
-			List<TimeSpan> vacation = userController.getVacation(sessionController.getUser());
+			List<TimeSpan> vacation = userController.getVacation(sessionController.getUser(), sessionController.getUser());
 			if (vacation != null) {
 				for (TimeSpan span : vacation) {
 					model.add(new TimelineEvent("Vacation", span.getDateFrom(), span.getDateUntil(), false, "", "vacation"));
@@ -89,7 +85,7 @@ public class BasicTimelineController implements Serializable {
 			}
 
 			// Add the current Users illness to the Timeline
-			TimeSpan illness = userController.getIllness(sessionController.getUser());
+			TimeSpan illness = userController.getIllness(sessionController.getUser(), sessionController.getUser());
 			if (illness != null) {
 				model.add(new TimelineEvent("Illness", illness.getDateFrom(), illness.getDateUntil(), false, "", "illness"));
 			}
@@ -104,7 +100,7 @@ public class BasicTimelineController implements Serializable {
 		selectedTime = new TimelineEvent("TimeMachine(Beta)", cal.getTime(), true);
 		model.add(selectedTime);
 
-		List<Company> companies = companyController.getAllCompanies();
+		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
 		for (Company c : companies) {
 			List<Department> departments = c.getDepartments();
 			for (Department d : departments) {
@@ -158,7 +154,7 @@ public class BasicTimelineController implements Serializable {
 		selectedTime = new TimelineEvent("TimeMachine(Beta)", cal.getTime(), true);
 		model.add(selectedTime);
 
-		List<Company> companies = companyController.getAllCompanies();
+		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
 		for (Company c : companies) {
 			List<Department> departments = c.getDepartments();
 			for (Department d : departments) {
@@ -191,7 +187,7 @@ public class BasicTimelineController implements Serializable {
 		selectedTime = new TimelineEvent("-Drag to travel in time-", cal.getTime(), true);
 		model.add(selectedTime);
 
-		List<Company> companies = companyController.getAllCompanies();
+		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
 		for (Company c : companies) {
 			List<Department> departments = c.getDepartments();
 			for (Department d : departments) {

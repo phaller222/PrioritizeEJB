@@ -18,6 +18,7 @@ import javax.persistence.Query;
 
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
+import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Address;
@@ -28,7 +29,6 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
-import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
@@ -45,7 +45,8 @@ public class CompanyController extends PEventConsumerProducer {
 
 	@PersistenceContext(unitName = "MySqlDS")
 	EntityManager em;
-
+	@EJB
+	AuthorizationController authController;
 	@EJB
 	UserRoleController userRoleController;
 	@EJB
@@ -55,20 +56,24 @@ public class CompanyController extends PEventConsumerProducer {
 	@Inject
 	EventRegistry eventRegistry;
 
-	public Company createCompany(String name, Address mainAddress) {
+	public Company createCompany(String name, Address mainAddress, User sessionUser) {
 		Company c = new Company();
-		c.setName(name);
-		c.setDescription("");
-		c.setMainAddress(em.find(Address.class, mainAddress.getId()));
-		em.persist(c);
-		em.flush();
-		try {
-			logger.log(sessionController.getUser().getUsername(), "Company", Action.CREATE, c.getId(),
-					" Company \"" + c.getName() + "\" created.");
-		} catch (ContextNotActiveException ex) {
-			logger.log("SYSTEM", "Company", Action.CREATE, c.getId(), " Company \"" + c.getName() + "\" created.");
+		if (authController.canCreate(c, sessionUser)) {
+			c.setName(name);
+			c.setDescription("");
+			c.setMainAddress(em.find(Address.class, mainAddress.getId()));
+			em.persist(c);
+			em.flush();
+			try {
+				logger.log(sessionController.getUser().getUsername(), "Company", Action.CREATE, c.getId(),
+						" Company \"" + c.getName() + "\" created.");
+			} catch (ContextNotActiveException ex) {
+				logger.log("SYSTEM", "Company", Action.CREATE, c.getId(), " Company \"" + c.getName() + "\" created.");
+			}
+			return c;
+		} else {
+			return null;
 		}
-		return c;
 	}
 
 	public Address createAddress(String street, String zipCode, String city, String phone, String fax) {
@@ -93,143 +98,153 @@ public class CompanyController extends PEventConsumerProducer {
 	}
 
 	public Department createDepartment(Company company, String name, String description, Address adr, User sessionUser) {
-		Department dept = new Department();
-		dept.setName(name);
-		dept.setDescription(description);
-		Company c = em.find(Company.class, company.getId());
-		dept.setCompany(c);
+		if (authController.canCreate(AuthorizationController.DEPARTMENT_TYPE, sessionUser)) {
+			Department dept = new Department();
+			dept.setName(name);
+			dept.setDescription(description);
+			Company c = em.find(Company.class, company.getId());
+			dept.setCompany(c);
 
-		if (c.getDepartments() != null) {
-			for (Department d : c.getDepartments()) {
-				if (d.getName().equals(name)) {
-					return null;
+			if (c.getDepartments() != null) {
+				for (Department d : c.getDepartments()) {
+					if (d.getName().equals(name)) {
+						return null;
+					}
 				}
 			}
-		}
 
-		// Set Company Address as Address of Department.
-		Address companyAddress = company.getMainAddress();
+			// Set Company Address as Address of Department.
+			Address companyAddress = company.getMainAddress();
 
-		Address address = new Address();
-		address.setCity(companyAddress.getCity());
-		address.setStreet(companyAddress.getStreet());
-		address.setZipCode(companyAddress.getZipCode());
-		address.setPhone(companyAddress.getPhone());
-		address.setFax(companyAddress.getFax());
+			Address address = new Address();
+			address.setCity(companyAddress.getCity());
+			address.setStreet(companyAddress.getStreet());
+			address.setZipCode(companyAddress.getZipCode());
+			address.setPhone(companyAddress.getPhone());
+			address.setFax(companyAddress.getFax());
 
-		DocumentGroup defaultDocumentGroup = new DocumentGroup();
-		defaultDocumentGroup.setDepartment(dept);
-		defaultDocumentGroup.setName("default");
+			DocumentGroup defaultDocumentGroup = new DocumentGroup();
+			defaultDocumentGroup.setDepartment(dept);
+			defaultDocumentGroup.setName("default");
 
-		ResourceGroup defaultResourceGroup = new ResourceGroup();
-		defaultResourceGroup.setDepartment(dept);
-		defaultResourceGroup.setName("default");
+			ResourceGroup defaultResourceGroup = new ResourceGroup();
+			defaultResourceGroup.setDepartment(dept);
+			defaultResourceGroup.setName("default");
 
-		em.persist(defaultDocumentGroup);
-		em.persist(defaultResourceGroup);
+			em.persist(defaultDocumentGroup);
+			em.persist(defaultResourceGroup);
 
-		em.persist(address);
+			em.persist(address);
 
-		dept.setAddress(address);
-		dept.addDocumentGroup(defaultDocumentGroup);
-		dept.addResourceGroup(defaultResourceGroup);
+			dept.setAddress(address);
+			dept.addDocumentGroup(defaultDocumentGroup);
+			dept.addResourceGroup(defaultResourceGroup);
 
-		// Generate token
-		if (c.getName().equalsIgnoreCase("Default Company") && (name.equals("default"))) {
-			dept.setToken(InitializationController.DEFAULT_DEPARTMENT_TOKEN);
+			// Generate token
+			if (c.getName().equalsIgnoreCase("Default Company") && (name.equals("default"))) {
+				dept.setToken(InitializationController.DEFAULT_DEPARTMENT_TOKEN);
+			} else {
+				UUID token = UUID.randomUUID();
+				dept.setToken(token.toString().replaceAll("-", ""));
+			}
+
+			em.persist(dept);
+			em.flush();
+
+			// The user who created this department should automatically get all permissions on objects in this department
+
+			Set<PermissionRecord> records = new HashSet<PermissionRecord>();
+
+			PermissionRecord deptDocs = new PermissionRecord(true, true, true, true);
+			deptDocs.setAbsoluteObjectType(DocumentInfo.class.getCanonicalName());
+			deptDocs.setDepartment(dept);
+			records.add(deptDocs);
+
+			PermissionRecord deptResources = new PermissionRecord(true, true, true, true);
+			deptResources.setAbsoluteObjectType(Resource.class.getCanonicalName());
+			deptResources.setDepartment(dept);
+			records.add(deptResources);
+
+			Role r = userRoleController.createRole(company.getName() + "-" + dept.getName() + "-Admin",
+					company.getName() + " - " + dept.getName() + " - Admin", records, sessionUser);
+
+			try {
+				userRoleController.addRoleToUser(sessionController.getUser().getId(), r.getId(), sessionUser);
+				sessionController.getUser().addRole(r);
+			} catch (ContextNotActiveException ex) {
+				// If called by initialization process, don't assign role here.
+				// ex.printStackTrace();
+			}
+
+			// Logging
+			try {
+				logger.log(sessionController.getUser().getUsername(), "Department", Action.CREATE, c.getId(),
+						" Department \"" + dept.getName() + "\" in Company \"" + dept.getCompany().getName() + "\" created.");
+			} catch (ContextNotActiveException ex) {
+				logger.log("SYSTEM", "Department", Action.CREATE, dept.getId(),
+						" Department \"" + dept.getName() + "\" in Company \"" + dept.getCompany().getName() + "\" created.");
+			}
+
+			return dept;
 		} else {
-			UUID token = UUID.randomUUID();
-			dept.setToken(token.toString().replaceAll("-", ""));
+			return null;
 		}
-
-		em.persist(dept);
-		em.flush();
-
-		// The user who created this department should automatically get all permissions on objects in this department
-
-		Set<PermissionRecord> records = new HashSet<PermissionRecord>();
-
-		PermissionRecord deptDocs = new PermissionRecord(true, true, true, true);
-		deptDocs.setAbsoluteObjectType(DocumentInfo.class.getCanonicalName());
-		deptDocs.setDepartment(dept);
-		records.add(deptDocs);
-
-		PermissionRecord deptResources = new PermissionRecord(true, true, true, true);
-		deptResources.setAbsoluteObjectType(Resource.class.getCanonicalName());
-		deptResources.setDepartment(dept);
-		records.add(deptResources);
-
-		Role r = userRoleController.createRole(company.getName() + "-" + dept.getName() + "-Admin",
-				company.getName() + " - " + dept.getName() + " - Admin", records, sessionUser);
-
-		try {
-			userRoleController.addRoleToUser(sessionController.getUser().getId(), r.getId(), sessionUser);
-			sessionController.getUser().addRole(r);
-		} catch (ContextNotActiveException ex) {
-			// If called by initialization process, don't assign role here.
-			// ex.printStackTrace();
-		}
-
-		// Logging
-		try {
-			logger.log(sessionController.getUser().getUsername(), "Department", Action.CREATE, c.getId(),
-					" Department \"" + dept.getName() + "\" in Company \"" + dept.getCompany().getName() + "\" created.");
-		} catch (ContextNotActiveException ex) {
-			logger.log("SYSTEM", "Department", Action.CREATE, dept.getId(),
-					" Department \"" + dept.getName() + "\" in Company \"" + dept.getCompany().getName() + "\" created.");
-		}
-
-		return dept;
 	}
 
 	public void deleteCompany(int id, User sessionUser) {
 		Company c = findCompanyById(id);
-		List<Department> departments = c.getDepartments();
-		List<Department> departmentsToDelete = new ArrayList<Department>();
-		for (Department dept : departments) {
-			departmentsToDelete.add(dept);
-		}
-		for (Department d : departmentsToDelete) {
-			deleteDepartment(d.getId(), sessionUser);
-		}
+		if (authController.canDelete(c, sessionUser)) {
+			List<Department> departments = c.getDepartments();
+			List<Department> departmentsToDelete = new ArrayList<Department>();
+			for (Department dept : departments) {
+				departmentsToDelete.add(dept);
+			}
+			for (Department d : departmentsToDelete) {
+				deleteDepartment(d.getId(), sessionUser);
+			}
 
-		em.remove(c);
-		em.flush();
+			em.remove(c);
+			em.flush();
 
-		logger.log(sessionController.getUser().getUsername(), "Company", Action.DELETE, c.getId(),
-				" Company \"" + c.getName() + "\" and all related Objects deleted.");
+			logger.log(sessionController.getUser().getUsername(), "Company", Action.DELETE, c.getId(),
+					" Company \"" + c.getName() + "\" and all related Objects deleted.");
+		}
 	}
 
 	public void deleteDepartment(int id, User sessionUser) {
 		Department managedDepartment = findDepartmentById(id);
-		Company managedCompany = em.find(Company.class, managedDepartment.getCompany().getId());
+		if (authController.canDelete(managedDepartment, sessionUser)) {
+			Company managedCompany = em.find(Company.class, managedDepartment.getCompany().getId());
 
-		deletePermissionRecordsWithDepartment(id, sessionUser);
-		removeDepartmentFromAffectedUsers(id);
-		managedCompany.getDepartments().remove(managedDepartment);
+			deletePermissionRecordsWithDepartment(id, sessionUser);
+			removeDepartmentFromAffectedUsers(id);
+			managedCompany.getDepartments().remove(managedDepartment);
 
-		em.remove(managedDepartment);
-		em.flush();
+			em.remove(managedDepartment);
+			em.flush();
 
-		logger.log(sessionController.getUser().getUsername(), "Department", Action.DELETE, id,
-				" Department \"" + managedDepartment.getName() + "\" deleted.");
+			logger.log(sessionController.getUser().getUsername(), "Department", Action.DELETE, id,
+					" Department \"" + managedDepartment.getName() + "\" deleted.");
+		}
 	}
 
 	private void deletePermissionRecordsWithDepartment(int departmentId, User sessionUser) {
-		Query query = em.createNamedQuery("findPermissionRecordsByDepartment");
-		query.setParameter("deptId", departmentId);
-		List<PermissionRecord> records = query.getResultList();
-		for (PermissionRecord rec : records) {
-			List<Role> affectedRoles = getRolesForPermissionRecord(rec.getId());
-			for (Role r : affectedRoles) {
-				userRoleController.deletePermissionRecord(r.getId(), rec.getId());
-				if (r.getPermissions().isEmpty()) {
-					userRoleController.deleteRole(r.getId(), sessionUser);
+		if (authController.canDelete(new PermissionRecord(), sessionUser)) {
+			Query query = em.createNamedQuery("findPermissionRecordsByDepartment");
+			query.setParameter("deptId", departmentId);
+			List<PermissionRecord> records = query.getResultList();
+			for (PermissionRecord rec : records) {
+				List<Role> affectedRoles = getRolesForPermissionRecord(rec.getId());
+				for (Role r : affectedRoles) {
+					userRoleController.deletePermissionRecord(r.getId(), rec.getId(), sessionUser);
+					if (r.getPermissions().isEmpty()) {
+						userRoleController.deleteRole(r.getId(), sessionUser);
+					}
+					logger.log(sessionController.getUser().getUsername(), "PermissionRecord", Action.DELETE, r.getId(),
+							" PermissionRecord " + "deleted.");
 				}
-				logger.log(sessionController.getUser().getUsername(), "PermissionRecord", Action.DELETE, r.getId(),
-						" PermissionRecord " + "deleted.");
+				em.flush();
 			}
-			em.flush();
 		}
 	}
 
@@ -256,44 +271,46 @@ public class CompanyController extends PEventConsumerProducer {
 	 * @param c
 	 *            The {@link Company} object with the changed data of the {@link Company}. the primary key must be set.
 	 */
-	public void editCompany(Company c) {
-		Company orig = em.find(Company.class, c.getId());
-		if (orig != null) {
-			orig.setName(c.getName());
-			orig.setDescription(c.getDescription());
-			// merge edited Address data
-			Address changedAddress = c.getMainAddress();
-			Address origAddress = em.find(Address.class, c.getMainAddress().getId());
-			origAddress.setCity(changedAddress.getCity());
-			origAddress.setStreet(changedAddress.getStreet());
-			origAddress.setZipCode(changedAddress.getZipCode());
-			origAddress.setPhone(changedAddress.getPhone());
-			origAddress.setFax(changedAddress.getFax());
-			em.merge(origAddress);
+	public void editCompany(Company company, User sessionUser) {
+		Company orig = em.find(Company.class, company.getId());
+		if (authController.canUpdate(orig, sessionUser)) {
+			if (orig != null) {
+				orig.setName(company.getName());
+				orig.setDescription(company.getDescription());
+				// merge edited Address data
+				Address changedAddress = company.getMainAddress();
+				Address origAddress = em.find(Address.class, company.getMainAddress().getId());
+				origAddress.setCity(changedAddress.getCity());
+				origAddress.setStreet(changedAddress.getStreet());
+				origAddress.setZipCode(changedAddress.getZipCode());
+				origAddress.setPhone(changedAddress.getPhone());
+				origAddress.setFax(changedAddress.getFax());
+				em.merge(origAddress);
 
-			orig.setMainAddress(origAddress);
+				orig.setMainAddress(origAddress);
 
-			// merge edited Departments data
-			if (c.getDepartments() != null && orig.getDepartments() != null) {
-				List<Department> origDepts = new ArrayList<Department>();
-				for (Department d : c.getDepartments()) {
-					Department origDept = em.find(Department.class, d.getId());
-					origDept.setCompany(orig);
-					origDept.setName(d.getName());
-					origDept.setDescription(d.getDescription());
-					origDepts.add(origDept);
-					em.merge(origDept);
+				// merge edited Departments data
+				if (company.getDepartments() != null && orig.getDepartments() != null) {
+					List<Department> origDepts = new ArrayList<Department>();
+					for (Department d : company.getDepartments()) {
+						Department origDept = em.find(Department.class, d.getId());
+						origDept.setCompany(orig);
+						origDept.setName(d.getName());
+						origDept.setDescription(d.getDescription());
+						origDepts.add(origDept);
+						em.merge(origDept);
+					}
+					orig.setDepartments(origDepts);
+				} else {
+					company.setDepartments(new ArrayList<Department>());
 				}
-				orig.setDepartments(origDepts);
-			} else {
-				c.setDepartments(new ArrayList<Department>());
-			}
-			em.flush();
-			logger.log(sessionController.getUser().getUsername(), "Company", Action.UPDATE, c.getId(),
-					" Company \"" + c.getName() + "\" changed.");
+				em.flush();
+				logger.log(sessionController.getUser().getUsername(), "Company", Action.UPDATE, company.getId(),
+						" Company \"" + company.getName() + "\" changed.");
 
-		} else {
-			// Company not found so no edit.
+			} else {
+				// Company not found so no edit.
+			}
 		}
 	}
 
@@ -301,67 +318,82 @@ public class CompanyController extends PEventConsumerProducer {
 	 * Changes the data of a department in the underlying persistence architecture.
 	 * @param d - the {@link Department} with the new {@link Department} data. The primary key (ID) must be set.
 	 */
-	public void editDepartment(Department d) throws Exception {
-		Department orig = em.find(Department.class, d.getId());
-		if (orig != null) {
+	public void editDepartment(Department department, User sessionUser) throws Exception {
+		Department orig = em.find(Department.class, department.getId());
+		if (authController.canUpdate(orig, sessionUser)) {
+			if (orig != null) {
 
-			// Fire events if configured
-			if (InitializationController.getAsBoolean(InitializationController.FIRE_DEPARTMENT_EVENTS)) {
-				if (!orig.getName().equals(d.getName())) {
-					this.raiseEvent(orig, Department.PROPERTY_NAME, orig.getName(), d.getName(),
-							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				// Fire events if configured
+				if (InitializationController.getAsBoolean(InitializationController.FIRE_DEPARTMENT_EVENTS)) {
+					if (!orig.getName().equals(department.getName())) {
+						this.raiseEvent(orig, Department.PROPERTY_NAME, orig.getName(), department.getName(),
+								InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					}
+					if (!orig.getAddress().equals(department.getAddress())) {
+						this.raiseEvent(orig, Department.PROPERTY_ADDRESS, orig.getAddress().toString(), department.getAddress().toString(),
+								InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					}
+					if (!orig.getDescription().equals(department.getDescription())) {
+						this.raiseEvent(orig, Department.PROPERTY_DESCRIPTION, orig.getDescription(), department.getDescription(),
+								InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					}
 				}
-				if (!orig.getAddress().equals(d.getAddress())) {
-					this.raiseEvent(orig, Department.PROPERTY_ADDRESS, orig.getAddress().toString(),
-							d.getAddress().toString(), InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				}
-				if (!orig.getDescription().equals(d.getDescription())) {
-					this.raiseEvent(orig, Department.PROPERTY_DESCRIPTION, orig.getDescription(),
-							d.getDescription(), InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				}
+
+				orig.setName(department.getName());
+				orig.setDescription(department.getDescription());
+				Address origAddress = orig.getAddress();
+				Address changedAddress = department.getAddress();
+
+				origAddress.setCity(changedAddress.getCity());
+				origAddress.setStreet(changedAddress.getStreet());
+				origAddress.setZipCode(changedAddress.getZipCode());
+				origAddress.setPhone(changedAddress.getPhone());
+				origAddress.setFax(changedAddress.getFax());
+				em.flush();
+
+				logger.log(sessionController.getUser().getUsername(), "Department", Action.UPDATE, orig.getId(),
+						" Department \"" + orig.getName() + "\" changed.");
+
+			} else {
+				throw new Exception("Error editing department or Department not found");
+				// Something went wrong. Department not found!
 			}
-
-			orig.setName(d.getName());
-			orig.setDescription(d.getDescription());
-			Address origAddress = orig.getAddress();
-			Address changedAddress = d.getAddress();
-
-			origAddress.setCity(changedAddress.getCity());
-			origAddress.setStreet(changedAddress.getStreet());
-			origAddress.setZipCode(changedAddress.getZipCode());
-			origAddress.setPhone(changedAddress.getPhone());
-			origAddress.setFax(changedAddress.getFax());
-			em.flush();
-
-			logger.log(sessionController.getUser().getUsername(), "Department", Action.UPDATE, orig.getId(),
-					" Department \"" + orig.getName() + "\" changed.");
-
-		} else {
-			throw new Exception("Error editing department or Department not found");
-			// Something went wrong. Department not found!
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Company> getAllCompanies() throws EJBException {
-		Query query = em.createNamedQuery("findAllCompanies");
-		return query.getResultList();
+	public List<Company> getAllCompanies(User sessionUser) throws EJBException {
+		if (authController.canRead(AuthorizationController.COMPANY_TYPE, sessionUser)) {
+			Query query = em.createNamedQuery("findAllCompanies");
+			return query.getResultList();
+		} else {
+			return new ArrayList<Company>();
+		}
 	}
 
-	public Company getCompanyByName(String name) {
+	public Company getCompanyByName(String name, User sessionUser) {
 		Query query = em.createNamedQuery("findCompanyByName");
 		query.setParameter(1, name);
 		try {
-			return (Company) query.getSingleResult();
+			Company company = (Company) query.getSingleResult();
+			if (company != null && authController.canRead(company, sessionUser)) {
+				return company;
+			} else {
+				return null;
+			}
 		} catch (NoResultException ex) {
 			return null;
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Department> getAllDepartments() throws EJBException {
+	public List<Department> getAllDepartments(User sessionUser) throws EJBException {
+		if (authController.canRead(AuthorizationController.DEPARTMENT_TYPE, sessionUser)) {
 		Query query = em.createNamedQuery("findAllDepartments");
 		return query.getResultList();
+		} else {
+			return new ArrayList<Department>();
+		}
 	}
 
 	public Department getDefaultDepartmentInDefaultCompany() throws EJBException {
@@ -414,16 +446,16 @@ public class CompanyController extends PEventConsumerProducer {
 
 	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
 		if (InitializationController.getAsBoolean(InitializationController.FIRE_DEPARTMENT_EVENTS)) {
-			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue)
-					.setNewValue(newValue).setPropertyName(name).setLifetime(lifetime).getEvent();
+			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
+					.setPropertyName(name).setLifetime(lifetime).getEvent();
 			eventRegistry.addEvent(evt);
 		}
 	}
 
 	@Override
 	public void consumeEvent(PObject destination, Event evt) {
-		System.out.println("Object " + evt.getSource() +  " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue() + "--- Dept listening: " + destination.getClass());
+		System.out.println("Object " + evt.getSource() + " raised event: " + evt.getPropertyName() + " with new Value: " + evt.getNewValue()
+				+ "--- Dept listening: " + destination.getClass());
 
 	}
 

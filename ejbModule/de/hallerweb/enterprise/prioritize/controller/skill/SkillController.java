@@ -52,38 +52,42 @@ public class SkillController {
 	 * @param parent Parent {@link SkillCategory}. null if this is a root category.
 	 * @return the created {@link SkillCategory}
 	 */
-	public SkillCategory createSkillCategory(String name, String description, SkillCategory parent) {
-		boolean alreadyExists = false;
-		if (parent != null) {
-			List<SkillCategory> categories = getAllCategories();
-			for (SkillCategory category : categories) {
-				if (category.getName().equals(name)) {
-					//TODO: Dubletten in unterschiedlichen ebenen erlauben! 
-					alreadyExists = true;
+	public SkillCategory createSkillCategory(String name, String description, SkillCategory parent, User sessionUser) {
+		if (authController.canCreate(parent, sessionUser)) {
+			boolean alreadyExists = false;
+			if (parent != null) {
+				List<SkillCategory> categories = getAllCategories();
+				for (SkillCategory category : categories) {
+					if (category.getName().equals(name)) {
+						// TODO: Dubletten in unterschiedlichen ebenen erlauben!
+						alreadyExists = true;
+					}
 				}
 			}
-		}
-		
-		if (!alreadyExists) {
-			SkillCategory category = new SkillCategory();
-			category.setName(name);
-			category.setDescription(description);
-			category.setParentCategory(parent);
 
-			em.persist(category);
-			if (parent != null) {
-				parent.addSubCategory(category);
-			}
+			if (!alreadyExists) {
+				SkillCategory category = new SkillCategory();
+				category.setName(name);
+				category.setDescription(description);
+				category.setParentCategory(parent);
 
-			em.flush();
-			try {
-				logger.log(sessionController.getUser().getUsername(), "SkillCategory", Action.CREATE, category.getId(),
-						" SkillCategory \"" + category.getName() + "\" created.");
-			} catch (ContextNotActiveException ex) {
-				logger.log("SYSTEM", "SkillCategory", Action.CREATE, category.getId(),
-						" SkillCategory \"" + category.getName() + "\" created.");
+				em.persist(category);
+				if (parent != null) {
+					parent.addSubCategory(category);
+				}
+
+				em.flush();
+				try {
+					logger.log(sessionController.getUser().getUsername(), "SkillCategory", Action.CREATE, category.getId(),
+							" SkillCategory \"" + category.getName() + "\" created.");
+				} catch (ContextNotActiveException ex) {
+					logger.log("SYSTEM", "SkillCategory", Action.CREATE, category.getId(),
+							" SkillCategory \"" + category.getName() + "\" created.");
+				}
+				return category;
+			} else {
+				return null;
 			}
-			return category;
 		} else {
 			return null;
 		}

@@ -2,11 +2,8 @@ package de.hallerweb.enterprise.prioritize.controller;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -33,25 +30,13 @@ import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
-import de.hallerweb.enterprise.prioritize.model.project.ActionBoard;
-import de.hallerweb.enterprise.prioritize.model.project.Project;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoal;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalCategory;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalProperty;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyDocument;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyNumeric;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyRecord;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
-import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
-import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
-import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.Skill;
-import de.hallerweb.enterprise.prioritize.view.security.RoleBean;
+import de.hallerweb.enterprise.prioritize.model.skill.SkillCategory;
 
 /**
  * Session Bean implementation class InitializationController. Singleton implementation and starts on Startup. this initializer bean is used
@@ -84,20 +69,20 @@ public class InitializationController {
 	public static HashMap<String, String> config = new HashMap<String, String>();
 
 	// Deployment configuration keys
-	public final static String CREATE_DEFAULT_COMPANY = "CREATE_DEFAULT_COMPANY"; // Create a default company on deployment?
-	public final static String CREATE_DEFAULT_DEPARTMENT = "CREATE_DEFAULT_DEPARTMENT"; // Create a default department on deployment?
-	public final static String MAXIMUM_FILE_UPLOAD_SIZE = "MAXIMUM_FILE_UPLOAD_SIZE"; // Max.filesize for uploads in bytes
-	public final static String ENABLE_MQTT_SERVICE = "ENABLE_MQTT_SERVICE"; // enable IoT MQTT Resource scanning?
-	public final static String MQTT_HOST = "MQTT_HOST"; // Host of MQTT Broker service
-	public final static String MQTT_PORT = "MQTT_PORT"; // Port of MQTT Broker Service
-	public final static String MQTT_HOST_WRITE = "MQTT_HOST_WRITE"; // Host of MQTT Broker service (write commands to)
-	public final static String MQTT_PORT_WRITE = "MQTT_PORT_WRITE"; // Port of MQTT Broker Service (write commands to)
-	public final static String MQTT_MAX_COMMUNICATION_BYTES = "MQTT_MAX_COMMUNICATION_BYTES"; // Maximum amount of bytes allowed over MQTT
-	public final static String MQTT_MAX_VALUES_BYTES = "MQTT_MAX_VALUES_BYTES"; // Max. bytes allowed for device key/value historical data.
-	public final static String MQTT_PING_TIMEOUT = "MQTT_PING_TIMEOUT"; // Timeout after which idle mqtt resource are shutdown (ms).
-	public final static String MQTT_MAX_DEVICE_VALUES = "MQTT_MAX_DEVICE_VALUES"; // Number of maximum allowed Name/value pair per MQTT
-	public final static String DISCOVERY_ALLOW_DEFAULT_DEPARTMENT = "DISCOVERY_ALLOW_DEFAULT_DEPARTMENT"; // Can resources be added without
-																											 // providing department token?
+	public static final String CREATE_DEFAULT_COMPANY = "CREATE_DEFAULT_COMPANY"; // Create a default company on deployment?
+	public static final String CREATE_DEFAULT_DEPARTMENT = "CREATE_DEFAULT_DEPARTMENT"; // Create a default department on deployment?
+	public static final String MAXIMUM_FILE_UPLOAD_SIZE = "MAXIMUM_FILE_UPLOAD_SIZE"; // Max.filesize for uploads in bytes
+	public static final String ENABLE_MQTT_SERVICE = "ENABLE_MQTT_SERVICE"; // enable IoT MQTT Resource scanning?
+	public static final String MQTT_HOST = "MQTT_HOST"; // Host of MQTT Broker service
+	public static final String MQTT_PORT = "MQTT_PORT"; // Port of MQTT Broker Service
+	public static final String MQTT_HOST_WRITE = "MQTT_HOST_WRITE"; // Host of MQTT Broker service (write commands to)
+	public static final String MQTT_PORT_WRITE = "MQTT_PORT_WRITE"; // Port of MQTT Broker Service (write commands to)
+	public static final String MQTT_MAX_COMMUNICATION_BYTES = "MQTT_MAX_COMMUNICATION_BYTES"; // Maximum amount of bytes allowed over MQTT
+	public static final String MQTT_MAX_VALUES_BYTES = "MQTT_MAX_VALUES_BYTES"; // Max. bytes allowed for device key/value historical data.
+	public static final String MQTT_PING_TIMEOUT = "MQTT_PING_TIMEOUT"; // Timeout after which idle mqtt resource are shutdown (ms).
+	public static final String MQTT_MAX_DEVICE_VALUES = "MQTT_MAX_DEVICE_VALUES"; // Number of maximum allowed Name/value pair per MQTT
+	public static final String DISCOVERY_ALLOW_DEFAULT_DEPARTMENT = "DISCOVERY_ALLOW_DEFAULT_DEPARTMENT"; // Can resources be added without
+	// providing department token?
 	public static final String EVENT_DEFAULT_TIMEOUT = "EVENT_DEFAULT_TIMEOUT"; // Default timeout value for events
 	public static final String EVENT_DEFAULT_STRATEGY = "EVENT_DEFAULT_STRATEGY"; // Default Strategy value for events
 	public static final String LISTENER_DEFAULT_TIMEOUT = "LISTENER_DEFAULT_TIMEOUT"; // Default timeout value for event listeners
@@ -109,9 +94,9 @@ public class InitializationController {
 	public static final String FIRE_TASK_EVENTS = "FIRE_TASK_EVENTS";
 
 	// !!! Use with caution! Admin auto login!
-	public final static String ADMIN_AUTO_LOGIN = "ADMIN_AUTO_LOGIN";
+	public static final String ADMIN_AUTO_LOGIN = "ADMIN_AUTO_LOGIN";
 	// resource / device.
-	public final static String DEFAULT_DEPARTMENT_TOKEN = "09eb3067d0fe446bbe7788218fec9bdd";
+	public static final String DEFAULT_DEPARTMENT_TOKEN = "09eb3067d0fe446bbe7788218fec9bdd";
 
 	@PostConstruct
 	public void initialize() {
@@ -181,16 +166,6 @@ public class InitializationController {
 	}
 
 	private void createAdminAccountIfNotPresent() {
-
-		RoleBean.authorizedObjects = new HashMap<String, Class<? extends PAuthorizedObject>>();
-		RoleBean.authorizedObjects.put(DocumentInfo.class.getSimpleName(), DocumentInfo.class);
-		RoleBean.authorizedObjects.put(Skill.class.getSimpleName(), Skill.class);
-		RoleBean.authorizedObjects.put(DocumentGroup.class.getSimpleName(), DocumentGroup.class);
-		RoleBean.authorizedObjects.put(User.class.getSimpleName(), User.class);
-		RoleBean.authorizedObjects.put(Role.class.getSimpleName(), Role.class);
-		RoleBean.authorizedObjects.put(Resource.class.getSimpleName(), Resource.class);
-		RoleBean.authorizedObjects.put(ResourceGroup.class.getSimpleName(), ResourceGroup.class);
-		RoleBean.authorizedObjects.put(Company.class.getSimpleName(), Company.class);
 		if (userRoleController.getAllUsers(AuthorizationController.getSystemUser()).size() <= 0) {
 
 			// No user present yet. Create admin user...
@@ -206,7 +181,7 @@ public class InitializationController {
 				adr.setPhone("00000-00000");
 				adr.setStreet("Street of Admins");
 				adr.setZipCode("00000");
-				Company c = companyController.createCompany("Default Company", adr);
+				Company c = companyController.createCompany("Default Company", adr,AuthorizationController.getSystemUser());
 				c.setMainAddress(adr);
 
 				if (Boolean.valueOf(config.get(CREATE_DEFAULT_DEPARTMENT))) {
@@ -215,151 +190,55 @@ public class InitializationController {
 				}
 			}
 
+			// Admin will get all permissions on all objects!
 			HashSet<PermissionRecord> records = new HashSet<PermissionRecord>();
-			PermissionRecord adminDocuments = new PermissionRecord(true, true, true, true, null);
+			
+			PermissionRecord adminCompanies = new PermissionRecord(true, true, true, true, Company.class.getCanonicalName());
+			PermissionRecord adminDepartments = new PermissionRecord(true, true, true, true, Department.class.getCanonicalName());
+			PermissionRecord adminRoles = new PermissionRecord(true, true, true, true, Role.class.getCanonicalName());
+			PermissionRecord adminUsers = new PermissionRecord(true, true, true, true, User.class.getCanonicalName());
+			PermissionRecord adminPermissions = new PermissionRecord(true, true, true, true, PermissionRecord.class.getCanonicalName());
+			
+			PermissionRecord adminDocumentGroups = new PermissionRecord(true, true, true, true, DocumentGroup.class.getCanonicalName());
+			PermissionRecord adminDocumentInfos = new PermissionRecord(true, true, true, true, DocumentInfo.class.getCanonicalName());
+			PermissionRecord adminDocuments = new PermissionRecord(true, true, true, true, Document.class.getCanonicalName());
+
+			PermissionRecord adminResourceGroups = new PermissionRecord(true, true, true, true, ResourceGroup.class.getCanonicalName());
+			PermissionRecord adminResources = new PermissionRecord(true, true, true, true, Resource.class.getCanonicalName());
+
 			PermissionRecord adminSkills = new PermissionRecord(true, true, true, true, Skill.class.getCanonicalName());
+			PermissionRecord adminSkillCategories = new PermissionRecord(true, true, true, true, SkillCategory.class.getCanonicalName());
+
+			records.add(adminCompanies);
+			records.add(adminDepartments);
+			records.add(adminRoles);
+			records.add(adminUsers);
+			records.add(adminPermissions);
+			records.add(adminDocumentGroups);
+			records.add(adminDocumentInfos);
 			records.add(adminDocuments);
+			records.add(adminResourceGroups);
+			records.add(adminResources);
+			records.add(adminSkillCategories);
 			records.add(adminSkills);
 
 			Role r = userRoleController.createRole("admin", "admin Role", records, AuthorizationController.getSystemUser());
-
 			HashSet<Role> roles = new HashSet<Role>();
 			roles.add(r);
 
 			User admin = userRoleController.createUser("admin", "13rikMyElTw", "admin", "", null, "", roles,
 					AuthorizationController.getSystemUser());
-
 			// TODO: Remove admin API-Key!
 			admin.setApiKey("ABCDEFG");
 
-			// TODO: Test implementation, REMOVE!
-			eventRegistry.createEventListener(admin, admin, "name", 120000, true);
-
-			// NOW PART OF CREATEUSER!!!!
-//			ActionBoard adminBoard = actionBoardController.createActionBoard("admin", "Admin's board", admin);
-//			actionBoardController.addSubscriber(adminBoard.getId(), admin);
-
-			// TODO: Test implementation, REMOVE!
-			// Task task = new Task();
-			// task.setName("My demo task");
-			// task.setDescription("This is my first test task");
-			// task.setPriority(1);
-			// task.setTaskStatus(TaskStatus.ASSIGNED);
-			//
-			// Task subtask = new Task();
-			// subtask.setName("My demo subtask");
-			// subtask.setDescription("This is my first test subtask");
-			// subtask.setPriority(1);
-			// subtask.setTaskStatus(TaskStatus.ASSIGNED);
-			//
-			// Task managedSubTask = taskController.createTask(subtask);
-			// taskController.addTaskAssignee(managedSubTask.getId(), admin);
-			//
-			// Task managedTask = taskController.createTask(task);
-			// taskController.addTaskAssignee(managedTask.getId(), admin);
-			//
-			// taskController.addSubTask(managedTask, managedSubTask);
-			//
-			// eventRegistry.createEventListener(managedTask, admin, "blackboard", 30000, false);
-			//
-			Blackboard bb = new Blackboard();
-			bb.setTitle("My Blackboard");
-			bb.setDescription("This is my first blackboard");
-			bb.setFrozen(false);
-			//
-			// Blackboard managedBlackboard = blackboardController.createBlackboard(bb);
-			// blackboardController.putTaskToBlackboard(managedTask.getId(), managedBlackboard.getId());
-
-			// ------------- TEST Project --------------------------------------
-//			Project project = new Project();
-//			project.setName("Testproject");
-//			project.setDescription("Testbeschreibung");
-//			project.setBeginDate(new Date());
-//			project.setDueDate(new Date(new Date().getTime() + 3000000));
-//			project.setManager(userRoleController.findRoleByRolename("admin", admin));
-//			project.setMaxManDays(20);
-//			project.setPriority(1);
-//			
-//			// project.setBlackboard(managedBlackboard);
-//			Project managedProject = projectController.createProject(project, bb, new ArrayList<Task>());
-//			// -------------------------------------------------------------------------
-//
-//			// --------------TEST Project Goals ---------------------------------------
-//			ProjectGoalPropertyNumeric property = new ProjectGoalPropertyNumeric();
-//			property.setName("Nominalumsatz");
-//			property.setDescription("Nominalumsatz im Unternehmen");
-//			property.setMin(10000);
-//			property.setMax(30000);
-//
-//			ProjectGoalPropertyDocument property2 = new ProjectGoalPropertyDocument();
-//			property2.setName("Finale Spezifikation");
-//			property2.setDescription("Feinspezifikation komplett");
-//			property2.setTag("FINAL");
-//
-//			List<ProjectGoalProperty> properties = new ArrayList<ProjectGoalProperty>();
-//			properties.add(property);
-//			properties.add(property2);
-//
-//			ProjectGoalPropertyRecord propRecord = new ProjectGoalPropertyRecord();
-//			propRecord.setProperty(property);
-//			propRecord.setValue(5000);
-//			propRecord.setNumericPropertyRecord(true);
-//
-//			ProjectGoalPropertyRecord propRecord2 = new ProjectGoalPropertyRecord();
-//			propRecord2.setProperty(property2);
-//			DocumentGroup temp = documentController.createDocumentGroup(d.getId(), "test", admin);
-//			DocumentInfo info = documentController.createDocument("ttt", temp.getId(), admin, "text/plain", false, new byte[] {}, "none");
-//			Document document = info.getCurrentDocument();
-//			document.setTag("FINAL");
-//			documentController.editDocument(info, document, "1212".getBytes(), "text/plain", admin, false);
-//			propRecord2.setDocumentInfo(info);
-//			propRecord2.setDocumentPropertyRecord(true);
-//
-//			ProjectGoalCategory cat = projectController.createProjectGoalCategory("Financial", "Financial project goals", null);
-//			ProjectGoal goal = projectController.createProjectGoal("Umsatzsteigerung", "Wir brauchen mehr Umsatz!", cat, 
-//					properties, admin);
-//			// new ProjectGoal();
-//			goal.setCategory(cat);
-//			property2.setProjectGoal(goal);
-//
-//			ProjectGoalRecord goalRecord = new ProjectGoalRecord();
-//			goalRecord.setPropertyRecord(propRecord);
-//			goalRecord.setProject(managedProject);
-//			goalRecord.setProjectGoal(goal);
-//
-//			ProjectGoalRecord goalRecord2 = new ProjectGoalRecord();
-//			goalRecord2.setPropertyRecord(propRecord2);
-//			goalRecord2.setProject(managedProject);
-//			goalRecord2.setProjectGoal(goal);
-//
-//			List<ProjectGoalRecord> projectGoalRecords = new ArrayList<ProjectGoalRecord>();
-//			projectGoalRecords.add(goalRecord);
-//			projectGoalRecords.add(goalRecord2);
-
+			// ---------------------------------------------------------------------------------------------------------------------
 			
-			
-			
-			//OLD
-			
-			// // Create initial ProjectProgress
-			// ProjectProgress managedProgress = projectController.createProjectProgress(project.getId(), projectGoalRecords, 0);
-			// managedProject.setProgress(managedProgress);
-			//
-			// // Update project progress and create tasks
-			// for (ProjectGoalRecord recOrig : project.getProgress().getTargetGoals()) {
-			// ProjectGoalRecord updatedRecord = projectController.activateProjectGoal(recOrig.getId());
-			// updatedRecord.getPropertyRecord().setValue(9800);
-			// updatedRecord.getPropertyRecord().setDocumentInfo(info);
-			// }
-			//
-			// projectController.updateProjectProgress(managedProject.getId());
-			// System.out.println("-------------- Ergebnis: ---- " + managedProgress.getProgress());
-
-			// ------------------------------------------------------------------
-
+			// Blackboard bb = new Blackboard();
+			// bb.setTitle("My Blackboard");
+			// bb.setDescription("This is my first blackboard");
+			// bb.setFrozen(false);
 		} else {
 			System.out.println("Deployment OK.");
 		}
 	}
-
 }

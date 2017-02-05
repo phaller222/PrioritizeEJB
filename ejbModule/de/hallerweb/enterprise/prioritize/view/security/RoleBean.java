@@ -28,6 +28,7 @@ import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.Skill;
+import de.hallerweb.enterprise.prioritize.model.skill.SkillCategory;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 
 /**
@@ -44,8 +45,6 @@ import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 @Named
 @SessionScoped
 public class RoleBean implements Serializable {
-
-	public static Map<String, Class<? extends PAuthorizedObject>> authorizedObjects;
 
 	@Inject
 	SessionController sessionController;
@@ -114,13 +113,17 @@ public class RoleBean implements Serializable {
 	public void init() {
 		resourceTypes.clear();
 		resourceTypes.add(Company.class.getCanonicalName());
-		resourceTypes.add(DocumentInfo.class.getCanonicalName());
-		resourceTypes.add(DocumentGroup.class.getCanonicalName());
+		resourceTypes.add(Department.class.getCanonicalName());
 		resourceTypes.add(User.class.getCanonicalName());
 		resourceTypes.add(Role.class.getCanonicalName());
+		resourceTypes.add(PermissionRecord.class.getCanonicalName());
+		
+		resourceTypes.add(DocumentInfo.class.getCanonicalName());
+		resourceTypes.add(DocumentGroup.class.getCanonicalName());
 		resourceTypes.add(Resource.class.getCanonicalName());
 		resourceTypes.add(ResourceGroup.class.getCanonicalName());
 		resourceTypes.add(Skill.class.getCanonicalName());
+		resourceTypes.add(SkillCategory.class.getCanonicalName());
 
 		role = new Role();
 
@@ -209,7 +212,7 @@ public class RoleBean implements Serializable {
 
 	@Named
 	public String deletePermission(PermissionRecord rec) {
-		controller.deletePermissionRecord(role.getId(), rec.getId());
+		controller.deletePermissionRecord(role.getId(), rec.getId(), sessionController.getUser());
 		role.getPermissions().remove(rec);
 		return "editrole";
 	}
@@ -238,7 +241,7 @@ public class RoleBean implements Serializable {
 	@Produces
 	@Named
 	public List<Department> getDepartments() {
-		return companyController.getAllDepartments();
+		return companyController.getAllDepartments(sessionController.getUser());
 
 	}
 
@@ -258,7 +261,7 @@ public class RoleBean implements Serializable {
 			rec.setDepartment(d);
 		}
 
-		controller.addPermissionRecord(role.getId(), rec);
+		controller.addPermissionRecord(role.getId(), rec, sessionController.getUser());
 		role.addPermission(rec);
 		return "editrole";
 	}
@@ -291,9 +294,9 @@ public class RoleBean implements Serializable {
 	public boolean canCreate() {
 		try {
 			int deptId = Integer.parseInt(this.selectedDepartmentId);
-			return authController.canCreate(deptId, new Role(), sessionController.getUser());
+			return authController.canCreate(deptId, AuthorizationController.ROLE_TYPE, sessionController.getUser());
 		} catch (NumberFormatException ex) {
-			return authController.canCreate(-1, new Role(), sessionController.getUser());
+			return authController.canCreate(-1, AuthorizationController.ROLE_TYPE, sessionController.getUser());
 
 		}
 	}

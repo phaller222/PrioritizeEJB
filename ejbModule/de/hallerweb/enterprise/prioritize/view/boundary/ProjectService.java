@@ -132,7 +132,7 @@ public class ProjectService {
 		if (user != null) {
 			Task task = taskController.findTaskById(Integer.parseInt(taskId));
 			if (task != null) {
-				return editTask(task, assigneeId, percentage, status);
+				return editTask(task, assigneeId, percentage, status, user);
 			} else {
 				throw new NotFoundException();
 			}
@@ -141,9 +141,9 @@ public class ProjectService {
 		}
 	}
 
-	private Task editTask(Task task, String assigneeId, String percentage, String status) {
+	private Task editTask(Task task, String assigneeId, String percentage, String status, User sessionUser) {
 		if (assigneeId != null) {
-			User assignee = userRoleController.findUserById(Integer.valueOf(assigneeId));
+			User assignee = userRoleController.findUserById(Integer.valueOf(assigneeId), sessionUser);
 			taskController.addTaskAssignee(task.getId(), assignee);
 			if (percentage != null) {
 				taskController.setTaskProgress(task, assignee, Integer.valueOf(percentage));

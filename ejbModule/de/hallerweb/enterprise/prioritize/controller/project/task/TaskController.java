@@ -129,9 +129,9 @@ public class TaskController extends PEventConsumerProducer {
 		task.addAssignee(assignee);
 	}
 	
-	public void removeTaskAssignee(int taskId, PActor assignee) {
+	public void removeTaskAssignee(int taskId, PActor assignee, User sessionUser) {
 		Task task = findTaskById(taskId);
-		User user = userRoleController.findUserById(assignee.getId());
+		User user = userRoleController.findUserById(assignee.getId(), sessionUser);
 		task.removeAssignee(user);
 	}
 	
@@ -159,8 +159,8 @@ public class TaskController extends PEventConsumerProducer {
 		ProjectGoalRecord rec = managedTask.getProjectGoalRecord();
 		rec.setPercentage(100);
 		
-		removeTaskAssignee(managedTask.getId(), user);
-		userRoleController.removeAssignedTask(user, managedTask);
+		removeTaskAssignee(managedTask.getId(), user, user);
+		userRoleController.removeAssignedTask(user, managedTask, user);
 		updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
 		projectController.updateProjectProgress(task.getProjectGoalRecord().getProject().getId());
 	}
@@ -173,8 +173,8 @@ public class TaskController extends PEventConsumerProducer {
 		ProjectGoalRecord rec = managedTask.getProjectGoalRecord();
 		rec.setPercentage(percentage);
 		if (percentage == 100) {
-			removeTaskAssignee(managedTask.getId(), user);
-			userRoleController.removeAssignedTask(user, managedTask);
+			removeTaskAssignee(managedTask.getId(), user, user);
+			userRoleController.removeAssignedTask(user, managedTask, user);
 			updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
 		} else if (percentage > 0) {
 			updateTaskStatus(managedTask.getId(), TaskStatus.STARTED);

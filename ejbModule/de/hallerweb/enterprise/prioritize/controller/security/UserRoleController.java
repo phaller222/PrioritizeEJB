@@ -179,20 +179,22 @@ public class UserRoleController extends PEventConsumerProducer {
 	 * @param permissionId
 	 *            - id of {@link PermissionRecord} to be removed.
 	 */
-	public void deletePermissionRecord(int roleId, int permissionId) {
+	public void deletePermissionRecord(int roleId, int permissionId, User sessionUser) {
 		Role r = em.find(Role.class, roleId);
-		PermissionRecord rec = em.find(PermissionRecord.class, permissionId);
+		if (r != null && authController.canDelete(AuthorizationController.PERMISSION_RECORD_TYPE, sessionUser)) {
+			PermissionRecord rec = em.find(PermissionRecord.class, permissionId);
 
-		if (rec.getDepartment() != null) {
-			rec.setDepartment(null);
+			if (rec.getDepartment() != null) {
+				rec.setDepartment(null);
+			}
+
+			r.getPermissions().remove(rec);
+			em.remove(rec);
+			em.flush();
+
+			logger.log(sessionController.getUser().getUsername(), "PermissionRecord", Action.DELETE, rec.getId(),
+					"PermissionRecord \"" + rec.getId() + "\" deleted.");
 		}
-
-		r.getPermissions().remove(rec);
-		em.remove(rec);
-		em.flush();
-
-		logger.log(sessionController.getUser().getUsername(), "PermissionRecord", Action.DELETE, rec.getId(),
-				"PermissionRecord \"" + rec.getId() + "\" deleted.");
 	}
 
 	/**
@@ -203,18 +205,20 @@ public class UserRoleController extends PEventConsumerProducer {
 	 * @param recNew
 	 *            - {@link PermissionRecord} to be added.
 	 */
-	public void addPermissionRecord(int roleId, PermissionRecord recNew) {
+	public void addPermissionRecord(int roleId, PermissionRecord recNew, User sessionUser) {
 		Role r = em.find(Role.class, roleId);
-		try {
-			em.persist(recNew);
+		if (r != null && authController.canCreate(AuthorizationController.PERMISSION_RECORD_TYPE, sessionUser)) {
+			try {
+				em.persist(recNew);
+				em.flush();
+			} catch (Exception ex) {
+				em.merge(recNew);
+			}
+			r.addPermission(recNew);
 			em.flush();
-		} catch (Exception ex) {
-			em.merge(recNew);
+			logger.log(sessionController.getUser().getUsername(), "PermissionRecord", Action.CREATE, recNew.getId(),
+					"PermissionRecord \"" + recNew.getId() + "\" added.");
 		}
-		r.addPermission(recNew);
-		em.flush();
-		logger.log(sessionController.getUser().getUsername(), "PermissionRecord", Action.CREATE, recNew.getId(),
-				"PermissionRecord \"" + recNew.getId() + "\" added.");
 	}
 
 	public List<Role> getAllRoles(User sessionUser) throws EJBException {
@@ -250,7 +254,7 @@ public class UserRoleController extends PEventConsumerProducer {
 				em.persist(preference);
 				user.setPreference(preference);
 				em.persist(user);
-				
+
 				ActionBoard actionBoard = actionBoardController.createActionBoard(user.getName(), user.getName() + "'s board", user);
 				actionBoardController.addSubscriber(actionBoard.getId(), user);
 
@@ -338,9 +342,8 @@ public class UserRoleController extends PEventConsumerProducer {
 
 	public List<User> getAllUsers(User sessionUser) throws EJBException {
 		Query query = em.createNamedQuery("findAllUsers");
-		User dummy = new User();
 		List<User> users = query.getResultList();
-		if (authController.canRead(dummy, sessionUser)) {
+		if (authController.canRead(AuthorizationController.USER_TYPE, sessionUser)) {
 			return users;
 		} else {
 			return new ArrayList<User>();
@@ -349,9 +352,13 @@ public class UserRoleController extends PEventConsumerProducer {
 	}
 
 	public List<String> getAllUserNames(User sessionUser) throws EJBException {
-		Query query = em.createNamedQuery("findAllUserNames");
-		List<String> users = query.getResultList();
-		return users;
+		if (authController.canRead(AuthorizationController.USER_TYPE, sessionUser)) {
+			Query query = em.createNamedQuery("findAllUserNames");
+			List<String> users = query.getResultList();
+			return users;
+		} else {
+			return new ArrayList<String>();
+		}
 	}
 
 	public User getUserById(int id, User sessionUser) {
@@ -403,27 +410,29 @@ public class UserRoleController extends PEventConsumerProducer {
 		return user;
 	}
 
-	public User findUserById(int id) {
-		return em.find(User.class, id);
+	public User findUserById(int id, User sessionUser) {
+		if (authController.canRead(AuthorizationController.USER_TYPE, sessionUser)) {
+			return em.find(User.class, id);
+		} else {
+			return null;
+		}
 	}
 
 	public void deleteUser(int id, User sessionUser) {
-		User u = findUserById(id);
+		User u = findUserById(id, sessionUser);
 		if (authController.canDelete(u, sessionUser)) {
-			int userId = u.getId();
-			String userName = u.getUsername();
 
 			Set<Role> roles = u.getRoles();
 			for (Role r : roles) {
 				r.removeUser(u);
 				u.removeRole(r);
 			}
-
 			em.flush();
-
 			em.remove(u);
 			em.flush();
 
+			int userId = u.getId();
+			String userName = u.getUsername();
 			logger.log(sessionController.getUser().getUsername(), "User", Action.DELETE, userId, "User \"" + userName + "\" deleted.");
 		}
 	}
@@ -494,9 +503,13 @@ public class UserRoleController extends PEventConsumerProducer {
 		}
 	}
 
-	public Set<SkillRecord> getSkillRecordsForUser(int userId) {
+	public Set<SkillRecord> getSkillRecordsForUser(int userId, User sessionUser) {
 		User u = em.find(User.class, userId);
-		return u.getSkills();
+		if (authController.canRead(u, sessionUser)) {
+			return u.getSkills();
+		} else {
+			return new HashSet<SkillRecord>();
+		}
 	}
 
 	public void addVacation(User user, TimeSpan timespan, User sessionUser) {
@@ -533,8 +546,12 @@ public class UserRoleController extends PEventConsumerProducer {
 		}
 	}
 
-	public List<TimeSpan> getVacation(User user) {
-		return user.getVacation();
+	public List<TimeSpan> getVacation(User user, User sessionUser) {
+		if (authController.canRead(user, sessionUser)) {
+			return user.getVacation();
+		} else {
+			return new ArrayList<TimeSpan>();
+		}
 	}
 
 	public void setIllness(User user, TimeSpan timespan, User sessionUser) {
@@ -560,16 +577,24 @@ public class UserRoleController extends PEventConsumerProducer {
 		}
 	}
 
-	public TimeSpan getIllness(User user) {
-		return user.getIllness();
+	public TimeSpan getIllness(User user, User sessionUser) {
+		if (authController.canRead(user, sessionUser)) {
+			return user.getIllness();
+		} else {
+			return null;
+		}
 	}
 
 	public String generateApiKey(User user, User sessionUser) {
-		String apiKey = UUID.randomUUID().toString();
-		User u = em.find(User.class, user.getId());
-		if (authController.canUpdate(u, sessionUser)) {
-			u.setApiKey(apiKey);
-			return apiKey;
+		if (authController.canUpdate(AuthorizationController.USER_TYPE, sessionUser)) {
+			String apiKey = UUID.randomUUID().toString();
+			User u = em.find(User.class, user.getId());
+			if (authController.canUpdate(u, sessionUser)) {
+				u.setApiKey(apiKey);
+				return apiKey;
+			} else {
+				return null;
+			}
 		} else {
 			return null;
 		}
@@ -585,29 +610,32 @@ public class UserRoleController extends PEventConsumerProducer {
 	}
 
 	@Override
-	public void consumeEvent(PObject o, Event evt) {
-		System.out.println("Object " + o.toString() + " raised event: " + evt.getPropertyName() + " with new Value: " + evt.getNewValue()
-				+ "--- User listening: " + ((User) o).getUsername());
+	public void consumeEvent(PObject obj, Event evt) {
+		System.out.println("Object " + obj.toString() + " raised event: " + evt.getPropertyName() + " with new Value: " + evt.getNewValue()
+				+ "--- User listening: " + ((User) obj).getUsername());
 
 		PObject source = evt.getSource();
-		User destination = (User) o;
+		User destination = (User) obj;
 		if (evt.getSource() instanceof ActionBoard) {
 			ActionBoard board = (ActionBoard) evt.getSource();
 			if (!board.getOwner().equals(destination)) {
-			actionBoardController.post(actionBoardController.findActionBoardByOwner(destination.getId()).getId(), evt.getPropertyName(),
-					evt.getPropertyName() + " set to " + evt.getNewValue(), evt);
+				actionBoardController.post(actionBoardController.findActionBoardByOwner(destination.getId()).getId(), evt.getPropertyName(),
+						evt.getPropertyName() + " set to " + evt.getNewValue(), evt);
 			}
 		}
 	}
-	
+
+	//-----------------------------------------------
+	// TODO: Task assignment not checked at the moment, add PermissionRecord type if necessary in the future.
 	public void assignTask(User user, Task task) {
-		User managedUser = findUserById(user.getId());
+		User managedUser = findUserById(user.getId(), user);
 		managedUser.addAssignedTask(task);
 	}
-	
-	public void removeAssignedTask(User user, Task task) {
-		User managedUser = findUserById(user.getId());
+
+	public void removeAssignedTask(User user, Task task, User sessionUser) {
+		User managedUser = findUserById(user.getId(), sessionUser);
 		managedUser.removeAssignedTask(task);
 	}
-	
+	//-----------------------------------------------------------------
+
 }

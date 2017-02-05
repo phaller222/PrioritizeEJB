@@ -111,7 +111,7 @@ public class UserBean implements Serializable {
 
 	@Named
 	public Set<SkillRecord> getSkillRecords() {
-		return controller.getSkillRecordsForUser(this.user.getId());
+		return controller.getSkillRecordsForUser(this.user.getId(), sessionController.getUser());
 	}
 
 	public void setSkillRecords(Set<SkillRecord> skillRecords) {
@@ -300,9 +300,9 @@ public class UserBean implements Serializable {
 	public boolean canCreate() {
 		try {
 			int deptId = Integer.parseInt(this.selectedDepartmentId);
-			return authController.canCreate(deptId, new User(), sessionController.getUser());
+			return authController.canCreate(deptId, AuthorizationController.USER_TYPE, sessionController.getUser());
 		} catch (NumberFormatException ex) {
-			return authController.canCreate(-1, new User(), sessionController.getUser());
+			return authController.canCreate(-1, AuthorizationController.USER_TYPE, sessionController.getUser());
 		}
 	}
 

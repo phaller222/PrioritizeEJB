@@ -4,11 +4,18 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.document.Document;
+import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
+import de.hallerweb.enterprise.prioritize.model.resource.Resource;
+import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+import de.hallerweb.enterprise.prioritize.model.skill.Skill;
+import de.hallerweb.enterprise.prioritize.model.skill.SkillCategory;
 
 /**
  * AuthorizationController.java - Retrieves information of the permissions a user has for the creation, modification and deletion of
@@ -23,6 +30,21 @@ public class AuthorizationController {
 
 	static User systemUser;
 	static final String SYSTEM_USER_API_KEY = "e685567d-38d3-49be-8ab9-2adf80eef508";
+	
+	// static Proxy instances for use during permission checks. Just used to get Cannonical class name.
+	// DO NOT CHANGE THEESE INSTANCES OR USE AS REAL WORLD OBJECTS!
+	public static Company COMPANY_TYPE = new Company();
+	public static Department DEPARTMENT_TYPE = new Department();
+	public static Role ROLE_TYPE = new Role();
+	public static User USER_TYPE = new User();
+	public static PermissionRecord PERMISSION_RECORD_TYPE = new PermissionRecord();
+	public static DocumentGroup DOCUMENT_GROUP_TYPE = new DocumentGroup();
+	public static Document DOCUMENT_TYPE = new Document();
+	public static ResourceGroup RESOURCE_GROUP_TYPE = new ResourceGroup();
+	public static Resource RESOURCE_TYPE = new Resource();
+	public static SkillCategory SKILL_CATEGORY = new SkillCategory();
+	public static Skill SKILL_TYPE = new Skill();
+	
 
 	public static User getSystemUser() {
 		if (systemUser == null) {
@@ -41,6 +63,10 @@ public class AuthorizationController {
 	 * @return
 	 */
 	public boolean canCreate(PAuthorizedObject targetObject, User user) {
+		// if no user provided, always deny permissions!
+		if (user == null) {
+			return false;
+		}
 		if (user.equals(systemUser)) {
 			return true;
 		}
@@ -49,7 +75,8 @@ public class AuthorizationController {
 			for (PermissionRecord perm : role.getPermissions()) {
 				if (perm.isCreatePermission()
 						&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
-					boolean canCreate = perm.getDepartment() == null || perm.getDepartment().equals(targetObject.getDepartment());
+					boolean canCreate = perm.getDepartment() == null || user.getDepartment() == null
+							|| (perm.getDepartment().getId() == user.getDepartment().getId());
 					if (canCreate) {
 						return true;
 					}
@@ -58,42 +85,6 @@ public class AuthorizationController {
 		}
 		return false;
 	}
-	// public boolean canCreate(PAuthorizedObject targetObject, User user) {
-	// // if no user provided, always deny permissions!
-	// if (user == null)
-	// return false;
-	//
-	// // System user overrides everything
-	// String apiKey = user.getApiKey();
-	// if (apiKey != null) {
-	// if (apiKey.equalsIgnoreCase(SYSTEM_USER_API_KEY)) {
-	// return true;
-	// }
-	// }
-	// // Find target department
-	// Department targetDepartment = targetObject.getDepartment();
-	// // Find Users create permission records for that department, return false if no create permission.
-	// Set<Role> roles = user.getRoles();
-	// for (Role r : roles) {
-	// Set<PermissionRecord> records = r.getPermissions();
-	// for (PermissionRecord rec : records) {
-	// if ((targetDepartment == null) || (rec.getDepartment() == null)
-	// || (rec.getDepartment().getId() == targetDepartment.getId())) {
-	// // If there is a PermissionRecord without a target resource type (User,Document...)
-	// // the permissions count for all resource types (provided createPermission = true)
-	// if ((rec.getTargetResourceType() == null) && (rec.isCreatePermission())) {
-	// return true;
-	// } else {
-	// if (rec.isCreatePermission() && targetObject.getClass().equals(rec.getTargetResourceType())) {
-	// return true;
-	// }
-	// }
-	// }
-	//
-	// }
-	// }
-	// return false;
-	// }
 
 	/**
 	 * Generally check create permission of {@link User} for a given {@link Department}
@@ -103,6 +94,10 @@ public class AuthorizationController {
 	 * @return
 	 */
 	public boolean canCreate(int departmentId, PAuthorizedObject targetObject, User user) {
+		// if no user provided, always deny permissions!
+		if (user == null) {
+			return false;
+		}
 		if (user.equals(systemUser)) {
 			return true;
 		}
@@ -121,58 +116,6 @@ public class AuthorizationController {
 		return false;
 	}
 
-	// // if no user provided, always deny permissions!
-	// if (user == null)
-	// return false;
-	//
-	// // System user overrides everything
-	// String apiKey = user.getApiKey();
-	// if (apiKey != null) {
-	// if (apiKey.equalsIgnoreCase(SYSTEM_USER_API_KEY)) {
-	// return true;
-	// }
-	// }
-	//
-	// // Find target department
-	// Department targetDepartment = em.find(Department.class, departmentId);
-	// if (targetDepartment == null) {
-	// // Find Users create permission records for that department, return false if no create permission.
-	// Set<Role> roles = user.getRoles();
-	// if (roles == null) {
-	// return false;
-	// }
-	//
-	// for (Role r : roles) {
-	// Set<PermissionRecord> records = r.getPermissions();
-	// for (PermissionRecord rec : records) {
-	// if ((rec.getDepartment() == null) || (targetClass.equals(Company.class))) {
-	// if (rec.isCreatePermission()) {
-	// if ((rec.getTargetResourceType() == null) || (targetClass.equals(rec.getTargetResourceType())))
-	// return true;
-	// }
-	// }
-	// }
-	// }
-	// return false;
-	// } else {
-	//
-	// // Find Users create permission records for that department, return false if no create permission.
-	// Set<Role> roles = user.getRoles();
-	// for (Role r : roles) {
-	// Set<PermissionRecord> records = r.getPermissions();
-	// for (PermissionRecord rec : records) {
-	// if ((rec.getDepartment() == null) || (rec.getDepartment().getId() == targetDepartment.getId())) {
-	// if (rec.isCreatePermission()) {
-	// if ((rec.getTargetResourceType() == null) || (targetClass.equals(rec.getTargetResourceType())))
-	// return true;
-	// }
-	// }
-	// }
-	// }
-	// return false;
-	// }
-	// }
-
 	/**
 	 * Checks if a given {@link User} can read the given {@link PAuthorizedObject}
 	 * 
@@ -181,6 +124,10 @@ public class AuthorizationController {
 	 * @return
 	 */
 	public boolean canRead(PAuthorizedObject targetObject, User user) {
+		// if no user provided, always deny permissions!
+		if (user == null) {
+			return false;
+		}
 		if (user.equals(systemUser)) {
 			return true;
 		}
@@ -189,7 +136,8 @@ public class AuthorizationController {
 			for (PermissionRecord perm : role.getPermissions()) {
 				if (perm.isReadPermission()
 						&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
-					boolean canRead = perm.getDepartment() == null || perm.getDepartment().equals(targetObject.getDepartment());
+					boolean canRead = perm.getDepartment() == null
+							|| (perm.getDepartment().getId() == targetObject.getDepartment().getId());
 					if (canRead) {
 						return true;
 					}
@@ -199,42 +147,6 @@ public class AuthorizationController {
 		return false;
 	}
 
-	// // if no user provided, always deny permissions!
-	// if (user == null)
-	// return false;
-	//
-	// // System user overrides everything
-	// String apiKey = user.getApiKey();
-	// if (apiKey != null) {
-	// if (apiKey.equalsIgnoreCase(SYSTEM_USER_API_KEY)) {
-	// return true;
-	// }
-	// }
-	// // Find target department
-	// Department targetDepartment = targetObject.getDepartment();
-	//
-	// // Find Users read permission records for that department, return false if no read permission.
-	// Set<Role> roles = user.getRoles();
-	// for (Role r : roles) {
-	// Set<PermissionRecord> records = r.getPermissions();
-	// for (PermissionRecord rec : records) {
-	// if ((rec.getDepartment() == null) || (targetDepartment == null)
-	// || (rec.getDepartment().getId() == targetDepartment.getId())) {
-	// if (rec.isReadPermission()) {
-	// if (rec.getTargetResourceType() == null) {
-	// return true;
-	// } else {
-	// if (targetObject.getClass().equals(rec.getTargetResourceType())) {
-	// return true;
-	// }
-	// }
-	// }
-	// }
-	// }
-	// }
-	// return false;
-	// }
-
 	/**
 	 * Checks if a given {@link User} can update the given {@link PAuthorizedObject}
 	 * 
@@ -243,6 +155,10 @@ public class AuthorizationController {
 	 * @return
 	 */
 	public boolean canUpdate(PAuthorizedObject targetObject, User user) {
+		// if no user provided, always deny permissions!
+		if (user == null) {
+			return false;
+		}
 		if (user.equals(systemUser)) {
 			return true;
 		}
@@ -251,7 +167,8 @@ public class AuthorizationController {
 			for (PermissionRecord perm : role.getPermissions()) {
 				if (perm.isUpdatePermission()
 						&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
-					boolean canUpdate = perm.getDepartment() == null || perm.getDepartment().equals(targetObject.getDepartment());
+					boolean canUpdate = perm.getDepartment() == null
+							|| (perm.getDepartment().getId() == targetObject.getDepartment().getId());
 					if (canUpdate) {
 						return true;
 					}
@@ -261,42 +178,6 @@ public class AuthorizationController {
 		return false;
 	}
 
-	// // if no user provided, always deny permissions!
-	// if (user == null)
-	// return false;
-	//
-	// // System user overrides everything
-	// String apiKey = user.getApiKey();
-	// if (apiKey != null) {
-	// if (apiKey.equalsIgnoreCase(SYSTEM_USER_API_KEY)) {
-	// return true;
-	// }
-	// }
-	// // Find target department
-	// Department targetDepartment = targetObject.getDepartment();
-	//
-	// // Find Users update permission records for that department, return false if no update permission.
-	// Set<Role> roles = user.getRoles();
-	// for (Role r : roles) {
-	// Set<PermissionRecord> records = r.getPermissions();
-	// for (PermissionRecord rec : records) {
-	// if ((rec.getDepartment() == null) || (targetDepartment == null)
-	// || (rec.getDepartment().getId() == targetDepartment.getId())) {
-	// if (rec.isUpdatePermission()) {
-	// if (rec.getTargetResourceType() == null) {
-	// return true;
-	// } else {
-	// if (targetObject.getClass().equals(rec.getTargetResourceType())) {
-	// return true;
-	// }
-	// }
-	// }
-	// }
-	// }
-	// }
-	// return false;
-	// }
-
 	/**
 	 * Checks if a given {@link User} can delete the given {@link PAuthorizedObject}
 	 * 
@@ -305,6 +186,10 @@ public class AuthorizationController {
 	 * @return
 	 */
 	public boolean canDelete(PAuthorizedObject targetObject, User user) {
+		// if no user provided, always deny permissions!
+		if (user == null) {
+			return false;
+		}
 		if (user.equals(systemUser)) {
 			return true;
 		}
@@ -313,7 +198,8 @@ public class AuthorizationController {
 			for (PermissionRecord perm : role.getPermissions()) {
 				if (perm.isDeletePermission()
 						&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
-					boolean canDelete = perm.getDepartment() == null || perm.getDepartment().equals(targetObject.getDepartment());
+					boolean canDelete = perm.getDepartment() == null
+							|| (perm.getDepartment().getId() == targetObject.getDepartment().getId());
 					if (canDelete) {
 						return true;
 					}
@@ -322,41 +208,4 @@ public class AuthorizationController {
 		}
 		return false;
 	}
-
-	// // if no user provided, always deny permissions!
-	// if (user == null)
-	// return false;
-	//
-	// // System user overrides everything
-	// String apiKey = user.getApiKey();
-	// if (apiKey != null) {
-	// if (apiKey.equalsIgnoreCase(SYSTEM_USER_API_KEY)) {
-	// return true;
-	// }
-	// }
-	// // Find target department
-	// Department targetDepartment = targetObject.getDepartment();
-	//
-	// // Find Users delete permission records for that department, return false if no delete permission.
-	// Set<Role> roles = user.getRoles();
-	// for (Role r : roles) {
-	// Set<PermissionRecord> records = r.getPermissions();
-	// for (PermissionRecord rec : records) {
-	// if ((rec.getDepartment() == null) || (targetDepartment == null)
-	// || (rec.getDepartment().getId() == targetDepartment.getId())) {
-	// if (rec.isDeletePermission()) {
-	// if (rec.getTargetResourceType() == null) {
-	// return true;
-	// } else {
-	// if (targetObject.getClass().equals(rec.getTargetResourceType())) {
-	// return true;
-	// }
-	// }
-	// }
-	// }
-	// }
-	// }
-	// return false;
-	// }
-
 }

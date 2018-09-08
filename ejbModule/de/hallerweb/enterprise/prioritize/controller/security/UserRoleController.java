@@ -5,11 +5,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.ejb.Stateless;
-import javax.enterprise.context.ContextNotActiveException;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -21,7 +21,8 @@ import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.project.ActionBoardController;
-import de.hallerweb.enterprise.prioritize.model.Company;
+import de.hallerweb.enterprise.prioritize.controller.project.task.TaskController;
+import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionController;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
@@ -32,8 +33,8 @@ import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
-import de.hallerweb.enterprise.prioritize.model.skill.Skill;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
+import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
 
 /**
@@ -48,24 +49,30 @@ public class UserRoleController extends PEventConsumerProducer {
 
 	@EJB
 	LoggingController logger;
-
 	@EJB
 	AuthorizationController authController;
-
+	@EJB
+	ActionBoardController actionBoardController;
+	@EJB
+	ItemCollectionController itemCollectionController;
+	@EJB
+	TaskController taskController;
 	@Inject
 	SessionController sessionController;
-
 	@Inject
 	EventRegistry eventRegistry;
 
-	@EJB
-	ActionBoardController actionBoardController;
+	public static final String LITERAL_CREATED = "\" created.";
+	public static final String LITERAL_SYSTEM = "SYSTEM";
+	public static final String LITERAL_DELETED = "\" deleted.";
+	public static final String LITERAL_PERMISSION_RECORD = "PermissionRecord";
+	public static final String LITERAL_USER = "User";
 
 	/**
 	 * Default constructor.
 	 */
 	public UserRoleController() {
-		// TODO Auto-generated constructor stub
+		// Empty default constructor
 	}
 
 	public Role findRoleByRolename(String roleName, User user) {
@@ -83,14 +90,6 @@ public class UserRoleController extends PEventConsumerProducer {
 		}
 	}
 
-	/**
-	 * Creates a new role with the given name and {@link PermissionRecord}s.
-	 * 
-	 * @param name - Name of company
-	 * @param mainAddress Main address
-	 * @param isSubcompany Is this company a subcompany of another?
-	 * @return the created {@link Company}
-	 */
 	public Role createRole(String name, String description, Set<PermissionRecord> permissions, User sessionUser) {
 		if (findRoleByRolename(name, sessionUser) == null) {
 			Role r = new Role();
@@ -99,33 +98,10 @@ public class UserRoleController extends PEventConsumerProducer {
 				r.setDescription(description);
 				em.persist(r);
 				em.flush();
-				Department managedDepartment;
-				Set<PermissionRecord> managedPermissions = new HashSet<PermissionRecord>();
+				Set<PermissionRecord> managedPermissions = new HashSet<>();
 
 				for (PermissionRecord rec : permissions) {
-					PermissionRecord recNew = new PermissionRecord();
-					recNew.setCreatePermission(rec.isCreatePermission());
-					recNew.setReadPermission(rec.isReadPermission());
-					recNew.setUpdatePermission(rec.isUpdatePermission());
-					recNew.setDeletePermission(rec.isDeletePermission());
-
-					// Resource type can be null for ALL resource types!
-					if (rec.getAbsoluteObjectType() != null) {
-						recNew.setAbsoluteObjectType(rec.getAbsoluteObjectType());
-					}
-
-					// rec.gertDepartment() can be null if permission record set for
-					// all departments!
-					if (rec.getDepartment() != null) {
-						managedDepartment = em.find(Department.class, rec.getDepartment().getId());
-						recNew.setDepartment(managedDepartment);
-					}
-
-					try {
-						em.persist(recNew);
-					} catch (Exception ex) {
-						em.merge(recNew);
-					}
+					PermissionRecord recNew = persistPermissionRecord(rec);
 					managedPermissions.add(recNew);
 				}
 				r.setPermissions(managedPermissions);
@@ -133,9 +109,9 @@ public class UserRoleController extends PEventConsumerProducer {
 				em.flush();
 				try {
 					logger.log(sessionController.getUser().getUsername(), "Role", Action.CREATE, r.getId(),
-							"Role \"" + r.getName() + "\" created.");
-				} catch (ContextNotActiveException ex) {
-					logger.log("SYSTEM", "Role", Action.CREATE, r.getId(), " Role \"" + r.getName() + "\" created.");
+							"Role \"" + r.getName() + LITERAL_CREATED);
+				} catch (Exception ex) {
+					logger.log(LITERAL_SYSTEM, "Role", Action.CREATE, r.getId(), " Role \"" + r.getName() + LITERAL_CREATED);
 				}
 				return r;
 			} else {
@@ -145,6 +121,36 @@ public class UserRoleController extends PEventConsumerProducer {
 			// Rolename already exists, return null.
 			return null;
 		}
+	}
+
+	private PermissionRecord persistPermissionRecord(PermissionRecord rec) {
+		Department managedDepartment;
+		PermissionRecord recNew = new PermissionRecord();
+		recNew.setCreatePermission(rec.isCreatePermission());
+		recNew.setReadPermission(rec.isReadPermission());
+		recNew.setUpdatePermission(rec.isUpdatePermission());
+		recNew.setDeletePermission(rec.isDeletePermission());
+
+		// Resource type can be null for ALL resource types!
+		if (rec.getAbsoluteObjectType() != null) {
+			recNew.setAbsoluteObjectType(rec.getAbsoluteObjectType());
+		}
+		// Also add explicitly assigned permissions
+		recNew.setObjectId(rec.getObjectId());
+
+		// rec.gertDepartment() can be null if permission record set for
+		// all departments!
+		if (rec.getDepartment() != null) {
+			managedDepartment = em.find(Department.class, rec.getDepartment().getId());
+			recNew.setDepartment(managedDepartment);
+		}
+
+		try {
+			em.persist(recNew);
+		} catch (Exception ex) {
+			em.merge(recNew);
+		}
+		return recNew;
 	}
 
 	public void deleteRole(int id, User sessionUser) {
@@ -167,7 +173,7 @@ public class UserRoleController extends PEventConsumerProducer {
 			em.flush();
 
 			logger.log(sessionController.getUser().getUsername(), "Role", Action.DELETE, r.getId(),
-					"Role \"" + r.getName() + "\" deleted.");
+					"Role \"" + r.getName() + LITERAL_DELETED);
 		}
 	}
 
@@ -192,8 +198,8 @@ public class UserRoleController extends PEventConsumerProducer {
 			em.remove(rec);
 			em.flush();
 
-			logger.log(sessionController.getUser().getUsername(), "PermissionRecord", Action.DELETE, rec.getId(),
-					"PermissionRecord \"" + rec.getId() + "\" deleted.");
+			logger.log(sessionController.getUser().getUsername(), LITERAL_PERMISSION_RECORD, Action.DELETE, rec.getId(),
+					LITERAL_PERMISSION_RECORD + " " + rec.getId() + LITERAL_DELETED);
 		}
 	}
 
@@ -216,19 +222,24 @@ public class UserRoleController extends PEventConsumerProducer {
 			}
 			r.addPermission(recNew);
 			em.flush();
-			logger.log(sessionController.getUser().getUsername(), "PermissionRecord", Action.CREATE, recNew.getId(),
-					"PermissionRecord \"" + recNew.getId() + "\" added.");
+			try {
+				logger.log(sessionController.getUser().getUsername(), LITERAL_PERMISSION_RECORD, Action.CREATE, recNew.getId(),
+						LITERAL_PERMISSION_RECORD + " " + recNew.getId() + "\" added.");
+			} catch (Exception ex) {
+				logger.log(LITERAL_SYSTEM, LITERAL_PERMISSION_RECORD, Action.CREATE, recNew.getId(),
+						LITERAL_PERMISSION_RECORD + " " + recNew.getId() + "\" added.");
+			}
 		}
 	}
 
-	public List<Role> getAllRoles(User sessionUser) throws EJBException {
+	public List<Role> getAllRoles(User sessionUser) {
 		Query query = em.createQuery("SELECT r FROM Role r ORDER BY r.name");
 		List<Role> roles = query.getResultList();
 		Role r = roles.get(0);
 		if (authController.canRead(r, sessionUser)) {
 			return roles;
 		} else {
-			return new ArrayList<Role>();
+			return new ArrayList<>();
 		}
 	}
 
@@ -238,40 +249,36 @@ public class UserRoleController extends PEventConsumerProducer {
 
 	// -------------------------- Users ---------------------------------------------------
 
-	public User createUser(String username, String password, String name, String email, Department initialDepartment, String occupation,
-			Set<Role> roles, User sessionUser) {
-		User user = new User();
-
-		if (authController.canCreate(user, sessionUser)) {
-			if (findUserByUsername(username, AuthorizationController.getSystemUser()) == null) {
-				user.setUsername(username);
-				user.setName(name);
-				user.setEmail(email);
-				user.setOccupation(occupation);
-				user.setDepartment(initialDepartment);
-				user.setPassword(String.valueOf(password.hashCode()));
-				UserPreference preference = new UserPreference(user);
+	public User createUser(User newUser, Department initialDepartment, Set<Role> roles, User sessionUser) {
+		if (authController.canCreate(newUser, sessionUser)) {
+			if (findUserByUsername(newUser.getUsername(), AuthorizationController.getSystemUser()) == null) {
+				User userToCreate = User.newInstane(newUser);
+				userToCreate.setPassword(String.valueOf(userToCreate.getPassword().hashCode()));
+				userToCreate.setDepartment(initialDepartment);
+				UserPreference preference = new UserPreference(userToCreate);
 				em.persist(preference);
-				user.setPreference(preference);
-				em.persist(user);
+				userToCreate.setPreference(preference);
+				em.persist(userToCreate);
 
-				ActionBoard actionBoard = actionBoardController.createActionBoard(user.getName(), user.getName() + "'s board", user);
-				actionBoardController.addSubscriber(actionBoard.getId(), user);
+				ActionBoard actionBoard = actionBoardController.createActionBoard(userToCreate.getName(),userToCreate.getName() + "'s board",
+						userToCreate);
+				actionBoardController.addSubscriber(actionBoard.getId(), userToCreate);
 
 				for (Role role : roles) {
 					Role managedRole = em.find(Role.class, role.getId());
-					user.addRole(managedRole);
-					managedRole.addUser(user);
+					userToCreate.addRole(managedRole);
+					managedRole.addUser(userToCreate);
 				}
 
 				em.flush();
 				try {
-					logger.log(sessionController.getUser().getUsername(), "User", Action.CREATE, user.getId(),
-							"User \"" + user.getUsername() + "\" created.");
-				} catch (ContextNotActiveException ex) {
-					logger.log("SYSTEM", "User", Action.CREATE, user.getId(), " User \"" + user.getUsername() + "\" created.");
+					logger.log(sessionController.getUser().getUsername(), "User", Action.CREATE, newUser.getId(),
+							LITERAL_USER + " " + newUser.getUsername() + LITERAL_CREATED);
+				} catch (Exception ex) {
+					logger.log(LITERAL_SYSTEM, "User", Action.CREATE, newUser.getId(),
+							LITERAL_USER + " " + newUser.getUsername() + LITERAL_CREATED);
 				}
-				return user;
+				return newUser;
 			} else {
 				// Username already exists, return null.
 				return null;
@@ -284,80 +291,85 @@ public class UserRoleController extends PEventConsumerProducer {
 	/**
 	 * Edit User information.
 	 * 
-	 * @param id int - ID of the {@link User} to edit.
-	 * @param username String - the new Username
-	 * @param name String - the new full name.
-	 * @param email String - the new E-Mail Address.
-	 * @param initialDepartmentId int - ID of the Department the user belongs to.
-	 * @param occupation String - the new Occupation of the user
 	 */
-	public void editUser(int id, String username, String password, String name, String email, int initialDepartmentId, String occupation,
-			User sessionUser) {
+	public void editUser(int id, User newUserData, User sessionUser) {
+
 		User user = em.find(User.class, id);
 		if (authController.canUpdate(user, sessionUser)) {
+			user.setUsername(newUserData.getUsername());
+			user.setName(newUserData.getName());
+			user.setEmail(newUserData.getEmail());
+			if ((newUserData.getPassword() != null) && (newUserData.getPassword().length() > 0)) {
+				user.setPassword(String.valueOf(newUserData.getPassword().hashCode()));
+			}
+			user.setOccupation(newUserData.getOccupation());
+
+			if (newUserData.getDepartment() != null) {
+			Department dept = em.find(Department.class, newUserData.getDepartment().getId());
+			user.setDepartment(dept);
+			} 
+
+			em.flush();
 
 			// Raise events if configured
 			if (InitializationController.getAsBoolean(InitializationController.FIRE_USER_EVENTS)) {
-				if (!user.getName().equals(name)) {
-					this.raiseEvent(user, User.PROPERTY_NAME, user.getName(), name,
-							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				}
-				if (!user.getUsername().equals(username)) {
-					this.raiseEvent(user, User.PROPERTY_USERNAME, user.getUsername(), username,
-							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				}
-				if (!user.getEmail().equals(email)) {
-					this.raiseEvent(user, User.PROPERTY_EMAIL, user.getEmail(), email,
-							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				}
-				if (!user.getOccupation().equals(occupation)) {
-					this.raiseEvent(user, User.PROPERTY_OCCUPATION, user.getOccupation(), occupation,
-							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				}
-				if (user.getDepartment() != null) {
-					if (!(user.getDepartment().getId() == initialDepartmentId)) {
-						this.raiseEvent(user, User.PROPERTY_DEPARTMENT, String.valueOf(user.getDepartment().getId()),
-								String.valueOf(initialDepartmentId),
-								InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-					}
-				}
+				fireEditUserEvents(newUserData, user);
 			}
 
-			user.setUsername(username);
-			user.setName(name);
-			user.setEmail(email);
-			if ((password != null) && (password.length() > 0)) {
-				user.setPassword(String.valueOf(password.hashCode()));
-			}
-			user.setOccupation(occupation);
-
-			Department dept = em.find(Department.class, initialDepartmentId);
-			user.setDepartment(dept);
-
-			em.flush();
-			logger.log(sessionController.getUser().getUsername(), "User", Action.UPDATE, user.getId(),
-					"User \"" + user.getUsername() + "\" updated.");
+			logger.log(sessionUser.getUsername(), "User", Action.UPDATE, user.getId(),
+					LITERAL_USER + " " + user.getUsername() + "\" updated.");
 		}
 	}
 
-	public List<User> getAllUsers(User sessionUser) throws EJBException {
+	private void fireEditUserEvents(User newUserData, User user) {
+		if (!user.getName().equals(newUserData.getName())) {
+			this.raiseEvent(user, User.PROPERTY_NAME, user.getName(), newUserData.getName(),
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+		}
+		if (!user.getUsername().equals(newUserData.getUsername())) {
+			this.raiseEvent(user, User.PROPERTY_USERNAME, user.getUsername(), newUserData.getUsername(),
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+		}
+		if (!user.getEmail().equals(newUserData.getEmail())) {
+			this.raiseEvent(user, User.PROPERTY_EMAIL, user.getEmail(), newUserData.getEmail(),
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+		}
+		if (!user.getOccupation().equals(newUserData.getOccupation())) {
+			this.raiseEvent(user, User.PROPERTY_OCCUPATION, user.getOccupation(), newUserData.getOccupation(),
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+		}
+		if (user.getDepartment() != null && user.getDepartment().getId() != newUserData.getDepartment().getId()) {
+			this.raiseEvent(user, User.PROPERTY_DEPARTMENT, String.valueOf(user.getDepartment().getId()),
+					String.valueOf(newUserData.getDepartment().getId()),
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+		}
+	}
+
+	public void editRole(Role role, String newName, String newDescription) {
+		Role managedRole = em.find(Role.class, role.getId());
+		managedRole.setName(newName);
+		managedRole.setDescription(newDescription);
+		em.flush();
+	}
+
+	public List<User> getAllUsers(User sessionUser) {
 		Query query = em.createNamedQuery("findAllUsers");
 		List<User> users = query.getResultList();
 		if (authController.canRead(AuthorizationController.USER_TYPE, sessionUser)) {
 			return users;
 		} else {
-			return new ArrayList<User>();
+			return new ArrayList<>();
 		}
 
 	}
 
-	public List<String> getAllUserNames(User sessionUser) throws EJBException {
+	public List<String> getAllUserNames(User sessionUser) {
 		if (authController.canRead(AuthorizationController.USER_TYPE, sessionUser)) {
 			Query query = em.createNamedQuery("findAllUserNames");
 			List<String> users = query.getResultList();
 			return users;
 		} else {
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
 	}
 
@@ -375,15 +387,18 @@ public class UserRoleController extends PEventConsumerProducer {
 		Query query = em.createNamedQuery("findUserByDepartment");
 		query.setParameter("deptId", dept.getId());
 		List<User> deptUsers = query.getResultList();
+		if (deptUsers == null || deptUsers.isEmpty()) {
+			return new ArrayList<>();
+		}
 		User userToCheck = deptUsers.get(0);
 		if (authController.canRead(userToCheck, sessionUser)) {
 			return deptUsers;
 		} else {
-			return new ArrayList<User>();
+			return new ArrayList<>();
 		}
 	}
 
-	public User findUserByUsername(String username, User sessionUser) throws EJBException {
+	public User findUserByUsername(String username, User sessionUser) {
 		Query query = em.createNamedQuery("findUserByUsername");
 		query.setParameter(1, username);
 		try {
@@ -398,7 +413,7 @@ public class UserRoleController extends PEventConsumerProducer {
 		}
 	}
 
-	public User findUserByApiKey(String apiKey) throws EJBException {
+	public User findUserByApiKey(String apiKey) {
 		Query query = em.createNamedQuery("findUserByApiKey");
 		query.setParameter("apiKey", apiKey);
 		User user = null;
@@ -427,13 +442,28 @@ public class UserRoleController extends PEventConsumerProducer {
 				r.removeUser(u);
 				u.removeRole(r);
 			}
+
+			// Delete UserPreferences of user
+			UserPreference p = u.getPreference();
+			u.setPreference(null);
+			em.remove(p);
+
+			// Delete all user item collections
+			List<ItemCollection> collection = itemCollectionController.getItemCollections(u);
+			if (collection != null && !collection.isEmpty()) {
+				for (ItemCollection c : collection) {
+					c.getUsers().clear();
+					em.remove(c);
+				}
+			}
 			em.flush();
 			em.remove(u);
 			em.flush();
 
 			int userId = u.getId();
 			String userName = u.getUsername();
-			logger.log(sessionController.getUser().getUsername(), "User", Action.DELETE, userId, "User \"" + userName + "\" deleted.");
+			logger.log(sessionController.getUser().getUsername(), LITERAL_USER, Action.DELETE, userId,
+					LITERAL_USER + " " + userName + LITERAL_DELETED);
 		}
 	}
 
@@ -458,6 +488,15 @@ public class UserRoleController extends PEventConsumerProducer {
 			}
 		}
 
+	}
+
+	public void removeAllRolesFromUser(int userId, User sessionUser) {
+		User u = em.find(User.class, userId);
+		if (authController.canUpdate(u, sessionUser)) {
+			for (Role r : u.getRoles()) {
+				removeRoleFromUser(u.getId(), r.getId(), sessionUser);
+			}
+		}
 	}
 
 	public void removeSkillFromUser(SkillRecord record, User user, User sessionUser) {
@@ -486,8 +525,6 @@ public class UserRoleController extends PEventConsumerProducer {
 		User u = em.find(User.class, userId);
 		if (authController.canUpdate(u, sessionUser)) {
 			SkillRecord rec = em.find(SkillRecord.class, skillRecordId);
-			Skill skill = em.find(Skill.class, rec.getSkill().getId());
-
 			for (SkillRecord userSkillRecord : u.getSkills()) {
 				if (userSkillRecord.getSkill().getId() == rec.getId()) {
 					alreadyAssigned = true;
@@ -508,7 +545,7 @@ public class UserRoleController extends PEventConsumerProducer {
 		if (authController.canRead(u, sessionUser)) {
 			return u.getSkills();
 		} else {
-			return new HashSet<SkillRecord>();
+			return new HashSet<>();
 		}
 	}
 
@@ -516,7 +553,7 @@ public class UserRoleController extends PEventConsumerProducer {
 		if (authController.canUpdate(user, sessionUser)) {
 			boolean intersects = false;
 			User managedUser = em.find(User.class, user.getId());
-			List<TimeSpan> userVacation = managedUser.getVacation();
+			Set<TimeSpan> userVacation = managedUser.getVacation();
 			if (!userVacation.isEmpty()) {
 				for (TimeSpan ts : userVacation) {
 					if (timespan.intersects(ts)) {
@@ -528,7 +565,7 @@ public class UserRoleController extends PEventConsumerProducer {
 				em.persist(timespan);
 				em.flush();
 				managedUser.addVacation(timespan);
-				logger.log(sessionController.getUser().getUsername(), "User", Action.UPDATE, user.getId(),
+				logger.log(sessionController.getUser().getUsername(), LITERAL_USER, Action.UPDATE, user.getId(),
 						"Vacation added for User \"" + user.getUsername() + "\" .");
 			}
 		}
@@ -541,16 +578,16 @@ public class UserRoleController extends PEventConsumerProducer {
 			managedUser.removeVacation(managedTimeSpan.getId());
 			em.remove(managedTimeSpan);
 			em.flush();
-			logger.log(sessionController.getUser().getUsername(), "User", Action.UPDATE, user.getId(),
+			logger.log(sessionController.getUser().getUsername(), LITERAL_USER, Action.UPDATE, user.getId(),
 					"Vacation removed for User \"" + user.getUsername() + "\" .");
 		}
 	}
 
-	public List<TimeSpan> getVacation(User user, User sessionUser) {
+	public Set<TimeSpan> getVacation(User user, User sessionUser) {
 		if (authController.canRead(user, sessionUser)) {
 			return user.getVacation();
 		} else {
-			return new ArrayList<TimeSpan>();
+			return new HashSet<>();
 		}
 	}
 
@@ -560,7 +597,7 @@ public class UserRoleController extends PEventConsumerProducer {
 			em.persist(timespan);
 			em.flush();
 			managedUser.setIllness(timespan);
-			logger.log(sessionController.getUser().getUsername(), "User", Action.UPDATE, user.getId(),
+			logger.log(sessionController.getUser().getUsername(), LITERAL_USER, Action.UPDATE, user.getId(),
 					"Illness added for User \"" + user.getUsername() + "\" .");
 		}
 	}
@@ -572,7 +609,7 @@ public class UserRoleController extends PEventConsumerProducer {
 			managedUser.removeIllness();
 			em.remove(managedTimeSpan);
 			em.flush();
-			logger.log(sessionController.getUser().getUsername(), "User", Action.DELETE, user.getId(),
+			logger.log(sessionController.getUser().getUsername(), LITERAL_USER, Action.DELETE, user.getId(),
 					"Illness removed for User \"" + user.getUsername() + "\" .");
 		}
 	}
@@ -611,9 +648,8 @@ public class UserRoleController extends PEventConsumerProducer {
 
 	@Override
 	public void consumeEvent(PObject obj, Event evt) {
-		System.out.println("Object " + obj.toString() + " raised event: " + evt.getPropertyName() + " with new Value: " + evt.getNewValue()
-				+ "--- User listening: " + ((User) obj).getUsername());
-
+		Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Object " + obj.toString() + " raised event: " + evt.getPropertyName()
+				+ " with new Value: " + evt.getNewValue() + "--- User listening: " + ((User) obj).getUsername());
 		PObject source = evt.getSource();
 		User destination = (User) obj;
 		if (evt.getSource() instanceof ActionBoard) {
@@ -625,7 +661,7 @@ public class UserRoleController extends PEventConsumerProducer {
 		}
 	}
 
-	//-----------------------------------------------
+	// -----------------------------------------------
 	// TODO: Task assignment not checked at the moment, add PermissionRecord type if necessary in the future.
 	public void assignTask(User user, Task task) {
 		User managedUser = findUserById(user.getId(), user);
@@ -634,8 +670,9 @@ public class UserRoleController extends PEventConsumerProducer {
 
 	public void removeAssignedTask(User user, Task task, User sessionUser) {
 		User managedUser = findUserById(user.getId(), sessionUser);
-		managedUser.removeAssignedTask(task);
+		Task managedTask = taskController.findTaskById(task.getId());
+		managedUser.removeAssignedTask(managedTask);
 	}
-	//-----------------------------------------------------------------
+	// -----------------------------------------------------------------
 
 }

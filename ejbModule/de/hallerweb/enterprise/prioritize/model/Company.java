@@ -34,7 +34,8 @@ import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
  */
 @Entity
 @NamedQueries({ @NamedQuery(name = "findAllCompanies", query = "SELECT c FROM Company c ORDER BY c.name"),
-		@NamedQuery(name = "findCompanyByName", query = "SELECT c FROM Company c WHERE c.name= ?1 ORDER BY c.name") })
+		@NamedQuery(name = "findCompanyByName", query = "SELECT c FROM Company c WHERE c.name= ?1 ORDER BY c.name"),
+		@NamedQuery(name = "findCompanyById", query = "SELECT c FROM Company c WHERE c.id = ?1 ORDER BY c.name")})
 public class Company implements PAuthorizedObject {
 
 	@Id
@@ -106,65 +107,8 @@ public class Company implements PAuthorizedObject {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((departments == null) ? 0 : departments.hashCode());
-		result = prime * result + ((description == null) ? 0 : description.hashCode());
-		result = prime * result + entityVersion;
-		result = prime * result + id;
-		result = prime * result + ((mainAddress == null) ? 0 : mainAddress.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
+	public String toString() {
+		return this.getName();
 	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		Company other = (Company) obj;
-		if (departments == null) {
-			if (other.departments != null) {
-				return false;
-			}
-		} else if (!departments.equals(other.departments)) {
-			return false;
-		}
-		if (description == null) {
-			if (other.description != null) {
-				return false;
-			}
-		} else if (!description.equals(other.description)) {
-			return false;
-		}
-		if (entityVersion != other.entityVersion) {
-			return false;
-		}
-		if (id != other.id) {
-			return false;
-		}
-		if (mainAddress == null) {
-			if (other.mainAddress != null) {
-				return false;
-			}
-		} else if (!mainAddress.equals(other.mainAddress)) {
-			return false;
-		}
-		if (name == null) {
-			if (other.name != null) {
-				return false;
-			}
-		} else if (!name.equals(other.name)) {
-			return false;
-		}
-		return true;
-	}
-
+	
 }

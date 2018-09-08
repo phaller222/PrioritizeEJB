@@ -28,7 +28,7 @@ public class ProjectProgress {
 	@GeneratedValue
 	int id;
 
-	@OneToMany(fetch = FetchType.EAGER)
+	@OneToMany(fetch = FetchType.LAZY)
 	List<ProjectGoalRecord> targetGoals;		// Goals for this project. If concrete tasks are build for this goal,
 												// a copy of this goal is created and assigned to a task.
 
@@ -44,7 +44,7 @@ public class ProjectProgress {
 
 	public void addTargetGoal(ProjectGoalRecord targetGoal) {
 		if (this.targetGoals == null) {
-			this.targetGoals = new ArrayList<ProjectGoalRecord>();
+			this.targetGoals = new ArrayList<>();
 		}
 		this.targetGoals.add(targetGoal);
 	}
@@ -60,13 +60,4 @@ public class ProjectProgress {
 	public int getId() {
 		return id;
 	}
-
-	/**
-	 * Calculates the project progress in percent (0-100).
-	 * @return
-	 */
-	public int calcProgress() {
-		return 0;
-	}
-
 }

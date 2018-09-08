@@ -25,6 +25,7 @@ import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
 import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
+import de.hallerweb.enterprise.prioritize.model.search.SearchProperty.SearchPropertyType;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResultType;
 import de.hallerweb.enterprise.prioritize.model.skill.Skill;
@@ -58,6 +59,19 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		this.name = username;
 	}
 
+	public static User newInstane(User userToCopy) {
+		User clonedUser = new User();
+		clonedUser.setApiKey(userToCopy.apiKey);
+		clonedUser.setEmail(userToCopy.email);
+		clonedUser.setIllness(userToCopy.illness);
+		clonedUser.setLastLogin(userToCopy.lastLogin);
+		clonedUser.setName(userToCopy.name);
+		clonedUser.setOccupation(userToCopy.occupation);
+		clonedUser.setPassword(userToCopy.password);
+		clonedUser.setUsername(userToCopy.username);
+		return clonedUser;
+	}
+
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_EMAIL = "email";
 	public static final String PROPERTY_OCCUPATION = "occupation";
@@ -66,11 +80,11 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 
 	String name;
 	String username;
-	
+
 	@JsonIgnore
-	@ManyToMany(fetch = FetchType.EAGER)
+	@OneToMany(fetch = FetchType.LAZY)
 	List<Task> assignedTasks;
-	
+
 	public List<Task> getAssignedTasks() {
 		return assignedTasks;
 	}
@@ -78,14 +92,14 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	public void setAssignedTasks(List<Task> assignedTasks) {
 		this.assignedTasks = assignedTasks;
 	}
-	
+
 	public void addAssignedTask(Task task) {
 		if (this.assignedTasks == null) {
-			this.assignedTasks = new ArrayList<Task>();
+			this.assignedTasks = new ArrayList<>();
 		}
 		this.assignedTasks.add(task);
 	}
-	
+
 	public void removeAssignedTask(Task task) {
 		this.assignedTasks.remove(task);
 	}
@@ -100,8 +114,6 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	String apiKey;
 	@JsonIgnore
 	Date lastLogin;
-	
-	
 
 	public Date getLastLogin() {
 		return lastLogin;
@@ -115,7 +127,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 
 	@JsonIgnore
 	@ManyToMany(fetch = FetchType.EAGER)
-	List<TimeSpan> vacations = new ArrayList<TimeSpan>();
+	Set<TimeSpan> vacations = new HashSet<>();
 
 	@JsonIgnore
 	@OneToOne
@@ -129,11 +141,11 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		this.illness = illness;
 	}
 
-	public List<TimeSpan> getVacation() {
+	public Set<TimeSpan> getVacation() {
 		return vacations;
 	}
 
-	public void setVacation(List<TimeSpan> vacation) {
+	public void setVacation(Set<TimeSpan> vacation) {
 		this.vacations = vacation;
 	}
 
@@ -181,7 +193,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		this.password = password;
 	}
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JsonBackReference
 	Department department;
 
@@ -207,7 +219,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 
 	public User() {
 		super();
-		roles = new HashSet<Role>();
+		roles = new HashSet<>();
 	}
 
 	public String getName() {
@@ -277,7 +289,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	}
 
 	public void removeRole(Role role) {
-		List<Role> rolesToRemove = new ArrayList<Role>();
+		List<Role> rolesToRemove = new ArrayList<>();
 		for (Role r : roles) {
 			if (r.getId() == role.getId()) {
 				rolesToRemove.add(r);
@@ -290,28 +302,19 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		}
 	}
 
-	// @Override
-	// public int hashCode() {
-	// final int prime = 31;
-	// int result = 1;
-	// return result;
-	// }
-
-	// @Override
-	// public boolean equals(Object obj) {
-	// if (this == obj)
-	// return true;
-	// if (obj == null)
-	// return false;
-	// if (getClass() != obj.getClass())
-	// return false;
-	// User other = (User) obj;
-	// return true;
-	// }
+	private SearchResult generateResult(String excerpt) {
+		SearchResult result = new SearchResult();
+		result.setResult(this);
+		result.setResultType(SearchResultType.USER);
+		result.setExcerpt(excerpt);
+		result.setProvidesExcerpt(true);
+		result.setSubresults(new HashSet<SearchResult>());
+		return result;
+	}
 
 	@Override
 	public List<SearchResult> find(String phrase) {
-		ArrayList<SearchResult> results = new ArrayList<SearchResult>();
+		ArrayList<SearchResult> results = new ArrayList<>();
 		SearchResult result;
 		// Search username
 		if (this.username.toLowerCase().indexOf(phrase) != -1) {
@@ -353,21 +356,10 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		return results;
 	}
 
-	private SearchResult generateResult(String excerpt) {
-		SearchResult result = new SearchResult();
-		result.setResult(this);
-		result.setResultType(SearchResultType.USER);
-		result.setExcerpt(excerpt);
-		result.setProvidesExcerpt(true);
-		result.setSubresults(new HashSet<SearchResult>());
-		return result;
-	}
-
 	@Override
 	public List<SearchResult> find(String phrase, SearchProperty property) {
-		ArrayList<SearchResult> results = new ArrayList<SearchResult>();
-		switch (property.getType()) {
-		case SKILL:
+		ArrayList<SearchResult> results = new ArrayList<>(); 
+		if (property.getType() == SearchPropertyType.SKILL) {
 			// TODO: find(...) von Sub-Objekten (hier:SkillRecord) aufrufen
 			for (SkillRecord skillRecord : this.getSkills()) {
 				if (skillRecord.getSkill().getName().toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
@@ -381,10 +373,6 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 					results.add(result);
 				}
 			}
-			break;
-		default:
-			break;
-
 		}
 		return results;
 	}
@@ -392,18 +380,17 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	@Override
 	public List<SearchProperty> getSearchProperties() {
 		if (this.searchProperties == null) {
-			searchProperties = new ArrayList<SearchProperty>();
+			searchProperties = new ArrayList<>();
 			SearchProperty prop = new SearchProperty("SKILL");
 			prop.setName("Skill");
 			searchProperties.add(prop);
 		}
 		return this.searchProperties;
 	}
-	
+
 	@Override
 	public String toString() {
 		return name;
 	}
-	
 
 }

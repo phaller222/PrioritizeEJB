@@ -45,6 +45,9 @@ public class SkillController {
 	@EJB
 	AuthorizationController authController;
 
+	public static final String LITERAL_SKILLCATEGORY = "SkillCategory";
+	public static final String LITERAL_CREATED = "\" created.";
+
 	/**
 	 * Creates a new SkillCategory with the given data
 	 * 
@@ -56,13 +59,7 @@ public class SkillController {
 		if (authController.canCreate(parent, sessionUser)) {
 			boolean alreadyExists = false;
 			if (parent != null) {
-				List<SkillCategory> categories = getAllCategories();
-				for (SkillCategory category : categories) {
-					if (category.getName().equals(name)) {
-						// TODO: Dubletten in unterschiedlichen ebenen erlauben!
-						alreadyExists = true;
-					}
-				}
+				alreadyExists = categoryExists(name);
 			}
 
 			if (!alreadyExists) {
@@ -78,11 +75,11 @@ public class SkillController {
 
 				em.flush();
 				try {
-					logger.log(sessionController.getUser().getUsername(), "SkillCategory", Action.CREATE, category.getId(),
-							" SkillCategory \"" + category.getName() + "\" created.");
+					logger.log(sessionController.getUser().getUsername(), LITERAL_SKILLCATEGORY, Action.CREATE, category.getId(),
+							" " + LITERAL_SKILLCATEGORY + " " + category.getName() + "\" created.");
 				} catch (ContextNotActiveException ex) {
-					logger.log("SYSTEM", "SkillCategory", Action.CREATE, category.getId(),
-							" SkillCategory \"" + category.getName() + "\" created.");
+					logger.log("SYSTEM", LITERAL_SKILLCATEGORY, Action.CREATE, category.getId(),
+							" " + LITERAL_SKILLCATEGORY + " " + category.getName() + "\" created.");
 				}
 				return category;
 			} else {
@@ -91,6 +88,17 @@ public class SkillController {
 		} else {
 			return null;
 		}
+	}
+
+	private boolean categoryExists(String name) {
+		List<SkillCategory> categories = getAllCategories();
+		for (SkillCategory category : categories) {
+			if (category.getName().equals(name)) {
+				// TODO: Dubletten in unterschiedlichen ebenen erlauben!
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public Skill createSkill(String name, String description, String keywords, SkillCategory category, Set<SkillProperty> properties,
@@ -161,8 +169,9 @@ public class SkillController {
 		List<SkillCategory> result = query.getResultList();
 		if (!result.isEmpty()) {
 			return result;
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	public List<SkillCategory> getAllCategories() {
@@ -171,8 +180,9 @@ public class SkillController {
 		List<SkillCategory> result = query.getResultList();
 		if (!result.isEmpty()) {
 			return result;
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	public List<Skill> getAllSkills(User sessionUser) {
@@ -185,8 +195,9 @@ public class SkillController {
 			} else {
 				return null;
 			}
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	public SkillCategory getCategoryByName(String categoryName) {
@@ -214,8 +225,9 @@ public class SkillController {
 			} else {
 				return null;
 			}
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	public List<SkillProperty> getSkillPropertiesForSkill(Skill skill) {
@@ -226,8 +238,9 @@ public class SkillController {
 		List<SkillProperty> result = query.getResultList();
 		if (!result.isEmpty()) {
 			return result;
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -329,8 +342,9 @@ public class SkillController {
 		List<SkillCategory> result = query.getResultList();
 		if (!result.isEmpty()) {
 			return result;
-		} else
+		} else {
 			return null;
+		}
 	}
 
 }

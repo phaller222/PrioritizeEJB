@@ -7,7 +7,7 @@ import javax.persistence.InheritanceType;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 
 @Entity
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class PActor extends PObject {
 
 }

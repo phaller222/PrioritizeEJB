@@ -13,31 +13,31 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
-
 /**
  * ProjectGoalProperty - Describes possible values of a given ProjectProperty a ProjectGoalPropertyNumericRecord might have.
  * @author peter
  *
  */
 @Entity
-@NamedQueries({ @NamedQuery(name = "findProjectGoalRecordsForProjectGoal", query = "select gr FROM ProjectGoalRecord gr WHERE gr.projectGoal.id = :goalId"),
-	@NamedQuery(name = "findAllProjectGoals", query = "select pg FROM ProjectGoal pg"),
-	@NamedQuery(name = "findProjectGoalPropertiesForProjectGoal", query = "select prop FROM ProjectGoalProperty prop WHERE prop.projectGoal.id = :goalId") })
+@NamedQueries({
+		@NamedQuery(name = "findProjectGoalRecordsForProjectGoal", query = "select gr FROM ProjectGoalRecord gr WHERE gr.projectGoal.id = :goalId"),
+		@NamedQuery(name = "findAllProjectGoals", query = "select pg FROM ProjectGoal pg"),
+		@NamedQuery(name = "findProjectGoalPropertiesForProjectGoal", query = "select prop FROM ProjectGoalProperty prop WHERE prop.projectGoal.id = :goalId") })
 public class ProjectGoal {
 
 	@Id
 	@GeneratedValue
 	int id;
-	
+
 	String name;
 	String description;
-	
+
 	@OneToOne
 	ProjectGoalCategory category;
-	
+
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "projectGoal", cascade = CascadeType.ALL)
 	List<ProjectGoalProperty> properties;
-	
+
 	public ProjectGoalCategory getCategory() {
 		return category;
 	}
@@ -69,10 +69,10 @@ public class ProjectGoal {
 	public void setProperties(List<ProjectGoalProperty> properties) {
 		this.properties = properties;
 	}
-	
+
 	public void addProjectGoalProperty(ProjectGoalProperty prop) {
-		if (this.properties== null) {
-			this.properties = new ArrayList<ProjectGoalProperty>();
+		if (this.properties == null) {
+			this.properties = new ArrayList<>();
 		}
 		this.properties.add(prop);
 	}
@@ -80,7 +80,7 @@ public class ProjectGoal {
 	public int getId() {
 		return id;
 	}
-	
+
 	@Override
 	public String toString() {
 		return name;

@@ -6,13 +6,10 @@ import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
-import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -36,12 +33,12 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 		@NamedQuery(name = "findDocumentByTag", query = "select d FROM Document d WHERE d.tag = :docTag") })
 public class Document extends PObject implements Comparable {
 
-	static final public String PROPERTY_NAME="name";
-	static final public String PROPERTY_MIMETYPE="mimeType";
-	static final public String PROPERTY_TAG="tag";
-	static final public String PROPERTY_ENCRYPTED="encrypted";
-	static final public String PROPERTY_CHANGES="changes";
-	
+	public static final String PROPERTY_NAME = "name";
+	public static final String PROPERTY_MIMETYPE = "mimeType";
+	public static final String PROPERTY_TAG = "tag";
+	public static final String PROPERTY_ENCRYPTED = "encrypted";
+	public static final String PROPERTY_CHANGES = "changes";
+
 	private String name; // Name of the document.
 	private int version; // Version of the document
 	private String mimeType; // mimeType
@@ -123,6 +120,7 @@ public class Document extends PObject implements Comparable {
 		this.encryptedBy = encryptedBy;
 	}
 
+	@Override
 	public int getId() {
 		return id;
 	}
@@ -148,87 +146,14 @@ public class Document extends PObject implements Comparable {
 	}
 
 	@Override
-	public int compareTo(Object o) {
-		Document doc = (Document) o;
+	public int compareTo(Object obj) {
+		Document doc = (Document) obj;
 		if (doc.getVersion() == version) {
 			return 0;
 		} else if (doc.getVersion() > version) {
 			return -1;
-		} else
+		} else {
 			return 1;
+		}
 	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((changes == null) ? 0 : changes.hashCode());
-		result = prime * result + Arrays.hashCode(data);
-		result = prime * result + (encrypted ? 1231 : 1237);
-		result = prime * result + ((encryptedBy == null) ? 0 : encryptedBy.hashCode());
-		result = prime * result + id;
-		result = prime * result + ((lastModified == null) ? 0 : lastModified.hashCode());
-		result = prime * result + ((lastModifiedBy == null) ? 0 : lastModifiedBy.hashCode());
-		result = prime * result + ((mimeType == null) ? 0 : mimeType.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
-		result = prime * result + version;
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Document other = (Document) obj;
-		if (changes == null) {
-			if (other.changes != null)
-				return false;
-		} else if (!changes.equals(other.changes))
-			return false;
-		if (!Arrays.equals(data, other.data))
-			return false;
-		if (encrypted != other.encrypted)
-			return false;
-		if (encryptedBy == null) {
-			if (other.encryptedBy != null)
-				return false;
-		} else if (!encryptedBy.equals(other.encryptedBy))
-			return false;
-		if (id != other.id)
-			return false;
-		if (lastModified == null) {
-			if (other.lastModified != null)
-				return false;
-		} else if (!lastModified.equals(other.lastModified))
-			return false;
-		if (lastModifiedBy == null) {
-			if (other.lastModifiedBy != null)
-				return false;
-		} else if (!lastModifiedBy.equals(other.lastModifiedBy))
-			return false;
-		if (mimeType == null) {
-			if (other.mimeType != null)
-				return false;
-		} else if (!mimeType.equals(other.mimeType))
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (tag == null) {
-			if (other.tag != null)
-				return false;
-		} else if (!tag.equals(other.tag))
-			return false;
-		if (version != other.version)
-			return false;
-		return true;
-	}
-
 }

@@ -48,6 +48,23 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @Stateless
 public class ProjectController extends PEventConsumerProducer {
 
+	private static final String QUERY_FIND_PROJECT_BY_ID = "findProjectById";
+	private static final String QUERY_FIND_PROJECTS_BY_MANAGER_ROLE = "findProjectsByManagerRole";
+	private static final String QUERY_FIND_PROJECTS_BY_MEMBER = "findProjectsByMember";
+	private static final String QUERY_FIND_PROJECTGOAL_RECORD_BY_ID = "findProjectGoalRecordById";
+	private static final String QUERY_FIND_PROJECTGOAL_RECORDS_BY_PROJECT = "findProjectGoalRecordByProject";
+	private static final String QUERY_FIND_ACTIVE_PROJECTGOAL_RECORDS_BY_PROJECT = "findActiveProjectGoalRecordsByProject";
+
+	private static final String PARAM_PROJECT_ID = "projectId";
+	private static final String PARAM_ROLE_ID = "roleId";
+	private static final String PARAM_USER = "user";
+	private static final String PARAM_PROJECTGOAL_RECORD_ID = "projectGoalRecordId";
+
+	private static final String LITERAL_LOGGING_SYSTEM_USER = "SYSTEM";
+	private static final String LITERAL_CREATED = "\" created.";
+	private static final String LITERAL_DELETED = "\" deleted.";
+	private static final String LITERAL_PROJECTGOAL = " ProjectGoal ";
+
 	@PersistenceContext(unitName = "MySqlDS")
 	EntityManager em;
 
@@ -68,72 +85,69 @@ public class ProjectController extends PEventConsumerProducer {
 	SessionController sessionController;
 
 	public Project findProjectById(int id) {
-		Query q = em.createNamedQuery("findProjectById");
-		q.setParameter("projectId", id);
-		Project project = (Project) q.getSingleResult();
-		return project;
+		Query q = em.createNamedQuery(QUERY_FIND_PROJECT_BY_ID);
+		q.setParameter(PARAM_PROJECT_ID, id);
+		return (Project) q.getSingleResult();
 	}
 
 	public List<Project> findProjectsByManagerRole(int managerRoleId) {
-		Query q = em.createNamedQuery("findProjectsByManagerRole");
-		q.setParameter("roleId", managerRoleId);
+		Query q = em.createNamedQuery(QUERY_FIND_PROJECTS_BY_MANAGER_ROLE);
+		q.setParameter(PARAM_ROLE_ID, managerRoleId);
 		List<Project> projects = (List<Project>) q.getResultList();
 		if (projects.isEmpty()) {
-			return new ArrayList<Project>();
+			return new ArrayList<>();
 		} else {
 			return projects;
 		}
 	}
 
 	public List<Project> findProjectsByUser(int userId, User sessionUser) {
-		Query q = em.createNamedQuery("findProjectsByMember");
-		User user = userRoleController.findUserById(userId, sessionUser);
-		q.setParameter("user", user);
+		Query q = em.createNamedQuery(QUERY_FIND_PROJECTS_BY_MEMBER);
+		//User user = userRoleController.findUserById(userId, sessionUser);
+		q.setParameter(PARAM_USER, sessionUser);
 		List<Project> projects = (List<Project>) q.getResultList();
 		if (projects.isEmpty()) {
-			return new ArrayList<Project>();
+			return new ArrayList<>();
 		} else {
 			return projects;
 		}
 	}
 
 	public ProjectGoalRecord findProjectGoalRecordById(int id) {
-		Query q = em.createNamedQuery("findProjectGoalRecordById");
-		q.setParameter("projectGoalRecordId", id);
-		ProjectGoalRecord projectGoalRecord = (ProjectGoalRecord) q.getSingleResult();
-		return projectGoalRecord;
+		Query q = em.createNamedQuery(QUERY_FIND_PROJECTGOAL_RECORD_BY_ID);
+		q.setParameter(PARAM_PROJECTGOAL_RECORD_ID, id);
+		return (ProjectGoalRecord) q.getSingleResult();
 	}
 
 	public List<ProjectGoalRecord> findProjectGoalRecordsByProject(int projectId) {
-		Query q = em.createNamedQuery("findProjectGoalRecordByProject");
-		q.setParameter("projectId", projectId);
+		Query q = em.createNamedQuery(QUERY_FIND_PROJECTGOAL_RECORDS_BY_PROJECT);
+		q.setParameter(PARAM_PROJECT_ID, projectId);
 		List<ProjectGoalRecord> projectGoalRecords = (List<ProjectGoalRecord>) q.getResultList();
 		if (!projectGoalRecords.isEmpty()) {
 			return projectGoalRecords;
 		} else {
-			return new ArrayList<ProjectGoalRecord>();
+			return new ArrayList<>();
 		}
 	}
 
 	public List<ProjectGoalRecord> findActiveProjectGoalRecordsByProject(int projectId) {
-		Query q = em.createNamedQuery("findActiveProjectGoalRecordsByProject");
-		q.setParameter("projectId", projectId);
+		Query q = em.createNamedQuery(QUERY_FIND_ACTIVE_PROJECTGOAL_RECORDS_BY_PROJECT);
+		q.setParameter(PARAM_PROJECT_ID, projectId);
 		List<ProjectGoalRecord> projectGoalRecords = (List<ProjectGoalRecord>) q.getResultList();
 		if (!projectGoalRecords.isEmpty()) {
 			return projectGoalRecords;
 		} else {
-			return new ArrayList<ProjectGoalRecord>();
+			return new ArrayList<>();
 		}
 	}
 
 	public ProjectProgress findProjectProgressById(int id) {
 		Query q = em.createNamedQuery("findProjectProgressById");
 		q.setParameter("projectProgressId", id);
-		ProjectProgress projectProgress = (ProjectProgress) q.getSingleResult();
-		return projectProgress;
+		return (ProjectProgress) q.getSingleResult();
 	}
 
-	public Project createProject(Project project, Blackboard bb, List<Task> tasks) {
+	public Project createProject(Project project, Blackboard bb) {
 
 		em.persist(bb);
 		em.persist(project);
@@ -144,7 +158,7 @@ public class ProjectController extends PEventConsumerProducer {
 		managedProject.setBlackboard(managedBlackboard);
 		managedBlackboard.setProject(managedProject);
 
-		List<ProjectGoalRecord> records = new ArrayList<ProjectGoalRecord>();
+		List<ProjectGoalRecord> records = new ArrayList<>();
 		if (managedBlackboard.getTasks() != null) {
 			for (Task t : managedBlackboard.getTasks()) {
 				ProjectGoalPropertyNumeric property = new ProjectGoalPropertyNumeric();
@@ -152,12 +166,12 @@ public class ProjectController extends PEventConsumerProducer {
 				property.setDescription("Indicates the percentage value of completeness of a task.");
 				property.setMin(0);
 				property.setMax(100);
-				ArrayList<ProjectGoalProperty> props = new ArrayList<ProjectGoalProperty>();
+				ArrayList<ProjectGoalProperty> props = new ArrayList<>();
 				props.add(property);
-				
+
 				// Find task in db to edit original vvalues in db!
 				Task task = taskController.findTaskById(t.getId());
-				
+
 				ProjectGoal goal = createProjectGoal(task.getName(), task.getDescription(), null, props, sessionController.getUser());
 
 				goal.setName(task.getName());
@@ -191,11 +205,11 @@ public class ProjectController extends PEventConsumerProducer {
 		em.remove(project);
 	}
 
-	public List<DocumentInfo> getProjectDocuments(Project p) {
-		if (!p.getDocuments().isEmpty()) {
-			return p.getDocuments();
+	public List<DocumentInfo> getProjectDocuments(Project project) {
+		if (!project.getDocuments().isEmpty()) {
+			return project.getDocuments();
 		} else {
-			return new ArrayList<DocumentInfo>();
+			return new ArrayList<>();
 		}
 	}
 
@@ -212,8 +226,7 @@ public class ProjectController extends PEventConsumerProducer {
 
 	public void addProjectResource(int projectId, Resource resource, User sessionUser) {
 		Project managedProject = findProjectById(projectId);
-		Resource managedResource = (Resource) resourceController.getResource(resource.getId(), sessionUser);
-		List<Resource> resources = managedProject.getResources();
+		Resource managedResource = resourceController.getResource(resource.getId(), sessionUser);
 		managedProject.addResource(managedResource);
 	}
 
@@ -239,8 +252,9 @@ public class ProjectController extends PEventConsumerProducer {
 		List<ProjectGoalCategory> result = query.getResultList();
 		if (!result.isEmpty()) {
 			return result;
-		} else
-			return null;
+		} else {
+			return new ArrayList<>();
+		}
 	}
 
 	public ProjectGoalCategory createProjectGoalCategory(String name, String description, ProjectGoalCategory parent) {
@@ -249,7 +263,7 @@ public class ProjectController extends PEventConsumerProducer {
 			List<ProjectGoalCategory> categories = getAllCategories();
 			for (ProjectGoalCategory category : categories) {
 				if (category.getName().equals(name)) {
-					// TODO: Dubletten in unterschiedlichen ebenen erlauben!
+					// TODO: Allow same project goal categories in different categories!
 					alreadyExists = true;
 				}
 			}
@@ -269,10 +283,10 @@ public class ProjectController extends PEventConsumerProducer {
 			em.flush();
 			try {
 				logger.log(sessionController.getUser().getUsername(), "SkillCategory", Action.CREATE, category.getId(),
-						" SkillCategory \"" + category.getName() + "\" created.");
+						" SkillCategory \"" + category.getName() + LITERAL_CREATED);
 			} catch (ContextNotActiveException ex) {
-				logger.log("SYSTEM", "SkillCategory", Action.CREATE, category.getId(),
-						" SkillCategory \"" + category.getName() + "\" created.");
+				logger.log(LITERAL_LOGGING_SYSTEM_USER, "SkillCategory", Action.CREATE, category.getId(),
+						" SkillCategory \"" + category.getName() + LITERAL_CREATED);
 			}
 			return category;
 		} else {
@@ -299,10 +313,10 @@ public class ProjectController extends PEventConsumerProducer {
 
 		try {
 			logger.log(sessionController.getUser().getUsername(), "ProjectGoalCategory", Action.DELETE, category.getId(),
-					" ProjectGoalCategory \"" + category.getName() + "\" deleted.");
+					" ProjectGoalCategory \"" + category.getName() + LITERAL_DELETED);
 		} catch (ContextNotActiveException ex) {
-			logger.log("SYSTEM", "ProjectGoalCategory", Action.DELETE, category.getId(),
-					" ProjectGoalCategory \"" + category.getName() + "\" deleted.");
+			logger.log(LITERAL_LOGGING_SYSTEM_USER, "ProjectGoalCategory", Action.DELETE, category.getId(),
+					" ProjectGoalCategory \"" + category.getName() + LITERAL_DELETED);
 		}
 	}
 
@@ -322,15 +336,10 @@ public class ProjectController extends PEventConsumerProducer {
 		@SuppressWarnings("unchecked")
 		List<ProjectGoal> result = query.getResultList();
 		if (!result.isEmpty()) {
-			ProjectGoal g = (ProjectGoal) result.get(0);
-			// TODO: permission in project object...?
-			// if (authController.canRead(s, sessionUser)) {
 			return result;
-			// } else {
-			// return null;
-			// }
-		} else
-			return null;
+		} else {
+			return new ArrayList<>();
+		}
 	}
 
 	public List<ProjectGoalProperty> getProjectGoalPropertiesForProjectGoal(ProjectGoal goal) {
@@ -342,7 +351,7 @@ public class ProjectController extends PEventConsumerProducer {
 		if (!result.isEmpty()) {
 			return result;
 		} else {
-			return null;
+			return new ArrayList<>();
 		}
 	}
 
@@ -354,7 +363,7 @@ public class ProjectController extends PEventConsumerProducer {
 		if (!result.isEmpty()) {
 			return result;
 		} else {
-			return null;
+			return new ArrayList<>();
 		}
 	}
 
@@ -369,8 +378,9 @@ public class ProjectController extends PEventConsumerProducer {
 		List<ProjectGoalCategory> result = query.getResultList();
 		if (!result.isEmpty()) {
 			return result;
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -382,19 +392,16 @@ public class ProjectController extends PEventConsumerProducer {
 
 	public void deleteProjectGoal(int projectGoalId, User sessionUser) {
 		ProjectGoal goal = em.find(ProjectGoal.class, projectGoalId);
-		// if (authController.canDelete(skill, sessionUser)) {
-		// TODO: permissions in project object...? add permission check here.
-		// Remove all SkillRecords for that skill from Users and delete them.
 		List<ProjectGoalRecord> projectGoalRecords = getProjectGoalRecordsForProjectGoal(goal);
 
 		// If there have been project records found for that project goal, it cannot be deleted.
 		if (!projectGoalRecords.isEmpty()) {
 			try {
-				logger.log(sessionController.getUser().getUsername(), "ProjectGoal", Action.DELETE, goal.getId(),
-						" ProjectGoal \"" + goal.getName() + "\" could NOT be deleted because active records in use!!!");
+				logger.log(sessionController.getUser().getUsername(), LITERAL_PROJECTGOAL, Action.DELETE, goal.getId(),
+						" " + LITERAL_PROJECTGOAL + "\"" + goal.getName() + "\" could NOT be deleted because active records in use!!!");
 			} catch (ContextNotActiveException ex) {
-				logger.log("SYSTEM", "ProjectGoal", Action.DELETE, goal.getId(),
-						" ProjectGoal \"" + goal.getName() + "\" could NOT be deleted because active records in use!!!");
+				logger.log(LITERAL_LOGGING_SYSTEM_USER, LITERAL_PROJECTGOAL, Action.DELETE, goal.getId(),
+						" " + LITERAL_PROJECTGOAL + " \"" + goal.getName() + "\" could NOT be deleted because active records in use!!!");
 			}
 			return;
 		}
@@ -402,12 +409,12 @@ public class ProjectController extends PEventConsumerProducer {
 		em.remove(goal);
 		em.flush();
 		try {
-			logger.log(sessionController.getUser().getUsername(), "ProjectGoal", Action.DELETE, goal.getId(),
-					" ProjectGoal \"" + goal.getName() + "\" deleted.");
+			logger.log(sessionController.getUser().getUsername(), LITERAL_PROJECTGOAL, Action.DELETE, goal.getId(),
+					" " + LITERAL_PROJECTGOAL + "\"" + goal.getName() + LITERAL_DELETED);
 		} catch (ContextNotActiveException ex) {
-			logger.log("SYSTEM", "ProjectGoal", Action.DELETE, goal.getId(), " ProjectGoal \"" + goal.getName() + "\" deleted.");
+			logger.log(LITERAL_LOGGING_SYSTEM_USER, LITERAL_PROJECTGOAL, Action.DELETE, goal.getId(),
+					"" + LITERAL_PROJECTGOAL + " \"" + goal.getName() + LITERAL_DELETED);
 		}
-		// }
 	}
 
 	public void deleteProjectGoalProperty(int propertyId) {
@@ -419,9 +426,6 @@ public class ProjectController extends PEventConsumerProducer {
 	public ProjectGoal createProjectGoal(String name, String description, ProjectGoalCategory category,
 			List<ProjectGoalProperty> properties, User sessionUser) {
 		ProjectGoal goal = new ProjectGoal();
-		// TODO: Check permissions first
-		// if (authController.canCreate(skill, sessionUser)) {
-
 		goal.setName(name);
 		goal.setDescription(description);
 		goal.setCategory(category);
@@ -433,23 +437,18 @@ public class ProjectController extends PEventConsumerProducer {
 					ProjectGoalPropertyNumeric property = (ProjectGoalPropertyNumeric) prop;
 					property.setProjectGoal(goal);
 					em.persist(property);
-					// em.flush();
 					goal.addProjectGoalProperty(property);
 				}
 			}
 		}
-
-		// em.flush();
 		try {
 			logger.log(sessionController.getUser().getUsername(), "ProjectGoal", Action.CREATE, goal.getId(),
-					" ProjectGoal \"" + goal.getName() + "\" created.");
+					" ProjectGoal \"" + goal.getName() + LITERAL_CREATED);
 		} catch (ContextNotActiveException ex) {
-			logger.log("SYSTEM", "ProjectGoal", Action.CREATE, goal.getId(), " ProjectGoal \"" + goal.getName() + "\" created.");
+			logger.log(LITERAL_LOGGING_SYSTEM_USER, "ProjectGoal", Action.CREATE, goal.getId(),
+					" ProjectGoal \"" + goal.getName() + LITERAL_CREATED);
 		}
 		return goal;
-		// } else {
-		// return null;
-		// }
 	}
 
 	public ProjectGoalRecord createProjectGoalRecord(ProjectGoalRecord rec) {
@@ -472,19 +471,12 @@ public class ProjectController extends PEventConsumerProducer {
 		em.persist(progress);
 		if (!targetGoals.isEmpty()) {
 			for (ProjectGoalRecord projectGoalRecord : targetGoals) {
-				// em.persist(projectGoal.getPropertyRecord().getProperty());
-				// em.persist(projectGoal.getPropertyRecord());
-				// em.persist(projectGoal.getProjectGoal());
-				// em.persist(projectGoalRecord);
 				if (projectGoalRecord.getTask() != null) {
 					Task t = projectGoalRecord.getTask();
-					// em.persist(t);
 					if (t.getProjectGoalRecord() == null) {
 						t.setProjectGoalRecord(projectGoalRecord);
 					}
 				}
-
-				// em.persist(projectGoal);
 				progress.addTargetGoal(projectGoalRecord);
 			}
 		}
@@ -495,7 +487,6 @@ public class ProjectController extends PEventConsumerProducer {
 		return progress;
 	}
 
-	// Todo: ??? ziel-Goals müssen als Eigenschaft im Progress-Objekt stehen ??? - evtl. doch nicht.
 	/**
 	 * Updates the overall progress of a project by calculating the percentage value of completeness of
 	 * each active {@link ProjectGoalRecord}
@@ -510,12 +501,10 @@ public class ProjectController extends PEventConsumerProducer {
 		int sum = 0;
 		for (ProjectGoalRecord currentProjectGoalRecord : currentProjectGoals) {
 			ProjectGoalRecord origProjectGoalRecord = findOriginalProjectGoalRecord(managedProgress, currentProjectGoalRecord);
-			if (origProjectGoalRecord.getPropertyRecord().isNumericPropertyRecord()) {
-				int percentage = currentProjectGoalRecord.getPercentage();//calcNumericGoalPercentage(currentProjectGoalRecord, origProjectGoalRecord);
-				origProjectGoalRecord.getPropertyRecord().setValue(percentage);
-				//setPercentage(percentage);
+			if (origProjectGoalRecord != null && origProjectGoalRecord.getPropertyRecord().isNumericPropertyRecord()) {
+				int percentage = calcNumericProgress(currentProjectGoalRecord, origProjectGoalRecord);
 				sum += percentage;
-			} else if (origProjectGoalRecord.getPropertyRecord().isDocumentPropertyRecord()) {
+			} else if (origProjectGoalRecord != null && origProjectGoalRecord.getPropertyRecord().isDocumentPropertyRecord()) {
 				DocumentInfo docInfo = currentProjectGoalRecord.getPropertyRecord().getDocumentInfo();
 				String targetTag = ((ProjectGoalPropertyDocument) origProjectGoalRecord.getPropertyRecord().getProperty()).getTag();
 
@@ -525,29 +514,28 @@ public class ProjectController extends PEventConsumerProducer {
 					continue;
 				} else {
 					if (docInfo.getRecentDocuments() != null) {
-						for (Document doc : docInfo.getRecentDocuments()) {
-							if (targetTag.equals(doc.getTag())) {
-								currentProjectGoalRecord.setPercentage(100);
-								sum += 100;
-								break;
-							}
-						}
+						sum = calcRecentDocumentsProgress(sum, currentProjectGoalRecord, docInfo, targetTag);
 					}
 				}
 			}
 		}
-		// System.out.println("SUMME: " + sum);
-		// System.out.println("NUMGOALS: " + numGoals);
-		managedProgress.setProgress((int) sum / numGoals);
-
+		managedProgress.setProgress(sum / numGoals);
 	}
 
-	private int calcNumericGoalPercentage(ProjectGoalRecord currentProjectGoalRecord, ProjectGoalRecord origProjectGoalRecord) {
-		double baseValue = origProjectGoalRecord.getPropertyRecord().getValue();
-		double minValue = ((ProjectGoalPropertyNumeric) origProjectGoalRecord.getPropertyRecord().getProperty()).getMin();
-		double maxValue = ((ProjectGoalPropertyNumeric) origProjectGoalRecord.getPropertyRecord().getProperty()).getMax();
-		double currentValue = currentProjectGoalRecord.getPropertyRecord().getValue();
-		int percentage = calculatePercentageComplete(baseValue, minValue, maxValue, currentValue);
+	private int calcRecentDocumentsProgress(int sum, ProjectGoalRecord currentProjectGoalRecord, DocumentInfo docInfo, String targetTag) {
+		for (Document doc : docInfo.getRecentDocuments()) {
+			if (targetTag.equals(doc.getTag())) {
+				currentProjectGoalRecord.setPercentage(100);
+				sum += 100;
+				break;
+			}
+		}
+		return sum;
+	}
+
+	private int calcNumericProgress(ProjectGoalRecord currentProjectGoalRecord, ProjectGoalRecord origProjectGoalRecord) {
+		int percentage = currentProjectGoalRecord.getPercentage();
+		origProjectGoalRecord.getPropertyRecord().setValue(percentage);
 		return percentage;
 	}
 
@@ -571,12 +559,11 @@ public class ProjectController extends PEventConsumerProducer {
 		ProjectGoalRecord managedGoal = findProjectGoalRecordById(projectGoalRecordId);
 
 		// Create a task for the ProjectGoalRecord
-		Task t = new Task();
-		t.setName(managedGoal.getPropertyRecord().getProperty().getName());
-		t.setDescription(managedGoal.getPropertyRecord().getProperty().getDescription());
-		t.setPriority(managedGoal.getProject().getPriority());
-		t.setTaskStatus(TaskStatus.CREATED);
-		Task managedTask = taskController.createTask(t);
+		Task task = new Task();
+		task.setName(managedGoal.getPropertyRecord().getProperty().getName());
+		task.setDescription(managedGoal.getPropertyRecord().getProperty().getDescription());
+		task.setPriority(managedGoal.getProject().getPriority());
+		task.setTaskStatus(TaskStatus.CREATED);
 
 		// Create copy of ProjectGoalRecord and initialize it with the original value
 		ProjectGoalPropertyRecord rec = new ProjectGoalPropertyRecord();
@@ -585,9 +572,10 @@ public class ProjectController extends PEventConsumerProducer {
 		rec.setDocumentInfo(managedGoal.getPropertyRecord().getDocumentInfo());
 		em.persist(rec);
 
+		Task managedTask = taskController.createTask(task);
 		ProjectGoalRecord activeGoal = new ProjectGoalRecord(managedGoal, rec, managedTask);
 		em.persist(activeGoal);
-		t.setProjectGoalRecord(activeGoal);
+		task.setProjectGoalRecord(activeGoal);
 		return activeGoal;
 	}
 
@@ -613,39 +601,7 @@ public class ProjectController extends PEventConsumerProducer {
 
 	@Override
 	public void consumeEvent(PObject destination, Event evt) {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 
 	}
-
-	/**
-	 * Calculates the percentage of completeness for a given {@link ProjectGoalRecord}.
-	 * There is a minimum and a maximum value. If the initial value was greater than max, 100 % is reached
-	 * when the current value goes below the max value. If the initial value was less then min, 100% is reached
-	 * when the current value goes above the min value.
-	 * Example: min=10000, max=30000; current=20000 percentage = 50%
-	 * @param baseValue double - the initial value of the goal before task started. 
-	 * @param minValue - the minimum value to reach 100%
-	 * @param maxValue - the maximum value to reach 100%
-	 * @param currentValue - The current value of the goal.
-	 * @return int - The percentage value
-	 */
-	private int calculatePercentageComplete(double baseValue, double minValue, double maxValue, double currentValue) {
-		int percentage;
-		// The goal is to increase value until it is more than min
-		if (baseValue <= minValue) {
-			double targetValue = minValue;
-			double base = targetValue - baseValue;
-			percentage = (int) (100 - ((targetValue - currentValue) * 100) / base);
-			// the goal is to decrease value until it is less than max
-		} else if (baseValue >= maxValue) {
-			double targetValue = maxValue;
-			double base = baseValue - targetValue;
-			percentage = (int) (100 + ((targetValue - currentValue) * 100) / base);
-			// Goal has already been reached during definition of goal!
-		} else {
-			percentage = 100;
-		}
-		return percentage;
-	}
-
 }

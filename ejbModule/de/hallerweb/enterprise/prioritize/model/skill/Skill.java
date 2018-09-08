@@ -64,7 +64,7 @@ public class Skill implements PAuthorizedObject, PSearchable {
 
 	public Skill() {
 		super();
-		this.skillProperties = new HashSet<SkillProperty>();
+		this.skillProperties = new HashSet<>();
 	}
 
 	public SkillCategory getCategory() {
@@ -126,9 +126,21 @@ public class Skill implements PAuthorizedObject, PSearchable {
 
 	transient List<SearchProperty> searchProperties;
 
+	
+
+	private SearchResult generateResult() {
+		SearchResult result = new SearchResult();
+		result.setResult(this);
+		result.setResultType(SearchResultType.SKILL);
+		result.setExcerpt(name + " : " + this.getDescription());
+		result.setProvidesExcerpt(true);
+		result.setSubresults(new HashSet<SearchResult>());
+		return result;
+	}
+
 	@Override
 	public List<SearchResult> find(String phrase) {
-		ArrayList<SearchResult> results = new ArrayList<SearchResult>();
+		ArrayList<SearchResult> results = new ArrayList<>();
 		// Search skill name
 		if (name.toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
 			// Match found
@@ -148,27 +160,16 @@ public class Skill implements PAuthorizedObject, PSearchable {
 		}
 		return results;
 	}
-
-	private SearchResult generateResult() {
-		SearchResult result = new SearchResult();
-		result.setResult(this);
-		result.setResultType(SearchResultType.SKILL);
-		result.setExcerpt(name + " : " + this.getDescription());
-		result.setProvidesExcerpt(true);
-		result.setSubresults(new HashSet<SearchResult>());
-		return result;
-	}
-
+	
 	@Override
 	public List<SearchResult> find(String phrase, SearchProperty property) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<>();
 	}
 
 	@Override
 	public List<SearchProperty> getSearchProperties() {
 		if (this.searchProperties == null) {
-			searchProperties = new ArrayList<SearchProperty>();
+			searchProperties = new ArrayList<>();
 			SearchProperty prop = new SearchProperty("SKILL");
 			prop.setName("Skill");
 			searchProperties.add(prop);

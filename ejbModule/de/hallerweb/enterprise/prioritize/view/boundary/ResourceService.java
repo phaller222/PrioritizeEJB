@@ -1,6 +1,7 @@
 /**
  * 
  */
+
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import java.util.Date;
@@ -26,7 +27,9 @@ import javax.ws.rs.core.Response;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
+import de.hallerweb.enterprise.prioritize.controller.resource.MQTTResourceController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
+import de.hallerweb.enterprise.prioritize.controller.resource.ResourceReservationController;
 import de.hallerweb.enterprise.prioritize.controller.search.SearchController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.RestAccessController;
@@ -58,28 +61,78 @@ public class ResourceService {
 
 	@EJB
 	RestAccessController accessController;
-
 	@EJB
 	CompanyController companyController;
-
 	@EJB
 	ResourceController resourceController;
-
+	@EJB
+	MQTTResourceController mqttResourceController;
+	@EJB
+	ResourceReservationController resourceReservationController;
 	@EJB
 	UserRoleController userRoleController;
-
 	@EJB
 	SearchController searchController;
-
 	@Inject
 	SessionController sessionController;
-
 	@EJB
 	AuthorizationController authController;
 
 	/**
-	 * Returns all the resources in the given department
-	 * 
+	 * Returns all the resource groups in the given department
+	 * @api {get} /list/{departmentToken}/groups?apiKey={apiKey} getResourceGroups
+	 * @apiName getResourceGroups
+	 * @apiGroup /resources
+	 * @apiDescription gets all resource groups within the given department.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} departmentToken The department token of the department.
+	 * @apiSuccess List of {ResourceGroup} objects with information about found resource groups.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 * @param departmentToken - The department token.
+	 * @return JSON object with resources in that department.
+	 */
+	@GET
+	@Path("list/{departmentToken}/groups")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<ResourceGroup> getResourceGroups(@PathParam(value = "departmentToken") String departmentToken,
+			@QueryParam(value = "apiKey") String apiKey) {
+		User user = accessController.checkApiKey(apiKey);
+		if (user != null) {
+			Department dept = companyController.getDepartmentByToken(departmentToken, user);
+			if (dept != null) {
+				List<ResourceGroup> groups = resourceController.getResourceGroupsForDepartment(dept.getId(), user);
+				if (groups != null) {
+					if (authController.canRead(groups.get(0), user)) {
+						return groups;
+					} else {
+						throw new NotAuthorizedException(Response.serverError());
+					}
+				}
+				throw new NotFoundException(createNegativeResponse("no resource groups found!"));
+			}
+			throw new NotFoundException(createNegativeResponse("Department not found or department token invalid!"));
+		} else {
+			throw new NotAuthorizedException(Response.serverError());
+		}
+	}
+
+	/**
+	 * Returns all the resource groups in the given department and group
+	 * @api {get} /list/{departmentToken}/{group}?apiKey={apiKey} getResources
+	 * @apiName getResources
+	 * @apiGroup /resources
+	 * @apiDescription gets all resources within the given department and group.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} departmentToken The department token of the department.
+	 * @apiParam {String} group The resource group of the resources.
+	 * @apiSuccess List of {Resource} objects.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 * @param departmentToken - The department token.
 	 * @return JSON object with resources in that department.
 	 */
@@ -87,30 +140,28 @@ public class ResourceService {
 	@Path("list/{departmentToken}/{group}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Set<Resource> getResources(@PathParam(value = "departmentToken") String departmentToken,
-			@PathParam(value = "group") String group, @QueryParam(value = "apiKey") String apiKey) {
+			@QueryParam(value = "apiKey") String apiKey, @PathParam(value = "group") String group) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Department dept = companyController.getDepartmentByToken(departmentToken);
+			Department dept = companyController.getDepartmentByToken(departmentToken, user);
 			if (dept != null) {
-				ResourceGroup resourceGroup = resourceController.getResourceGroupInDepartment(dept.getId(), group);
-				if (resourceGroup != null) {
-					if (authController.canRead(resourceGroup, user)) {
-						Set<Resource> resources = resourceGroup.getResources();
-						return resources;
-					} else
-						throw new NotAuthorizedException(Response.serverError());
+				ResourceGroup grp = resourceController.findResourceGroupByNameAndDepartment(group, dept.getId(), user);
+				if (authController.canRead(grp, user)) {
+					return grp.getResources();
+				} else {
+					throw new NotAuthorizedException(Response.serverError());
 				}
-				throw new NotFoundException(createNegativeResponse("Resource group with name " + group + "not found!"));
 			}
-			throw new NotFoundException(createNegativeResponse("Department not found or department token invalid!"));
-		} else
-			throw new NotAuthorizedException(Response.serverError());
+			throw new NotFoundException(createNegativeResponse("no resource groups found!"));
+		}
+		throw new NotFoundException(createNegativeResponse("Department not found or department token invalid!"));
 	}
 
 	/**
-	 * Returns all the resources in the given department
+	 * searches resources in the given department
 	 * 
 	 * @param departmentToken - The department token.
+	 * @param phrase - the search phrase
 	 * @return JSON object with resources in that department.
 	 */
 	@GET
@@ -120,9 +171,9 @@ public class ResourceService {
 			@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "phrase") String phrase) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Department dept = companyController.getDepartmentByToken(departmentToken);
+			Department dept = companyController.getDepartmentByToken(departmentToken, user);
 			if (dept != null) {
-				Set<Resource> searchResult = new HashSet<Resource>();
+				Set<Resource> searchResult = new HashSet<>();
 				List<SearchResult> results = searchController.searchResources(phrase, user);
 				for (SearchResult result : results) {
 					Resource resource = (Resource) result.getResult();
@@ -154,14 +205,15 @@ public class ResourceService {
 	public Resource getResourceByUuid(@PathParam(value = "uuid") String uuid, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Resource resource = resourceController.getResource(uuid, user);
+			Resource resource = mqttResourceController.getResource(uuid, user);
 			if (authController.canRead(resource, user)) {
 				return resource;
 			} else {
 				throw new NotAuthorizedException(Response.serverError());
 			}
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	/**
@@ -176,14 +228,15 @@ public class ResourceService {
 	public boolean isResourceOnline(@PathParam(value = "uuid") String uuid, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Resource resource = resourceController.getResource(uuid, user);
+			Resource resource = mqttResourceController.getResource(uuid, user);
 			if (authController.canRead(resource, user)) {
 				return resource.isMqttOnline();
 			} else {
 				throw new NotAuthorizedException(Response.serverError());
 			}
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	/**
@@ -200,7 +253,7 @@ public class ResourceService {
 			@QueryParam(value = "commands") String commands, @QueryParam(value = "geo") String geo, @QueryParam(value = "set") String set,
 			@QueryParam(value = "apiKey") String apiKey) {
 		User user = userRoleController.findUserByApiKey(apiKey);
-		Resource resource = resourceController.getResource(uuid, user);
+		Resource resource = mqttResourceController.getResource(uuid, user);
 		if (authController.canUpdate(resource, user)) {
 			return setResourceAttributes(resource, mqttOnline, name, description, commands, geo, set, apiKey);
 		} else {
@@ -211,9 +264,18 @@ public class ResourceService {
 
 	/**
 	 * Return the {@link Resource} object with the given id.
-	 * 
+	 * @api {get} /id/{id}?apiKey={apiKey} getResourceById
+	 * @apiName getResourceById
+	 * @apiGroup /resources
+	 * @apiDescription returns the resource/device with the given id
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiSuccess {Resource} resource/device Object.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 * @param id - The id of the {@link Resource}.
-	 * @return {@link Company} - JSON Representation of the company.
+	 * @return {@link Resource} - JSON Representation of the Resource.
 	 */
 	@GET
 	@Path("id/{id}")
@@ -227,8 +289,9 @@ public class ResourceService {
 			} else {
 				throw new NotAuthorizedException(Response.serverError());
 			}
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	/**
@@ -249,13 +312,29 @@ public class ResourceService {
 			} else {
 				throw new NotAuthorizedException(Response.serverError());
 			}
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	/**
-	 * Updates a resource and sets it's online state.
-	 * @param uuid - The uuid of the {@link Resource}.
+	 * Updates a resource and sets it's attributes.
+	 * @api {put} /id/{id}?apiKey={apiKey}&name={name}&description={description}&mqttOnline={mqttOnline}&commands={commands}&geo=[geo}&set={set} updateResource
+	 * @apiName updateResource
+	 * @apiGroup /resources
+	 * @apiDescription Changes different attributes of a resource
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} name The new name of the resource. omit if no changes.
+	 * @apiParam {String} description The new description of the resource. omit if no changes.
+	 * @apiParam {String} mqttOnline (true/false) - Set the resources online state. omit if no changes.
+	 * @apiParam {String} commands update command set the resource understands. separate by colon (e.G ON:OFF:RESET) 
+	 * @apiParam {String} geo new coordinates of the resource (LAT:LONG)- leave blank if no changes 
+	 * @apiParam {String} set set a specific resource attribute to a specific value (e.G. NAME:WERT) 
+	 * @apiSuccess OK
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 */
 	@PUT
 	@Path("id/{id}")
@@ -279,68 +358,7 @@ public class ResourceService {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			boolean processed = false;
-			if (mqttOnline != null) {
-				processed = true;
-				boolean online = Boolean.parseBoolean(mqttOnline);
-
-				resourceController.raiseEvent(resource, "mqttOnline", String.valueOf(resource.isMqttOnline()), mqttOnline,
-						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-
-				if (online) {
-					resourceController.setMqttResourceOnline(resource);
-				} else {
-					resourceController.setMqttResourceOffline(resource);
-				}
-			}
-
-			if (name != null) {
-				processed = true;
-				resourceController.raiseEvent(resource, "name", resource.getName(), name,
-						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				resourceController.setResourceName(resource, name, sessionController.getUser());
-			}
-			if (description != null) {
-				processed = true;
-				resourceController.raiseEvent(resource, "description", resource.getDescription(), description,
-						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				resourceController.setResourceDescription(resource, description, sessionController.getUser());
-			}
-			if (commands != null) {
-				processed = true;
-				String[] commandString = commands.split(":");
-				HashSet<String> commandsForResource = new HashSet<String>();
-				for (String cmd : commandString) {
-					commandsForResource.add(cmd);
-				}
-				resourceController.raiseEvent(resource, "commands", resource.getMqttCommands().toString(), commands,
-						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				resourceController.setCommands(resource, commandsForResource);
-			}
-			if (geo != null) {
-				processed = true;
-				String[] geoString = geo.split(":");
-				resourceController.setCoordinates(resource, geoString[0], geoString[1]);
-			}
-
-			if (set != null) {
-				processed = true;
-				String[] nameValuePair = set.split(":");
-
-				// ----------------- Raise event for value change
-				Set<NameValueEntry> valuesOld = resourceController.getNameValueEntries(resource);
-				String oldValue = "";
-				for (NameValueEntry entry : valuesOld) {
-					if (entry.getName().equals(nameValuePair[0])) {
-						oldValue = entry.getValues();
-					}
-				}
-				resourceController.raiseEvent(resource, nameValuePair[0], oldValue, nameValuePair[1],
-						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				// ------------------------------------------------------
-
-				resourceController.addMqttValueForResource(resource, nameValuePair[0], nameValuePair[1]);
-
-			}
+			processed = handleSetResourceAttributes(resource, mqttOnline, name, description, commands, geo, set, processed);
 
 			if (!processed) {
 				return createNegativeResponse("ERROR: None of the given resource property names found! Nothing changed.");
@@ -348,35 +366,140 @@ public class ResourceService {
 				return createPositiveResponse("OK");
 			}
 
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
+	}
+
+	private boolean handleSetResourceAttributes(Resource resource, String mqttOnline, String name, String description, String commands,
+			String geo, String set, boolean processed) {
+		if (mqttOnline != null) {
+			processed = true;
+			boolean online = Boolean.parseBoolean(mqttOnline);
+
+			resourceController.raiseEvent(resource, "mqttOnline", String.valueOf(resource.isMqttOnline()), mqttOnline,
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+
+			mqttResourceController.setMqttResourceStatus(resource, online);
+		}
+
+		if (name != null) {
+			processed = true;
+			resourceController.raiseEvent(resource, "name", resource.getName(), name,
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+			resourceController.setResourceName(resource, name, sessionController.getUser());
+		}
+		if (description != null) {
+			processed = true;
+			resourceController.raiseEvent(resource, "description", resource.getDescription(), description,
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+			resourceController.setResourceDescription(resource, description, sessionController.getUser());
+		}
+		if (commands != null) {
+			processed = handleSetCommands(resource, commands);
+		}
+		if (geo != null) {
+			processed = true;
+			String[] geoString = geo.split(":");
+			mqttResourceController.setCoordinates(resource, geoString[0], geoString[1]);
+		}
+
+		if (set != null) {
+			processed = handleSetNameValuePairs(resource, set);
+		}
+		return processed;
+	}
+
+	private boolean handleSetCommands(Resource resource, String commands) {
+		boolean processed;
+		processed = true;
+		String[] commandString = commands.split(":");
+		HashSet<String> commandsForResource = new HashSet<>();
+		for (String cmd : commandString) {
+			commandsForResource.add(cmd);
+		}
+		resourceController.raiseEvent(resource, "commands", resource.getMqttCommands().toString(), commands,
+				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+		mqttResourceController.setCommands(resource, commandsForResource);
+		return processed;
+	}
+
+	private boolean handleSetNameValuePairs(Resource resource, String set) {
+		boolean processed;
+		processed = true;
+		String[] nameValuePair = set.split(":");
+
+		// ----------------- Raise event for value change
+		Set<NameValueEntry> valuesOld = mqttResourceController.getNameValueEntries(resource);
+		String oldValue = "";
+		for (NameValueEntry entry : valuesOld) {
+			if (entry.getName().equals(nameValuePair[0])) {
+				oldValue = entry.getValues();
+			}
+		}
+		resourceController.raiseEvent(resource, nameValuePair[0], oldValue, nameValuePair[1],
+				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+		// ------------------------------------------------------
+
+		mqttResourceController.addMqttValueForResource(resource, nameValuePair[0], nameValuePair[1]);
+		return processed;
 	}
 
 	@POST
-	@Path("create")
+	@Path("create/{departmentToken}/{group}")
 	@Produces(MediaType.APPLICATION_JSON)
+	/**
+	 * @api {post} /create/{departmentToken}/{group}?apiKey={apiKey} createResource
+	 * @apiName createResource
+	 * @apiGroup /resources
+	 * @apiDescription creates a new resource
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} departmentToken The department token of the department.
+	 * @apiParam {String} group The resource group to put new resource in.
+	 * @apiSuccess 200 OK.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 * @apiParam uuid - uuid of new resource
+	 * @apiParam name - name of new resource
+	 * @apiParam description - description
+	 * @apiParam slots - max.number of slots for new device
+	 * @apiParam ip - ip address of new device/resource (if applicable)
+	 * @apiParam commands - list of commands the device understands
+	 * @apiParam isAgent - is device an agent?
+	 * @return Response 
+	 */
 	public Response createResource(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "uuid") String uuid,
-			@QueryParam(value = "departmentToken") String departmentToken, @QueryParam(value = "group") String group,
+			@PathParam(value = "departmentToken") String departmentToken, @PathParam(value = "group") String group,
 			@QueryParam(value = "name") String name, @QueryParam(value = "description") String description,
 			@QueryParam(value = "slots") String slots, @QueryParam(value = "ip") String ip, @QueryParam(value = "commands") String commands,
 			@QueryParam(value = "isAgent") boolean isAgent) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Department dept = companyController.getDepartmentByToken(departmentToken);
+			Department dept = companyController.getDepartmentByToken(departmentToken, user);
 			if (authController.canCreate(dept.getId(), new Resource(), user)) {
-				if (ip == null) {
-					ip = "";
-				}
-				Resource resource = resourceController.createMqttResource(name, departmentToken, group, sessionController.getUser(),
-						description, ip, Integer.parseInt(slots), false, true, isAgent, uuid, uuid + "/write", uuid + "/read");
+				Resource tempResource = new Resource();
+				tempResource.setName(name);
+				tempResource.setDescription(description);
+				tempResource.setMaxSlots(Integer.valueOf(slots));
+				tempResource.setStationary(false);
+				tempResource.setRemote(true);
+				tempResource.setAgent(false);
+				tempResource.setMqttUUID(uuid);
+				tempResource.setDataReceiveTopic(uuid + "/write");
+				tempResource.setDataSendTopic(uuid + "/read");
+				tempResource.setIp(ip != null ? ip : "");
+
+				Resource resource = mqttResourceController.createMqttResource(tempResource, departmentToken, group, user);
 
 				if (commands != null) {
-					HashSet<String> cmds = new HashSet<String>();
+					HashSet<String> cmds = new HashSet<>();
 					String[] commandsArray = commands.split(":");
 					for (String cmd : commandsArray) {
 						cmds.add(cmd);
 					}
-					resourceController.setCommands(resource, cmds);
+					mqttResourceController.setCommands(resource, cmds);
 				}
 
 				if (resource != null) {
@@ -402,11 +525,11 @@ public class ResourceService {
 			@QueryParam(value = "command") String command, @QueryParam(value = "value") String value) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Resource managedResource = resourceController.getResource(uuid, user);
+			Resource managedResource = mqttResourceController.getResource(uuid, user);
 			if (authController.canUpdate(managedResource, user)) {
-				if (resourceController.createResourceReservation(managedResource, new Date(), new Date(System.currentTimeMillis() + 2000),
-						user) != null) {
-					resourceController.sendCommand(managedResource, command, value);
+				if (resourceReservationController.createResourceReservation(managedResource, new Date(),
+						new Date(System.currentTimeMillis() + 2000), user) != null) {
+					mqttResourceController.sendCommand(managedResource, command, value);
 					return createPositiveResponse("Command has been send to resource: " + managedResource.getMqttUUID());
 				} else {
 					return createNegativeResponse("Not enough free slots available for resource: " + managedResource.getMqttUUID());
@@ -417,30 +540,88 @@ public class ResourceService {
 		throw new NotAuthorizedException(Response.serverError());
 	}
 
+	/**
+	 * @api {delete} /remove/uuid/{uuid}?apiKey={apiKey}&departmentToken={departmenttoken} deleteResourceByUuid
+	 * @apiName deleteResourceByUuid
+	 * @apiGroup /resources
+	 * @apiDescription Deletes a resource by uuid
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} uuid The uuid of the resource to remove.
+	   @apiParam {String} departmentToken department token of the department the resource belongs to.
+	 * @apiSuccess OK
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 */
 	@DELETE
-	@Path("remove")
+	@Path("remove/uuid/{uuid}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response removeResource(@QueryParam(value = "apiKey") String apiKey,
-			@QueryParam(value = "departmentToken") String departmentToken, @QueryParam(value = "uuid") String uuid) {
+			@QueryParam(value = "departmentToken") String departmentToken, @PathParam("uuid") String uuid) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Department dept = companyController.getDepartmentByToken(departmentToken);
+			Department dept = companyController.getDepartmentByToken(departmentToken, user);
 			if (dept != null) {
-				Resource resource = resourceController.getResource(uuid, user);
+				Resource resource = mqttResourceController.getResource(uuid, user);
 				if (resource != null) {
 					if (authController.canDelete(resource, user)) {
-						resourceController.deleteResource(resource.getId());
+						resourceController.deleteResource(resource.getId(), user);
 						return createPositiveResponse("Resource has been removed.");
 					} else {
 						throw new NotAuthorizedException(Response.serverError());
 					}
-				} else
+				} else {
 					throw new NotFoundException(Response.serverError().build());
+				}
 			} else {
 				throw new NotAuthorizedException(Response.serverError());
 			}
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
+	}
+
+	/**
+	 * @api {delete} /remove/id/{id}?apiKey={apiKey}&departmentToken={departmenttoken} deleteResourceById
+	 * @apiName deleteResourceById
+	 * @apiGroup /resources
+	 * @apiDescription Deletes a resource by id
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} id The id of the resource to remove.
+	   @apiParam {String} departmentToken department token of the department the resource belongs to.
+	 * @apiSuccess OK
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 */
+	@DELETE
+	@Path("remove/id/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response removeResource(@QueryParam(value = "apiKey") String apiKey,
+			@QueryParam(value = "departmentToken") String departmentToken, @PathParam("id") int id) {
+		User user = accessController.checkApiKey(apiKey);
+		if (user != null) {
+			Department dept = companyController.getDepartmentByToken(departmentToken, user);
+			if (dept != null) {
+				Resource resource = resourceController.getResource(id, user);
+				if (resource != null) {
+					if (authController.canDelete(resource, user)) {
+						resourceController.deleteResource(resource.getId(), user);
+						return createPositiveResponse("Resource has been removed.");
+					} else {
+						throw new NotAuthorizedException(Response.serverError());
+					}
+				} else {
+					throw new NotFoundException(Response.serverError().build());
+				}
+			} else {
+				throw new NotAuthorizedException(Response.serverError());
+			}
+		} else {
+			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	private Response createPositiveResponse(String responseText) {

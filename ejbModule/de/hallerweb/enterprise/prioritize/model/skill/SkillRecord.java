@@ -1,7 +1,6 @@
 package de.hallerweb.enterprise.prioritize.model.skill;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -56,7 +55,7 @@ public class SkillRecord {
 
 	public SkillRecord() {
 		super();
-		this.skillProperties = new HashSet<SkillRecordProperty>();
+		this.skillProperties = new HashSet<>();
 	}
 
 	public int getId() {
@@ -67,8 +66,8 @@ public class SkillRecord {
 		return enthusiasm;
 	}
 
-	public void setUser(User u) {
-		this.user = u;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public User getUser() {
@@ -104,6 +103,5 @@ public class SkillRecord {
 	public void setSkillProperties(Set<SkillRecordProperty> skillProperties) {
 		this.skillProperties = skillProperties;
 	}
-	
 
 }

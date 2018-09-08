@@ -2,8 +2,9 @@ package de.hallerweb.enterprise.prioritize.view.project;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -11,17 +12,18 @@ import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.primefaces.context.RequestContext;
 import org.primefaces.model.SelectableDataModel;
 
 import de.hallerweb.enterprise.prioritize.controller.project.ProjectController;
+import de.hallerweb.enterprise.prioritize.controller.project.task.BlackboardController;
 import de.hallerweb.enterprise.prioritize.controller.project.task.TaskController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.project.Project;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
+import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.project.task.TaskStatus;
-import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
 @Named
@@ -33,16 +35,21 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 	@EJB
 	TaskController taskController;
 	@EJB
+	BlackboardController blackboardController;
+	@EJB
 	UserRoleController userRoleController;
-
 	@Inject
 	SessionController sessionController;
 
-	private List<Project> projects;
+	private transient List<Project> projects;
+	private transient List<Task> notMyTasks;
+	private transient List<Task> myTasks;
+	private transient Project currentProject;		// Currently selected Project
+	private transient Task selectedTask;
+	private transient User currentUser;
 
-	private Project currentProject;		// Currently selected Project
-	
-	private Task selectedTask;
+	private static final String NAVIGATION_EDITPROJECT = "editproject";
+	private static final String NAVIGATION_BLACKBOARD = "blackboard";
 
 	public Project getCurrentProject() {
 		return currentProject;
@@ -54,51 +61,49 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 
 	@PostConstruct
 	public void init() {
-		
+		this.currentUser = sessionController.getUser();
+		loadProjects();
+		loadForeignTasks();
+		loadMyTasks();
+	}
+
+	public void loadProjects() {
+		if (currentUser != null) {
+			// TODO: Project admin must also be project member!
+			this.projects = projectController.findProjectsByUser(currentUser.getId(), currentUser);
+			// Collections.sort(projects, (projectA, projectB) -> projectA.getName().compareTo(projectB.getName()));
+		} else {
+			this.projects = new ArrayList<>();
+		}
+	}
+
+	public void loadForeignTasks() {
+		notMyTasks = taskController.findTasksNotAssignedToUser(currentUser, currentProject);
+		if (notMyTasks == null || notMyTasks.isEmpty()) {
+			notMyTasks = new ArrayList<>();
+		}
+	}
+
+	public void loadMyTasks() {
+		myTasks = taskController.findTasksAssignedToUser(currentUser, currentProject);
+		if (myTasks == null || myTasks.isEmpty()) {
+			myTasks = new ArrayList<>();
+		}
 	}
 
 	public List<Project> getProjects() {
-		this.projects = new ArrayList<Project>();
-		User sessionUser = sessionController.getUser();
-		if (sessionUser != null) {
-			this.projects.addAll(getProjectsForUser(sessionUser.getId(),sessionUser));
-			for (Role r : sessionUser.getRoles()) {
-				List<Project> managerProjects = getProjectsByManagerRole(r.getId());
-				for (Project p : managerProjects) {
-					if (!p.getUsers().contains(sessionUser)) {
-						this.projects.add(p);
-					}
-				}
-			}
-		}
-		Collections.sort(projects, (projectA, projectB) -> projectA.getName().compareTo(projectB.getName()));
-		return projects;
+		loadProjects();
+		return this.projects;
 	}
 
 	public void setProjects(List<Project> projects) {
 		this.projects = projects;
 	}
 
-	private List<Project> getProjectsByManagerRole(int roleId) {
-		List<Project> projects = projectController.findProjectsByManagerRole(roleId);
-		if (projects != null && !projects.isEmpty()) {
-			return projects;
-		} else {
-			return new ArrayList<Project>();
-		}
-	}
 
-	private List<Project> getProjectsForUser(int userId, User sessionUser) {
-		List<Project> projects = projectController.findProjectsByUser(userId, sessionUser);
-		if (projects != null && !projects.isEmpty()) {
-			return projects;
-		} else {
-			return new ArrayList<Project>();
-		}
-	}
 
 	public String editProject() {
-		return "editproject";
+		return NAVIGATION_EDITPROJECT;
 	}
 
 	public String showTasks(Project project) {
@@ -108,60 +113,53 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 
 	public String showBlackboard(Project project) {
 		setCurrentProject(project);
-		return "blackboard";
+		return NAVIGATION_BLACKBOARD;
 	}
 
-//	public List<Task> getForeignTasks() {
-//		List<Task> foreignTasks = new ArrayList<Task>();
-//		List<Task> notMyTasks = taskController.findTasksNotAssignedToUser(sessionController.getUser());// taskController.findTasksByAssignee(sessionController.getUser());
-//
-//		for (Task t : currentProject.getBlackboard().getTasks()) {
-//			for (Task myTask : notMyTasks) {
-//				if (t.getId() == myTask.getId()) {
-//					foreignTasks.add(t);
-//				}
-//			}
-//		}
-//		if (foreignTasks.isEmpty()) {
-//			foreignTasks = currentProject.getBlackboard().getTasks();
-//		}
-//		return notMyTasks;
-//	}
-
 	public List<Task> getForeignTasks() {
-		User user = sessionController.getUser();
-		List<Task> foreignTasks = new ArrayList<Task>();
-		List<Task> notMyTasks = taskController.findTasksNotAssignedToUser(user);
-		// taskController.findTasksByAssignee(sessionController.getUser());
-
-		for (Task t : currentProject.getBlackboard().getTasks()) {
-			if (notMyTasks.contains(t)) {
-				foreignTasks.add(t);
-			} else {
-				notMyTasks.remove(t);
-			}
-		}
-		if (foreignTasks.isEmpty()) {
-			foreignTasks = currentProject.getBlackboard().getTasks();
-		}
+		loadForeignTasks();
 		return notMyTasks;
+	}
+
+	public List<Task> getMyTasksForCurrentProject() {
+		loadMyTasks();
+		return myTasks;
 	}
 
 	public List<Task> getMyTasks() {
 		return taskController.findTasksByAssignee(sessionController.getUser());
 	}
 
+	public Set<Task> getProjectTasks(Project pr) {
+		Project project = projectController.findProjectById(pr.getId());
+		TreeSet<Task> determinedTasks = new TreeSet<>();
+		Blackboard board = project.getBlackboard();
+
+		determinedTasks.addAll(blackboardController.getBlackboardTasks(board));
+		if (!determinedTasks.isEmpty()) {
+			return determinedTasks;
+		} else {
+			return new TreeSet<>();
+		}
+	}
+	
+	public List<Task> getBlackboardTasks(Project pr) {
+		Project project = projectController.findProjectById(pr.getId());
+		Blackboard board = project.getBlackboard();
+		return board.getTasks();
+	}
+
 	public String assignTaskToUser(Task task) {
 
 		Task managedTask = taskController.findTaskById(task.getId());
-		User user = sessionController.getUser();
 
 		taskController.updateTaskStatus(managedTask.getId(), TaskStatus.ASSIGNED);
-		taskController.addTaskAssignee(managedTask.getId(), user);
+		taskController.setTaskAssignee(managedTask, currentUser);
+		userRoleController.assignTask(currentUser, managedTask);
+		
+		loadForeignTasks();
 
-		userRoleController.assignTask(user, managedTask);
-
-		return "blackboard";
+		return NAVIGATION_BLACKBOARD;
 	}
 
 	public String unassignTask(Task task) {
@@ -170,35 +168,26 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 		taskController.updateTaskStatus(managedTask.getId(), TaskStatus.OPEN);
 		taskController.removeTaskAssignee(managedTask.getId(), user, user);
 		userRoleController.removeAssignedTask(user, managedTask, user);
-		return "blackboard";
+		loadForeignTasks();
+		return NAVIGATION_BLACKBOARD;
 	}
-	
+
 	public String resolveTask(Task task) {
-//		Task managedTask = taskController.findTaskById(task.getId());
-//		ProjectGoalRecord rec = projectController.findProjectGoalRecordById(managedTask.getProjectGoalRecord().getId());
-//		rec.setPercentage(100);
-//		
-//		//projectController.updateProjectProgress(rec.getProject().getId());
-//		
-//		User user = sessionController.getUser();
-//		taskController.removeTaskAssignee(managedTask.getId(), user);
-//		userRoleController.removeAssignedTask(user, managedTask);
-//		taskController.updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
 		taskController.resolveTask(task, sessionController.getUser());
-		return "blackboard";
+		return NAVIGATION_BLACKBOARD;
 	}
-	
+
 	public String setTaskProgress(Task task, int percentage) {
 		taskController.setTaskProgress(task, sessionController.getUser(), percentage);
-		return "blackboard";
+		return NAVIGATION_BLACKBOARD;
 	}
-	
+
 	public Task getSelectedTask() {
 		return selectedTask;
 	}
-	
-	public void setSelectedTask(Task t) {
-		this.selectedTask = t;
+
+	public void setSelectedTask(Task task) {
+		this.selectedTask = task;
 	}
 
 	@Override
@@ -208,7 +197,11 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 
 	@Override
 	public Object getRowKey(Object arg0) {
-		return String.valueOf(((Task)arg0).getId());
+		return String.valueOf(((Task) arg0).getId());
+	}
+
+	public void showTimeTracker() {
+		RequestContext.getCurrentInstance().openDialog("admin/timetracker");
 	}
 
 }

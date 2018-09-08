@@ -8,7 +8,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -27,7 +26,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 @Entity
 @NamedQueries({ @NamedQuery(name = "findProjectById", query = "select p FROM Project p WHERE p.id = :projectId"),
 		@NamedQuery(name = "findProjectsByManagerRole", query = "select p FROM Project p WHERE p.manager.id = :roleId"),
-		@NamedQuery(name = "findProjectsByMember", query = "select p FROM Project p WHERE :user MEMBER OF p.users") })
+		@NamedQuery(name = "findProjectsByMember", query = "select p FROM Project p WHERE :user MEMBER OF p.users ORDER BY p.name") })
 public class Project {
 
 	@GeneratedValue
@@ -55,26 +54,26 @@ public class Project {
 	@JsonIgnore
 	@ManyToMany
 	List<Resource> resources;							// Resources assigned to this project
-	
-	@ManyToMany(fetch = FetchType.EAGER)
+
+	@ManyToMany(fetch = FetchType.LAZY)
 	List<User> users;									// Users assigned to this project
-	
+
 	@JsonIgnore
 	@OneToMany
 	List<SkillGroup> requiredSkills;					// The skills required to fullfill this project
-	
+
 	@JsonIgnore
 	@OneToMany
 	List<SkillRecord> availableSkills;					// Skills already assigned to the project (=available)
-	
+
 	@JsonIgnore
 	@OneToOne
 	Blackboard blackboard;								// The blackboard with tasks for this project
-	
+
 	@JsonIgnore
 	@OneToOne
 	ActionBoard actionboard;							// ActionBoard with up to date information on the project.
-	
+
 	@OneToOne
 	ProjectProgress progress;							// Observe project goals and progress.
 

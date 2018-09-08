@@ -9,22 +9,22 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 
 @Entity
 public class ProjectGoalPropertyRecord {
-	
+
 	@Id
 	@GeneratedValue
 	int id;
-	
+
 	@OneToOne
 	ProjectGoalProperty property;
-	
+
 	double value;
-	
+
 	@OneToOne
 	DocumentInfo documentInfo;
 
 	boolean documentPropertyRecord;
 	boolean numericPropertyRecord;
-	
+
 	public boolean isDocumentPropertyRecord() {
 		return documentPropertyRecord;
 	}
@@ -68,6 +68,5 @@ public class ProjectGoalPropertyRecord {
 	public int getId() {
 		return id;
 	}
-	
-	
+
 }

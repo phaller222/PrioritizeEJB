@@ -3,7 +3,6 @@ package de.hallerweb.enterprise.prioritize.view.security;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -17,18 +16,11 @@ import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
-import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
-import de.hallerweb.enterprise.prioritize.model.resource.Resource;
-import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
-import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
+import de.hallerweb.enterprise.prioritize.model.security.ObservedObjectType;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
-import de.hallerweb.enterprise.prioritize.model.security.User;
-import de.hallerweb.enterprise.prioritize.model.skill.Skill;
-import de.hallerweb.enterprise.prioritize.model.skill.SkillCategory;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 
 /**
@@ -55,19 +47,26 @@ public class RoleBean implements Serializable {
 	@EJB
 	AuthorizationController authController;
 
-	Role role; 															// Current role
-	List<Department> departments; 										// Departments
-	String selectedDepartmentId; 										// currently selected department
-	boolean createPermission; 											// (C)reate
-	boolean readPermission; 											// (R)ead
-	boolean updatePermission; 											// (U)pdate
-	boolean deletePermission; 											// (D)elete
+	transient Role role; 										// Current role
+	transient List<Department> departments;						// Departments
+	String selectedDepartmentId; 								// currently selected department
+	boolean createPermission; 									// (C)reate
+	boolean readPermission; 									// (R)ead
+	boolean updatePermission; 									// (U)pdate
+	boolean deletePermission; 									// (D)elete
 	String targetResourceType;
-	List<String> resourceTypes = new ArrayList<String>();
+	transient List<String> resourceTypes = new ArrayList<>();
 
-	public List<String> getResourceTypes() {
+	private static final String NAVIGATION_ROLES = "roles";
+	private static final String NAVIGATION_EDITROLE = "editrole";
 
-		return resourceTypes;
+	public List<String> getObservableObjectTypesResourceTypes() {
+		List<String> observableObjectResourceTypes = new ArrayList<>();
+		List<ObservedObjectType> objectTypes = authController.getObservableObjectTypes();
+		for (ObservedObjectType type : objectTypes) {
+			observableObjectResourceTypes.add(type.getObjectType());
+		}
+		return observableObjectResourceTypes;
 	}
 
 	@Named
@@ -111,19 +110,6 @@ public class RoleBean implements Serializable {
 	 */
 	@PostConstruct
 	public void init() {
-		resourceTypes.clear();
-		resourceTypes.add(Company.class.getCanonicalName());
-		resourceTypes.add(Department.class.getCanonicalName());
-		resourceTypes.add(User.class.getCanonicalName());
-		resourceTypes.add(Role.class.getCanonicalName());
-		resourceTypes.add(PermissionRecord.class.getCanonicalName());
-		
-		resourceTypes.add(DocumentInfo.class.getCanonicalName());
-		resourceTypes.add(DocumentGroup.class.getCanonicalName());
-		resourceTypes.add(Resource.class.getCanonicalName());
-		resourceTypes.add(ResourceGroup.class.getCanonicalName());
-		resourceTypes.add(Skill.class.getCanonicalName());
-		resourceTypes.add(SkillCategory.class.getCanonicalName());
 
 		role = new Role();
 
@@ -196,46 +182,46 @@ public class RoleBean implements Serializable {
 
 			controller.createRole(role.getName(), role.getDescription(), role.getPermissions(), sessionController.getUser());
 			init();
-			return "roles";
+			return NAVIGATION_ROLES;
 		} else {
 			ViewUtilities.addErrorMessage("rolename", "The Rolename " + role.getName() + " already exists. Role has not been created!");
-			return "roles";
+			return NAVIGATION_ROLES;
 		}
 	}
 
 	@Named
-	public String delete(Role r) {
-		controller.deleteRole(r.getId(), sessionController.getUser());
+	public String delete(Role role) {
+		controller.deleteRole(role.getId(), sessionController.getUser());
 		init();
-		return "roles";
+		return NAVIGATION_ROLES;
 	}
 
 	@Named
 	public String deletePermission(PermissionRecord rec) {
 		controller.deletePermissionRecord(role.getId(), rec.getId(), sessionController.getUser());
 		role.getPermissions().remove(rec);
-		return "editrole";
+		return NAVIGATION_EDITROLE;
 	}
 
 	@Named
-	public String edit(Role r) {
-		this.role = r;
+	public String edit(Role role) {
+		this.role = role;
 		this.createPermission = false;
 		this.readPermission = false;
 		this.updatePermission = false;
 		this.deletePermission = false;
 
-		return "editrole";
+		return NAVIGATION_EDITROLE;
 	}
 
 	@Named
 	String editPermission(PermissionRecord rec) {
-		return "editrole";
+		return NAVIGATION_EDITROLE;
 	}
 
 	@Named
 	public String save() {
-		return "roles";
+		return NAVIGATION_EDITROLE;
 	}
 
 	@Produces
@@ -263,7 +249,7 @@ public class RoleBean implements Serializable {
 
 		controller.addPermissionRecord(role.getId(), rec, sessionController.getUser());
 		role.addPermission(rec);
-		return "editrole";
+		return NAVIGATION_EDITROLE;
 	}
 
 	@Named

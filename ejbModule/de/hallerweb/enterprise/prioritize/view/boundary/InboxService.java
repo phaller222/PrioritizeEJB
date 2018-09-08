@@ -1,6 +1,7 @@
 /**
  * 
  */
+
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import java.util.ArrayList;
@@ -45,16 +46,16 @@ public class InboxService {
 
 	@EJB
 	RestAccessController accessController;
-
 	@EJB
 	MessageController messagController;
-
 	@EJB
 	UserRoleController userRoleController;
-
 	@Inject
 	SessionController sessionController;
 
+	public static final String LITERAL_MESSAGE_WITH_ID = "Message with ID ";
+	
+	
 	/**
 	 * Returns all received messages for this user
 	 * @return JSON object with users in that department.
@@ -62,15 +63,14 @@ public class InboxService {
 	@GET
 	@Path("list/received")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Message> getInboxMessages(@QueryParam(value = "apiKey") String apiKey,
-			@QueryParam(value = "from") String fromUserId) {
+	public List<Message> getInboxMessages(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String fromUserId) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			List<Message> messages = messagController.getReceivedMessages(user);
 			if (fromUserId == null) {
 				return messages;
 			} else {
-				List<Message> messagesReceivedFrom = new ArrayList<Message>();
+				List<Message> messagesReceivedFrom = new ArrayList<>();
 				User userReceivedFrom = userRoleController.getUserById(Integer.parseInt(fromUserId), user);
 				for (Message msg : messages) {
 					if (msg.getFrom().getId() == userReceivedFrom.getId()) {
@@ -80,8 +80,9 @@ public class InboxService {
 				return messagesReceivedFrom;
 			}
 
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	/**
@@ -92,15 +93,14 @@ public class InboxService {
 	@GET
 	@Path("list/sent")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Message> getSentMessages(@QueryParam(value = "apiKey") String apiKey,
-			@QueryParam(value = "to") String toUserId) {
+	public List<Message> getSentMessages(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "to") String toUserId) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			List<Message> messages = messagController.getSentMessages(user);
 			if (toUserId == null) {
 				return messages;
 			} else {
-				List<Message> messagesSentTo = new ArrayList<Message>();
+				List<Message> messagesSentTo = new ArrayList<>();
 				User userSentTo = userRoleController.getUserById(Integer.parseInt(toUserId), user);
 				for (Message msg : messages) {
 					if (msg.getTo().getId() == userSentTo.getId()) {
@@ -109,8 +109,9 @@ public class InboxService {
 				}
 				return messagesSentTo;
 			}
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	/**
@@ -131,7 +132,7 @@ public class InboxService {
 				for (Message msg : messages) {
 					if (msg.getId() == Integer.parseInt(id)) {
 						messagController.setMessageRead(msg, true);
-						return msg.getMessage();
+						return msg.getContent();
 					}
 				}
 				throw new NotFoundException(createNegativeResponse("User has no message with the given id!"));
@@ -149,21 +150,20 @@ public class InboxService {
 	@POST
 	@Path("new")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response newMessageByUsername(@QueryParam(value = "apiKey") String apiKey,
-			@QueryParam(value = "username") String username, @QueryParam(value = "subject") String subject,
-			@QueryParam(value = "message") String message) {
+	public Response newMessageByUsername(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "username") String username,
+			@QueryParam(value = "subject") String subject, @QueryParam(value = "message") String message) {
 		User from = accessController.checkApiKey(apiKey);
 		if (from != null) {
 			User to = userRoleController.findUserByUsername(username, from);
 			if (to != null) {
 				messagController.createMessage(from, to, subject, message);
-				return createPositiveResponse(
-						"Message " + subject + "has succcessfully been sent to User " + username + ".");
+				return createPositiveResponse("Message " + subject + "has succcessfully been sent to User " + username + ".");
 			} else {
 				return createNegativeResponse("User with username " + username + " not found!");
 			}
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	@POST
@@ -176,37 +176,36 @@ public class InboxService {
 			User to = userRoleController.findUserById(Integer.parseInt(id), from);
 			if (to != null) {
 				messagController.createMessage(from, to, subject, message);
-				return createPositiveResponse(
-						"Message " + subject + "has succcessfully been sent to User " + to.getUsername() + ".");
+				return createPositiveResponse("Message " + subject + "has succcessfully been sent to User " + to.getUsername() + ".");
 			} else {
 				return createNegativeResponse("User with ID " + id + " not found!");
 			}
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	@DELETE
 	@Path("remove")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response removeMessage(@QueryParam(value = "apiKey") String apiKey,
-			@QueryParam(value = "id") String messageId) {
+	public Response removeMessage(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "id") String messageId) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			List<Message> receivedMessages = messagController.getReceivedMessages(user);
 			for (Message msg : receivedMessages) {
 				if (msg.getId() == Integer.parseInt(messageId)) {
 					messagController.deleteMessage(msg.getId());
-					return createPositiveResponse("Message with ID " + messageId + " has been removed.");
+					return createPositiveResponse(LITERAL_MESSAGE_WITH_ID + messageId + " has been removed.");
 				}
 			}
 			List<Message> sentMessages = messagController.getSentMessages(user);
 			for (Message msg : sentMessages) {
 				if (msg.getId() == Integer.parseInt(messageId)) {
 					messagController.deleteMessage(msg.getId());
-					return createPositiveResponse("Message with ID " + messageId + " has been removed.");
+					return createPositiveResponse(LITERAL_MESSAGE_WITH_ID + messageId + " has been removed.");
 				}
 			}
-			return createNegativeResponse("Message with ID " + messageId + " not found. Nothing removed!");
+			return createNegativeResponse(LITERAL_MESSAGE_WITH_ID + messageId + " not found. Nothing removed!");
 		} else {
 			throw new NotAuthorizedException(Response.serverError());
 		}

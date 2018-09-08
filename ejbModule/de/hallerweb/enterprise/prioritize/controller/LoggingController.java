@@ -22,12 +22,12 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @LocalBean
 public class LoggingController {
 
-	static public boolean LOGGING_ENABLED = true;
+	private static boolean loggingEnabled = true;
 
 	@PersistenceContext
 	EntityManager em;
 
-	public static enum Action {
+	public enum Action {
 		CREATE, UPDATE, DELETE
 	}
 
@@ -35,19 +35,19 @@ public class LoggingController {
 	 * Default constructor.
 	 */
 	public LoggingController() {
-		// TODO Auto-generated constructor stub
+		// Auto-generated constructor stub
 	}
 
-	public void enableLogging() {
-		LOGGING_ENABLED = true;
+	public static void enableLogging() {
+		loggingEnabled = true;
 	}
 
-	public void disableLogging() {
-		LOGGING_ENABLED = false;
+	public static void disableLogging() {
+		loggingEnabled = false;
 	}
 
 	public boolean isLoggingEnabled() {
-		return LOGGING_ENABLED;
+		return loggingEnabled;
 	}
 
 	public void log(String user, String relatedObject, Action what, int objectId) {
@@ -56,7 +56,7 @@ public class LoggingController {
 
 	public void log(String user, String relatedObject, Action what, int objectId, String description) {
 		// Log action to database
-		if (LOGGING_ENABLED) {
+		if (loggingEnabled) {
 			LogEntry entry = new LogEntry();
 			entry.setUser(user);
 			entry.setRelatedObject(relatedObject);
@@ -70,11 +70,10 @@ public class LoggingController {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<LogEntry> findLogEntriesByUser(User u) {
+	public List<LogEntry> findLogEntriesByUser(User user) {
 		Query q = em.createNamedQuery("findLogEntryByUser");
-		q.setParameter("username", u.getUsername());
-		List<LogEntry> result = q.getResultList();
-		return result;
+		q.setParameter("username",user.getUsername());
+		return q.getResultList();
 	}
 
 }

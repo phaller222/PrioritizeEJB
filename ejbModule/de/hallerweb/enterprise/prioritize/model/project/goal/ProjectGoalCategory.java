@@ -62,9 +62,11 @@ public class ProjectGoalCategory  {
 	@Version
 	private int entityVersion; // For optimistic locks
 
+	private static final String TYPE_CATEGORY = "CATEGORY";
+	
 	public ProjectGoalCategory() {
 		super();
-		this.subCategories = new HashSet<ProjectGoalCategory>();
+		this.subCategories = new HashSet<>();
 	}
 
 	public ProjectGoalCategory getParentCategory() {
@@ -132,7 +134,7 @@ public class ProjectGoalCategory  {
 	}
 
 	public String getType() {
-		return "CATEGORY";
+		return TYPE_CATEGORY;
 	}
 
 }

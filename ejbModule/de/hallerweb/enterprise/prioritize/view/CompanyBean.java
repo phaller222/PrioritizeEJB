@@ -2,6 +2,8 @@ package de.hallerweb.enterprise.prioritize.view;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -10,20 +12,12 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.jboss.logging.Logger;
-import org.jboss.logging.Logger.Level;
-
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
-import de.hallerweb.enterprise.prioritize.controller.InitializationController;
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Address;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
-import de.hallerweb.enterprise.prioritize.model.security.User;
 
 /**
  * CompanyBean - JSF Backing-Bean to store session information about companies and departments associated with them. this bean is mainly
@@ -46,15 +40,16 @@ public class CompanyBean implements Serializable {
 
 	@EJB
 	CompanyController controller;
-
 	@Inject
 	SessionController sessionController;
-
 	@EJB
 	AuthorizationController authController;
 
-	Company company; 													// Current company
-	Department department; 												// current department
+	transient Company company;				// Current company
+	transient Department department;		// current department
+
+	private static final String NAVIGATION_COMPANIES = "companies";
+	private static final String NAVIGATION_EDIT_COMPANY = "editcompany";
 
 	/**
 	 * Initialize empty {@link Department} and {@link Company}
@@ -108,16 +103,16 @@ public class CompanyBean implements Serializable {
 		if (controller.getCompanyByName(company.getName(), sessionController.getUser()) == null) {
 			Address address = company.getMainAddress();
 			Address adr = controller.createAddress(address.getStreet(), address.getZipCode(), address.getCity(), address.getPhone(),
-					address.getFax());
+					address.getFax(), address.getEmail());
 
-			Company createdCompany = controller.createCompany(company.getName(), adr,sessionController.getUser());
+			Company createdCompany = controller.createCompany(company.getName(), adr, sessionController.getUser());
 			controller.createDepartment(createdCompany, "default", "Auto generated default department", adr, sessionController.getUser());
 
-			return "companies";
+			return NAVIGATION_COMPANIES;
 		} else {
 			ViewUtilities.addErrorMessage("name",
 					"A company with name " + company.getName() + " already exists. Company has not been created!");
-			return "companies";
+			return NAVIGATION_COMPANIES;
 		}
 	}
 
@@ -139,14 +134,14 @@ public class CompanyBean implements Serializable {
 	public String delete(Company company) {
 		controller.deleteCompany(company.getId(), sessionController.getUser());
 		init();
-		return "companies";
+		return NAVIGATION_COMPANIES;
 	}
 
 	@Named
 	public String deleteDepartment(Department department) {
 		company.getDepartments().remove(department);
 		controller.deleteDepartment(department.getId(), sessionController.getUser());
-		return "editcompany";
+		return NAVIGATION_EDIT_COMPANY;
 	}
 
 	/**
@@ -160,7 +155,7 @@ public class CompanyBean implements Serializable {
 	public String edit(Company company) {
 		this.company = company;
 		initDepartment();
-		return "editcompany";
+		return NAVIGATION_EDIT_COMPANY;
 
 	}
 
@@ -173,7 +168,7 @@ public class CompanyBean implements Serializable {
 	public String save() {
 		controller.editCompany(company, sessionController.getUser());
 		init();
-		return "companies";
+		return NAVIGATION_COMPANIES;
 	}
 
 	/**
@@ -199,16 +194,16 @@ public class CompanyBean implements Serializable {
 		try {
 			controller.editDepartment(department, sessionController.getUser());
 		} catch (Exception ex) {
-			Logger.getLogger(CompanyBean.class).log(Level.ERROR, "Could not edit Department");
+			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Could not edit Department");
 		}
 		initDepartment();
-		return "editcompany";
+		return NAVIGATION_EDIT_COMPANY;
 	}
 
 	@Named
 	public String createDummyData() {
 
-		return "companies";
+		return NAVIGATION_COMPANIES;
 
 	}
 

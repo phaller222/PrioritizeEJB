@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 
+import org.jboss.resteasy.logging.Logger;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.NodeCollapseEvent;
 import org.primefaces.event.NodeExpandEvent;
@@ -59,6 +60,9 @@ public class DocumentBean implements Serializable {
 
 	private static final long serialVersionUID = -9021544577054017322L;
 
+	private static final String NAVIGATION_HISTORY = "history";
+	private static final String NAVIGATION_DOCUMENTS = "documents";
+
 	@Inject
 	SessionController sessionController;
 
@@ -74,8 +78,8 @@ public class DocumentBean implements Serializable {
 
 	String selectedItemCollectionName;
 
-	TreeNode documentTreeRoot;
-	TreeNode selectedNode;
+	transient TreeNode documentTreeRoot;
+	transient TreeNode selectedNode;
 
 	public TreeNode getSelectedNode() {
 		return selectedNode;
@@ -93,16 +97,16 @@ public class DocumentBean implements Serializable {
 		this.selectedItemCollectionName = selectedItemCollectionName;
 	}
 
-	List<DocumentInfo> documentInfos; // Current List with documentInfo objects
-										 // in the view.
-	List<DocumentGroup> documentGroups; // Current list of document groups in
-										 // the view
-	List<Department> departments; // List of departments in the view
+	transient List<DocumentInfo> documentInfos; // Current List with documentInfo objects
+	// in the view.
+	transient List<DocumentGroup> documentGroups; // Current list of document groups in
+	// the view
+	transient List<Department> departments; // List of departments in the view
 	String selectedDepartmentId; // Currently selected Department
 	String selectedDocumentGroup; // Currently selected DocumentGroup
 	String documentGroupName; // DocumentGroup to create
-	Document document; // Current Document to create
-	DocumentInfo documentInfo; // Current edited DocumentInfo
+	transient Document document; // Current Document to create
+	transient DocumentInfo documentInfo; // Current edited DocumentInfo
 	String clientFilename; // Name of file to upload on the client machine
 	String tmpMimeType = "text/plain"; // Temporary mimeType of document to
 										 // upload (default: text/plain)
@@ -110,14 +114,14 @@ public class DocumentBean implements Serializable {
 									 // (upload)
 	byte[] tmpBytesDownload = new byte[] {}; // Temporary byte array of document
 											 // to download (download)
-	private DefaultStreamedContent download; // download streamed content
+	private transient DefaultStreamedContent download; // download streamed content
 
-	Department selectedDepartment;
+	transient Department selectedDepartment;
 
 	@PostConstruct
 	public void init() {
 		document = new Document();
-		selectedDocumentGroup = new String();
+		selectedDocumentGroup = "";
 		this.documentTreeRoot = createDocumentTree();
 	}
 
@@ -131,10 +135,10 @@ public class DocumentBean implements Serializable {
 	}
 
 	public List<DocumentInfo> getDocumentInfos() {
-		if (!(this.selectedDocumentGroup == null) && (!this.selectedDocumentGroup.isEmpty())) {
+		if ((this.selectedDocumentGroup != null) && (!this.selectedDocumentGroup.isEmpty())) {
 			return controller.getDocumentInfosInDocumentGroup(Integer.parseInt(this.selectedDocumentGroup), sessionController.getUser());
 		} else {
-			return null;
+			return new ArrayList<>();
 		}
 	}
 
@@ -145,12 +149,12 @@ public class DocumentBean implements Serializable {
 
 	@Named
 	public String setDocumentTag(Document doc, String tag) {
-		Document managedDocument = controller.getDocument(doc.getId(), sessionController.getUser());
-		controller.setDocumentTag(managedDocument, tag, sessionController.getUser());
+		Document managedDocument = controller.getDocument(doc.getId());
+		controller.setDocumentTag(managedDocument, tag);
 		if (tag == null || tag.isEmpty()) {
 			doc.setTag(null);
 		}
-		return "history";
+		return NAVIGATION_HISTORY;
 	}
 
 	@Named
@@ -160,13 +164,13 @@ public class DocumentBean implements Serializable {
 
 	@Named
 	public String createDocument() {
-		if (controller.createDocument(document.getName(), Integer.parseInt(selectedDocumentGroup), sessionController.getUser(), tmpMimeType,
-				false, tmpBytes, "") != null) {
-			return "documents";
+		if (controller.createDocumentInfo(document.getName(), Integer.parseInt(selectedDocumentGroup), sessionController.getUser(),
+				tmpMimeType, false, tmpBytes, "") != null) {
+			return NAVIGATION_DOCUMENTS;
 		} else {
 			ViewUtilities.addErrorMessage("name",
 					"A document with the name " + document.getName() + " already exists in this document group!");
-			return "documents";
+			return NAVIGATION_DOCUMENTS;
 		}
 	}
 
@@ -230,11 +234,10 @@ public class DocumentBean implements Serializable {
 
 	public List<DocumentGroup> getDocumentGroups() {
 		if ((selectedDepartmentId != null) && (selectedDepartmentId.length() > 0)) {
-			List<DocumentGroup> groups = controller.getDocumentGroupsForDepartment(Integer.parseInt(selectedDepartmentId),
-					sessionController.getUser());
-			return groups;
-		} else
-			return new ArrayList<DocumentGroup>();
+			return controller.getDocumentGroupsForDepartment(Integer.parseInt(selectedDepartmentId), sessionController.getUser());
+		} else {
+			return new ArrayList<>();
+		}
 
 	}
 
@@ -248,11 +251,11 @@ public class DocumentBean implements Serializable {
 		if (controller.createDocumentGroup(Integer.parseInt(selectedDepartmentId), documentGroupName,
 				sessionController.getUser()) != null) {
 			init();
-			return "documents";
+			return NAVIGATION_DOCUMENTS;
 		} else {
 			ViewUtilities.addErrorMessage(null,
 					"A document group with the name " + documentGroupName + " already exists in this department!");
-			return "documents";
+			return NAVIGATION_DOCUMENTS;
 		}
 	}
 
@@ -260,20 +263,21 @@ public class DocumentBean implements Serializable {
 		controller.deleteDocumentGroup(
 				controller.getDocumentGroup(Integer.parseInt(this.selectedDocumentGroup), sessionController.getUser()).getId(),
 				sessionController.getUser());
-		return "documents";
+		return NAVIGATION_DOCUMENTS;
 	}
 
 	public String delete(DocumentInfo info) {
 		controller.deleteDocumentInfo(info.getId(), sessionController.getUser());
-		return "documents";
+		return NAVIGATION_DOCUMENTS;
 	}
 
 	public String deleteDocumentVersion(Document doc) {
 		this.documentInfo = controller.deleteDocumentFromDocumentInfo(doc, documentInfo, sessionController.getUser());
 		if (documentInfo.getRecentDocuments().isEmpty()) {
-			return "documents";
-		} else
-			return "history";
+			return NAVIGATION_DOCUMENTS;
+		} else {
+			return NAVIGATION_HISTORY;
+		}
 	}
 
 	/**
@@ -306,20 +310,20 @@ public class DocumentBean implements Serializable {
 	@Named
 	public String history(DocumentInfo info) {
 		this.documentInfo = info;
-		return "history";
+		return NAVIGATION_HISTORY;
 	}
 
 	@Named
 	public String history(String documentInfoId) {
 
 		this.documentInfo = controller.getDocumentInfo(Integer.parseInt(documentInfoId), sessionController.getUser());
-		return "history";
+		return NAVIGATION_HISTORY;
 	}
 
 	@Named
 	public String setDocumentAsCurrent(Document doc) {
 		controller.setDocumentAsCurrentVersion(doc, documentInfo, sessionController.getUser());
-		return "documents";
+		return NAVIGATION_DOCUMENTS;
 	}
 
 	/**
@@ -330,8 +334,8 @@ public class DocumentBean implements Serializable {
 	 */
 	@Named
 	public String commitEdits() {
-		controller.editDocument(documentInfo, document, tmpBytes, tmpMimeType, sessionController.getUser(), false);
-		return "documents";
+		controller.editDocumentInfo(documentInfo, document, tmpBytes, tmpMimeType, sessionController.getUser(), false);
+		return NAVIGATION_DOCUMENTS;
 	}
 
 	// ---------------- File download and upload management
@@ -340,7 +344,7 @@ public class DocumentBean implements Serializable {
 		this.download = download;
 	}
 
-	public DefaultStreamedContent getDownload() throws Exception {
+	public DefaultStreamedContent getDownload() {
 		return download;
 	}
 
@@ -350,8 +354,8 @@ public class DocumentBean implements Serializable {
 	 * @param id
 	 * @throws Exception
 	 */
-	public void prepDownload(int id) throws Exception {
-		DocumentInfo docToDownload = controller.getDocumentInfo(Integer.valueOf(id), sessionController.getUser());
+	public void prepDownload(int id) {
+		DocumentInfo docToDownload = controller.getDocumentInfo(id, sessionController.getUser());
 		Document currentDocument = docToDownload.getCurrentDocument();
 
 		ByteArrayInputStream in = new ByteArrayInputStream(currentDocument.getData(), 0, currentDocument.getData().length);
@@ -365,8 +369,8 @@ public class DocumentBean implements Serializable {
 	 * @param id
 	 * @throws Exception
 	 */
-	public void prepDownloadHistory(int id) throws Exception {
-		Document docToDownload = controller.getDocument(Integer.valueOf(id), sessionController.getUser());
+	public void prepDownloadHistory(int id) {
+		Document docToDownload = controller.getDocument(id);
 
 		ByteArrayInputStream in = new ByteArrayInputStream(docToDownload.getData(), 0, docToDownload.getData().length);
 
@@ -381,7 +385,7 @@ public class DocumentBean implements Serializable {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			InputStream in = event.getFile().getInputstream();
 
-			tmpMimeType = event.getFile().getContentType();// URLConnection.guessContentTypeFromName(clientFilename);
+			tmpMimeType = event.getFile().getContentType();
 			if (tmpMimeType == null) {
 				tmpMimeType = "application/unknown";
 			}
@@ -399,7 +403,7 @@ public class DocumentBean implements Serializable {
 
 			tmpBytes = out.toByteArray();
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			Logger.getLogger(getClass()).error(e.getMessage());
 		}
 	}
 
@@ -492,52 +496,47 @@ public class DocumentBean implements Serializable {
 		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
 		for (Company c : companies) {
 			TreeNode company = new DefaultTreeNode(new DocumentTreeInfo(c.getName(), false, false, null, null), root);
-			List<Department> departments = c.getDepartments();
-			for (Department d : departments) {
+			List<Department> companyDepartments = c.getDepartments();
+			for (Department d : companyDepartments) {
 				TreeNode department = new DefaultTreeNode(new DocumentTreeInfo(d.getName(), false, false, null, null), company);
-				List<DocumentGroup> groups = d.getDocumentGroups();
-				for (DocumentGroup g : groups) {
-					if (authController.canRead(g, sessionController.getUser())) {
-						TreeNode group = null;
-						if (authController.canCreate(g, sessionController.getUser())) {
-							group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null),
-									department);
-						} else {
-							group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, false, null, null), department);
-						}
-						Set<DocumentInfo> documents = g.getDocuments();
-						List<DocumentInfo> docList = new ArrayList<DocumentInfo>();
-						docList.addAll(documents);
-						Collections.sort(docList, new Comparator<DocumentInfo>() {
-							@Override
-							public int compare(DocumentInfo o1, DocumentInfo o2) {
-								Integer id1 = o1.getId();
-								Integer id2 = o2.getId();
-								if (id1 == null && id2 == null) {
-									return 0;
-								} else if (id1 != null && id2 == null) {
-									return -1;
-								} else if (id1 == null && id2 != null) {
-									return 1;
-								} else {
-									return o2.getCurrentDocument().getLastModified().compareTo(o1.getCurrentDocument().getLastModified());
-								}
-							}
-						});
-						for (DocumentInfo docInfo : docList) {
-							if (authController.canRead(docInfo, sessionController.getUser())) {
-								TreeNode documentInfoNode = new DefaultTreeNode(
-										new DocumentTreeInfo(docInfo.getCurrentDocument().getName(), true, false, null, docInfo), group);
-							}
-						}
-
-					}
-
-				}
-
+				Set<DocumentGroup> groups = d.getDocumentGroups();
+				buildDocumentGroupsWithContent(department, groups);
 			}
 		}
 		return root;
+	}
+
+	private void buildDocumentGroupsWithContent(TreeNode department, Set<DocumentGroup> groups) {
+		for (DocumentGroup g : groups) {
+			if (authController.canRead(g, sessionController.getUser())) {
+				TreeNode group = null;
+				if (authController.canCreate(g, sessionController.getUser())) {
+					group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null),
+							department);
+				} else {
+					group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, false, null, null), department);
+				}
+				Set<DocumentInfo> documents = g.getDocuments();
+				List<DocumentInfo> docList = new ArrayList<>();
+				docList.addAll(documents);
+				sortDocumentList(docList);
+				for (DocumentInfo docInfo : docList) {
+					if (authController.canRead(docInfo, sessionController.getUser())) {
+						new DefaultTreeNode(new DocumentTreeInfo(docInfo.getCurrentDocument().getName(), true, false, null, docInfo),
+								group);
+					}
+				}
+			}
+		}
+	}
+
+	private void sortDocumentList(List<DocumentInfo> docList) {
+		Collections.sort(docList, new Comparator<DocumentInfo>() {
+			@Override
+			public int compare(DocumentInfo o1, DocumentInfo o2) {
+				return o2.getCurrentDocument().getLastModified().compareTo(o1.getCurrentDocument().getLastModified());
+			}
+		});
 	}
 
 	public void updateDocumentTree() {
@@ -565,11 +564,13 @@ public class DocumentBean implements Serializable {
 	public String createNewDocument() {
 		if (selectedNode != null) {
 			if (selectedNode.isLeaf()) {
-				return "documents";
-			} else
-				return "history";
-		} else
+				return NAVIGATION_DOCUMENTS;
+			} else {
+				return NAVIGATION_HISTORY;
+			}
+		} else {
 			return null;
+		}
 	}
 
 	public void updateDocumentGroupId(String groupId) {
@@ -577,7 +578,7 @@ public class DocumentBean implements Serializable {
 	}
 
 	public String goBack() {
-		return "documents";
+		return NAVIGATION_DOCUMENTS;
 	}
 
 }

@@ -60,15 +60,20 @@ public class SkillBean implements Serializable {
 	@Inject
 	MQTTService service;
 
-	SkillCategory selectedSkillCategory;
-	Skill selectedSkill;
-	List<SkillCategory> skillCategories;
+	transient SkillCategory selectedSkillCategory;
+	transient Skill selectedSkill;
+	transient List<SkillCategory> skillCategories;
 	private DefaultTreeNode root;
+	private transient Object selectedSkillItem = null;
+	private transient SkillCategory newSkillCategory = new SkillCategory();
+	private String currentTreeOrientation = "horizontal";
 
 	private static final String TYPE_ROOT = "rootnode";
 	private static final String TYPE_CATEGORY = "category";
 	private static final String TYPE_SKILL = "skill";
 	private static final String TYPE_SKILL_PROPERTY = "skillproperty";
+
+	private static final String NAVIGATION_SKILLS = "skills";
 
 	public Skill getSelectedSkill() {
 		return selectedSkill;
@@ -82,16 +87,10 @@ public class SkillBean implements Serializable {
 
 	}
 
-	private Object selectedSkillItem = null;
-	private SkillCategory newSkillCategory = new SkillCategory();
-	private String currentTreeOrientation = "horizontal";
-
-	private static boolean dummyDataCreated = false; // TODO: Remove for production!
-
 	int selectedEnthusiasmLevel;
 
 	public int getSelectedEnthusiasmLevel() {
-		return selectedEnthusiasmLevel = 0;
+		return selectedEnthusiasmLevel;
 	}
 
 	public void setSelectedEnthusiasmLevel(int selectedEnthusiasmLevel) {
@@ -114,10 +113,6 @@ public class SkillBean implements Serializable {
 		this.newSkillCategory = newSkillCategory;
 	}
 
-	public String getTYPE_ROOT() {
-		return TYPE_ROOT;
-	}
-
 	public Object getSelectedSkillItem() {
 		return selectedSkillItem;
 	}
@@ -126,21 +121,9 @@ public class SkillBean implements Serializable {
 		if (selectedSkillItem != null) {
 			this.selectedSkillItem = selectedSkillItem;
 			if (((DefaultTreeNode) selectedSkillItem).getData() instanceof Skill) {
-				this.selectedSkill = (Skill) ((DefaultTreeNode) selectedSkillItem).getData();// selectedSkillItem;
+				this.selectedSkill = (Skill) ((DefaultTreeNode) selectedSkillItem).getData();
 			}
 		}
-	}
-
-	public String getTYPE_CATEGORY() {
-		return TYPE_CATEGORY;
-	}
-
-	public String getTYPE_SKILL() {
-		return TYPE_SKILL;
-	}
-
-	public String getTYPE_SKILL_PROPERTY() {
-		return TYPE_SKILL_PROPERTY;
 	}
 
 	/**
@@ -177,7 +160,7 @@ public class SkillBean implements Serializable {
 			Skill s = (Skill) skillItem;
 			controller.deleteSkill(s.getId(), sessionController.getUser());
 		}
-		return "skills";
+		return NAVIGATION_SKILLS;
 	}
 
 	public void deleteSelectedSkillItem() {
@@ -188,9 +171,6 @@ public class SkillBean implements Serializable {
 		selectedNode.getChildren().clear();
 		selectedNode.getParent().getChildren().remove(selectedNode);
 		selectedNode.setParent(null);
-
-		selectedNode = null;
-
 	}
 
 	public void addSubcategoryToSelectedItem() {
@@ -204,7 +184,7 @@ public class SkillBean implements Serializable {
 
 	@Named
 	public String editItem(int skillItem) {
-		return "skills";
+		return NAVIGATION_SKILLS;
 	}
 
 	@Named
@@ -220,14 +200,14 @@ public class SkillBean implements Serializable {
 	 * 
 	 * @return
 	 */
-	@PostConstruct
 	public void createDummyData() {
-		if (dummyDataCreated) {
-			return;
-		}
+		
+		List<Skill> skills = controller.getAllSkills(AuthorizationController.getSystemUser());
+		if (skills == null || skills.size() < 1) {
+		
 		SkillCategory catCoaching = controller.createSkillCategory("Coaching", "Schulungen/Workshops/Coaching", null,
 				AuthorizationController.getSystemUser());
-		Skill workshops = controller.createSkill("Workshops", "Durchführung von Workshops", "coaching,workshops", catCoaching, null,
+		controller.createSkill("Workshops", "Durchführung von Workshops", "coaching,workshops", catCoaching, null,
 				AuthorizationController.getSystemUser());
 
 		SkillPropertyNumeric prop1 = new SkillPropertyNumeric();
@@ -250,7 +230,7 @@ public class SkillBean implements Serializable {
 		prop22.setText("");
 		prop22.setNumericProperty(false);
 
-		HashSet props = new HashSet<SkillProperty>();
+		HashSet<SkillProperty> props = new HashSet<>();
 		props.add(prop1);
 		props.add(prop2);
 		props.add(prop22);
@@ -269,22 +249,20 @@ public class SkillBean implements Serializable {
 		prop4.setMinValue(0);
 		prop4.setMaxValue(6);
 
-		HashSet props2 = new HashSet<SkillProperty>();
+		HashSet<SkillProperty> props2 = new HashSet<>();
 		props2.add(prop3);
 		props2.add(prop4);
 
 		SkillCategory cat2 = controller.createSkillCategory("Programmierung", "Programmierung/Programmiersprachen", null,
-				authController.getSystemUser());
+				AuthorizationController.getSystemUser());
 		SkillCategory cat22 = controller.createSkillCategory("Java", "Kenntnisse im Bereich Java", cat2,
 				AuthorizationController.getSystemUser());
 		SkillCategory cat23 = controller.createSkillCategory("Apple", "Apple Kenntnisse", cat2, AuthorizationController.getSystemUser());
 
-		Skill sk1 = controller.createSkill("J2EE", "J2EE Kenntnisse", "JPA, JavaMail, EJB", cat22, props,
-				AuthorizationController.getSystemUser());
-		Skill sk2 = controller.createSkill("iOS", "iOS Kenntnisse", "Swift, objective-c...", cat23, props2,
-				AuthorizationController.getSystemUser());
+		controller.createSkill("J2EE", "J2EE Kenntnisse", "JPA, JavaMail, EJB", cat22, props, AuthorizationController.getSystemUser());
+		controller.createSkill("iOS", "iOS Kenntnisse", "Swift, objective-c...", cat23, props2, AuthorizationController.getSystemUser());
+		}
 
-		dummyDataCreated = true;
 	}
 
 	private void traverseSkillCategories(DefaultTreeNode parentNode, SkillCategory currentCategory) {
@@ -320,22 +298,18 @@ public class SkillBean implements Serializable {
 	}
 
 	@Named
-	public boolean isSkillCategory(Object o) {
-		return o instanceof SkillCategory;
+	public boolean isSkillCategory(Object obj) {
+		return obj instanceof SkillCategory;
 	}
 
 	@Named
-	public boolean isSkill(Object o) {
-		return o instanceof Skill;
+	public boolean isSkill(Object obj) {
+		return obj instanceof Skill;
 	}
 
 	@Named
-	public boolean isSkillProperty(Object o) {
-		return o instanceof SkillProperty;
-	}
-
-	public String addSkillCategory(Object category) {
-		return "skills";
+	public boolean isSkillProperty(Object obj) {
+		return obj instanceof SkillProperty;
 	}
 
 	@Named
@@ -354,9 +328,9 @@ public class SkillBean implements Serializable {
 	public void assignSkillToUser(String userid) {
 
 		DefaultTreeNode node = (DefaultTreeNode) getSelectedSkillItem();
-		Skill selectedSkill = (Skill) node.getData();
-		HashSet<SkillRecordProperty> propertyRecords = new HashSet<SkillRecordProperty>();
-		Set<SkillProperty> skillProperties = selectedSkill.getSkillProperties();
+		Skill selectedSkillInTree = (Skill) node.getData();
+		HashSet<SkillRecordProperty> propertyRecords = new HashSet<>();
+		Set<SkillProperty> skillProperties = selectedSkillInTree.getSkillProperties();
 		for (SkillProperty prop : skillProperties) {
 			if (prop.getNumericProperty()) {
 				SkillPropertyNumeric numProperty = (SkillPropertyNumeric) prop;
@@ -374,16 +348,16 @@ public class SkillBean implements Serializable {
 		}
 
 		User userToAssignSkill = roleController.getUserById(Integer.parseInt(userid), sessionController.getUser());
-		SkillRecord rec = controller.createSkillRecord(selectedSkill, propertyRecords, this.selectedEnthusiasmLevel);
+		SkillRecord rec = controller.createSkillRecord(selectedSkillInTree, propertyRecords, this.selectedEnthusiasmLevel);
 		roleController.addSkillToUser(userToAssignSkill.getId(), rec.getId(), sessionController.getUser());
 	}
 
 	public void assignSkillToResource(String resourceId) {
 
 		DefaultTreeNode node = (DefaultTreeNode) getSelectedSkillItem();
-		Skill selectedSkill = (Skill) node.getData();
-		Set<SkillRecordProperty> propertyRecords = new HashSet<SkillRecordProperty>();
-		Set<SkillProperty> skillProperties = selectedSkill.getSkillProperties();
+		Skill selectedSkillInTree = (Skill) node.getData();
+		Set<SkillRecordProperty> propertyRecords = new HashSet<>();
+		Set<SkillProperty> skillProperties = selectedSkillInTree.getSkillProperties();
 		for (SkillProperty prop : skillProperties) {
 			if (prop.getNumericProperty()) {
 				SkillPropertyNumeric numProperty = (SkillPropertyNumeric) prop;
@@ -401,7 +375,7 @@ public class SkillBean implements Serializable {
 		}
 
 		Resource resourceToAssignSkill = resourceController.getResource(Integer.parseInt(resourceId), sessionController.getUser());
-		SkillRecord rec = controller.createSkillRecord(selectedSkill, propertyRecords, this.selectedEnthusiasmLevel);
+		SkillRecord rec = controller.createSkillRecord(selectedSkillInTree, propertyRecords, this.selectedEnthusiasmLevel);
 		resourceController.addSkillToResource(resourceToAssignSkill.getId(), rec.getId(), sessionController.getUser());
 	}
 

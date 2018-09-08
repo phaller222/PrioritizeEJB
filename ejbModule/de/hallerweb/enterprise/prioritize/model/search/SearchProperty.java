@@ -16,7 +16,7 @@ package de.hallerweb.enterprise.prioritize.model.search;
 
 public class SearchProperty {
 
-	public static enum SearchPropertyType {
+	public enum SearchPropertyType {
 		NAME, DESCRIPTION, SKILL, VERSION
 	}
 
@@ -37,6 +37,8 @@ public class SearchProperty {
 		case "DESCRIPTION":
 			this.type = SearchPropertyType.DESCRIPTION;
 			break;
+		default:
+			this.type = SearchPropertyType.NAME;
 		}
 	}
 

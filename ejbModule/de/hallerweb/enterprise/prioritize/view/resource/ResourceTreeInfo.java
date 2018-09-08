@@ -1,13 +1,12 @@
 package de.hallerweb.enterprise.prioritize.view.resource;
 
-import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 
 public class ResourceTreeInfo {
 
 	private boolean leaf;
 	private boolean resourceGroupNode;
-	
+
 	public boolean isResourceGroupNode() {
 		return resourceGroupNode;
 	}

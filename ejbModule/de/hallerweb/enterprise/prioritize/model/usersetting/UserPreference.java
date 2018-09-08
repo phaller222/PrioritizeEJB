@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 
+import org.jboss.resteasy.logging.Logger;
+
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
@@ -68,9 +70,10 @@ public class UserPreference {
 
 	public boolean addWatchedResource(Resource res) {
 		if (!this.watchedResources.contains(res)) {
-		boolean added = this.watchedResources.add(res);
-		return added;
-		} else return false;
+			return this.watchedResources.add(res);
+		} else {
+			return false;
+		}
 
 	}
 
@@ -85,14 +88,13 @@ public class UserPreference {
 			try {
 				// TODO: Klären warum dies 2 mal aufgerufen werden muss!!!
 				this.watchedResources.remove(resToRemove);
-
 				this.watchedResources.remove(resToRemove);
 			} catch (Exception ex) {
-				ex.printStackTrace();
-				// TODO: Klären warum dies 2 mal aufgerufen werden muss!!!
+				Logger.getLogger(getClass()).error(ex.getMessage());
 			}
 			return true;
-		} else
+		} else {
 			return false;
+		}
 	}
 }

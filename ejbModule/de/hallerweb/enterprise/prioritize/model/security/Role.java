@@ -64,7 +64,7 @@ public class Role extends PActor implements PAuthorizedObject, PSearchable {
 
 	@Override
 	public List<SearchResult> find(String phrase) {
-		ArrayList<SearchResult> results = new ArrayList<SearchResult>();
+		ArrayList<SearchResult> results = new ArrayList<>();
 		// Search role name
 		if (name.toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
 			// Match found
@@ -83,14 +83,13 @@ public class Role extends PActor implements PAuthorizedObject, PSearchable {
 	
 	@Override
 	public List<SearchResult> find(String phrase, SearchProperty property) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<>();
 	}
 
 	@Override
 	public List<SearchProperty> getSearchProperties() {
 		if (this.searchProperties == null) {
-			searchProperties = new ArrayList<SearchProperty>();
+			searchProperties = new ArrayList<>();
 			SearchProperty prop = new SearchProperty("RESOURCE");
 			prop.setName("Resource");
 			searchProperties.add(prop);
@@ -100,7 +99,7 @@ public class Role extends PActor implements PAuthorizedObject, PSearchable {
 
 	public Role() {
 		super();
-		this.users = new HashSet<User>();
+		this.users = new HashSet<>();
 	}
 
 	public Set<PermissionRecord> getPermissions() {
@@ -113,7 +112,7 @@ public class Role extends PActor implements PAuthorizedObject, PSearchable {
 
 	public void addPermission(PermissionRecord rec) {
 		if (this.permissions == null) {
-			permissions = new HashSet<PermissionRecord>();
+			permissions = new HashSet<>();
 		}
 		this.permissions.add(rec);
 	}
@@ -161,4 +160,9 @@ public class Role extends PActor implements PAuthorizedObject, PSearchable {
 		return null;
 	}
 
+	@Override
+	public String toString() {
+		return this.name;
+	}
+	
 }

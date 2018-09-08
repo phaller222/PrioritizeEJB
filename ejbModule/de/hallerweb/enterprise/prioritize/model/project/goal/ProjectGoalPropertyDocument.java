@@ -20,23 +20,17 @@ import de.hallerweb.enterprise.prioritize.model.document.Document;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public class ProjectGoalPropertyDocument extends ProjectGoalProperty  {
+public class ProjectGoalPropertyDocument extends ProjectGoalProperty {
 
-	private String tag;		  // Target tag a document should have 	
-	
-
+	private String tag;		  // Target tag a document should have
 
 	public String getTag() {
 		return tag;
 	}
 
-
-
 	public void setTag(String tag) {
 		this.tag = tag;
 	}
-
-
 
 	@Override
 	public String toString() {

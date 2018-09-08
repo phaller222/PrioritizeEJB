@@ -38,22 +38,16 @@ public class SearchController {
 
 	@EJB
 	UserRoleController userRoleController;
-
 	@EJB
 	DocumentController documentController;
-
 	@EJB
 	ResourceController resourceController;
-
 	@EJB
 	CompanyController companyController;
-
 	@EJB
 	SkillController skillController;
-
 	@EJB
 	LoggingController logger;
-
 	@EJB
 	AuthorizationController authController;
 
@@ -61,7 +55,7 @@ public class SearchController {
 	SessionController sessionController;
 
 	public List<SearchResult> searchUsers(String phrase, User sessionUser) {
-		List<SearchResult> result = new ArrayList<SearchResult>();
+		List<SearchResult> result = new ArrayList<>();
 		List<User> users = userRoleController.getAllUsers(sessionUser);
 		for (User user : users) {
 			result.addAll(user.find(phrase));
@@ -71,7 +65,7 @@ public class SearchController {
 	}
 
 	public List<SearchResult> searchDocuments(String phrase, User user) {
-		List<SearchResult> result = new ArrayList<SearchResult>();
+		List<SearchResult> result = new ArrayList<>();
 		List<DocumentInfo> documentInfos = documentController.getAllDocumentInfos(sessionController.getUser());
 		for (DocumentInfo docInfo : documentInfos) {
 			if (authController.canRead(docInfo, user)) {
@@ -82,7 +76,7 @@ public class SearchController {
 	}
 
 	public List<SearchResult> searchResources(String phrase, User user) {
-		List<SearchResult> result = new ArrayList<SearchResult>();
+		List<SearchResult> result = new ArrayList<>();
 		List<Resource> resources = resourceController.getAllResources(sessionController.getUser());
 		for (Resource res : resources) {
 			if (authController.canRead(res, user)) {
@@ -93,7 +87,7 @@ public class SearchController {
 	}
 
 	public List<SearchResult> searchSkills(String phrase, User user) {
-		List<SearchResult> result = new ArrayList<SearchResult>();
+		List<SearchResult> result = new ArrayList<>();
 		List<Skill> skills = skillController.getAllSkills(user);
 		if (skills != null && !skills.isEmpty()) {
 			for (Skill skill : skills) {
@@ -106,7 +100,7 @@ public class SearchController {
 	}
 
 	public List<SearchResult> searchRoles(String phrase, User sessionUser) {
-		List<SearchResult> result = new ArrayList<SearchResult>();
+		List<SearchResult> result = new ArrayList<>();
 		List<Role> roles = userRoleController.getAllRoles(sessionUser);
 		for (Role role : roles) {
 			result.addAll(role.find(phrase));
@@ -115,7 +109,7 @@ public class SearchController {
 	}
 
 	public List<SearchResult> searchDepartments(String phrase, User user) {
-		List<SearchResult> result = new ArrayList<SearchResult>();
+		List<SearchResult> result = new ArrayList<>();
 		List<Department> departments = companyController.getAllDepartments(sessionController.getUser());
 		for (Department dept : departments) {
 			if (authController.canRead(dept, user)) {
@@ -125,9 +119,8 @@ public class SearchController {
 		return result;
 	}
 
-	// TODO: Skills durchsuchbar machen!
 	public List<SearchResult> search(String phrase, User user) {
-		List<SearchResult> result = new ArrayList<SearchResult>();
+		List<SearchResult> result = new ArrayList<>();
 		result.addAll(searchUsers(phrase, user));
 		result.addAll(searchDocuments(phrase, user));
 		result.addAll(searchResources(phrase, user));
@@ -144,11 +137,10 @@ public class SearchController {
 	 * @return List<SearchResult> searchresult
 	 */
 	public List<SearchResult> searchUser(String phrase, SearchProperty property, User sessionUser) {
-		List<SearchResult> result = new ArrayList<SearchResult>();
+		List<SearchResult> result = new ArrayList<>();
 		List<User> users = userRoleController.getAllUsers(sessionUser);
 		for (User user : users) {
 			if (authController.canRead(user, sessionUser)) {
-				List<SearchResult> res = user.find(phrase, property);
 				result.addAll(user.find(phrase, property));
 			}
 		}

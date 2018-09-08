@@ -47,7 +47,7 @@ public class UserPreferenceController {
 	 * Default constructor.
 	 */
 	public UserPreferenceController() {
-		// TODO Auto-generated constructor stub
+		// Auto-generated constructor stub
 	}
 	
 	public UserPreference createUserPreference(User owner) {

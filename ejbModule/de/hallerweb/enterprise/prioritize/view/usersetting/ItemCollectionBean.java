@@ -38,9 +38,9 @@ public class ItemCollectionBean implements Serializable {
 	@Inject
 	SessionController sessionController;
 
-	ItemCollection newItemCollection; 										// ItemCollection to be created.
-	ItemCollection currentItemCollection;									// Selected item collection / to be edited.
-	
+	transient ItemCollection newItemCollection; 			// ItemCollection to be created.
+	transient ItemCollection currentItemCollection;			// Selected item collection / to be edited.
+
 	/**
 	 * Initialize empty {@link ItemCollection}
 	 */
@@ -48,7 +48,7 @@ public class ItemCollectionBean implements Serializable {
 	public void init() {
 		newItemCollection = new ItemCollection();
 	}
-	
+
 	public ItemCollection getNewItemCollection() {
 		return newItemCollection;
 	}
@@ -66,13 +66,13 @@ public class ItemCollectionBean implements Serializable {
 		return itemCollectionController.createItemCollection(newItemCollection.getName(), newItemCollection.getDescription(),
 				sessionController.getUser());
 	}
-	
+
 	@Named
 	public void deleteItemCollection(ItemCollection collection) {
 		itemCollectionController.deleteItemCollection(collection);
 	}
-	
-	@Named 
+
+	@Named
 	public String editItemCollection(ItemCollection collection) {
 		this.currentItemCollection = collection;
 		return "edititemcollections";
@@ -84,7 +84,8 @@ public class ItemCollectionBean implements Serializable {
 	}
 
 	public String removeUser(User user) {
-		ItemCollection collection = itemCollectionController.getItemCollection(sessionController.getUser(), this.currentItemCollection.getName());
+		ItemCollection collection = itemCollectionController.getItemCollection(sessionController.getUser(),
+				this.currentItemCollection.getName());
 		itemCollectionController.removeUser(collection, user);
 		return "itemcollections";
 	}
@@ -93,14 +94,15 @@ public class ItemCollectionBean implements Serializable {
 		ItemCollection collection = itemCollectionController.getItemCollection(sessionController.getUser(), itemCollectionName);
 		return collection.getUsers();
 	}
-	
+
 	public void addDocument(String itemCollectionName, DocumentInfo document) {
 		ItemCollection collection = itemCollectionController.getItemCollection(sessionController.getUser(), itemCollectionName);
 		itemCollectionController.addDocumentInfo(collection, document);
 	}
 
 	public String removeDocument(DocumentInfo document) {
-		ItemCollection collection = itemCollectionController.getItemCollection(sessionController.getUser(), this.currentItemCollection.getName());
+		ItemCollection collection = itemCollectionController.getItemCollection(sessionController.getUser(),
+				this.currentItemCollection.getName());
 		itemCollectionController.removeDocumentInfo(collection, document);
 		return "itemcollections";
 	}
@@ -109,7 +111,7 @@ public class ItemCollectionBean implements Serializable {
 		ItemCollection collection = itemCollectionController.getItemCollection(sessionController.getUser(), itemCollectionName);
 		return collection.getDocuments();
 	}
-	
+
 	public ItemCollectionController getItemCollectionController() {
 		return itemCollectionController;
 	}
@@ -117,7 +119,7 @@ public class ItemCollectionBean implements Serializable {
 	public void setItemCollectionController(ItemCollectionController itemCollectionController) {
 		this.itemCollectionController = itemCollectionController;
 	}
-	
+
 	public ItemCollection getCurrentItemCollection() {
 		return currentItemCollection;
 	}

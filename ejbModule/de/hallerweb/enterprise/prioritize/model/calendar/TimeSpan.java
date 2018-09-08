@@ -36,11 +36,12 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  * @author peter
  */
 @Entity
-@NamedQueries({ @NamedQuery(name = "findTimeSpansByUser", query = "select ts FROM TimeSpan ts WHERE :user MEMBER OF ts.involvedUsers") })
+@NamedQueries({ @NamedQuery(name = "findTimeSpansByUser", query = "select ts FROM TimeSpan ts WHERE :user MEMBER OF ts.involvedUsers"),
+	@NamedQuery(name = "findTimeSpansByUserAndType", query = "select ts FROM TimeSpan ts WHERE :user MEMBER OF ts.involvedUsers AND ts.type = :type")})
 public class TimeSpan implements PAuthorizedObject {
 
-	public static enum TimeSpanType {
-		RESOURCE_RESERVATION, VACATION, ILLNESS, OTHER, ALL
+	public enum TimeSpanType {
+		RESOURCE_RESERVATION, VACATION, ILLNESS, TIME_TRACKER, OTHER, ALL
 	}
 
 	@Id
@@ -126,7 +127,7 @@ public class TimeSpan implements PAuthorizedObject {
 
 	public void addInvolvedResource(Resource resource) {
 		if (this.involvedResources == null) {
-			this.involvedResources = new HashSet<Resource>();
+			this.involvedResources = new HashSet<>();
 		}
 		this.involvedResources.add(resource);
 
@@ -142,7 +143,7 @@ public class TimeSpan implements PAuthorizedObject {
 
 	public void addInvolvedUser(User user) {
 		if (this.involvedUsers == null) {
-			this.involvedUsers = new HashSet<User>();
+			this.involvedUsers = new HashSet<>();
 		}
 		this.involvedUsers.add(user);
 	}
@@ -161,8 +162,9 @@ public class TimeSpan implements PAuthorizedObject {
 			return false;
 		} else if (until.before(this.dateFrom)) {
 			return false;
-		} else
+		} else {
 			return true;
+		}
 	}
 
 	@Override

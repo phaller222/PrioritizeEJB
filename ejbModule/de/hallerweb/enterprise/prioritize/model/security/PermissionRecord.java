@@ -10,7 +10,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.view.security.RoleBean;
 
 /**
  * {@link PermissionRecord} - Holds information about a specific access rule based on CRUD (CREATE/READ/UPDATE/DELETE) to specific objects
@@ -28,20 +27,19 @@ import de.hallerweb.enterprise.prioritize.view.security.RoleBean;
 @Entity
 @NamedQueries(@NamedQuery(name = "findPermissionRecordsByDepartment", query = "select p FROM PermissionRecord p "
 		+ "WHERE p.department.id = :deptId"))
-public class PermissionRecord implements PAuthorizedObject{
+public class PermissionRecord implements PAuthorizedObject {
 
 	public PermissionRecord() {
 
 	}
 
-	public PermissionRecord(boolean create, boolean read, boolean update, boolean delete,
-			String absoluteObjectType) {
+	public PermissionRecord(boolean create, boolean read, boolean update, boolean delete, String absoluteObjectType) {
 		this.readPermission = read;
 		this.createPermission = create;
 		this.updatePermission = update;
 		this.deletePermission = delete;
 		this.absoluteObjectType = absoluteObjectType;
-		//this.targetResourceType = targetResourceType;
+		setObjectNameFromAbsoluteObjectType();
 	}
 
 	public PermissionRecord(boolean create, boolean read, boolean update, boolean delete) {
@@ -91,8 +89,21 @@ public class PermissionRecord implements PAuthorizedObject{
 	boolean readPermission;
 	boolean updatePermission;
 	boolean deletePermission;
-	//Class<? extends PAuthorizedObject> targetResourceType;
 	String absoluteObjectType;
+	String objectName;
+	int objectId;
+
+	public int getObjectId() {
+		return objectId;
+	}
+
+	public String getObjectName() {
+		return objectName;
+	}
+
+	public void setObjectId(int objectId) {
+		this.objectId = objectId;
+	}
 
 	public String getAbsoluteObjectType() {
 		return absoluteObjectType;
@@ -100,6 +111,13 @@ public class PermissionRecord implements PAuthorizedObject{
 
 	public void setAbsoluteObjectType(String absoluteObjectType) {
 		this.absoluteObjectType = absoluteObjectType;
+		setObjectNameFromAbsoluteObjectType();
+	}
+
+	private void setObjectNameFromAbsoluteObjectType() {
+		if (this.absoluteObjectType != null) {
+		this.objectName = this.absoluteObjectType.substring(this.absoluteObjectType.lastIndexOf('.') + 1, this.absoluteObjectType.length());
+		}
 	}
 
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -108,14 +126,6 @@ public class PermissionRecord implements PAuthorizedObject{
 	public Department getDepartment() {
 		return department;
 	}
-
-//	public Class<? extends PAuthorizedObject> getTargetResourceType() {
-//		return targetResourceType;
-//	}
-//
-//	public void setTargetResourceType(String targetResource) {
-//		this.targetResourceType = (Class<? extends PAuthorizedObject>) RoleBean.authorizedObjects.get(targetResource);
-//	}
 
 	public int getId() {
 		return id;

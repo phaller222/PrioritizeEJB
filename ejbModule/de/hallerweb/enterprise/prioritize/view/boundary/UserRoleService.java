@@ -1,6 +1,7 @@
 /**
  * 
  */
+
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import java.util.HashSet;
@@ -69,41 +70,113 @@ public class UserRoleService {
 	/**
 	 * Returns all the users in the given department
 	 * 
+	 * @api {get} /users/department/{departmentToken} getUsers
+	 * @apiName getUsers
+	 * @apiGroup /users
+	 * @apiDescription Returns all users within the department with token {departmentToken}
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiSuccess {List}  JSON-Array with all users in this department.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 * [
+	 *  {
+	 *   "id": 48,
+	 *   "name": "peter",
+	 *   "username": "peter"
+	 *  },
+	 *  {
+	 *   "id": 54,
+	 *   "name": "torsten",
+	 *   "username": "torsten"
+	 *  }
+	 * ]
+	 *
+	 * @apiError NotAuthorized APIKey incorrect.
+	 * 
 	 * @param departmentToken - The department token.
 	 * @return JSON object with users in that department.
 	 */
 	@GET
-	@Path("list/{departmentToken}")
+	@Path("department/{departmentToken}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<User> getUsers(@PathParam(value = "departmentToken") String departmentToken, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Department dept = companyController.getDepartmentByToken(departmentToken);
+			Department dept = companyController.getDepartmentByToken(departmentToken, user);
 			if (dept != null) {
-				List<User> users = userRoleController.getUsersForDepartment(dept, user);
-				return users;
+				return userRoleController.getUsersForDepartment(dept, user);
 			}
 			throw new NotFoundException(createNegativeResponse("Department not found or department token invalid!"));
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	/**
 	 * Return the {@link User} object with the given id.
 	 *
-	 * @param id
-	 *            - The id of the {@link Resource}.
+	 * @api {get} /users/{id} getUserById
+	 * @apiName getUserById
+	 * @apiGroup /users
+	 * @apiDescription Returns user with the given {id}
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiSuccess {User}  JSON-Object with the user with id {id}.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *  {
+	 *   "id": 48,
+	 *   "name": "peter",
+	 *   "username": "peter"
+	 *  }
+	 *
+	 * @apiError NotAuthorized APIKey incorrect.
+	 * @param id - The id of the {@link Resource}.
 	 * @return {@link Company} - JSON Representation of the company.
 	 */
 	@GET
-	@Path("id/{id}")
+	@Path("{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public User getUserById(@PathParam(value = "id") String id, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			return userRoleController.getUserById(Integer.parseInt(id), user);
-		} else
+		} else {
 			throw new NotFoundException(createNegativeResponse("User with id " + id + " not found!"));
+		}
+
+	}
+
+	/**
+	 * Return the {@link User} object with the given id.
+	 *
+	 * @api {get} /users/username/{username} getUserByUsername
+	 * @apiName getUserByUsername
+	 * @apiGroup /users
+	 * @apiDescription Returns user with the given {username}
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiSuccess {User}  JSON-Object with the user with username {username}.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *  {
+	 *   "id": 48,
+	 *   "name": "peter",
+	 *   "username": "peter"
+	 *  }
+	 *
+	 * @apiError NotAuthorized APIKey incorrect.
+	 * @param id - The id of the {@link Resource}.
+	 * @return {@link Company} - JSON Representation of the company.
+	 */
+	@GET
+	@Path("username/{username}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public User getUserByUsername(@PathParam(value = "username") String username, @QueryParam(value = "apiKey") String apiKey) {
+		User user = accessController.checkApiKey(apiKey);
+		if (user != null) {
+			return userRoleController.findUserByUsername(username, user);
+		} else {
+			throw new NotFoundException(createNegativeResponse("User with username " + username + " not found!"));
+		}
 
 	}
 
@@ -120,7 +193,7 @@ public class UserRoleService {
 	public Set<User> searchUsers(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "phrase") String phrase) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Set<User> searchResult = new HashSet<User>();
+			Set<User> searchResult = new HashSet<>();
 			List<SearchResult> results = searchController.searchUsers(phrase, user);
 			for (SearchResult result : results) {
 				User foundUser = (User) result.getResult();
@@ -150,7 +223,7 @@ public class UserRoleService {
 	public Set<Role> searchRoles(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "phrase") String phrase) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Set<Role> searchResult = new HashSet<Role>();
+			Set<Role> searchResult = new HashSet<>();
 			List<SearchResult> results = searchController.searchRoles(phrase, user);
 			for (SearchResult result : results) {
 				Role foundRole = (Role) result.getResult();

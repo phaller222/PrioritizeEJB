@@ -4,17 +4,12 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 import de.hallerweb.enterprise.prioritize.model.PObject;
-import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
-import de.hallerweb.enterprise.prioritize.model.security.User;
-
 
 /**
  * ActionBoard.java - Holds ActionBoardEntry's. It is assigned either to a department, a user or a project
@@ -23,12 +18,10 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  *
  */
 @Entity
-@NamedQueries({
-	@NamedQuery(name = "findActionBoardById", query = "select ab FROM ActionBoard ab WHERE ab.id = :actionBoardId"),
-	@NamedQuery(name = "findActionBoardByName", query = "select ab FROM ActionBoard ab WHERE ab.name = :actionBoardName"),
-	@NamedQuery(name = "findActionBoardByOwner", query = "select ab FROM ActionBoard ab WHERE ab.owner.id = :ownerId")
-	 })
-public class ActionBoard extends PObject{
+@NamedQueries({ @NamedQuery(name = "findActionBoardById", query = "select ab FROM ActionBoard ab WHERE ab.id = :actionBoardId"),
+		@NamedQuery(name = "findActionBoardByName", query = "select ab FROM ActionBoard ab WHERE ab.name = :actionBoardName"),
+		@NamedQuery(name = "findActionBoardByOwner", query = "select ab FROM ActionBoard ab WHERE ab.owner.id = :ownerId") })
+public class ActionBoard extends PObject {
 
 	public String getDescription() {
 		return description;
@@ -53,24 +46,24 @@ public class ActionBoard extends PObject{
 	public void setEntries(List<ActionBoardEntry> entries) {
 		this.entries = entries;
 	}
-	
+
 	public void addEntry(ActionBoardEntry entry) {
 		entries.add(entry);
 	}
-	
+
 	public void removeEntry(ActionBoardEntry entry) {
 		entries.remove(entry);
 	}
-	
+
 	private String name;
 	private String description;
-	
+
 	@OneToOne
 	private PObject owner;
-	
-	@OneToMany(fetch=FetchType.EAGER)
+
+	@OneToMany(fetch = FetchType.EAGER)
 	private List<ActionBoardEntry> entries;
-	
+
 	public String getName() {
 		return name;
 	}
@@ -79,14 +72,11 @@ public class ActionBoard extends PObject{
 		this.description = desc;
 	}
 
-	public String getDescriprion() {
-		return description;
-	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	@Override
 	public int getId() {
 		return id;
 	}

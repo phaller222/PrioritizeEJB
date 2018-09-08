@@ -1,11 +1,15 @@
 /**
  * 
  */
+
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -23,12 +27,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import de.hallerweb.enterprise.prioritize.controller.project.ProjectController;
+import de.hallerweb.enterprise.prioritize.controller.project.task.BlackboardController;
 import de.hallerweb.enterprise.prioritize.controller.project.task.TaskController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.RestAccessController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.project.Project;
+import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
 import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.project.task.TaskStatus;
@@ -59,6 +65,9 @@ public class ProjectService {
 
 	@EJB
 	ProjectController projectController;
+	
+	@EJB
+	BlackboardController blackboardController;
 
 	@EJB
 	TaskController taskController;
@@ -79,7 +88,7 @@ public class ProjectService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Project> getProjects(@QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
-		List<Project> projects = new ArrayList<Project>();
+		List<Project> projects = new ArrayList<>();
 		if (user != null) {
 			Set<Role> roles = user.getRoles();
 			for (Role r : roles) {
@@ -104,11 +113,12 @@ public class ProjectService {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			Project project = projectController.findProjectById(Integer.valueOf(projectId));
-			List<Task> tasks = project.getBlackboard().getTasks();
+			Blackboard bb = project.getBlackboard();
+			List<Task> tasks = blackboardController.getBlackboardTasks(bb);
 			if (tasks != null && !tasks.isEmpty()) {
 				return tasks;
 			} else {
-				return new ArrayList<Task>();
+				return new ArrayList<>();
 			}
 		} else {
 			throw new NotAuthorizedException(Response.serverError());
@@ -126,8 +136,7 @@ public class ProjectService {
 	public Task assignTask(@PathParam(value = "taskId") String taskId, @QueryParam(value = "apiKey") String apiKey,
 			@FormParam(value = "assignee") String assigneeId, @FormParam(value = "percentage") String percentage,
 			@FormParam(value = "status") String status) {
-		System.out.println("-------------- ASIGNEE: --- " + assigneeId);
-
+		Logger.getLogger(this.getClass().getName()).log(Level.INFO, "-------------- ASIGNEE: --- " + assigneeId);
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			Task task = taskController.findTaskById(Integer.parseInt(taskId));
@@ -144,14 +153,14 @@ public class ProjectService {
 	private Task editTask(Task task, String assigneeId, String percentage, String status, User sessionUser) {
 		if (assigneeId != null) {
 			User assignee = userRoleController.findUserById(Integer.valueOf(assigneeId), sessionUser);
-			taskController.addTaskAssignee(task.getId(), assignee);
+			Task managedTask = taskController.findTaskById(task.getId());
+			taskController.setTaskAssignee(managedTask, assignee);
 			if (percentage != null) {
 				taskController.setTaskProgress(task, assignee, Integer.valueOf(percentage));
 			}
 		} else {
-			task.setAssignees(new ArrayList<PActor>());
-			setTaskStatus(task,status);
-			taskController.editTask(task.getId(),task);
+			setTaskStatus(task, status);
+			taskController.editTask(task.getId(), task);
 		}
 		setTaskStatus(task, status);
 		return task;
@@ -161,7 +170,7 @@ public class ProjectService {
 		if (status != null) {
 			switch (status.toUpperCase()) {
 			case "ASSIGNED":
-				taskController.updateTaskStatus(task.getId(),TaskStatus.ASSIGNED);
+				taskController.updateTaskStatus(task.getId(), TaskStatus.ASSIGNED);
 				break;
 			case "CANCELLED":
 				task.setTaskStatus(TaskStatus.CANCELLED);

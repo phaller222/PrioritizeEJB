@@ -5,10 +5,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 
-import de.hallerweb.enterprise.prioritize.controller.CompanyController;
-import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
-import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
+import de.hallerweb.enterprise.prioritize.controller.resource.ResourceReservationController;
 
 /**
  * Session Bean implementation class CleanupJob. This Singleton bean is called every minute to perform different kinds of cleanup jobs e.G.
@@ -19,20 +16,17 @@ import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController
 public class CleanupJob {
 
 	@EJB
-	ResourceController resourceController;
+	ResourceReservationController resourceReservationController;
 
 	/**
 	 * Default constructor.
 	 */
 	public CleanupJob() {
-		// TODO Auto-generated constructor stub
+		// Auto-generated constructor stub
 	}
 
 	@Schedule(minute = "*/5", hour = "*", persistent = false)
 	public void cleanup() {
-		resourceController.cleanupReservations();
-
-		// TODO: cleanup Vacation and illness entries from the past...? Does this make sense or
-		// shall we keep all entries because the data amount isn't THAT Big.
+		resourceReservationController.cleanupReservations();
 	}
 }

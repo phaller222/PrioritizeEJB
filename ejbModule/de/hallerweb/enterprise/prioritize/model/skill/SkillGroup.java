@@ -18,8 +18,7 @@ public class SkillGroup {
 	int id;
 	
 	@OneToOne
-	Skill skill;							// The concrete skill 
-	
-	int amount;								// Number of skills of this type needed.
+	Skill skill;
+	int amount;
 	
 }

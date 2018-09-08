@@ -32,8 +32,6 @@ public class SkillPropertyNumeric extends SkillProperty implements SkillType {
 		this.tempValue = tempValue;
 	}
 
-	private String type;
-
 	public int getMinValue() {
 		return minimum;
 	}
@@ -58,9 +56,4 @@ public class SkillPropertyNumeric extends SkillProperty implements SkillType {
 	public String getType() {
 		return "NUMERIC";
 	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
 }

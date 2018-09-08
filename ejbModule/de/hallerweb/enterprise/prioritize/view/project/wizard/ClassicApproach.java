@@ -5,6 +5,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -32,6 +34,7 @@ import de.hallerweb.enterprise.prioritize.model.project.task.TaskStatus;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+import de.hallerweb.enterprise.prioritize.view.project.ListProjectsBean;
 
 @Named
 @SessionScoped
@@ -51,6 +54,9 @@ public class ClassicApproach implements Serializable {
 	BlackboardController blackboardController;
 	@Inject
 	SessionController sessionController;
+	
+	@Inject
+	ListProjectsBean listProjectsBean;
 
 	public List<Resource> getResources() {
 		return resources;
@@ -63,10 +69,10 @@ public class ClassicApproach implements Serializable {
 	@PostConstruct
 	public void initialize() {
 		project = new Project();
-		tasks = new ArrayList<Task>();
-		members = new ArrayList<User>();
-		documents = new ArrayList<DocumentInfo>();
-		resources = new ArrayList<Resource>();
+		tasks = new ArrayList<>();
+		members = new ArrayList<>();
+		documents = new ArrayList<>();
+		resources = new ArrayList<>();
 	}
 
 	public String getProjectName() {
@@ -85,12 +91,12 @@ public class ClassicApproach implements Serializable {
 		this.projectDescription = projectDescription;
 	}
 
-	private Project project;					// Holds the current project instance to be created
-	private List<Task> tasks;					// Holds current Tasks to be created
-	private List<User> members;					// A list of all Members (Users) for the project to be created.
-	private List<DocumentInfo> documents;		// A list of all documents relevant to the project
-	private List<Resource> resources;			// A list of all documents relevant to the project
-	private String managerRoleName;				// The name of the Role which will act as project lead.
+	private transient Project project;					// Holds the current project instance to be created
+	private transient List<Task> tasks;					// Holds current Tasks to be created
+	private transient List<User> members;					// A list of all Members (Users) for the project to be created.
+	private transient List<DocumentInfo> documents;		// A list of all documents relevant to the project
+	private transient  List<Resource> resources;			// A list of all documents relevant to the project
+	private transient  String managerUserName;				// The name of the User which will act as project lead.
 
 	private String userToAdd;					// Current username to add to the project (selected by autocomplete)
 	private String documentToAdd;				// Current DocumentInfo-Object to add to the project.
@@ -151,12 +157,12 @@ public class ClassicApproach implements Serializable {
 		this.documentToAdd = documentToAdd;
 	}
 
-	public String getManagerRoleName() {
-		return managerRoleName;
+	public String getManagerUserName() {
+		return managerUserName;
 	}
 
-	public void setManagerRoleName(String managerName) {
-		this.managerRoleName = managerName;
+	public void setManagerUserName(String managerName) {
+		this.managerUserName = managerName;
 	}
 
 	public Project getProject() {
@@ -199,29 +205,32 @@ public class ClassicApproach implements Serializable {
 		project.setDescription(projectDescription);
 		project.setDocuments(this.documents);
 		project.setResources(this.resources);
-		project.setManager(userRoleController.findRoleByRolename(managerRoleName, sessionController.getUser()));
+		User projectLead = userRoleController.findUserByUsername(managerUserName, sessionController.getUser());
+		project.setManager(projectLead);
+		members.add(projectLead);
 		project.setDueDate(this.projectDueDate);
 		project.setBeginDate(new Date());
 		project.setUsers(members);
-		
+
 		// Create blackboard for project
-		Blackboard bb = new Blackboard();
-		bb.setTitle(project.getName());
-		bb.setDescription(project.getDescription());
-		bb.setFrozen(false);
-		bb.setTasks(tasks);
-	   
+		Blackboard blackBoard = new Blackboard();
+		blackBoard.setTitle(project.getName());
+		blackBoard.setDescription(project.getDescription());
+		blackBoard.setFrozen(false);
+		blackBoard.setTasks(tasks);
+
 		// Create all subdata (ProjectGoal etc..) and persist project
-		projectController.createProject(project,bb, this.tasks);
+		projectController.createProject(project, blackBoard);
 
 		clearInputData();
 
+		listProjectsBean.loadProjects();
+		
 		ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
 		try {
 			context.redirect(context.getApplicationContextPath() + "/client/projects/projects.xhtml");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, e.getMessage());
 		}
 	}
 
@@ -229,12 +238,12 @@ public class ClassicApproach implements Serializable {
 		this.projectDescription = "";
 		this.projectName = "";
 		this.projectDueDate = new Date();
-		this.managerRoleName = "";
+		this.managerUserName = "";
 		this.userToAdd = "";
-		this.documents = new ArrayList<DocumentInfo>();
-		this.resources = new ArrayList<Resource>();
-		this.members = new ArrayList<User>();
-		this.tasks = new ArrayList<Task>();
+		this.documents = new ArrayList<>();
+		this.resources = new ArrayList<>();
+		this.members = new ArrayList<>();
+		this.tasks = new ArrayList<>();
 	}
 
 	public void addUser() {
@@ -252,10 +261,6 @@ public class ClassicApproach implements Serializable {
 
 	public void addDocument() {
 		if (documentToAdd != null) {
-			// TODO: Change to more detailed selection of documents, not just by name!!!
-			// DocumentInfo docInfo = documentController.getDocumentInfo(Integer.parseInt(documentToAdd),
-
-			// TODO: Hack, remove this!!!
 			DocumentInfo docInfo = documentController.getAllDocumentInfos(AuthorizationController.getSystemUser()).get(0);
 			if ((docInfo != null)) {
 				this.documents.add(docInfo);
@@ -269,8 +274,7 @@ public class ClassicApproach implements Serializable {
 
 	public void addResource() {
 		if (resourceToAdd != null) {
-			// TODO: Change to more detailed selection of resources, not just by name!!!
-			// TODO: Hack, remove this!!!
+			// TODO: Make a real selection of resourrces!
 			Resource res = resourceController.getAllResources(AuthorizationController.getSystemUser()).get(0);
 			if ((res != null)) {
 				this.resources.add(res);
@@ -309,7 +313,7 @@ public class ClassicApproach implements Serializable {
 	 */
 	public List<String> completeUserList(String query) {
 		List<String> users = userRoleController.getAllUserNames(sessionController.getUser());
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		for (String username : users) {
 			if (username.startsWith(query)) {
 				result.add(username);
@@ -317,7 +321,7 @@ public class ClassicApproach implements Serializable {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * AutoComplete method for Role
 	 * @param query
@@ -325,7 +329,7 @@ public class ClassicApproach implements Serializable {
 	 */
 	public List<String> completeRolesList(String query) {
 		List<Role> availableRoles = userRoleController.getAllRoles(sessionController.getUser());
-		List<String> roles = new ArrayList<String>();
+		List<String> roles = new ArrayList<>();
 		for (Role r : availableRoles) {
 			if (r.getName().startsWith(query)) {
 				roles.add(r.getName());
@@ -341,7 +345,7 @@ public class ClassicApproach implements Serializable {
 	 */
 	public List<String> completeDocumentList(String query) {
 		List<DocumentInfo> docInfos = documentController.getAllDocumentInfos(sessionController.getUser());
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		for (DocumentInfo docInfo : docInfos) {
 			if (docInfo.getCurrentDocument().getName().startsWith(query)) {
 				result.add(docInfo.getCurrentDocument().getName());
@@ -356,9 +360,9 @@ public class ClassicApproach implements Serializable {
 	 * @return
 	 */
 	public List<String> completeResourcesList(String query) {
-		List<Resource> resources = resourceController.getAllResources(sessionController.getUser());
-		List<String> result = new ArrayList<String>();
-		for (Resource res : resources) {
+		List<Resource> allResources = resourceController.getAllResources(sessionController.getUser());
+		List<String> result = new ArrayList<>();
+		for (Resource res : allResources) {
 			if (res.getName().startsWith(query)) {
 				result.add(res.getName());
 			}

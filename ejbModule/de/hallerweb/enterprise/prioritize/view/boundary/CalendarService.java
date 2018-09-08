@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.calendar.CalendarController;
-import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
+import de.hallerweb.enterprise.prioritize.controller.resource.ResourceReservationController;
 import de.hallerweb.enterprise.prioritize.controller.search.SearchController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.RestAccessController;
@@ -52,7 +52,7 @@ public class CalendarService {
 	RestAccessController accessController;
 
 	@EJB
-	ResourceController resourceController;
+	ResourceReservationController resourceReservationController;
 
 	@EJB
 	CompanyController companyController;
@@ -113,25 +113,10 @@ public class CalendarService {
 			@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String from, @QueryParam(value = "to") String to) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Department dept = companyController.getDepartmentByToken(departmentToken);
-			List<TimeSpan> entries = new ArrayList<TimeSpan>();
+			Department dept = companyController.getDepartmentByToken(departmentToken, user);
 			if (dept != null) {
-				List<ResourceReservation> reservations = resourceController.getResourceReservationsForDepartment(dept.getId());
-				for (ResourceReservation res : reservations) {
-					if (authController.canRead(res.getResource(), user)) {
-						TimeSpan span = res.getTimeSpan();
-						TimeSpan searchSpan = new TimeSpan();
-						searchSpan.setDateFrom(new Date(Long.parseLong(from)));
-						searchSpan.setDateUntil(new Date(Long.parseLong(to)));
-
-						// Add to search result if TimeSpan objects intersect
-						if (span.intersects(searchSpan)) {
-							entries.add(res.getTimeSpan());
-						}
-					} else {
-						break;
-					}
-				}
+				List<ResourceReservation> reservations = resourceReservationController.getResourceReservationsForDepartment(dept.getId());
+				List<TimeSpan> entries = findIntersectingTimeSpansInReservations(from, to, user, reservations);
 
 				if (!entries.isEmpty()) {
 					return entries;
@@ -145,6 +130,27 @@ public class CalendarService {
 		} else {
 			throw new NotAuthorizedException(Response.serverError());
 		}
+	}
+
+	private List<TimeSpan> findIntersectingTimeSpansInReservations(String timeSpanFrom, String timeSpanTo, User sessionUser,
+			List<ResourceReservation> reservations) {
+		List<TimeSpan> entries = new ArrayList<>();
+		for (ResourceReservation res : reservations) {
+			if (authController.canRead(res.getResource(), sessionUser)) {
+				TimeSpan reservationTimeSpan = res.getTimeSpan();
+				TimeSpan searchSpan = new TimeSpan();
+				searchSpan.setDateFrom(new Date(Long.parseLong(timeSpanFrom)));
+				searchSpan.setDateUntil(new Date(Long.parseLong(timeSpanTo)));
+
+				// Add to search result if TimeSpan objects intersect
+				if (reservationTimeSpan.intersects(searchSpan)) {
+					entries.add(reservationTimeSpan);
+				}
+			} else {
+				break;
+			}
+		}
+		return entries;
 	}
 
 	/**

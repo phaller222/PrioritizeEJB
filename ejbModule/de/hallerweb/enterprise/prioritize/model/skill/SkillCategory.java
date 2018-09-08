@@ -67,7 +67,7 @@ public class SkillCategory implements PAuthorizedObject, SkillType {
 
 	public SkillCategory() {
 		super();
-		this.subCategories = new HashSet<SkillCategory>();
+		this.subCategories = new HashSet<>();
 	}
 
 	public SkillCategory getParentCategory() {

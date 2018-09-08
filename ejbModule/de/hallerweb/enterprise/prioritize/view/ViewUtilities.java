@@ -1,10 +1,13 @@
 package de.hallerweb.enterprise.prioritize.view;
 
-import javax.ejb.Stateless;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 
 public class ViewUtilities {
+
+	private ViewUtilities() {
+
+	}
 
 	public static void addErrorMessage(String component, String message) {
 		if (component == null) {

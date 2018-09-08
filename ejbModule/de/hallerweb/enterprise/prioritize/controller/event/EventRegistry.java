@@ -18,6 +18,8 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import org.jboss.resteasy.logging.Logger;
+
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
@@ -58,43 +60,40 @@ public class EventRegistry {
 		IMMEDIATE, DELAYED
 	}
 
-	public static EventStrategy EVENT_STRATEGY = EventStrategy.DELAYED;  // Default = DELAYED
+	private EventStrategy eventStrategie = EventStrategy.DELAYED;  // Default = DELAYED
 
 	private HashMap<Class<? extends PObject>, PEventConsumerProducer> destinationMapping;
 
 	@PostConstruct
 	public void initialize() {
-		destinationMapping = new HashMap<Class<? extends PObject>, PEventConsumerProducer>();
+		destinationMapping = new HashMap<>();
 		destinationMapping.put(User.class, userController);
 		destinationMapping.put(DocumentInfo.class, documentController);
 
 		// Override Event Strategy value with config
 		try {
-		if (InitializationController.config.get(InitializationController.EVENT_DEFAULT_STRATEGY).equals("IMMEDIATE")) {
-			EVENT_STRATEGY = EventStrategy.IMMEDIATE;
-		} else {
-			EVENT_STRATEGY = EventStrategy.DELAYED;
-		}
+			if (InitializationController.getConfig().get(InitializationController.EVENT_DEFAULT_STRATEGY).equals("IMMEDIATE")) {
+				eventStrategie = EventStrategy.IMMEDIATE;
+			} else {
+				eventStrategie = EventStrategy.DELAYED;
+			}
 		} catch (NullPointerException ex) {
-			EVENT_STRATEGY = EventStrategy.IMMEDIATE;
+			eventStrategie = EventStrategy.IMMEDIATE;
 		}
 	}
 
 	public void addEvent(Event evt) {
 		mng.persist(evt);
 		List<EventListener> listeners = getEventListenersRegisteredFor(evt.getSource(), evt.getPropertyName());
-		if (!listeners.isEmpty()) {
-
+		if (!listeners.isEmpty() && eventStrategie == EventStrategy.IMMEDIATE) {
 			// If immediate strategy, deliver event at once.
-			if (EVENT_STRATEGY == EventStrategy.IMMEDIATE) {
-				processEvent(evt, listeners);
-			}
+			processEvent(evt, listeners);
 		}
 	}
 
 	private void processEvent(Event evt, List<EventListener> listeners) {
 		if ((listeners != null) && (!listeners.isEmpty())) {
-			List<EventListener> listenersToRemove = new ArrayList<EventListener>();
+			List<EventListener> listenersToRemove = new ArrayList<>();
 			for (EventListener listener : listeners) {
 				PObject destination = listener.getDestination();
 				destinationMapping.get(destination.getClass()).consumeEvent(destination, evt);
@@ -173,11 +172,12 @@ public class EventRegistry {
 		try {
 			List<EventListener> result = query.getResultList();
 			if (result.isEmpty()) {
-				return new ArrayList<EventListener>();
-			} else
+				return new ArrayList<>();
+			} else {
 				return result;
+			}
 		} catch (NoResultException ex) {
-			return new ArrayList<EventListener>();
+			return new ArrayList<>();
 		}
 	}
 
@@ -188,7 +188,7 @@ public class EventRegistry {
 		mng.remove(listener);
 	}
 
-	@Schedule(second = "*/30", minute = "*", hour = "*", persistent = false)
+	@Schedule(minute = "*/5", hour = "*", persistent = false)
 	/**
 	 * Process all event currently present in datastore. Checks if events lifetime has passed
 	 * and removes them if necessary.
@@ -196,31 +196,40 @@ public class EventRegistry {
 	 */
 	public void processEvents() {
 		long currentDateMillis = new Date().getTime();
-		System.out.println("Runnig processEvents at " + currentDateMillis + "...");
+		Logger.getLogger(this.getClass()).debug("Runnig processEvents at " + currentDateMillis + "...");
+		
 		// Remove all events which lifetime is passed
-		List<Event> eventsToRemove = new ArrayList<Event>();
 		Query q1 = mng.createNamedQuery("findEventsWithLimitedLifetime");
 		try {
-		List<Event> lifetimeEvents = q1.getResultList();
-		if ((lifetimeEvents != null) && (!lifetimeEvents.isEmpty())) {
-			for (Event evt : lifetimeEvents) {
-				if ((evt.getEventDate().getTime() + evt.getLifetime()) <= currentDateMillis) {
-					eventsToRemove.add(evt);
-				}
-			}
-			for (Event evt : eventsToRemove) {
-				System.out.println("Removing event: " + evt.getLifetime());
-				mng.remove(evt);
-			}
-		}
+			List<Event> lifetimeEvents = q1.getResultList();
+			removeEventsWithExpiredLifetime(lifetimeEvents);
 		} catch (EntityNotFoundException ex) {
 			// Don't log
 		}
 
 		// Remove all EventListeners which lifetime is passed
-		List<EventListener> listenersToRemove = new ArrayList<EventListener>();
 		Query q2 = mng.createNamedQuery("findEventListenersWithLimitedLifetime");
 		List<EventListener> lifetimeListeners = q2.getResultList();
+		removeEventListenersWithExpiredLifetime(lifetimeListeners);
+		
+		// Finally process all remaining events
+		processRemainingEvents();
+	}
+
+	private void processRemainingEvents() {
+		Query q3 = mng.createNamedQuery("findAllEvents");
+		List<Event> events = q3.getResultList();
+		for (Event evt : events) {
+			if (evt.getSource() != null) {
+				Logger.getLogger(this.getClass()).debug(("Processing: " + evt.getLifetime()));
+				processEvent(evt, getEventListenersRegisteredFor(evt.getSource(), evt.getPropertyName()));
+			}
+		}
+	}
+
+	private void removeEventListenersWithExpiredLifetime(List<EventListener> lifetimeListeners) {
+		long currentDateMillis = new Date().getTime();
+		List<EventListener> listenersToRemove = new ArrayList<>();
 		if ((lifetimeListeners != null) && (!lifetimeListeners.isEmpty())) {
 			for (EventListener listener : lifetimeListeners) {
 				if ((listener.getCreatedAt().getTime() + listener.getLifetime()) <= currentDateMillis) {
@@ -228,21 +237,26 @@ public class EventRegistry {
 				}
 			}
 			for (EventListener listener : listenersToRemove) {
-				System.out.println("Removing listener: " + listener.getLifetime());
+				Logger.getLogger(this.getClass()).debug(("Removing listener: " + listener.getLifetime()));
 				mng.remove(listener);
 			}
 
 		}
-		// Finally process all remaining events
-		Query q3 = mng.createNamedQuery("findAllEvents");
-		List<Event> events = q3.getResultList();
-		for (Event evt : events) {
-			if (evt.getSource() != null) {
-				System.out.println("Processing: " + evt.getLifetime());
-				processEvent(evt, getEventListenersRegisteredFor(evt.getSource(), evt.getPropertyName()));
-			}
-		}
-
 	}
 
+	private void removeEventsWithExpiredLifetime(List<Event> lifetimeEvents) {
+		long currentDateMillis = new Date().getTime();
+		List<Event> eventsToRemove = new ArrayList<>();
+		if ((lifetimeEvents != null) && (!lifetimeEvents.isEmpty())) {
+			for (Event evt : lifetimeEvents) {
+				if ((evt.getEventDate().getTime() + evt.getLifetime()) <= currentDateMillis) {
+					eventsToRemove.add(evt);
+				}
+			}
+			for (Event evt : eventsToRemove) {
+				Logger.getLogger(this.getClass()).debug(("Removing event: " + evt.getLifetime()));
+				mng.remove(evt);
+			}
+		}
+	}
 }

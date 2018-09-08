@@ -25,7 +25,13 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  *
  */
 @Stateless
-public class ActionBoardController extends PEventConsumerProducer{
+public class ActionBoardController extends PEventConsumerProducer {
+
+	private static final String QUERY_FIND_ACTION_BOARD_BY_ID = "findActionBoardById";
+	private static final String PARAM_ACTION_BOARD_ID = "actionBoardId";
+	private static final String PARAM_ACTION_BOARD_NAME = "actionBoardName";
+
+	private static final String EVENT_ENTRY_ADDED = "entry";
 
 	@PersistenceContext(unitName = "MySqlDS")
 	EntityManager em;
@@ -33,33 +39,29 @@ public class ActionBoardController extends PEventConsumerProducer{
 	@Inject
 	EventRegistry eventRegistry;
 
-	
 	public ActionBoard findActionBoardByName(String name) {
 		Query q = em.createNamedQuery("findActionBoardByName");
-		q.setParameter("actionBoardName", name);
-		ActionBoard board = (ActionBoard) q.getSingleResult();
-		return board;
+		q.setParameter(PARAM_ACTION_BOARD_NAME, name);
+		return (ActionBoard) q.getSingleResult();
 	}
-	
+
 	public ActionBoard findActionBoardById(int id) {
-		Query q = em.createNamedQuery("findActionBoardById");
-		q.setParameter("actionBoardId",id);
-		ActionBoard board = (ActionBoard) q.getSingleResult();
-		return board;
+		Query q = em.createNamedQuery(QUERY_FIND_ACTION_BOARD_BY_ID);
+		q.setParameter(PARAM_ACTION_BOARD_ID, id);
+		return (ActionBoard) q.getSingleResult();
 	}
-	
+
 	public ActionBoard findActionBoardByOwner(int ownerId) {
 		Query q = em.createNamedQuery("findActionBoardByOwner");
-		q.setParameter("ownerId",ownerId);
+		q.setParameter("ownerId", ownerId);
 		try {
-		ActionBoard board = (ActionBoard) q.getSingleResult();
-		return board;
+			return (ActionBoard) q.getSingleResult();
 		} catch (NoResultException ex) {
 			return null;
 		}
-		
+
 	}
-	
+
 	public ActionBoard createActionBoard(String name, String desc, PObject owner) {
 		ActionBoard board = new ActionBoard();
 		board.setName(name);
@@ -70,15 +72,15 @@ public class ActionBoardController extends PEventConsumerProducer{
 	}
 
 	public void removeActionBoard(int actionBoardId) {
-		Query q = em.createNamedQuery("findActionBoardById");
-		q.setParameter("actionBoardId", actionBoardId);
+		Query q = em.createNamedQuery(QUERY_FIND_ACTION_BOARD_BY_ID);
+		q.setParameter(PARAM_ACTION_BOARD_ID, actionBoardId);
 		ActionBoard board = (ActionBoard) q.getSingleResult();
 		em.remove(board);
 	}
 
 	public void editActionBoard(int actionBoardId, String name, String description, PObject owner) {
-		Query q = em.createNamedQuery("findActionBoardById");
-		q.setParameter("actionBoardId", actionBoardId);
+		Query q = em.createNamedQuery(QUERY_FIND_ACTION_BOARD_BY_ID);
+		q.setParameter(PARAM_ACTION_BOARD_ID, actionBoardId);
 		ActionBoard managedBoard = (ActionBoard) q.getSingleResult();
 
 		managedBoard.setDescriprion(description);
@@ -87,27 +89,23 @@ public class ActionBoardController extends PEventConsumerProducer{
 	}
 
 	public ActionBoardEntry post(int actionBoardId, String title, String message, Event source) {
-		Query q = em.createNamedQuery("findActionBoardById");
-		q.setParameter("actionBoardId", actionBoardId);
-		ActionBoard board = (ActionBoard) q.getSingleResult();
+		Query q = em.createNamedQuery(QUERY_FIND_ACTION_BOARD_BY_ID);
+		q.setParameter(PARAM_ACTION_BOARD_ID, actionBoardId);
 
-		
-		
 		ActionBoardEntry entry = new ActionBoardEntry();
 		entry.setTitle(title);
 		entry.setMessage(message);
 		em.persist(source);
 		entry.setSource(source);
+
+		ActionBoard board = (ActionBoard) q.getSingleResult();
 		entry.setActionBoard(board);
-		
+
 		em.persist(entry);
-		
+
 		board.addEntry(entry);
-		
-		
-		// Raise event "New entry"
-		raiseEvent(board, "entries", "","",0);
-		
+		raiseEvent(board, EVENT_ENTRY_ADDED, "", "", 0);
+
 		return entry;
 	}
 
@@ -121,16 +119,16 @@ public class ActionBoardController extends PEventConsumerProducer{
 	}
 
 	public void addSubscriber(int actionBoardId, User subscriber) {
-		Query q = em.createNamedQuery("findActionBoardById");
-		q.setParameter("actionBoardId", actionBoardId);
+		Query q = em.createNamedQuery(QUERY_FIND_ACTION_BOARD_BY_ID);
+		q.setParameter(PARAM_ACTION_BOARD_ID, actionBoardId);
 		ActionBoard board = (ActionBoard) q.getSingleResult();
 
 		eventRegistry.createEventListener(board, subscriber, "entries", -1L, true);
 	}
 
 	public void removeSubscriber(int actionBoardId, EventListener subscriber) {
-		Query q = em.createNamedQuery("findActionBoardById");
-		q.setParameter("actionBoardId", actionBoardId);
+		Query q = em.createNamedQuery(QUERY_FIND_ACTION_BOARD_BY_ID);
+		q.setParameter(PARAM_ACTION_BOARD_ID, actionBoardId);
 		ActionBoard board = (ActionBoard) q.getSingleResult();
 
 		EventListener listenerToRemove = null;
@@ -140,7 +138,9 @@ public class ActionBoardController extends PEventConsumerProducer{
 				listenerToRemove = listener;
 			}
 		}
-		eventRegistry.removeEventListener(listenerToRemove.getId());
+		if (listenerToRemove != null) {
+			eventRegistry.removeEventListener(listenerToRemove.getId());
+		}
 	}
 
 	@Override
@@ -154,7 +154,7 @@ public class ActionBoardController extends PEventConsumerProducer{
 
 	@Override
 	public void consumeEvent(PObject destination, Event evt) {
-		// TODO Auto-generated method stub
-		
+		// Auto-generated method stub
+
 	}
 }

@@ -1,5 +1,7 @@
 package de.hallerweb.enterprise.prioritize.controller.project.task;
 
+import java.util.List;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -33,18 +35,10 @@ public class BlackboardController extends PEventConsumerProducer {
 	@Inject
 	EventRegistry eventRegistry;
 
-	// public ActionBoard findActionBoardByName(String name) {
-	// Query q = em.createNamedQuery("findActionBoardByName");
-	// q.setParameter("actionBoardName", name);
-	// ActionBoard board = (ActionBoard) q.getSingleResult();
-	// return board;
-	// }
-
 	public Blackboard findBlackboardById(int id) {
 		Query q = em.createNamedQuery("findBlackboardById");
 		q.setParameter("blackboardId", id);
-		Blackboard board = (Blackboard) q.getSingleResult();
-		return board;
+		return (Blackboard) q.getSingleResult();
 	}
 
 	public Blackboard createBlackboard(Blackboard board) {
@@ -72,13 +66,19 @@ public class BlackboardController extends PEventConsumerProducer {
 		}
 	}
 
-	public void TakeTaskFromBlackboard(int blackboardId, int taskId, PActor assignee) {
+	public void takeTaskFromBlackboard(int blackboardId, int taskId, PActor assignee) {
 		Blackboard bb = findBlackboardById(blackboardId);
 		if (!bb.isFrozen()) {
 			Task task = taskController.findTaskById(taskId);
-			task.addAssignee(assignee);
+			task.setAssignee(assignee);
 			bb.removeTask(task); 
 		}
+	}
+	
+	public List<Task> getBlackboardTasks(Blackboard bb) {
+		Query q = em.createNamedQuery("findBlackboardTasks");
+		q.setParameter("blackboardId", bb.getId());
+		return (List) q.getResultList();
 	}
 
 	public void freezeBlackboard(int blackboardId) {
@@ -102,7 +102,7 @@ public class BlackboardController extends PEventConsumerProducer {
 
 	@Override
 	public void consumeEvent(PObject destination, Event evt) {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 
 	}
 }

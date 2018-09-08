@@ -9,7 +9,7 @@ import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
-import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
+import de.hallerweb.enterprise.prioritize.controller.resource.MQTTResourceController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
@@ -23,25 +23,24 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 public class MqttClientPing {
 
 	@EJB
-	ResourceController resourceController;
+	MQTTResourceController mqttResourceController;
 
 	/**
 	 * Default constructor.
 	 */
 	public MqttClientPing() {
-		// TODO Auto-generated constructor stub
+		// Auto-generated constructor stub
 	}
 
 	// TODO: Set persistence of timer for releases to "true"
 	@Schedule(minute = "*/1", hour = "*", persistent = false)
 	public void checkMqttClientPings() {
-		if (Boolean.parseBoolean(InitializationController.config.get(InitializationController.ENABLE_MQTT_SERVICE))) {
-			
+		if (Boolean.parseBoolean(InitializationController.getConfig().get(InitializationController.ENABLE_MQTT_SERVICE))) {
 
 			// Get all online MQTT resources
 			User systemUser = new User();
 			systemUser.setUsername("system");
-			List<Resource> onlineMqttResources = resourceController.getOnlineMqttResources(AuthorizationController.getSystemUser());
+			List<Resource> onlineMqttResources = mqttResourceController.getOnlineMqttResources(AuthorizationController.getSystemUser());
 			if (onlineMqttResources != null) {
 				for (Resource resource : onlineMqttResources) {
 					if (isResourceTimedOut(resource)) {
@@ -55,10 +54,7 @@ public class MqttClientPing {
 
 	private boolean isResourceTimedOut(Resource resource) {
 		Date lastPing = resource.getMqttLastPing();
-		if (System.currentTimeMillis() - lastPing.getTime() > Long
-				.valueOf(InitializationController.config.get(InitializationController.MQTT_PING_TIMEOUT))) {
-			return true;
-		}
-		return false;
+		return (System.currentTimeMillis() - lastPing.getTime() > Long
+				.valueOf(InitializationController.getConfig().get(InitializationController.MQTT_PING_TIMEOUT)));
 	}
 }

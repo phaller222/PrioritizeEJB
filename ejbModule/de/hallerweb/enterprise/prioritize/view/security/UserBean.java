@@ -59,23 +59,26 @@ public class UserBean implements Serializable {
 	@EJB
 	ActionBoardController actionboardController;
 
-	User user; 														// Stores the user
+	transient User user; 														// Stores the user
 	String selectedDepartmentId; 									// Selected Department
-	List<String> selectedRolesId; 									// Selected Roles
+	transient List<String> selectedRolesId; 									// Selected Roles
 	String roleToAddId; 											// Role to add
-	List<User> users; 												// List of Users in the system.
-	User currentUser; 												// The user who is logged in into the admin pages.
-	Set<SkillRecord> skillRecords;
+	transient List<User> users; 												// List of Users in the system.
+	transient User currentUser; 												// The user who is logged in into the admin pages.
+	transient Set<SkillRecord> skillRecords;
 
 	Date vacationFrom;
 	Date vacationUntil;
 	Date illnessFrom;
 	Date illnessUntil;
-	List<TimeSpan> vacations;
+	transient List<TimeSpan> vacations;
 
 	String selectedItemCollectionName;
 
-	List<ActionBoardEntry> actionBoardEntries;
+	transient List<ActionBoardEntry> actionBoardEntries;
+
+	private static final String NAVIGATION_USERS = "users";
+	private static final String NAVIGATION_EDITUSER = "edituser";
 	
 	public List<TimeSpan> getVacations() {
 		return vacations;
@@ -154,6 +157,7 @@ public class UserBean implements Serializable {
 	 * Initialize empty {@link Role}
 	 */
 	@PostConstruct
+
 	public void init() {
 		user = new User();
 	}
@@ -199,22 +203,21 @@ public class UserBean implements Serializable {
 				}
 			}
 
-			controller.createUser(user.getUsername(), user.getPassword(), user.getName(), user.getEmail(), department, user.getOccupation(),
-					user.getRoles(), sessionController.getUser());
+			controller.createUser(user, department, user.getRoles(), sessionController.getUser());
 
 			init();
-			return "users";
+			return NAVIGATION_USERS;
 		} else {
 			ViewUtilities.addErrorMessage("username", "The username " + user.getUsername() + " already exists. User has not been created!");
-			return "users";
+			return NAVIGATION_USERS;
 		}
 	}
 
 	@Named
-	public String delete(User u) {
-		controller.deleteUser(u.getId(), sessionController.getUser());
+	public String delete(User user) {
+		controller.deleteUser(user.getId(), sessionController.getUser());
 		init();
-		return "users";
+		return NAVIGATION_USERS;
 	}
 
 	@Named
@@ -224,7 +227,7 @@ public class UserBean implements Serializable {
 			user.addRole(r);
 			controller.addRoleToUser(user.getId(), r.getId(), sessionController.getUser());
 		}
-		return "edituser";
+		return NAVIGATION_EDITUSER;
 	}
 
 	@Named
@@ -233,7 +236,7 @@ public class UserBean implements Serializable {
 		user.removeRole(role);
 		role.removeUser(user);
 		controller.removeRoleFromUser(user.getId(), role.getId(), sessionController.getUser());
-		return "edituser";
+		return NAVIGATION_EDITUSER;
 	}
 
 	public void removeSkillFromUser(SkillRecord skillRecord) {
@@ -241,19 +244,18 @@ public class UserBean implements Serializable {
 	}
 
 	@Named
-	public String edit(User u) {
-		this.user = u;
+	public String edit(User newUserData) {
+		this.user = newUserData;
 		if (user.getDepartment() != null) {
 			this.selectedDepartmentId = String.valueOf(user.getDepartment().getId());
 		}
-		return "edituser";
+		return NAVIGATION_EDITUSER;
 	}
 
 	@Named
 	public String saveUser() {
-		controller.editUser(user.getId(), user.getUsername(), user.getPassword(), user.getName(), user.getEmail(),
-				Integer.valueOf(selectedDepartmentId), user.getOccupation(), sessionController.getUser());
-		return "edituser";
+		controller.editUser(user.getId(), user, sessionController.getUser());
+		return NAVIGATION_EDITUSER;
 	}
 
 	@Named
@@ -329,19 +331,19 @@ public class UserBean implements Serializable {
 			user.addVacation(ts);
 		}
 
-		return "edituser";
+		return NAVIGATION_EDITUSER;
 	}
 
 	@Named
 	public String removeVacation(TimeSpan timespan) {
 		controller.removeVacation(user, timespan.getId(), sessionController.getUser());
-		return "edituser";
+		return NAVIGATION_EDITUSER;
 	}
 
 	@Named
 	public String removeIllness(TimeSpan timespan) {
 		controller.removeIllness(user, timespan.getId(), sessionController.getUser());
-		return "edituser";
+		return NAVIGATION_EDITUSER;
 	}
 
 	@Named
@@ -356,7 +358,7 @@ public class UserBean implements Serializable {
 
 		controller.setIllness(user, ts, sessionController.getUser());
 		user.setIllness(ts);
-		return "edituser";
+		return NAVIGATION_EDITUSER;
 	}
 
 	@Named
@@ -367,7 +369,7 @@ public class UserBean implements Serializable {
 	@Named
 	public String generateApiKey() {
 		this.user.setApiKey(controller.generateApiKey(this.user, sessionController.getUser()));
-		return "edituser";
+		return NAVIGATION_EDITUSER;
 	}
 
 	@Named
@@ -379,15 +381,13 @@ public class UserBean implements Serializable {
 			itemCollectionController.addUser(managedCollection, managedUser);
 		}
 	}
-	
+
 	@Named
 	public List<ActionBoardEntry> getActionBoardEntries() {
-		ActionBoard board = (ActionBoard) actionboardController.findActionBoardByOwner(sessionController.getUser().getId());
+		ActionBoard board = actionboardController.findActionBoardByOwner(sessionController.getUser().getId());
 		return board.getEntries();
 	}
-	
 
-	// TODO: TEST, REMOVE!!!
 
 	public void raiseTestEvent() {
 		actionboardController.post(actionboardController.findActionBoardByName("admin").getId(), "Testeintrag", "Dies ist ein Test!",

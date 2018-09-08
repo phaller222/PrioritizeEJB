@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
-//import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.inject.Named;
 
@@ -20,7 +19,7 @@ import org.primefaces.model.ScheduleModel;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.calendar.CalendarController;
-import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
+import de.hallerweb.enterprise.prioritize.controller.resource.ResourceReservationController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
@@ -38,27 +37,24 @@ public class CalendarView implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -5946979998839647600L;
-	private ScheduleModel lazyEventModel;
-	private ScheduleModel lazyEventModelVacations;
-	private ScheduleModel lazyEventModelIllness;
-	private ScheduleEvent event = new DefaultScheduleEvent();
 
-	List<Department> departments; // List of departments
+	private transient ScheduleModel lazyEventModel;
+	private transient ScheduleModel lazyEventModelVacations;
+	private transient ScheduleModel lazyEventModelIllness;
+	private transient ScheduleEvent event = new DefaultScheduleEvent();
+
+	transient List<Department> departments; // List of departments
 	String selectedDepartmentId; // Currently selected Department
-	Department selectedDepartment = null;
+	transient Department selectedDepartment = null;
 
 	@EJB
-	private ResourceController resourceController;
-
+	private ResourceReservationController resourceReservationController;
 	@EJB
 	private CompanyController companyController;
-
 	@EJB
 	private UserRoleController userRoleController;
-
 	@EJB
 	private SessionController sessionController;
-
 	@EJB
 	private CalendarController calendarController;
 
@@ -71,14 +67,14 @@ public class CalendarView implements Serializable {
 		this.selectedDepartmentId = departmentId;
 		if ((departmentId != null) && (departmentId.length() > 0)) {
 			this.selectedDepartment = companyController.findDepartmentById(Integer.parseInt(departmentId));
-		} else
+		} else {
 			this.selectedDepartment = null;
+		}
 	}
 
 	private void updateLazyModel() {
 		if (lazyEventModel == null) {
 			lazyEventModel = new LazyScheduleModel() {
-
 				@Override
 				public void loadEvents(Date start, Date end) {
 					createReservationsModel(start, end);
@@ -92,7 +88,6 @@ public class CalendarView implements Serializable {
 	private void updateLazyVacationsModel() {
 		if (lazyEventModelVacations == null) {
 			lazyEventModelVacations = new LazyScheduleModel() {
-
 				@Override
 				public void loadEvents(Date start, Date end) {
 					createVacationsModel(start, end);
@@ -116,73 +111,82 @@ public class CalendarView implements Serializable {
 	private void createReservationsModel(Date from, Date until) {
 		List<ResourceReservation> reservations = null;
 
+		TimeSpan requestedTimeSpan = new TimeSpan();
+		requestedTimeSpan.setDateFrom(from);
+		requestedTimeSpan.setDateUntil(until);
+
 		if (this.selectedDepartment == null) {
-			reservations = resourceController.getAllResourceReservations();
+			reservations = resourceReservationController.getAllResourceReservations();
 		} else {
-			reservations = resourceController.getResourceReservationsForDepartment(this.selectedDepartment.getId());
+			reservations = resourceReservationController.getResourceReservationsForDepartment(this.selectedDepartment.getId());
 		}
 
 		if (reservations != null) {
 			for (ResourceReservation res : reservations) {
-				DefaultScheduleEvent event = new DefaultScheduleEvent(res.getTimeSpan().getDescription(), res.getTimeSpan().getDateFrom(),
-						res.getTimeSpan().getDateUntil(), res.getTimeSpan());
-				event.setStyleClass("resourcereservation");
-				lazyEventModel.addEvent(event);
+				TimeSpan reservationTimeSpan = res.getTimeSpan();
+
+				if (reservationTimeSpan.intersects(requestedTimeSpan)) {
+					DefaultScheduleEvent scheduleEvent = new DefaultScheduleEvent(reservationTimeSpan.getDescription(),
+							reservationTimeSpan.getDateFrom(), reservationTimeSpan.getDateUntil(), reservationTimeSpan);
+					scheduleEvent.setStyleClass("resourcereservation");
+					lazyEventModel.addEvent(scheduleEvent);
+				}
 			}
 		}
 	}
 
 	private void createIllnessModel(Date from, Date until) {
+		TimeSpan requestedTimeSpan = new TimeSpan();
+		requestedTimeSpan.setDateFrom(from);
+		requestedTimeSpan.setDateUntil(until);
+
 		if (this.selectedDepartment == null) {
 			List<User> users = userRoleController.getAllUsers(AuthorizationController.getSystemUser());
-			for (User user : users) {
-				if (user.getIllness() != null) {
-					TimeSpan illness = user.getIllness();
-					DefaultScheduleEvent event = new DefaultScheduleEvent(illness.getDescription(), illness.getDateFrom(),
-							illness.getDateUntil(), illness);
-					event.setStyleClass("illness");
-					lazyEventModel.addEvent(event);
-					lazyEventModelIllness.addEvent(event);
-				}
-			}
+			addUsersIllnessWithinTimeSpan(requestedTimeSpan, users);
 		} else {
 			List<User> users = userRoleController.getUsersForDepartment(selectedDepartment, AuthorizationController.getSystemUser());
-			for (User user : users) {
-				if (user.getIllness() != null) {
-					TimeSpan illness = user.getIllness();
-					DefaultScheduleEvent event = new DefaultScheduleEvent(illness.getDescription(), illness.getDateFrom(),
-							illness.getDateUntil(), illness);
-					event.setStyleClass("illness");
-					lazyEventModel.addEvent(event);
-					lazyEventModelIllness.addEvent(event);
+			addUsersIllnessWithinTimeSpan(requestedTimeSpan, users);
+		}
+	}
+
+	private void addUsersIllnessWithinTimeSpan(TimeSpan requestedTimeSpan, List<User> users) {
+		for (User user : users) {
+			if (user.getIllness() != null) {
+				TimeSpan illnessTimeSpan = user.getIllness();
+				if (illnessTimeSpan.intersects(requestedTimeSpan)) {
+					DefaultScheduleEvent scheduleEvent = new DefaultScheduleEvent(illnessTimeSpan.getDescription(),
+							illnessTimeSpan.getDateFrom(), illnessTimeSpan.getDateUntil(), illnessTimeSpan);
+					scheduleEvent.setStyleClass("illness");
+					lazyEventModel.addEvent(scheduleEvent);
+					lazyEventModelIllness.addEvent(scheduleEvent);
 				}
 			}
 		}
 	}
 
 	private void createVacationsModel(Date from, Date until) {
+		TimeSpan requestedTimeSpan = new TimeSpan();
+		requestedTimeSpan.setDateFrom(from);
+		requestedTimeSpan.setDateUntil(until);
 
 		if (this.selectedDepartment == null) {
 			List<User> users = userRoleController.getAllUsers(AuthorizationController.getSystemUser());
-			for (User user : users) {
-				for (TimeSpan timespan : user.getVacation()) {
-					DefaultScheduleEvent event = new DefaultScheduleEvent(timespan.getDescription(), timespan.getDateFrom(),
-							timespan.getDateUntil(), timespan);
-					event.setStyleClass("vacations");
-					lazyEventModel.addEvent(event);
-					lazyEventModelVacations.addEvent(event);
-				}
-			}
+			addUserVaccationWithinTimeSpan(requestedTimeSpan, users);
 		} else {
-
 			List<User> users = userRoleController.getUsersForDepartment(selectedDepartment, AuthorizationController.getSystemUser());
-			for (User user : users) {
-				for (TimeSpan timespan : user.getVacation()) {
-					DefaultScheduleEvent event = new DefaultScheduleEvent(timespan.getDescription(), timespan.getDateFrom(),
-							timespan.getDateUntil(), timespan);
-					event.setStyleClass("vacations");
-					lazyEventModel.addEvent(event);
-					lazyEventModelVacations.addEvent(event);
+			addUserVaccationWithinTimeSpan(requestedTimeSpan, users);
+		}
+	}
+
+	private void addUserVaccationWithinTimeSpan(TimeSpan requestedTimeSpan, List<User> users) {
+		for (User user : users) {
+			for (TimeSpan vacationTimespan : user.getVacation()) {
+				if (vacationTimespan.intersects(requestedTimeSpan)) {
+					DefaultScheduleEvent scheduleEvent = new DefaultScheduleEvent(vacationTimespan.getDescription(),
+							vacationTimespan.getDateFrom(), vacationTimespan.getDateUntil(), vacationTimespan);
+					scheduleEvent.setStyleClass("vacations");
+					lazyEventModel.addEvent(scheduleEvent);
+					lazyEventModelVacations.addEvent(scheduleEvent);
 				}
 			}
 		}

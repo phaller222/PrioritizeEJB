@@ -1,8 +1,12 @@
 package de.hallerweb.enterprise.prioritize.controller.security;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
@@ -10,6 +14,7 @@ import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
+import de.hallerweb.enterprise.prioritize.model.security.ObservedObjectType;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
@@ -30,21 +35,20 @@ public class AuthorizationController {
 
 	static User systemUser;
 	static final String SYSTEM_USER_API_KEY = "e685567d-38d3-49be-8ab9-2adf80eef508";
-	
+
 	// static Proxy instances for use during permission checks. Just used to get Cannonical class name.
 	// DO NOT CHANGE THEESE INSTANCES OR USE AS REAL WORLD OBJECTS!
-	public static Company COMPANY_TYPE = new Company();
-	public static Department DEPARTMENT_TYPE = new Department();
-	public static Role ROLE_TYPE = new Role();
-	public static User USER_TYPE = new User();
-	public static PermissionRecord PERMISSION_RECORD_TYPE = new PermissionRecord();
-	public static DocumentGroup DOCUMENT_GROUP_TYPE = new DocumentGroup();
-	public static Document DOCUMENT_TYPE = new Document();
-	public static ResourceGroup RESOURCE_GROUP_TYPE = new ResourceGroup();
-	public static Resource RESOURCE_TYPE = new Resource();
-	public static SkillCategory SKILL_CATEGORY = new SkillCategory();
-	public static Skill SKILL_TYPE = new Skill();
-	
+	public static final Company COMPANY_TYPE = new Company();
+	public static final Department DEPARTMENT_TYPE = new Department();
+	public static final Role ROLE_TYPE = new Role();
+	public static final User USER_TYPE = new User();
+	public static final PermissionRecord PERMISSION_RECORD_TYPE = new PermissionRecord();
+	public static final DocumentGroup DOCUMENT_GROUP_TYPE = new DocumentGroup();
+	public static final Document DOCUMENT_TYPE = new Document();
+	public static final ResourceGroup RESOURCE_GROUP_TYPE = new ResourceGroup();
+	public static final Resource RESOURCE_TYPE = new Resource();
+	public static final SkillCategory SKILL_CATEGORY = new SkillCategory();
+	public static final Skill SKILL_TYPE = new Skill();
 
 	public static User getSystemUser() {
 		if (systemUser == null) {
@@ -70,6 +74,12 @@ public class AuthorizationController {
 		if (user.equals(systemUser)) {
 			return true;
 		}
+
+		if (targetObject instanceof Company && !checkCompanyPermission(targetObject, user)) {
+			// User must not create foreign companies!
+			return false;
+		}
+
 		String absoluteObjectType = targetObject.getClass().getCanonicalName();
 		for (Role role : user.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
@@ -101,6 +111,12 @@ public class AuthorizationController {
 		if (user.equals(systemUser)) {
 			return true;
 		}
+
+		if (targetObject instanceof Company && !checkCompanyPermission(targetObject, user)) {
+			// User must not create foreign companies!
+			return false;
+		}
+
 		String absoluteObjectType = targetObject.getClass().getCanonicalName();
 		for (Role role : user.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
@@ -131,13 +147,27 @@ public class AuthorizationController {
 		if (user.equals(systemUser)) {
 			return true;
 		}
+
+		if ((targetObject instanceof Company) && (!checkCompanyPermission(targetObject, user))) {
+			// User must not read foreign companies!
+			return false;
+		}
+
 		String absoluteObjectType = targetObject.getClass().getCanonicalName();
 		for (Role role : user.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
 				if (perm.isReadPermission()
 						&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
-					boolean canRead = perm.getDepartment() == null
-							|| (perm.getDepartment().getId() == targetObject.getDepartment().getId());
+					// Object with this ID is explicitly readable by this role.
+					if (perm.getObjectId() == targetObject.getId()) {
+						return true;
+					}
+					boolean canRead;
+					if (targetObject.getDepartment() != null) {
+						canRead = perm.getDepartment() == null || (perm.getDepartment().getId() == targetObject.getDepartment().getId());
+					} else {
+						return true;
+					}
 					if (canRead) {
 						return true;
 					}
@@ -162,12 +192,22 @@ public class AuthorizationController {
 		if (user.equals(systemUser)) {
 			return true;
 		}
+
+		if (targetObject instanceof Company && !checkCompanyPermission(targetObject, user)) {
+			// User must not update foreign companies!
+			return false;
+		}
+
 		String absoluteObjectType = targetObject.getClass().getCanonicalName();
 		for (Role role : user.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
 				if (perm.isUpdatePermission()
 						&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
-					boolean canUpdate = perm.getDepartment() == null
+					// Object with this ID is explicitly updatable by this role.
+					if (perm.getObjectId() == targetObject.getId()) {
+						return true;
+					}
+					boolean canUpdate = perm.getDepartment() == null || targetObject.getDepartment() == null
 							|| (perm.getDepartment().getId() == targetObject.getDepartment().getId());
 					if (canUpdate) {
 						return true;
@@ -193,11 +233,21 @@ public class AuthorizationController {
 		if (user.equals(systemUser)) {
 			return true;
 		}
+
+		if (targetObject instanceof Company && !checkCompanyPermission(targetObject, user)) {
+			// User must not delete foreign companies!
+			return false;
+		}
+
 		String absoluteObjectType = targetObject.getClass().getCanonicalName();
 		for (Role role : user.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
 				if (perm.isDeletePermission()
 						&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
+					// Object with this ID is explicitly deletable by this role.
+					if (perm.getObjectId() == targetObject.getId()) {
+						return true;
+					}
 					boolean canDelete = perm.getDepartment() == null
 							|| (perm.getDepartment().getId() == targetObject.getDepartment().getId());
 					if (canDelete) {
@@ -207,5 +257,33 @@ public class AuthorizationController {
 			}
 		}
 		return false;
+	}
+
+	public void addObservedObjectType(String absoluteClassName) {
+		Query query = em.createNamedQuery("findAllObjectTypes");
+		ObservedObjectType newType = new ObservedObjectType();
+		newType.setObjectType(absoluteClassName);
+		em.persist(newType);
+	}
+
+	public List<ObservedObjectType> getObservableObjectTypes() {
+		Query query = em.createNamedQuery("findAllObjectTypes");
+		List<ObservedObjectType> types = query.getResultList();
+		if (types != null && !types.isEmpty()) {
+			return types;
+		} else {
+			return new ArrayList<>();
+		}
+	}
+
+	private boolean checkCompanyPermission(PAuthorizedObject targetObject, User user) {
+		Company comp = (Company) targetObject;
+		Department dept = user.getDepartment();
+		// User must not read foreign companies!
+		if (dept != null) {
+		return (dept.getCompany().getId() == comp.getId());
+		} else {
+			return true;
+		}
 	}
 }

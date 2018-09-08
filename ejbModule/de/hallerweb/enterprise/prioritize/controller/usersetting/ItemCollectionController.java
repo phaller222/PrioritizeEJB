@@ -42,7 +42,7 @@ public class ItemCollectionController {
 	 * Default constructor.
 	 */
 	public ItemCollectionController() {
-		// TODO Auto-generated constructor stub
+		// Auto-generated constructor stub
 	}
 	
 	public ItemCollection createItemCollection(String name, String description, User owner) {
@@ -77,7 +77,9 @@ public class ItemCollectionController {
 	public void addUser(ItemCollection collection, User user) {
 		ItemCollection managedCollection = em.find(ItemCollection.class, collection.getId());
 		User managedUser = em.find(User.class, user.getId());
+		if (managedUser.getId() != managedCollection.getOwner().getId()) {
 		managedCollection.addUser(managedUser);
+		}
 	}
 	
 	public void removeUser(ItemCollection collection, User user) {

@@ -1,11 +1,15 @@
 package de.hallerweb.enterprise.prioritize.model.search;
 
-public interface SearchResultType {
-	public static String DOCUMENT = "Document";
-	public static String DOCUMENTINFO = "DocumentInfo";
-	public static String RESOURCE = "Resource";
-	public static String USER = "User";
-	public static String ROLE = "Role";
-	public static String DEPARTMENT = "Department";
-	public static String SKILL = "Skill";
+public abstract class SearchResultType {
+	private SearchResultType() {
+		super();
+	}
+	
+	public static final String DOCUMENT = "Document";
+	public static final String DOCUMENTINFO = "DocumentInfo";
+	public static final String RESOURCE = "Resource";
+	public static final String USER = "User";
+	public static final String ROLE = "Role";
+	public static final String DEPARTMENT = "Department";
+	public static final String SKILL = "Skill";
 }

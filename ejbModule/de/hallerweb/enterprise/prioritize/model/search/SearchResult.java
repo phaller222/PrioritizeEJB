@@ -67,8 +67,8 @@ public class SearchResult implements Comparable {
 	Set<SearchResult> subresults;
 
 	@Override
-	public int compareTo(Object o) {
-		SearchResult sr = (SearchResult) o;
+	public int compareTo(Object obj) {
+		SearchResult sr = (SearchResult) obj;
 		return this.getExcerpt().compareTo(sr.getExcerpt());
 	}
 

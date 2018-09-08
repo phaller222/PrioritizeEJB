@@ -18,6 +18,7 @@ import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
+import de.hallerweb.enterprise.prioritize.model.project.Project;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
 import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
@@ -38,25 +39,17 @@ public class TaskController extends PEventConsumerProducer {
 
 	@Inject
 	EventRegistry eventRegistry;
-	
+
 	@EJB
 	UserRoleController userRoleController;
-	
+
 	@EJB
 	ProjectController projectController;
-
-	// public ActionBoard findActionBoardByName(String name) {
-	// Query q = em.createNamedQuery("findActionBoardByName");
-	// q.setParameter("actionBoardName", name);
-	// ActionBoard board = (ActionBoard) q.getSingleResult();
-	// return board;
-	// }
 
 	public Task findTaskById(int id) {
 		Query q = em.createNamedQuery("findTaskById");
 		q.setParameter("taskId", id);
-		Task task = (Task) q.getSingleResult();
-		return task;
+		return (Task) q.getSingleResult();
 	}
 
 	public List<Task> findTasksByAssignee(PActor assignee) {
@@ -64,18 +57,32 @@ public class TaskController extends PEventConsumerProducer {
 		q.setParameter("assignee", assignee);
 		List<Task> tasks = (List<Task>) q.getResultList();
 		if (tasks.isEmpty()) {
-			return new ArrayList<Task>();
+			return new ArrayList<>();
 		} else {
 			return tasks;
 		}
 	}
 	
-	public List<Task> findTasksNotAssignedToUser(PActor assignee) {
-		Query q = em.createNamedQuery("findTasksNotAssignedToUser");
+	public List<Task> findTasksAssignedToUser(PActor assignee, Project p) {
+		Query q = em.createNamedQuery("findTasksInProjectAssignedToUser");
 		q.setParameter("assignee", assignee);
+		q.setParameter("project", p);
 		List<Task> tasks = (List<Task>) q.getResultList();
 		if (tasks.isEmpty()) {
-			return new ArrayList<Task>();
+			return new ArrayList<>();
+		} else {
+			return tasks;
+		}
+	}
+	
+
+	public List<Task> findTasksNotAssignedToUser(PActor assignee,Project p) {
+		Query q = em.createNamedQuery("findTasksInProjectNotAssignedToUser");
+		q.setParameter("assignee", assignee);
+		q.setParameter("project", p);
+		List<Task> tasks = (List<Task>) q.getResultList();
+		if (tasks.isEmpty()) {
+			return new ArrayList<>();
 		} else {
 			return tasks;
 		}
@@ -93,78 +100,77 @@ public class TaskController extends PEventConsumerProducer {
 		}
 		em.remove(task);
 	}
-	
-	public List<Task> getSubTasks(Task t) {
-		if (!t.getSubTasks().isEmpty()) {
-			return t.getSubTasks();
+
+	public List<Task> getSubTasks(Task task) {
+		if (!task.getSubTasks().isEmpty()) {
+			return task.getSubTasks();
 		} else {
-			return new ArrayList<Task>();
+			return new ArrayList<>();
 		}
 	}
-	
+
 	public void addSubTask(Task parent, Task child) {
 		Task managedParent = findTaskById(parent.getId());
 		Task managedChild = findTaskById(child.getId());
 		List<Task> children = managedParent.getSubTasks();
 		if (children == null) {
-			children  = new ArrayList<Task>();
+			children = new ArrayList<>();
 		}
 		children.add(managedChild);
 		managedParent.setSubTasks(children);
 	}
 
-	public void editTask(int taskId,Task detachedTask) {
+	public void editTask(int taskId, Task detachedTask) {
 		Task task = findTaskById(taskId);
 		task.setName(detachedTask.getName());
 		task.setDescription(detachedTask.getDescription());
 		task.setPriority(detachedTask.getPriority());
 		task.setTaskStatus(detachedTask.getTaskStatus());
-		if (detachedTask.getAssignees() != null) {
-			task.setAssignees(detachedTask.getAssignees());
+		if (detachedTask.getAssignee() != null) {
+			task.setAssignee(detachedTask.getAssignee());
 		}
 	}
-	
-	public void addTaskAssignee(int taskId, PActor assignee) {
-		Task task = findTaskById(taskId);
-		task.addAssignee(assignee);
+
+	public void setTaskAssignee(Task task, PActor assignee) {
+		findTaskById(task.getId()).setAssignee(assignee);
 	}
-	
+
 	public void removeTaskAssignee(int taskId, PActor assignee, User sessionUser) {
 		Task task = findTaskById(taskId);
 		User user = userRoleController.findUserById(assignee.getId(), sessionUser);
-		task.removeAssignee(user);
+		task.removeAssignee();
 	}
-	
+
 	public void addTaskResource(int taskId, Resource resource) {
 		Task task = findTaskById(taskId);
 		List<Resource> resources = task.getResources();
 		resources.add(resource);
 		task.setResources(resources);
 	}
-	
+
 	public void addTaskDocument(int taskId, Document document) {
 		Task task = findTaskById(taskId);
 		List<Document> documents = task.getDocuments();
 		documents.add(document);
 		task.setDocuments(documents);
 	}
-	
+
 	public void updateTaskStatus(int taskId, TaskStatus newStatus) {
 		Task task = findTaskById(taskId);
 		task.setTaskStatus(newStatus);
 	}
-	
+
 	public void resolveTask(Task task, User user) {
 		Task managedTask = findTaskById(task.getId());
 		ProjectGoalRecord rec = managedTask.getProjectGoalRecord();
 		rec.setPercentage(100);
-		
+
 		removeTaskAssignee(managedTask.getId(), user, user);
 		userRoleController.removeAssignedTask(user, managedTask, user);
 		updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
 		projectController.updateProjectProgress(task.getProjectGoalRecord().getProject().getId());
 	}
-	
+
 	public void setTaskProgress(Task task, User user, int percentage) {
 		if (percentage < 0 || percentage > 100) {
 			return;
@@ -183,8 +189,7 @@ public class TaskController extends PEventConsumerProducer {
 		}
 		projectController.updateProjectProgress(task.getProjectGoalRecord().getProject().getId());
 	}
-	
-	
+
 	@Override
 	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
 		if (InitializationController.getAsBoolean(InitializationController.FIRE_TASK_EVENTS)) {
@@ -196,7 +201,7 @@ public class TaskController extends PEventConsumerProducer {
 
 	@Override
 	public void consumeEvent(PObject destination, Event evt) {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 
 	}
 }

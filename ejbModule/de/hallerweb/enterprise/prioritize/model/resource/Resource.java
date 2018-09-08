@@ -66,8 +66,7 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 	public static final String PROPERTY_RESOURCEGROUP = "resourceGroup";
 	public static final String PROPERTY_GEO = "geo";
 	public static final String PROPERTY_MQTTONLINE = "mqttOnline";
-	
-	
+
 	private String name; // Name of the resource.
 	@Column(length = 65535)
 	private String description; // Human readable description of the resource.
@@ -131,7 +130,7 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 
 	@Override
 	public List<SearchResult> find(String phrase) {
-		ArrayList<SearchResult> results = new ArrayList<SearchResult>();
+		ArrayList<SearchResult> results = new ArrayList<>();
 		// Search document name
 		if (name.toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
 			// Match found
@@ -147,6 +146,22 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 		return results;
 	}
 
+	@Override
+	public List<SearchResult> find(String phrase, SearchProperty property) {
+		return new ArrayList<>();
+	}
+
+	@Override
+	public List<SearchProperty> getSearchProperties() {
+		if (this.searchProperties == null) {
+			searchProperties = new ArrayList<>();
+			SearchProperty prop = new SearchProperty("RESOURCE");
+			prop.setName("Resource");
+			searchProperties.add(prop);
+		}
+		return this.searchProperties;
+	}
+
 	private SearchResult generateResult() {
 		SearchResult result = new SearchResult();
 		result.setResult(this);
@@ -155,23 +170,6 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 		result.setProvidesExcerpt(true);
 		result.setSubresults(new HashSet<SearchResult>());
 		return result;
-	}
-
-	@Override
-	public List<SearchResult> find(String phrase, SearchProperty property) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<SearchProperty> getSearchProperties() {
-		if (this.searchProperties == null) {
-			searchProperties = new ArrayList<SearchProperty>();
-			SearchProperty prop = new SearchProperty("RESOURCE");
-			prop.setName("Resource");
-			searchProperties.add(prop);
-		}
-		return this.searchProperties;
 	}
 
 	public Set<String> getMqttCommands() {
@@ -364,8 +362,9 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 	public String getMqttDataReceivedAsString() {
 		if (mqttDataReceived != null) {
 			return new String(mqttDataReceived);
-		} else
+		} else {
 			return "";
+		}
 	}
 
 	public void setMqttDataReceived(byte[] mqttDataReceived) {
@@ -384,8 +383,9 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 	public String getMqttDataSentAsString() {
 		if (mqttDataToSend != null) {
 			return new String(mqttDataToSend);
-		} else
+		} else {
 			return "";
+		}
 	}
 
 	public void setMqttDataSentAsString(String data) {
@@ -396,16 +396,8 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 		this.mqttDataToSend = mqttDataToSend;
 	}
 
-	public String getDataSendTopic() {
-		return mqttDataSendTopic;
-	}
-
 	public void setDataSendTopic(String dataSendTopic) {
 		this.mqttDataSendTopic = dataSendTopic;
-	}
-
-	public String getDataReceiveTopic() {
-		return mqttDataReceiveTopic;
 	}
 
 	public void setDataReceiveTopic(String dataReceiveTopic) {
@@ -429,138 +421,20 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 	}
 
 	@Override
-	public int compareTo(Object o) {
-		Resource res = (Resource) o;
+	public int compareTo(Object obj) {
+		Resource res = (Resource) obj;
 		if (res.getId() == id) {
 			return 0;
 		} else if (res.getId() > id) {
 			return -1;
-		} else
+		} else {
 			return 1;
+		}
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((busyBy == null) ? 0 : busyBy.hashCode());
-		result = prime * result + ((department == null) ? 0 : department.hashCode());
-		result = prime * result + ((description == null) ? 0 : description.hashCode());
-		result = prime * result + id;
-		result = prime * result + ((ip == null) ? 0 : ip.hashCode());
-		result = prime * result + (isBusy ? 1231 : 1237);
-		result = prime * result + (isMqttResource ? 1231 : 1237);
-		result = prime * result + (isRemote ? 1231 : 1237);
-		result = prime * result + (isStationary ? 1231 : 1237);
-		result = prime * result + ((latitude == null) ? 0 : latitude.hashCode());
-		result = prime * result + ((longitude == null) ? 0 : longitude.hashCode());
-		result = prime * result + maxSlots;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
+	public String toString() {
+		return this.getName();
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Resource other = (Resource) obj;
-		if (busyBy == null) {
-			if (other.busyBy != null)
-				return false;
-		} else if (!busyBy.equals(other.busyBy))
-			return false;
-		if (department == null) {
-			if (other.department != null)
-				return false;
-		} else if (!department.equals(other.department))
-			return false;
-		if (description == null) {
-			if (other.description != null)
-				return false;
-		} else if (!description.equals(other.description))
-			return false;
-		if (id != other.id)
-			return false;
-		if (ip == null) {
-			if (other.ip != null)
-				return false;
-		} else if (!ip.equals(other.ip))
-			return false;
-		if (isBusy != other.isBusy)
-			return false;
-		if (isMqttResource != other.isMqttResource)
-			return false;
-		if (isRemote != other.isRemote)
-			return false;
-		if (isStationary != other.isStationary)
-			return false;
-		if (latitude == null) {
-			if (other.latitude != null)
-				return false;
-		} else if (!latitude.equals(other.latitude))
-			return false;
-		if (longitude == null) {
-			if (other.longitude != null)
-				return false;
-		} else if (!longitude.equals(other.longitude))
-			return false;
-		if (maxSlots != other.maxSlots)
-			return false;
-		if (mqttCommands == null) {
-			if (other.mqttCommands != null)
-				return false;
-		} else if (!mqttCommands.equals(other.mqttCommands))
-			return false;
-		if (mqttDataReceiveTopic == null) {
-			if (other.mqttDataReceiveTopic != null)
-				return false;
-		} else if (!mqttDataReceiveTopic.equals(other.mqttDataReceiveTopic))
-			return false;
-		if (!Arrays.equals(mqttDataReceived, other.mqttDataReceived))
-			return false;
-		if (mqttDataSendTopic == null) {
-			if (other.mqttDataSendTopic != null)
-				return false;
-		} else if (!mqttDataSendTopic.equals(other.mqttDataSendTopic))
-			return false;
-		if (!Arrays.equals(mqttDataToSend, other.mqttDataToSend))
-			return false;
-		if (mqttLastPing == null) {
-			if (other.mqttLastPing != null)
-				return false;
-		} else if (!mqttLastPing.equals(other.mqttLastPing))
-			return false;
-		if (mqttOnline != other.mqttOnline)
-			return false;
-		if (mqttUUID == null) {
-			if (other.mqttUUID != null)
-				return false;
-		} else if (!mqttUUID.equals(other.mqttUUID))
-			return false;
-		if (mqttValues == null) {
-			if (other.mqttValues != null)
-				return false;
-		} else if (!mqttValues.equals(other.mqttValues))
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (reservations == null) {
-			if (other.reservations != null)
-				return false;
-		} else if (!reservations.equals(other.reservations))
-			return false;
-		if (resourceGroup == null) {
-			if (other.resourceGroup != null)
-				return false;
-		} else if (!resourceGroup.equals(other.resourceGroup))
-			return false;
-		return true;
-	}
 }

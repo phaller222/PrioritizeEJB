@@ -1,8 +1,10 @@
 /**
  * 
  */
+
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,31 +86,6 @@ public class DocumentService {
 	 * @apiSuccess {Document} documents JSON DocumentInfo-Objects with information about found documents.
 	 * @apiSuccessExample Success-Response:
 	 *     HTTP/1.1 200 OK
-	 *  [
-	 *    {
-	 *		"id" : 80,
-	 *		"currentDocument" : {
-	 *			"id" : 79,
-	 *			"name" : "testdefault",
-	 *			"version" : 1,
-	 *			"mimeType" : "image/png",
-	 *			"tag" : null,
-	 *			"lastModified" : 1485693706000,
-	 *			"encrypted" : false,
-	 *			"changes" : "",
-	 *			"lastModifiedBy" : {
-	 *				"id" : 18,
-	 *				"name" : "admin",
-	 *				"username" : "admin",
-	 *				"assignedTasks" : [ ]
-	 *			},
-	 *			"encryptedBy" : null
-	 *		},
-	 *		"recentDocuments" : [ ],
-	 *		"locked" : false,
-	 *		"lockedBy" : null,
-	 * 	 }
-	 * ]
 	 *
 	 * @apiError NotAuthorized  APIKey incorrect.
 	 *
@@ -123,21 +100,14 @@ public class DocumentService {
 			@PathParam(value = "group") String group, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Department dept = companyController.getDepartmentByToken(departmentToken);
+			Department dept = companyController.getDepartmentByToken(departmentToken, user);
 			if (dept != null) {
-				List<DocumentGroup> groups = documentController.getDocumentGroupsForDepartment(dept.getId(), user);
-				DocumentGroup groupToSearch = null;
-				for (DocumentGroup groupInDept : groups) {
-					if (groupInDept.getName().equals(group)) {
-						groupToSearch = groupInDept;
-					}
-				}
-				if (groupToSearch == null) {
+				DocumentGroup documentGroup = documentController.findDocumentGroupByNameAndDepartment(dept.getId(), group, user);
+				if (documentGroup == null) {
 					throw new NotFoundException(createNegativeResponse("Document group with name " + group + "not found!"));
 				} else {
-					if (authController.canRead(groupToSearch, user)) {
-						List<DocumentInfo> documents = documentController.getDocumentInfosInDocumentGroup(groupToSearch.getId(), user);
-						return documents;
+					if (authController.canRead(documentGroup, user)) {
+						return documentController.getDocumentInfosInDocumentGroup(documentGroup.getId(), user);
 					} else {
 						throw new NotAuthorizedException(Response.serverError());
 					}
@@ -152,26 +122,76 @@ public class DocumentService {
 	}
 
 	/**
-	 * Returns all the documents in the given department matching the search phrase.
+	 * @api {get} /documents/{departmentToken}/groups?apiKey={apiKey} getDocumentGroups
+	 * @apiName getDocumentGroups
+	 * @apiGroup /documents
+	 * @apiDescription gets all document groups (metadata only) within the given department
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} departmentToken The department token of the department.
+	 * @apiSuccess {Document} documents JSON DocumentInfo-Objects with information about found documents.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 *
 	 * @param departmentToken - The department token.
+	 * @param group - The document group to look for dcuments.
 	 * @return JSON object with documents in that department.
 	 */
 	@GET
-	@Path("search/{departmentToken}")
+	@Path("list/{departmentToken}/groups")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Set<DocumentInfo> searchDocuments(@PathParam(value = "departmentToken") String departmentToken,
-			@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "phrase") String phrase) {
+	public List<DocumentGroup> getDocumentGroups(@PathParam(value = "departmentToken") String departmentToken,
+			@QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Department dept = companyController.getDepartmentByToken(departmentToken);
+			Department dept = companyController.getDepartmentByToken(departmentToken, user);
 			if (dept != null) {
-				Set<DocumentInfo> searchResult = new HashSet<DocumentInfo>();
+				List<DocumentGroup> groups = documentController.getDocumentGroupsForDepartment(dept.getId(), user);
+				return groups != null ? groups : new ArrayList<>();
+			} else {
+				throw new NotFoundException(createNegativeResponse("Department not found or department token invalid!"));
+			}
+		} else {
+			throw new NotAuthorizedException(Response.serverError());
+		}
+	}
+
+	/**
+	 * Returns all the documents in the given department and document group matching the search phrase.
+	 * @api {get} /search/{departmentToken}/documentGroup?apiKey={apiKey}&phrase={phrase} searchDocuments
+	 * @apiName searchDocuments
+	 * @apiGroup /documents
+	 * @apiDescription Returns all the documents in the given department and document group matching the search phrase.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} departmentToken The department token of the department.
+	 * @apiParam {String} phrase The searchstring to searh for.
+	 * @apiSuccess {DocumentInfo} documents JSON DocumentInfo-Objects with information about found documents.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 *
+	 * @param departmentToken - The department token.
+	 * @param documentGroup name - The name of the document group
+	 * @return JSON object with documents in that department.
+	 */
+	@GET
+	@Path("search/{departmentToken}/{documentGroup}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Set<DocumentInfo> searchDocuments(@PathParam(value = "departmentToken") String departmentToken,
+			@PathParam(value = "documentGroup") String documentGroup, @QueryParam(value = "apiKey") String apiKey,
+			@QueryParam(value = "phrase") String phrase) {
+		User user = accessController.checkApiKey(apiKey);
+		if (user != null) {
+			Department dept = companyController.getDepartmentByToken(departmentToken, user);
+			if (dept != null) {
+				Set<DocumentInfo> searchResult = new HashSet<>();
 				List<SearchResult> results = searchController.searchDocuments(phrase, user);
 				for (SearchResult result : results) {
 					DocumentInfo documentInfo = (DocumentInfo) result.getResult();
 					DocumentGroup group = documentInfo.getDocumentGroup();
-					if (authController.canRead(group, user)) {
+					if (group.getName().equals(documentGroup) && authController.canRead(group, user)) {
 						searchResult.add(documentInfo);
 					} else {
 						throw new NotAuthorizedException(Response.serverError());
@@ -188,20 +208,28 @@ public class DocumentService {
 
 	/**
 	 * Return the {@link Document} object with the given id.
+	 * @api {get} /id/{id}?apiKey={apiKey} getDocumentById
+	 * @apiName getDocumentById
+	 * @apiGroup /documents
+	 * @apiDescription returns the document with the given id
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiSuccess {DocumentInfo} document  JSON DocumentInfo-Object.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
 	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 * @param id - The id of the {@link Document}.
 	 * @return {@link Document} - JSON Representation of the Document.
 	 */
 	@GET
 	@Path("id/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Document getDocumentByUuid(@PathParam(value = "id") String id, @QueryParam(value = "apiKey") String apiKey) {
+	public DocumentInfo getDocumentById(@PathParam(value = "id") String id, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			DocumentInfo docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
-			Document document = docInfo.getCurrentDocument();
 			if (authController.canRead(docInfo, user)) {
-				return document;
+				return docInfo;
 			} else {
 				throw new NotAuthorizedException(Response.serverError());
 			}
@@ -212,7 +240,16 @@ public class DocumentService {
 
 	/**
 	 * Return the {@link Document} object with the given id.
+	 * @api {get} /id/{id}/content?apiKey={apiKey} getDocumentContent
+	 * @apiName getDocumentContent
+	 * @apiGroup /documents
+	 * @apiDescription returns the content of the document with the given id
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiSuccess {byte[]} Document content
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
 	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 * @param id - The id of the {@link Document}.
 	 * @return {@link Document} - JSON Representation of the Document.
 	 */
@@ -233,10 +270,27 @@ public class DocumentService {
 		}
 	}
 
+	/**
+	 * @api {put} /id/{id}?apiKey={apiKey}&name={name}&mimeType={mimeType}&tag={tag}&changes={changes} setDocumentAttributes
+	 * @apiName setDocumentAttributes
+	 * @apiGroup /documents
+	 * @apiDescription Changes different attributes of a document
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} name The new name of the document.
+	 * @apiParam {String} mimeType The new MIME-Type of the document.
+	 * @apiParam {String} tag The new document tag.
+	 * @apiParam {String} changes description of changes made.
+	 * @apiSuccess OK
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 * @param id - The id of the {@link Document}.
+	 */
 	@PUT
-	@Path("id/{id}/current/")
+	@Path("id/{id}/")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response setResourceAttributesByUuid(@PathParam(value = "id") String id, @QueryParam(value = "mimeType") String mimeType,
+	public Response setDocumentAttributesById(@PathParam(value = "id") String id, @QueryParam(value = "mimeType") String mimeType,
 			@QueryParam(value = "name") String name, @QueryParam(value = "tag") String tag, @QueryParam(value = "changes") String changes,
 			@QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
@@ -262,7 +316,7 @@ public class DocumentService {
 					processed = true;
 				}
 				if (processed) {
-					documentController.editDocument(docInfo, doc, doc.getData(), mimeType, user, doc.isEncrypted());
+					documentController.editDocumentInfo(docInfo, doc, doc.getData(), mimeType, user, doc.isEncrypted());
 					return createPositiveResponse("OK");
 				} else {
 					return createNegativeResponse("ERROR: None of the given document property names found! Nothing changed.");
@@ -276,6 +330,20 @@ public class DocumentService {
 		}
 	}
 
+	/**
+	 * @api {delete} /remove?apiKey={apiKey}&departmentToken={departmenttoken}&id={id} deleteDocument
+	 * @apiName deleteDocument
+	 * @apiGroup /documents
+	 * @apiDescription Deletes a document
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} id The id of the document to remove.
+	   @apiParam {String} departmentToken department token of the department the document belongs to.
+	 * @apiSuccess OK
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 */
 	@DELETE
 	@Path("remove")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -283,7 +351,7 @@ public class DocumentService {
 			@QueryParam(value = "departmentToken") String departmentToken, @QueryParam(value = "id") String id) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Department dept = companyController.getDepartmentByToken(departmentToken);
+			Department dept = companyController.getDepartmentByToken(departmentToken, user);
 			if (dept != null) {
 				DocumentInfo docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
 				if (docInfo != null) {

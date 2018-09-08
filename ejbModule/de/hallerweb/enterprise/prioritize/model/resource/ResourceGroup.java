@@ -48,6 +48,7 @@ public class ResourceGroup implements PAuthorizedObject {
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@OrderBy(value = "id")
+	@JsonBackReference
 	private SortedSet<Resource> resources;
 
 	@Version
@@ -90,46 +91,8 @@ public class ResourceGroup implements PAuthorizedObject {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((department == null) ? 0 : department.hashCode());
-		result = prime * result + entityVersion;
-		result = prime * result + id;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((resources == null) ? 0 : resources.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ResourceGroup other = (ResourceGroup) obj;
-		if (department == null) {
-			if (other.department != null)
-				return false;
-		} else if (!department.equals(other.department))
-			return false;
-		if (entityVersion != other.entityVersion)
-			return false;
-		if (id != other.id)
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (resources == null) {
-			if (other.resources != null)
-				return false;
-		} else if (!resources.equals(other.resources))
-			return false;
-		return true;
+	public String toString() {
+		return this.getName();
 	}
 
 }

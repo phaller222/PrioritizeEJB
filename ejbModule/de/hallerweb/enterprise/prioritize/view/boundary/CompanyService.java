@@ -136,7 +136,7 @@ public class CompanyService {
 	public Set<Department> searchDepartments(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "phrase") String phrase) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Set<Department> searchResult = new HashSet<Department>();
+			Set<Department> searchResult = new HashSet<>();
 			List<SearchResult> results = searchController.searchDepartments(phrase, user);
 			for (SearchResult result : results) {
 				Department dept = (Department) result.getResult();

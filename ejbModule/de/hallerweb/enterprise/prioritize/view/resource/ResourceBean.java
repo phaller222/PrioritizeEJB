@@ -6,8 +6,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -29,13 +32,6 @@ import org.primefaces.model.chart.AxisType;
 import org.primefaces.model.chart.CategoryAxis;
 import org.primefaces.model.chart.LineChartModel;
 import org.primefaces.model.chart.LineChartSeries;
-import org.primefaces.model.diagram.Connection;
-import org.primefaces.model.diagram.DefaultDiagramModel;
-import org.primefaces.model.diagram.DiagramModel;
-import org.primefaces.model.diagram.Element;
-import org.primefaces.model.diagram.connector.FlowChartConnector;
-import org.primefaces.model.diagram.endpoint.DotEndPoint;
-import org.primefaces.model.diagram.endpoint.EndPointAnchor;
 import org.primefaces.model.map.DefaultMapModel;
 import org.primefaces.model.map.LatLng;
 import org.primefaces.model.map.MapModel;
@@ -44,7 +40,9 @@ import org.primefaces.model.mindmap.DefaultMindmapNode;
 import org.primefaces.model.mindmap.MindmapNode;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
+import de.hallerweb.enterprise.prioritize.controller.resource.MQTTResourceController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
+import de.hallerweb.enterprise.prioritize.controller.resource.ResourceReservationController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionController;
@@ -79,48 +77,54 @@ public class ResourceBean implements Serializable {
 	private static final long serialVersionUID = -9021544577054017322L;
 
 	@Inject
-	SessionController sessionController; 							// Reference to SessionController EJB
+	SessionController sessionController;
 	@EJB
-	ResourceController resourceController; 							// Reference to ResourceController EJB
+	ResourceController resourceController;
 	@EJB
-	CompanyController companyController; 							// Reference to CompanyController EJB
+	MQTTResourceController mqttResourceController;
 	@EJB
-	AuthorizationController authController; 						// Reference to AuthorizationController EJB
+	ResourceReservationController resourceReservationController;
 	@EJB
-	ItemCollectionController itemCollectionController; 				// Reference to ItemCollectionController EJB
+	CompanyController companyController;
 	@EJB
-	UserPreferenceController preferenceController;					// Reference to UserPreferenceController.
+	AuthorizationController authController;
+	@EJB
+	ItemCollectionController itemCollectionController;
+	@EJB
+	UserPreferenceController preferenceController;
 
-	Set<Resource> resources; 										// Current List with Resource objects
-	List<ResourceGroup> resourceGroups; 							// Current list of resource groups within department
-	List<Department> departments; 									// List of departments
+	transient Set<Resource> resources; 								// Current List with Resource objects
+	transient List<ResourceGroup> resourceGroups; 					// Current list of resource groups within department
+	transient List<Department> departments; 						// List of departments
 	String selectedDepartmentId; 									// Currently selected Department
 	String selectedResourceGroupId; 								// Currently selected ResourceGroup
 	String resourceGroupName; 										// ResourceGroup to create
-	Resource resource; 												// Current Resource to create
-	ResourceReservation resourceReservation; 						// Current Resource Reservation to create
-	List<ResourceReservation> resourceReservations; 				// Current List with Resource Reservations
+	transient Resource resource; 									// Current Resource to create
+	transient ResourceReservation resourceReservation; 				// Current Resource Reservation to create
+	transient List<ResourceReservation> resourceReservations; 		// Current List with Resource Reservations
 	Date from; 														// FROM-Date of ResourceReservation
 	Date until; 													// UNTIL-Date of ResourceReservation
 	String mqttDataSentAsString = ""; 								// Represents the MQTT data sent as String
 	String lastMqttValue;
-	Set<String> mqttCommands; 										// A list of commands a MQTT resource understands (e.g. ON, OFF....)
+	transient Set<String> mqttCommands; 							// A list of commands a MQTT resource understands (e.g. ON, OFF....)
 	LineChartModel valueModel; 										// LineChartModel for the primefaces <gmap> tag (Resource location).
 
-	private MindmapNode root; 										// RootNode for agent mindmap.
-	private MindmapNode selectedNode; 								// selectedNode for agent mindmap.
+	private transient MindmapNode selectedNode; 					// selectedNode for agent mindmap.
 
-	Department selectedDepartment = null; 							// Department to change resource to
-	Department selectedResourceGroup = null; 						// ResourceGroup to change resource to
+	transient Department selectedDepartment = null; 				// Department to change resource to
+	transient Department selectedResourceGroup = null; 				// ResourceGroup to change resource to
 
-	Set<SkillRecord> skillRecords;
+	transient Set<SkillRecord> skillRecords;
 
 	String selectedItemCollectionName;								// Selected ItemCollection to add a resource to
 
-	TreeNode resourceTreeRoot;										// Tree for resources
-	TreeNode agentTreeRoot;											// Tree for agent resources
+	transient TreeNode resourceTreeRoot;							// Tree for resources
+	transient TreeNode agentTreeRoot;								// Tree for agent resources
 
-	Resource currentAgent;											// If in agent view the currently select agent for viewing its data
+	transient Resource currentAgent;								// If in agent view the currently select agent for viewing its data
+
+	private static final String NAVIGATION_RESOURCERESERVATIONS = "resourcereservations";
+	private static final String NAVIGATION_RESOURCES = "resources";
 
 	public Resource getCurrentAgent() {
 		return currentAgent;
@@ -146,7 +150,7 @@ public class ResourceBean implements Serializable {
 		this.selectedDepartment = selectedDepartment;
 	}
 
-	ResourceReservation aquiredReservation = null;
+	transient ResourceReservation aquiredReservation = null;
 
 	public String getMqttDataSentAsString() {
 		return mqttDataSentAsString;
@@ -174,27 +178,27 @@ public class ResourceBean implements Serializable {
 
 	@Named
 	public String createResourceReservation() {
-		resourceController.createResourceReservation(resource, from, until, sessionController.getUser());
-		return "resourcereservations";
+		resourceReservationController.createResourceReservation(resource, from, until, sessionController.getUser());
+		return NAVIGATION_RESOURCERESERVATIONS;
 	}
 
 	@Named
 	public String aquireResource(Resource resource) {
 		if (this.mqttCommands == null || this.mqttCommands.isEmpty()) {
-			this.mqttCommands = resourceController.getMqttCommands(resource, sessionController.getUser());
+			this.mqttCommands = mqttResourceController.getMqttCommands(resource, sessionController.getUser());
 		}
 		Date oneMinute = new Date(System.currentTimeMillis() + 60000L);
-		this.aquiredReservation = resourceController.createResourceReservation(resource, new Date(), oneMinute,
+		this.aquiredReservation = resourceReservationController.createResourceReservation(resource, new Date(), oneMinute,
 				sessionController.getUser());
-		return "resources";
+		return NAVIGATION_RESOURCES;
 	}
 
 	@Named
 	public String releaseResource(Resource resource) {
 		if (aquiredReservation != null) {
-			resourceController.removeResourceReservation(aquiredReservation.getId());
+			resourceReservationController.removeResourceReservation(aquiredReservation.getId());
 		}
-		return "resources";
+		return NAVIGATION_RESOURCES;
 	}
 
 	@Named
@@ -208,18 +212,19 @@ public class ResourceBean implements Serializable {
 
 	public List<ResourceReservation> getResourceReservations() {
 		if (!this.selectedResourceGroupId.isEmpty()) {
-			return resourceController.getResourceReservationsForResourceGroup(Integer.parseInt(this.selectedResourceGroupId));
-		} else
-			return null;
+			return resourceReservationController.getResourceReservationsForResourceGroup(Integer.parseInt(this.selectedResourceGroupId));
+		} else {
+			return new ArrayList<>();
+		}
 	}
 
 	public String removeReservation(ResourceReservation reservation) {
-		resourceController.removeResourceReservation(reservation.getId());
-		return "resourcereservations";
+		resourceReservationController.removeResourceReservation(reservation.getId());
+		return NAVIGATION_RESOURCERESERVATIONS;
 	}
 
 	public String refreshReservations() {
-		return "resourcereservations";
+		return NAVIGATION_RESOURCERESERVATIONS;
 	}
 
 	/**
@@ -228,7 +233,7 @@ public class ResourceBean implements Serializable {
 	@PostConstruct
 	public void init() {
 		resource = new Resource();
-		selectedResourceGroupId = new String();
+		selectedResourceGroupId = "";
 		this.resourceTreeRoot = createResourceTree();
 	}
 
@@ -243,28 +248,29 @@ public class ResourceBean implements Serializable {
 
 	@Named
 	public int getSlotsInUse(Resource res) {
-		return resourceController.getSlotsInUse(res);
+		return resourceReservationController.getSlotsInUse(res);
 	}
 
 	public Set<Resource> getResources() {
 		if ((this.selectedResourceGroupId != null) && (!this.selectedResourceGroupId.isEmpty())) {
 			return resourceController.getResourcesInResourceGroup(Integer.parseInt(this.selectedResourceGroupId),
 					sessionController.getUser());
-		} else
-			return null;
+		} else {
+			return new HashSet<>();
+		}
 	}
 
 	@Named
 	public String createResource() {
 		int resourceGroupId = Integer.parseInt(selectedResourceGroupId);
-		if (resourceController.createResource(resource.getName(), resourceGroupId, sessionController.getUser(), resource.getDescription(),
-				resource.getIp(), resource.getMaxSlots(), resource.isStationary(), resource.isRemote()) != null) {
+
+		if (resourceController.createResource(resource, resourceGroupId, sessionController.getUser()) != null) {
 			updateResourceTree();
-			return "resources";
+			return NAVIGATION_RESOURCES;
 		} else {
 			ViewUtilities.addErrorMessage("name", "A resource with the name " + resource.getName()
 					+ " already exists in this resource group. Please change name or select a different Resource Group!");
-			return "resources";
+			return NAVIGATION_RESOURCES;
 		}
 	}
 
@@ -294,7 +300,8 @@ public class ResourceBean implements Serializable {
 		}
 		if ((departmentId != null) && (departmentId.length() > 0)) {
 
-			this.resourceGroups = resourceController.getResourceGroupsForDepartment(Integer.parseInt(departmentId));
+			this.resourceGroups = resourceController.getResourceGroupsForDepartment(Integer.parseInt(departmentId),
+					sessionController.getUser());
 			String id = String.valueOf(this.resourceGroups.get(0).getId());
 			setSelectedResourceGroup(id);
 
@@ -322,10 +329,10 @@ public class ResourceBean implements Serializable {
 
 	public List<ResourceGroup> getResourceGroups() {
 		if ((selectedDepartmentId != null) && (selectedDepartmentId.length() > 0)) {
-			List<ResourceGroup> groups = resourceController.getResourceGroupsForDepartment(Integer.parseInt(selectedDepartmentId));
-			return groups;
-		} else
-			return new ArrayList<ResourceGroup>();
+			return resourceController.getResourceGroupsForDepartment(Integer.parseInt(selectedDepartmentId), sessionController.getUser());
+		} else {
+			return new ArrayList<>();
+		}
 	}
 
 	@Named
@@ -333,10 +340,10 @@ public class ResourceBean implements Serializable {
 		if (resourceController.createResourceGroup(Integer.parseInt(selectedDepartmentId), resourceGroupName,
 				sessionController.getUser()) != null) {
 			init();
-			return "resources";
+			return NAVIGATION_RESOURCES;
 		} else {
 			ViewUtilities.addErrorMessage("name", "A resource group with the name " + resourceGroupName + " already exists!");
-			return "resource";
+			return NAVIGATION_RESOURCES;
 		}
 	}
 
@@ -348,8 +355,8 @@ public class ResourceBean implements Serializable {
 	}
 
 	public String delete(Resource res) {
-		resourceController.deleteResource(res.getId());
-		return "resources";
+		resourceController.deleteResource(res.getId(), sessionController.getUser());
+		return NAVIGATION_RESOURCES;
 	}
 
 	public String delete(Resource res, String resourceGroupId) {
@@ -367,7 +374,7 @@ public class ResourceBean implements Serializable {
 	public String reservations(Resource res) {
 		this.resource = res;
 		this.selectedResourceGroupId = String.valueOf(resource.getResourceGroup().getId());
-		return "resourcereservations";
+		return NAVIGATION_RESOURCERESERVATIONS;
 	}
 
 	/**
@@ -412,7 +419,7 @@ public class ResourceBean implements Serializable {
 		resourceController.editResource(resource, selectedDepartment, selectedResourceGroupObject, resource.getName(),
 				resource.getDescription(), resource.getIp(), resource.isStationary(), resource.isRemote(), resource.getMaxSlots(),
 				sessionController.getUser());
-		return "resources";
+		return NAVIGATION_RESOURCES;
 	}
 
 	@Named
@@ -451,8 +458,9 @@ public class ResourceBean implements Serializable {
 	public boolean isMqttResource(Resource res) {
 		if (res != null) {
 			return res.isMqttResource();
-		} else
+		} else {
 			return false;
+		}
 	}
 
 	public boolean isAgentResource(String valId) {
@@ -468,44 +476,46 @@ public class ResourceBean implements Serializable {
 	public boolean isMqttResourceOnline(Resource res) {
 		if (res != null) {
 			return res.isMqttOnline();
-		} else
+		} else {
 			return false;
+		}
 	}
 
 	@Named
 	public void sendDataToDevice(Resource res, String data) {
 		if (data != null) {
-			resourceController.writeMqttDataToSend(res, data.getBytes());
+			mqttResourceController.writeMqttDataToSend(res, data.getBytes());
 		}
 	}
 
 	@Named
 	public Set<NameValueEntry> getNameValuePairs() {
-		return resourceController.getNameValueEntries(resource);
+		return mqttResourceController.getNameValueEntries(resource);
 	}
 
 	@Named
 	public Set<NameValueEntry> getNameValuePairs(Resource res) {
-		return resourceController.getNameValueEntries(res);
+		return mqttResourceController.getNameValueEntries(res);
 	}
 
 	@Named
 	public String getLastMqttValue(String name) {
-		return resourceController.getLastMqttValueForResource(resource, name);
+		return mqttResourceController.getLastMqttValueForResource(resource, name);
 	}
 
 	@Named
 	public String getLastMqttValue(Resource res, String name) {
-		return resourceController.getLastMqttValueForResource(res, name);
+		return mqttResourceController.getLastMqttValueForResource(res, name);
 	}
 
 	@Named
 	public String getLastMqttValueForResource(Resource res, String name) {
-		String value = resourceController.getLastMqttValueForResource(res, name);
+		String value = mqttResourceController.getLastMqttValueForResource(res, name);
 		if (value != null && value.contains(",")) {
 			return value.split(",")[1];
-		} else
+		} else {
 			return "-NO DATA-";
+		}
 	}
 
 	@Named
@@ -515,21 +525,21 @@ public class ResourceBean implements Serializable {
 
 	@Named
 	public void sendCommand(Resource resource, String command, String param) {
-		resourceController.sendCommand(resource, command, param);
+		mqttResourceController.sendCommand(resource, command, param);
 	}
 
 	@Named
 	public void sendCommandFromResource(Resource resource, String command, String param) {
-		resourceController.sendCommandToResource(resource, command, param);
+		mqttResourceController.sendCommandToResource(resource, command, param);
 	}
 
 	@Named
 	public boolean isResourceActiveForCurrentUser(Resource res) {
-		return resourceController.getActiveSlotForUser(sessionController.getUser(), res.getReservations()) >= 0;
+		return resourceReservationController.getActiveSlotForUser(sessionController.getUser(), res.getReservations()) >= 0;
 	}
 
 	public int getActiveSlotForCurrentUser(Resource res) {
-		return resourceController.getActiveSlotForUser(sessionController.getUser(), res.getReservations());
+		return resourceReservationController.getActiveSlotForUser(sessionController.getUser(), res.getReservations());
 	}
 
 	public String getGMapCoordinateParameters() {
@@ -621,7 +631,7 @@ public class ResourceBean implements Serializable {
 				// Basic marker
 				simpleModel.addOverlay(new Marker(coord, resource.getName()));
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
 			}
 
 		}
@@ -630,15 +640,13 @@ public class ResourceBean implements Serializable {
 	}
 
 	public MindmapNode getNetworkRoot() {
-		List<Resource> resources = resourceController.getAllResources(sessionController.getUser());
-		if (resources != null) {
+		List<Resource> allResources = resourceController.getAllResources(sessionController.getUser());
+		if (allResources != null) {
 			MindmapNode root = new DefaultMindmapNode("Origin", "Root", "C0C0FF", false);
-			for (Resource res : resources) {
-				if (authController.canRead(res, sessionController.getUser())) {
-					if (res.isAgent()) {
-						root.addNode(new DefaultMindmapNode(res.getName() + " " + res.getIp(), res,
-								res.isMqttOnline() ? "00C000" : "C0C0C0", true));
-					}
+			for (Resource res : allResources) {
+				if (authController.canRead(res, sessionController.getUser()) && res.isAgent()) {
+					root.addNode(
+							new DefaultMindmapNode(res.getName() + " " + res.getIp(), res, res.isMqttOnline() ? "00C000" : "C0C0C0", true));
 				}
 			}
 			return root;
@@ -664,12 +672,13 @@ public class ResourceBean implements Serializable {
 		if (this.selectedNode != null) {
 			Resource res = (Resource) this.selectedNode.getData();
 			Set<NameValueEntry> data = res.getMqttValues();
-			String currentEntry = "";
+			StringBuilder currentEntry = new StringBuilder("");
 			for (NameValueEntry entry : data) {
 				String values = entry.getValues();
-				currentEntry += entry.getName() + " : " + values.substring(values.lastIndexOf(","), values.length()) + "\n";
+				currentEntry.append(entry.getName()).append(" : ").append(values.substring(values.lastIndexOf(','), values.length()))
+						.append("\n");
 			}
-			return currentEntry;
+			return currentEntry.toString();
 		} else {
 			return "";
 		}
@@ -700,38 +709,37 @@ public class ResourceBean implements Serializable {
 		TreeNode root = new DefaultTreeNode("My Devices", null);
 
 		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
-		for (Company c : companies) {
-			TreeNode company = new DefaultTreeNode(new ResourceTreeInfo(c.getName(), false, false, null, null), root);
-			List<Department> departments = c.getDepartments();
-			for (Department d : departments) {
-				TreeNode department = new DefaultTreeNode(new ResourceTreeInfo(d.getName(), false, false, null, null), company);
-				List<ResourceGroup> groups = d.getResourceGroups();
+		for (Company company : companies) {
+			TreeNode companyTreeNode = new DefaultTreeNode(new ResourceTreeInfo(company.getName(), false, false, null, null), root);
+			List<Department> companyDepartments = company.getDepartments();
+			for (Department d : companyDepartments) {
+				TreeNode department = new DefaultTreeNode(new ResourceTreeInfo(d.getName(), false, false, null, null), companyTreeNode);
+				Set<ResourceGroup> groups = d.getResourceGroups();
 				for (ResourceGroup g : groups) {
-					if (authController.canRead(g, sessionController.getUser())) {
-						TreeNode group = null;
-						if (authController.canCreate(g, sessionController.getUser())) {
-							group = new DefaultTreeNode(new ResourceTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null),
-									department);
-						} else {
-							group = new DefaultTreeNode(new ResourceTreeInfo(g.getName(), false, false, null, null), department);
-						}
-						Set<Resource> resources = g.getResources();
-						for (Resource res : resources) {
-							if (!res.isAgent()) {
-								if (authController.canRead(res, sessionController.getUser())) {
-									TreeNode resourceInfoNode = new DefaultTreeNode(
-											new ResourceTreeInfo(res.getName(), true, false, null, res), group);
-								}
-							}
-						}
-
-					}
-
+					buildGroupResourceSubtree(department, g);
 				}
-
 			}
 		}
 		return root;
+	}
+
+	private void buildGroupResourceSubtree(TreeNode department, ResourceGroup resourceGroup) {
+		if (authController.canRead(resourceGroup, sessionController.getUser())) {
+			TreeNode groupTreeNode = null;
+			if (authController.canCreate(resourceGroup, sessionController.getUser())) {
+				groupTreeNode = new DefaultTreeNode(
+						new ResourceTreeInfo(resourceGroup.getName(), false, true, String.valueOf(resourceGroup.getId()), null),
+						department);
+			} else {
+				groupTreeNode = new DefaultTreeNode(new ResourceTreeInfo(resourceGroup.getName(), false, false, null, null), department);
+			}
+			Set<Resource> resourcesInGroup = resourceGroup.getResources();
+			for (Resource res : resourcesInGroup) {
+				if (!res.isAgent() && authController.canRead(res, sessionController.getUser())) {
+					new DefaultTreeNode(new ResourceTreeInfo(res.getName(), true, false, null, res), groupTreeNode);
+				}
+			}
+		}
 	}
 
 	// Create Tree for resources view
@@ -741,36 +749,37 @@ public class ResourceBean implements Serializable {
 		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
 		for (Company c : companies) {
 			TreeNode company = new DefaultTreeNode(new ResourceTreeInfo(c.getName(), false, false, null, null), root);
-			List<Department> departments = c.getDepartments();
-			for (Department d : departments) {
+			List<Department> companyDepartments = c.getDepartments();
+			for (Department d : companyDepartments) {
 				TreeNode department = new DefaultTreeNode(new ResourceTreeInfo(d.getName(), false, false, null, null), company);
-				List<ResourceGroup> groups = d.getResourceGroups();
+				Set<ResourceGroup> groups = d.getResourceGroups();
 				for (ResourceGroup g : groups) {
-					if (authController.canRead(g, sessionController.getUser())) {
-						TreeNode group = null;
-						if (authController.canCreate(g, sessionController.getUser())) {
-							group = new DefaultTreeNode(new ResourceTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null),
-									department);
-						} else {
-							group = new DefaultTreeNode(new ResourceTreeInfo(g.getName(), false, false, null, null), department);
-						}
-						Set<Resource> resources = g.getResources();
-						for (Resource res : resources) {
-							if (res.isAgent()) {
-								if (authController.canRead(res, sessionController.getUser())) {
-									TreeNode resourceInfoNode = new DefaultTreeNode(
-											new ResourceTreeInfo(res.getName(), true, false, null, res), group);
-								}
-							}
-						}
-
-					}
-
+					buildGroupAgentSubtree(department, g);
 				}
 
 			}
 		}
 		return root;
+	}
+
+	private void buildGroupAgentSubtree(TreeNode department, ResourceGroup resourceGroup) {
+		if (authController.canRead(resourceGroup, sessionController.getUser())) {
+			TreeNode groupTreeNode = null;
+			if (authController.canCreate(resourceGroup, sessionController.getUser())) {
+				groupTreeNode = new DefaultTreeNode(
+						new ResourceTreeInfo(resourceGroup.getName(), false, true, String.valueOf(resourceGroup.getId()), null),
+						department);
+			} else {
+				groupTreeNode = new DefaultTreeNode(new ResourceTreeInfo(resourceGroup.getName(), false, false, null, null), department);
+			}
+			Set<Resource> groupResources = resourceGroup.getResources();
+			for (Resource res : groupResources) {
+				if (res.isAgent() && authController.canRead(res, sessionController.getUser())) {
+					new DefaultTreeNode(new ResourceTreeInfo(res.getName(), true, false, null, res), groupTreeNode);
+				}
+			}
+
+		}
 	}
 
 	public void updateResourceTree() {
@@ -802,7 +811,7 @@ public class ResourceBean implements Serializable {
 	}
 
 	public String goBack() {
-		return "resources";
+		return NAVIGATION_RESOURCES;
 	}
 
 	public String goBackToAgents() {
@@ -810,8 +819,7 @@ public class ResourceBean implements Serializable {
 		try {
 			context.redirect(context.getApplicationContextPath() + "/client/resources/agents.xhtml");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
 		}
 		return "agents";
 	}

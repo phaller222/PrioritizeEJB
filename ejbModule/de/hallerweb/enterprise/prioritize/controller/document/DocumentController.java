@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -55,9 +57,11 @@ public class DocumentController extends PEventConsumerProducer {
 	SessionController sessionController;
 	@Inject
 	EventRegistry eventRegistry;
+	
+	static final String DOCUMENT_LITERAL = "Document";
 
-	public DocumentInfo createDocument(String name, int groupId, User user, String mimeType, boolean encrypt, byte[] data, String changes) {
-		int maxsize = Integer.parseInt(InitializationController.config.get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
+	public DocumentInfo createDocumentInfo(String name, int groupId, User user, String mimeType, boolean encrypt, byte[] data, String changes) {
+		int maxsize = Integer.parseInt(InitializationController.getConfig().get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
 		if (data.length > maxsize) {
 			return null;
 		}
@@ -83,7 +87,7 @@ public class DocumentController extends PEventConsumerProducer {
 				document.setEncryptedBy(user);
 			}
 			document.setLastModified(new Date());
-			document.setLastModifiedBy(user);
+			document.setLastModifiedBy(userRoleController.findUserByUsername(user.getUsername(), AuthorizationController.getSystemUser()));
 
 			// New document, so version is always 1
 			document.setVersion(1);
@@ -97,14 +101,12 @@ public class DocumentController extends PEventConsumerProducer {
 
 			// ------------------ AUTH check ---------------------
 			if (authController.canCreate(documentInfo, user)) {
-
 				managedDocumentGroup.addDocument(documentInfo);
-
 				em.persist(document);
 				em.persist(documentInfo);
 				try {
-					logger.log(sessionController.getUser().getUsername(), "Document", Action.CREATE, documentInfo.getId(),
-							" Document \"" + documentInfo.getCurrentDocument().getName() + "\" created.");
+					logger.log(user.getUsername(), DOCUMENT_LITERAL, Action.CREATE, documentInfo.getId(),
+							" " + DOCUMENT_LITERAL + " \"" + documentInfo.getCurrentDocument().getName() + "\" created.");
 				} catch (ContextNotActiveException ex) {
 					// Log omitted here.
 				}
@@ -157,10 +159,31 @@ public class DocumentController extends PEventConsumerProducer {
 			if (authController.canRead(result.get(0), user)) {
 				return result;
 			} else {
-				return null;
+				return new ArrayList<>();
 			}
 		} else {
-			return null;
+			return new ArrayList<>();
+		}
+	}
+
+	public List<Document> getCurrentDocumentsInDocumentGroup(int documentGroupId, User user) {
+		Query query = em.createNamedQuery("findDocumentInfosByDocumentGroup");
+		query.setParameter("dgid", documentGroupId);
+		List<Document> currentDocuments = new ArrayList<>();
+
+		List<DocumentInfo> result = (List<DocumentInfo>) query.getResultList();
+		if (!result.isEmpty()) {
+			// ------------- AUTH check ----------------
+			if (authController.canRead(result.get(0), user)) {
+				for (DocumentInfo docInfo : result) {
+					currentDocuments.add(docInfo.getCurrentDocument());
+				}
+				return currentDocuments;
+			} else {
+				return new ArrayList<>();
+			}
+		} else {
+			return new ArrayList<>();
 		}
 	}
 
@@ -177,18 +200,35 @@ public class DocumentController extends PEventConsumerProducer {
 		}
 	}
 
-	public List<DocumentInfo> getAllDocumentInfos(User user) {
-		Query query = em.createNamedQuery("findAllDocumentInfos");
-		return query.getResultList();
+	public DocumentInfo getDocumentInfoByDocumentId(int documentId, User user) {
+		Query query = em.createNamedQuery("findDocumentInfoByDocumentId");
+		query.setParameter("documentId", documentId);
+		DocumentInfo docinfo = (DocumentInfo) query.getSingleResult();
+
+		// ------------------ AUTH check ---------------
+		if (authController.canRead(docinfo, user)) {
+			return docinfo;
+		} else {
+			return null;
+		}
 	}
 
-	public Document getDocument(int id, User user) {
+	public List<DocumentInfo> getAllDocumentInfos(User user) {
+		if (authController.canRead(new DocumentInfo(), user)) {
+		Query query = em.createNamedQuery("findAllDocumentInfos");
+		return query.getResultList();
+		} else {
+			return new ArrayList<>();
+		}
+	}
+
+	public Document getDocument(int id) {
 		Query query = em.createNamedQuery("findDocumentById");
 		query.setParameter("docId", id);
 		return (Document) query.getSingleResult();
 	}
 
-	public Document getDocumentByTag(String tag, User user) {
+	public Document getDocumentByTag(String tag) {
 		Query query = em.createNamedQuery("findDocumentByTag");
 		query.setParameter("docTag", tag);
 		return (Document) query.getSingleResult();
@@ -209,11 +249,11 @@ public class DocumentController extends PEventConsumerProducer {
 		Query query = em.createNamedQuery("findDocumentGroupsForDepartment");
 		query.setParameter("deptId", departmentId);
 		List<DocumentGroup> groups = query.getResultList();
-		DocumentGroup gr = (DocumentGroup) groups.get(0);
+		DocumentGroup gr = groups.get(0);
 		if (authController.canRead(gr, user)) {
 			return groups;
 		} else {
-			return new ArrayList<DocumentGroup>();
+			return new ArrayList<>();
 		}
 	}
 
@@ -228,35 +268,33 @@ public class DocumentController extends PEventConsumerProducer {
 			em.remove(info);
 			em.flush();
 
-			logger.log(sessionController.getUser().getUsername(), "Document", Action.DELETE, info.getId(),
-					" Document \"" + info.getCurrentDocument().getName() + "\" deleted.");
+			logger.log(user.getUsername(), DOCUMENT_LITERAL, Action.DELETE, info.getId(),
+					" " + DOCUMENT_LITERAL  + "\"" + info.getCurrentDocument().getName() + "\" deleted.");
 		}
 	}
 
 	public void deleteDocumentGroup(int documentGroupId, User user) {
 		DocumentGroup group = em.find(DocumentGroup.class, documentGroupId);
 		// ------------------ AUTH check ---------------
-		if (authController.canDelete(group, user)) {
-			if (group.getDepartment().getDocumentGroups().size() > 1) {
-				Set<DocumentInfo> documents = group.getDocuments();
-				if (documents != null) {
-					for (DocumentInfo info : documents) {
-						deleteDocumentInfo(info.getId(), user);
-					}
+		if (authController.canDelete(group, user) && group.getDepartment().getDocumentGroups().size() > 1) {
+			Set<DocumentInfo> documents = group.getDocuments();
+			if (documents != null) {
+				for (DocumentInfo info : documents) {
+					deleteDocumentInfo(info.getId(), user);
 				}
-
-				group.getDepartment().getDocumentGroups().remove(group);
-				group.setDepartment(null);
-				em.remove(group);
-				group = null;
-				em.flush();
 			}
+
+			group.getDepartment().getDocumentGroups().remove(group);
+			group.setDepartment(null);
+			em.remove(group);
+			em.flush();
+
 		}
 	}
 
-	public DocumentInfo editDocument(DocumentInfo info, Document newDocumentData, byte[] data, String mimeType, User user,
+	public DocumentInfo editDocumentInfo(DocumentInfo info, Document newDocumentData, byte[] data, String mimeType, User user,
 			boolean encrypt) {
-		int maxsize = Integer.parseInt(InitializationController.config.get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
+		int maxsize = Integer.parseInt(InitializationController.getConfig().get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
 		if (data.length > maxsize) {
 			return null;
 		}
@@ -283,24 +321,7 @@ public class DocumentController extends PEventConsumerProducer {
 
 			// Fire events for changed properties if configured.
 			if (InitializationController.getAsBoolean(InitializationController.FIRE_DOCUMENT_EVENTS)) {
-				Document current = managedInfo.getCurrentDocument();
-				if (!current.getName().equals(newDocumentData.getName())) {
-					this.raiseEvent(managedInfo, Document.PROPERTY_NAME, current.getName(), newDocumentData.getName(),
-							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				}
-				if (!current.getMimeType().equals(newDocumentData.getMimeType())) {
-					this.raiseEvent(managedInfo, Document.PROPERTY_MIMETYPE, current.getMimeType(), newDocumentData.getMimeType(),
-							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				}
-				if (!current.getChanges().equals(newDocumentData.getChanges())) {
-					this.raiseEvent(managedInfo, Document.PROPERTY_CHANGES, current.getChanges(), newDocumentData.getChanges(),
-							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				}
-				if (!current.isEncrypted() == newDocumentData.isEncrypted()) {
-					this.raiseEvent(managedInfo, Document.PROPERTY_ENCRYPTED, String.valueOf(current.isEncrypted()),
-							String.valueOf(newDocumentData.isEncrypted()),
-							InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-				}
+				checkEventsToFire(newDocumentData, managedInfo);
 			}
 
 			// Then edit the DocumentInfo information
@@ -314,8 +335,8 @@ public class DocumentController extends PEventConsumerProducer {
 			em.persist(document);
 			em.flush();
 			try {
-				logger.log(sessionController.getUser().getUsername(), "Document", Action.UPDATE, managedInfo.getId(),
-						" Document \"" + managedInfo.getCurrentDocument().getName() + "\" changed.");
+				logger.log(user.getUsername(), DOCUMENT_LITERAL, Action.UPDATE, managedInfo.getId(),
+						" " + DOCUMENT_LITERAL + " \"" + managedInfo.getCurrentDocument().getName() + "\" changed.");
 			} catch (ContextNotActiveException ex) {
 				// Omit logging here.
 			}
@@ -326,14 +347,35 @@ public class DocumentController extends PEventConsumerProducer {
 		}
 	}
 
-	public Document setDocumentTag(Document document, String tag, User user) {
+	private void checkEventsToFire(Document newDocumentData, DocumentInfo managedInfo) {
+		Document current = managedInfo.getCurrentDocument();
+		if (!current.getName().equals(newDocumentData.getName())) {
+			this.raiseEvent(managedInfo, Document.PROPERTY_NAME, current.getName(), newDocumentData.getName(),
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+		}
+		if (!current.getMimeType().equals(newDocumentData.getMimeType())) {
+			this.raiseEvent(managedInfo, Document.PROPERTY_MIMETYPE, current.getMimeType(), newDocumentData.getMimeType(),
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+		}
+		if (!current.getChanges().equals(newDocumentData.getChanges())) {
+			this.raiseEvent(managedInfo, Document.PROPERTY_CHANGES, current.getChanges(), newDocumentData.getChanges(),
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+		}
+		if (!current.isEncrypted() == newDocumentData.isEncrypted()) {
+			this.raiseEvent(managedInfo, Document.PROPERTY_ENCRYPTED, String.valueOf(current.isEncrypted()),
+					String.valueOf(newDocumentData.isEncrypted()),
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+		}
+	}
+
+	public Document setDocumentTag(Document document, String tag) {
 		Document managedDocument = em.find(Document.class, document.getId());
 		managedDocument.setTag(tag);
 		if (tag == null || tag.isEmpty()) {
-			logger.log(sessionController.getUser().getUsername(), "Document", Action.UPDATE, document.getId(),
-					"Tag " + tag + " for Document \"" + document.getName() + "\" has been removed.");
+			logger.log(sessionController.getUser().getUsername(), DOCUMENT_LITERAL, Action.UPDATE, document.getId(),
+					"Tag " + tag + " for " + DOCUMENT_LITERAL + " \"" + document.getName() + "\" has been removed.");
 		} else {
-			logger.log(sessionController.getUser().getUsername(), "Document", Action.UPDATE, document.getId(),
+			logger.log(sessionController.getUser().getUsername(), DOCUMENT_LITERAL, Action.UPDATE, document.getId(),
 					" Document \"" + document.getName() + "\" has been tagged: " + tag + ".");
 		}
 
@@ -441,8 +483,8 @@ public class DocumentController extends PEventConsumerProducer {
 
 	@Override
 	public void consumeEvent(PObject destination, Event evt) {
-		System.out.println("Object " + evt.getSource() + " raised event: " + evt.getPropertyName() + " with new Value: " + evt.getNewValue()
-				+ "--- Document listening: " + destination.getClass());
+		Logger.getLogger(this.getClass().toString()).log(Level.INFO, "Object " + evt.getSource() + " raised event: " + evt.getPropertyName()
+				+ " with new Value: " + evt.getNewValue() + "--- Document listening: " + destination.getClass());
 
 	}
 

@@ -30,13 +30,11 @@ public class Address {
 
 	@Size(min = 5, max = 5, message = "ZIP-code must be 5 digits in length!")
 	String zipCode;
-
 	String phone;
-
 	String fax;
-
 	String city;
 	String street;
+	String email;
 
 	@Version
 	private int entityVersion; // For optimistic locks
@@ -85,59 +83,11 @@ public class Address {
 		this.phone = phone;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((city == null) ? 0 : city.hashCode());
-		result = prime * result + entityVersion;
-		result = prime * result + ((fax == null) ? 0 : fax.hashCode());
-		result = prime * result + id;
-		result = prime * result + ((phone == null) ? 0 : phone.hashCode());
-		result = prime * result + ((street == null) ? 0 : street.hashCode());
-		result = prime * result + ((zipCode == null) ? 0 : zipCode.hashCode());
-		return result;
+	public String getEmail() {
+		return email;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Address other = (Address) obj;
-		if (city == null) {
-			if (other.city != null)
-				return false;
-		} else if (!city.equals(other.city))
-			return false;
-		if (entityVersion != other.entityVersion)
-			return false;
-		if (fax == null) {
-			if (other.fax != null)
-				return false;
-		} else if (!fax.equals(other.fax))
-			return false;
-		if (id != other.id)
-			return false;
-		if (phone == null) {
-			if (other.phone != null)
-				return false;
-		} else if (!phone.equals(other.phone))
-			return false;
-		if (street == null) {
-			if (other.street != null)
-				return false;
-		} else if (!street.equals(other.street))
-			return false;
-		if (zipCode == null) {
-			if (other.zipCode != null)
-				return false;
-		} else if (!zipCode.equals(other.zipCode))
-			return false;
-		return true;
+	public void setEmail(String email) {
+		this.email = email;
 	}
-
 }

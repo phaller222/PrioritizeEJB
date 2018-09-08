@@ -17,8 +17,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import de.hallerweb.enterprise.prioritize.model.project.Project;
 
 @Entity
- @NamedQueries({ @NamedQuery(name = "findBlackboardById", query = "select bb FROM Blackboard bb WHERE bb.id = :blackboardId")
- })
+@NamedQueries({ @NamedQuery(name = "findBlackboardById", query = "select bb FROM Blackboard bb WHERE bb.id = :blackboardId"),
+				@NamedQuery(name = "findBlackboardTasks", query = "select t FROM Task t, Blackboard b WHERE t.id MEMBER OF b.tasks AND b.id = :blackboardId")})
 public class Blackboard {
 	@Id
 	@GeneratedValue
@@ -28,7 +28,7 @@ public class Blackboard {
 	private String description;
 	boolean frozen;
 
-	@OneToMany(fetch = FetchType.EAGER)
+	@OneToMany(fetch = FetchType.LAZY)
 	List<Task> tasks;
 
 	@JsonBackReference
@@ -56,18 +56,25 @@ public class Blackboard {
 	}
 
 	public void setTasks(List<Task> tasks) {
-		this.tasks = tasks;
-	}
-
-	public void addTask(Task t) {
-		if (tasks == null) {
-			tasks = new ArrayList<Task>();
+		if (this.tasks == null) {
+			this.tasks = new ArrayList<>();
+		} else {
+			this.tasks.clear();
 		}
-		this.tasks.add(t);
+		for (Task t : tasks) {
+			this.tasks.add(t);
+		}
 	}
 
-	public void removeTask(Task t) {
-		this.tasks.remove(t);
+	public void addTask(Task task) {
+		if (tasks == null) {
+			tasks = new ArrayList<>();
+		}
+		this.tasks.add(task);
+	}
+
+	public void removeTask(Task task) {
+		this.tasks.remove(task);
 	}
 
 	public String getTitle() {

@@ -51,7 +51,7 @@ public class Message {
 
 	@JsonIgnore
 	@Column(length = 65535)
-	String message;
+	String content;
 
 	@Version
 	private int entityVersion; // For optimistic locks
@@ -112,11 +112,11 @@ public class Message {
 		this.subject = subject;
 	}
 
-	public String getMessage() {
-		return message;
+	public String getContent() {
+		return content;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setContent(String message) {
+		this.content = message;
 	}
 }

@@ -1,7 +1,9 @@
 package de.hallerweb.enterprise.prioritize.model.project.task;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,48 +16,68 @@ import javax.persistence.OneToOne;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import de.hallerweb.enterprise.prioritize.model.PObject;
+import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 
 @Entity
-@NamedQueries({ @NamedQuery(name = "findTaskById", query = "select t FROM Task t WHERE t.id = :taskId"),
-	@NamedQuery(name = "findTasksByAssignee", query = "select t FROM Task t WHERE :assignee MEMBER OF  t.assignees"),
-	@NamedQuery(name = "findTasksNotAssignedToUser", query = "select t FROM Task t WHERE NOT :assignee MEMBER OF  t.assignees")
-	 })
-public class Task extends PObject{
-	
-	
+@NamedQueries({ 
+	@NamedQuery(name = "findTaskById", query = "select t FROM Task t WHERE t.id = :taskId"),
+	@NamedQuery(name = "findTasksByAssignee", query = "select t FROM Task t WHERE :assignee = t.assignee"),
+		//@NamedQuery(name = "findTasksInProjectNotAssignedToUser", query = "select t FROM Task t WHERE t.projectGoalRecord.project = :project AND NOT :assignee MEMBER OF  t.assignees"),
+	@NamedQuery(name = "findTasksInProjectNotAssignedToUser", query="select DISTINCT t FROM Task t " + 
+																	"LEFT JOIN ProjectGoalRecord PGR2 ON PGR2.project = :project WHERE "+ 
+																	"NOT :assignee = t.assignee OR t.assignee IS NULL AND PGR2.project = :project"),
+	@NamedQuery(name = "findTasksInProjectAssignedToUser", query =  "select t FROM Task t " +  
+																	"LEFT JOIN ProjectGoalRecord PGR2 ON PGR2.project = :project WHERE "+ 
+																	":assignee = t.assignee AND PGR2.project = :project") })
+public class Task extends PObject implements Comparable {
+
 	private int priority;
 	private String name;
 	private String description;
 	private TaskStatus taskStatus;
-	@OneToOne(fetch=FetchType.EAGER)
+	@OneToOne(fetch = FetchType.EAGER)
 	private Task parent;
-	
-	@OneToMany(fetch=FetchType.EAGER)
+
+	@OneToMany(fetch = FetchType.LAZY)
 	private List<Task> subTasks;
-	
+
 	@JsonIgnore
 	@OneToMany
 	private List<Resource> resources;
-	
+
 	@JsonIgnore
 	@OneToMany
 	private List<Document> documents;
-	
+
 	@JsonIgnore
 	@OneToMany
 	private List<SkillRecord> requiredSkills;
-	
-	@ManyToMany(fetch = FetchType.EAGER)
-	private List<PActor> assignees;
-	
+
+	@OneToOne
+	private PActor assignee;
+
 	@JsonIgnore
-	@OneToOne 
+	@OneToOne
 	ProjectGoalRecord projectGoalRecord;
-	
+
+	@OneToMany(fetch = FetchType.LAZY)
+	List<TimeSpan> timeSpent;
+
+	public List<TimeSpan> getTimeSpent() {
+		return timeSpent;
+	}
+
+	public void setTimeSpent(List<TimeSpan> timeSpent) {
+		this.timeSpent = timeSpent;
+	}
+
+	public void addTimeSpent(TimeSpan timeSpent) {
+		this.timeSpent.add(timeSpent);
+	}
 
 	public ProjectGoalRecord getProjectGoalRecord() {
 		return projectGoalRecord;
@@ -121,12 +143,12 @@ public class Task extends PObject{
 		this.requiredSkills = requiredSkills;
 	}
 
-	public List<PActor> getAssignees() {
-		return assignees;
+	public PActor getAssignee() {
+		return assignee;
 	}
 
-	public void setAssignees(List<PActor> assignees) {
-		this.assignees = assignees;
+	public void setAssignee(PActor assignee) {
+		this.assignee = assignee;
 	}
 
 	public void setParent(Task parent) {
@@ -145,22 +167,32 @@ public class Task extends PObject{
 		return subTasks;
 	}
 
-	public int getId() {
-		return id;
-	}
-
 	public boolean isSubTask() {
 		return parent != null;
 	}
 
-	public void addAssignee(PActor assignee) {
-		if (this.assignees == null) {
-			this.assignees = new ArrayList<PActor>();
-		}
-		this.assignees.add(assignee);
+	public void removeAssignee() {
+		this.assignee = null;
+	}
+
+	
+
+	@Override
+	public int getId() {
+		return id;
 	}
 	
-	public void removeAssignee(PActor assignee) {
-		this.assignees.remove(assignee);
+	@Override
+	public int compareTo(Object obj) {
+		if (obj == null) {
+			return 1;
+		} else if (!(obj instanceof Task)) {
+			return 1;
+		} else if (((Task) obj).getId() == id) {
+			return 0;
+		} else {
+			return -1;
+		}
+
 	}
 }

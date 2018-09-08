@@ -1,6 +1,7 @@
 /**
  * 
  */
+
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import java.util.HashSet;
@@ -77,11 +78,10 @@ public class SkillService {
 	@GET
 	@Path("search/")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Set<Skill> searchSkills(@QueryParam(value = "apiKey") String apiKey,
-			@QueryParam(value = "phrase") String phrase) {
+	public Set<Skill> searchSkills(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "phrase") String phrase) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Set<Skill> searchResult = new HashSet<Skill>();
+			Set<Skill> searchResult = new HashSet<>();
 
 			List<SearchResult> results = searchController.searchSkills(phrase, user);
 
@@ -98,8 +98,9 @@ public class SkillService {
 			} else {
 				throw new NotFoundException(createNegativeResponse("Query returned no result!"));
 			}
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	/**
@@ -119,8 +120,9 @@ public class SkillService {
 			} else {
 				throw new NotFoundException(createNegativeResponse("No skill categories defined!"));
 			}
-		} else
+		} else {
 			throw new NotAuthorizedException(Response.serverError());
+		}
 	}
 
 	private Response createPositiveResponse(String responseText) {

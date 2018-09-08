@@ -13,9 +13,8 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.primefaces.extensions.event.timeline.TimelineSelectEvent;
-import org.primefaces.extensions.model.timeline.TimelineEvent;
-import org.primefaces.extensions.model.timeline.TimelineModel;
+import org.primefaces.model.timeline.TimelineEvent;
+import org.primefaces.model.timeline.TimelineModel;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
@@ -56,9 +55,6 @@ public class BasicTimelineController implements Serializable {
 
 	@Inject
 	private SessionController sessionController;
-
-	private TimelineEvent selectedEvent;
-
 	String contextPath;
 
 	@PostConstruct
@@ -77,7 +73,7 @@ public class BasicTimelineController implements Serializable {
 			model.add(selectedTime);
 
 			// Add the current Users vacation to the Timeline
-			List<TimeSpan> vacation = userController.getVacation(sessionController.getUser(), sessionController.getUser());
+			Set<TimeSpan> vacation = userController.getVacation(sessionController.getUser(), sessionController.getUser());
 			if (vacation != null) {
 				for (TimeSpan span : vacation) {
 					model.add(new TimelineEvent("Vacation", span.getDateFrom(), span.getDateUntil(), false, "", "vacation"));
@@ -96,7 +92,6 @@ public class BasicTimelineController implements Serializable {
 		model = new TimelineModel();
 
 		Calendar cal = Calendar.getInstance();
-		// cal.set(2013, Calendar.MAY, 4, 0, 0, 0);
 		selectedTime = new TimelineEvent("TimeMachine(Beta)", cal.getTime(), true);
 		model.add(selectedTime);
 
@@ -105,25 +100,10 @@ public class BasicTimelineController implements Serializable {
 			List<Department> departments = c.getDepartments();
 			for (Department d : departments) {
 				if (authController.canRead(d, sessionController.getUser())) {
-					List<ResourceGroup> groups = d.getResourceGroups();
+					Set<ResourceGroup> groups = d.getResourceGroups();
 					for (ResourceGroup g : groups) {
 						Set<Resource> resources = g.getResources();
-						for (Resource resource : resources) {
-							if (!resource.isAgent()) {
-								if (authController.canRead(resource, sessionController.getUser())) {
-									for (ResourceReservation res : resource.getReservations()) {
-										if (resource.isMqttResource() && resource.isMqttOnline()) {
-											model.add(new TimelineEvent(resource.getName(), res.getTimeSpan().getDateFrom(),
-													res.getTimeSpan().getDateUntil(), false, "", "resourcereservationonline"));
-										} else {
-											model.add(new TimelineEvent(resource.getName(), res.getTimeSpan().getDateFrom(),
-													res.getTimeSpan().getDateUntil(), false, "", "resourcereservationoffline"));
-										}
-
-									}
-								}
-							}
-						}
+						addResoucesToTimeline(resources);
 
 					}
 				}
@@ -132,6 +112,25 @@ public class BasicTimelineController implements Serializable {
 
 		}
 
+	}
+
+	private void addResoucesToTimeline(Set<Resource> resources) {
+		for (Resource resource : resources) {
+
+			if (!resource.isAgent() && authController.canRead(resource, sessionController.getUser())) {
+				for (ResourceReservation res : resource.getReservations()) {
+					if (resource.isMqttResource() && resource.isMqttOnline()) {
+						model.add(new TimelineEvent(resource.getName(), res.getTimeSpan().getDateFrom(), res.getTimeSpan().getDateUntil(),
+								false, "", "resourcereservationonline"));
+					} else {
+						model.add(new TimelineEvent(resource.getName(), res.getTimeSpan().getDateFrom(), res.getTimeSpan().getDateUntil(),
+								false, "", "resourcereservationoffline"));
+					}
+
+				}
+			}
+
+		}
 	}
 
 	public Date getMin() {
@@ -148,9 +147,7 @@ public class BasicTimelineController implements Serializable {
 
 	public void displayAgentsTimeline() {
 		model = new TimelineModel();
-
 		Calendar cal = Calendar.getInstance();
-		// cal.set(2013, Calendar.MAY, 4, 0, 0, 0);
 		selectedTime = new TimelineEvent("TimeMachine(Beta)", cal.getTime(), true);
 		model.add(selectedTime);
 
@@ -159,17 +156,10 @@ public class BasicTimelineController implements Serializable {
 			List<Department> departments = c.getDepartments();
 			for (Department d : departments) {
 				if (authController.canRead(d, sessionController.getUser())) {
-					List<ResourceGroup> groups = d.getResourceGroups();
+					Set<ResourceGroup> groups = d.getResourceGroups();
 					for (ResourceGroup g : groups) {
 						Set<Resource> resources = g.getResources();
-						for (Resource resource : resources) {
-							if (resource.isAgent()) {
-								if (authController.canRead(resource, sessionController.getUser()) && resource.getMqttLastPing() != null) {
-									model.add(new TimelineEvent(resource.getName(), resource.getMqttLastPing(), false, "",
-											"resourcereservation"));
-								}
-							}
-						}
+						addAgentsToTimeline(resources);
 					}
 				}
 
@@ -179,11 +169,19 @@ public class BasicTimelineController implements Serializable {
 
 	}
 
+	private void addAgentsToTimeline(Set<Resource> resources) {
+		for (Resource resource : resources) {
+			if (resource.isAgent() && authController.canRead(resource, sessionController.getUser()) && resource.getMqttLastPing() != null) {
+				model.add(new TimelineEvent(resource.getName(), resource.getMqttLastPing(), false, "", "resourcereservation"));
+			}
+
+		}
+	}
+
 	public void displayDocumentsTimeline() {
 		model = new TimelineModel();
 
 		Calendar cal = Calendar.getInstance();
-		// cal.set(2013, Calendar.MAY, 4, 0, 0, 0);
 		selectedTime = new TimelineEvent("-Drag to travel in time-", cal.getTime(), true);
 		model.add(selectedTime);
 
@@ -191,13 +189,11 @@ public class BasicTimelineController implements Serializable {
 		for (Company c : companies) {
 			List<Department> departments = c.getDepartments();
 			for (Department d : departments) {
-				List<DocumentGroup> groups = d.getDocumentGroups();
+				Set<DocumentGroup> groups = d.getDocumentGroups();
 				for (DocumentGroup g : groups) {
 					Set<DocumentInfo> documents = g.getDocuments();
 					for (DocumentInfo docInfo : documents) {
 						if (authController.canRead(docInfo, sessionController.getUser())) {
-							// model.add(new TimelineEvent(docInfo.getCurrentDocument().getName(),
-							// docInfo.getCurrentDocument().getLastModified()));
 							String iconName = lookupMimeIcon(docInfo.getCurrentDocument().getMimeType());
 							model.add(new TimelineEvent(
 									"<div>" + docInfo.getCurrentDocument().getName() + "</div><img src='" + contextPath + "/images/"
@@ -243,38 +239,37 @@ public class BasicTimelineController implements Serializable {
 		}
 	}
 
-	public void onSelect(TimelineSelectEvent e) {
-		TimelineEvent timelineEvent = e.getTimelineEvent();
-		this.selectedEvent = timelineEvent;
-		// if (selectedEvent.getData() instanceof DocumentTreeInfo) {
-		// DocumentTreeInfo info = (DocumentTreeInfo) selectedEvent.getData();
-		// DocumentInfo docInfo = info.getDocumentInfo();
-		// try {
-		// sendDocumentFromTree(info.getName(), docInfo.getCurrentDocument().getMimeType(), docInfo.getCurrentDocument().getData());
-		// } catch (IOException e1) {
-		// // TODO Auto-generated catch block
-		// e1.printStackTrace();
-		// }
-		// }
-		// FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Selected event:", timelineEvent.getData().toString());
-		// FacesContext.getCurrentInstance().addMessage(null, msg);
-	}
-
-	// public void sendDocumentFromTree(String filename,String contentType, byte[] data) throws IOException {
-	// FacesContext fc = FacesContext.getCurrentInstance();
-	// ExternalContext ec = fc.getExternalContext();
-	//
-	// ec.responseReset();
-	// ec.setResponseContentType(contentType);
-	// ec.setResponseContentLength(data.length);
-	// ec.setResponseHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-	//
-	// OutputStream output = ec.getResponseOutputStream();
-	// output.write(data);
-	//
-	// fc.responseComplete(); // Important! Otherwise JSF will attempt to render the response which obviously will fail since it's already
-	// written with a file and closed.
-	// }
+//	public void onSelect(TimelineSelectEvent event) {
+//		TimelineEvent timelineEvent = event.getTimelineEvent();
+//		this.selectedEvent = timelineEvent;
+//		if (selectedEvent.getData() instanceof DocumentTreeInfo) {
+//			DocumentTreeInfo info = (DocumentTreeInfo) selectedEvent.getData();
+//			DocumentInfo docInfo = info.getDocumentInfo();
+//			try {
+//				sendDocumentFromTree(info.getName(), docInfo.getCurrentDocument().getMimeType(), docInfo.getCurrentDocument().getData());
+//			} catch (IOException e1) {
+//				Logger.getLogger(getClass().getName()).log(Level.SEVERE, e1.getMessage(), e1);
+//			}
+//		}
+//		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Selected event:", timelineEvent.getData().toString());
+//		FacesContext.getCurrentInstance().addMessage(null, msg);
+//	}
+//
+//	public void sendDocumentFromTree(String filename, String contentType, byte[] data) throws IOException {
+//		FacesContext fc = FacesContext.getCurrentInstance();
+//		ExternalContext ec = fc.getExternalContext();
+//
+//		ec.responseReset();
+//		ec.setResponseContentType(contentType);
+//		ec.setResponseContentLength(data.length);
+//		ec.setResponseHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+//
+//		OutputStream output = ec.getResponseOutputStream();
+//		output.write(data);
+//
+//		fc.responseComplete(); // Important! Otherwise JSF will attempt to render the response which obviously will fail since it's already
+//								 // written with a file and closed.
+//	}
 
 	public TimelineModel getModel() {
 		return model;

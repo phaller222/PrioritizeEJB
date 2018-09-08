@@ -12,10 +12,8 @@ import javax.persistence.Query;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
-import de.hallerweb.enterprise.prioritize.model.Address;
-import de.hallerweb.enterprise.prioritize.model.Company;
-import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
+import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan.TimeSpanType;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
 /**
@@ -28,8 +26,7 @@ public class CalendarController {
 	@PersistenceContext(unitName = "MySqlDS")
 	EntityManager em;
 
-	@EJB
-	UserRoleController userRoleController;
+
 	@EJB
 	LoggingController logger;
 	@Inject
@@ -47,8 +44,21 @@ public class CalendarController {
 		List<TimeSpan> timespans = query.getResultList();
 		if (!timespans.isEmpty()) {
 			return timespans;
-		} else
+		} else {
 			return null;
+		}
+	}
+
+	public List<TimeSpan> getTimeSpansForUser(User user, TimeSpanType type) {
+		Query query = em.createNamedQuery("findTimeSpansByUserAndType");
+		query.setParameter("user", user);
+		query.setParameter("type", type);
+		List<TimeSpan> timespans = query.getResultList();
+		if (!timespans.isEmpty()) {
+			return timespans;
+		} else {
+			return null;
+		}
 	}
 
 }

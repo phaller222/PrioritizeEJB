@@ -2,20 +2,20 @@ package de.hallerweb.enterprise.prioritize.view;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.jgroups.protocols.AUTH;
 
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
@@ -47,22 +47,19 @@ public class LoginBean implements Serializable {
 	UserRoleController userRoleController;
 	@Inject
 	UserPreferenceController preferenceController;
-
 	@Inject
 	SessionController sessionController;
 
 	private String username;
 	private String password;
 	private boolean loggedIn;
-	private Date lastLogin;
-	private User currentUser;
+
+	private static final String NAVIGATION_LOGIN = "login";
 
 	public User getCurrentUser() {
-		this.currentUser = sessionController.getUser();
-		return currentUser;
+		return sessionController.getUser();
 	}
 
-	List<Resource> watchedResources;
 	int dashboardTabsActiveIndex = 0;
 
 	public int getDashboardTabsActiveIndex() {
@@ -71,11 +68,6 @@ public class LoginBean implements Serializable {
 
 	public void setDashboardTabsActiveIndex(int dashboardTabsActiveIndex) {
 		this.dashboardTabsActiveIndex = dashboardTabsActiveIndex;
-	}
-
-	@PostConstruct
-	public void init() {
-
 	}
 
 	@Named
@@ -111,23 +103,23 @@ public class LoginBean implements Serializable {
 		watchedResources.clear();
 		watchedResources.addAll(depdupeResources);
 		if (!watchedResources.isEmpty()) {
-			// TODO: sublist is a hack!!!
-			List<Resource> watched = watchedResources;
-			return watched;
-		} else
+			// TODO: depdupeResources sublist is a hack here!!!
 			return watchedResources;
+		} else {
+			return new ArrayList<>();
+		}
 	}
 
 	public String login() {
 		User user = userRoleController.findUserByUsername(username, AuthorizationController.getSystemUser());
 		if (user == null) {
 			loggedIn = false;
-			return "login";
+			return NAVIGATION_LOGIN;
 		}
 
 		if (!user.getPassword().equals(password)) {
 			loggedIn = false;
-			return "login";
+			return NAVIGATION_LOGIN;
 		}
 
 		user.setLastLogin(new Date());
@@ -153,8 +145,7 @@ public class LoginBean implements Serializable {
 			try {
 				context.redirect(context.getApplicationContextPath() + "/client/dashboard/dashboard.xhtml");
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
 			}
 			return "dashboard";
 		}
@@ -162,12 +153,12 @@ public class LoginBean implements Serializable {
 		User user = userRoleController.findUserByUsername(username, AuthorizationController.getSystemUser());
 		if (user == null) {
 			loggedIn = false;
-			return "login";
+			return NAVIGATION_LOGIN;
 		}
 
 		if (!user.getPassword().equals(password)) {
 			loggedIn = false;
-			return "login";
+			return NAVIGATION_LOGIN;
 		}
 		user.setLastLogin(new Date());
 		sessionController.setUser(user);
@@ -176,8 +167,7 @@ public class LoginBean implements Serializable {
 		try {
 			context.redirect(context.getApplicationContextPath() + "/client/dashboard/dashboard.xhtml");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
 		}
 		return "dashboard";
 	}
@@ -185,7 +175,7 @@ public class LoginBean implements Serializable {
 	public String logout() {
 		sessionController.setUser(null);
 		loggedIn = false;
-		return "login";
+		return NAVIGATION_LOGIN;
 	}
 
 	@Named
@@ -196,10 +186,9 @@ public class LoginBean implements Serializable {
 		try {
 			context.redirect(context.getApplicationContextPath() + "/client/login.xhtml");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
 		}
-		return "login";
+		return NAVIGATION_LOGIN;
 	}
 
 	@Named

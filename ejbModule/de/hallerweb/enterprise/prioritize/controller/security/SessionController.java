@@ -29,6 +29,7 @@ public class SessionController {
 	}
 
 	public User getUser() {
+		//User sessionUser = em.find(User.class, user.getId());
 		return user;
 	}
 

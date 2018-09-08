@@ -78,8 +78,8 @@ public class DocumentGroup implements PAuthorizedObject {
 	}
 
 	public void addDocument(DocumentInfo info) {
-		if (this.documents== null) {
-			this.documents = new HashSet<DocumentInfo>();
+		if (this.documents == null) {
+			this.documents = new HashSet<>();
 		}
 		this.documents.add(info);
 	}
@@ -103,6 +103,11 @@ public class DocumentGroup implements PAuthorizedObject {
 
 	public int getId() {
 		return id;
+	}
+
+	@Override
+	public String toString() {
+		return this.name;
 	}
 
 }

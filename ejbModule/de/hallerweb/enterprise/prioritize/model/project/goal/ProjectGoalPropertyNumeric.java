@@ -18,7 +18,7 @@ import javax.persistence.InheritanceType;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public class ProjectGoalPropertyNumeric extends ProjectGoalProperty  {
+public class ProjectGoalPropertyNumeric extends ProjectGoalProperty {
 
 	private double min; // Minimum value this property can hold (e.G. 0).
 	private double max; // Maximum value this property can hold (e.G. 10).

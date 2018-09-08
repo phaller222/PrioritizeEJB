@@ -14,6 +14,8 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.jboss.resteasy.logging.Logger;
+
 import de.hallerweb.enterprise.prioritize.controller.inbox.MessageController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
@@ -36,6 +38,8 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @SessionScoped
 public class MessageBean implements Serializable {
 
+	private static final String NAVIGATION_MESSAGES = "messages";
+	
 	@Inject
 	SessionController sessionController;
 	@EJB
@@ -45,13 +49,13 @@ public class MessageBean implements Serializable {
 	@EJB
 	AuthorizationController authController;
 
-	List<Message> messages; // List of messages
+	transient List<Message> messages; // List of messages
 	String message; // Stores the newly composed Message
 	String subject; // Stores the newly composed Message subject
 	String readMessageSubject; // Subject of currently viewed message
 	String readMessageMessage; // Message of currently viewed message
 	String to; // Stores the User to receive the message
-	List<User> recipientList; // List of Users in the system.
+	transient List<User> recipientList; // List of Users in the system.
 	String readMessageId; // ID of currently viewed message
 
 	@Named
@@ -96,7 +100,7 @@ public class MessageBean implements Serializable {
 		this.readMessageId = readMessageId;
 		Message readMessage = controller.findMessageById(Integer.parseInt(readMessageId));
 		this.readMessageSubject = readMessage.getSubject();
-		this.readMessageMessage = readMessage.getMessage();
+		this.readMessageMessage = readMessage.getContent();
 		return "readmessage";
 	}
 
@@ -107,7 +111,7 @@ public class MessageBean implements Serializable {
 
 	@PostConstruct
 	public void init() {
-		to = new String();
+		to = "";
 	}
 
 	@Produces
@@ -118,7 +122,7 @@ public class MessageBean implements Serializable {
 
 	public List<String> completeRecipiantList(String query) {
 		List<String> users = userRoleController.getAllUserNames(sessionController.getUser());
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		for (String username : users) {
 			if (username.startsWith(query)) {
 				result.add(username);
@@ -142,19 +146,19 @@ public class MessageBean implements Serializable {
 	public String delete(Message msg) {
 		controller.deleteMessage(msg.getId());
 		init();
-		return "messages";
+		return NAVIGATION_MESSAGES;
 	}
 
 	@Named
 	public String sendMessage() {
-		controller.createMessage(sessionController.getUser(), userRoleController.findUserByUsername(this.to, sessionController.getUser()),
+		controller.createMessage(sessionController.getUser(), userRoleController.findUserById(Integer.valueOf(this.to), sessionController.getUser()),
 				this.subject, this.message);
-		return "messages";
+		return NAVIGATION_MESSAGES;
 	}
 
 	@Named
 	public String overview() {
-		return "messages";
+		return NAVIGATION_MESSAGES;
 	}
 
 	@Named
@@ -168,8 +172,7 @@ public class MessageBean implements Serializable {
 		try {
 			context.redirect(context.getApplicationContextPath() + "/client/messages/inbox.xhtml");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.getLogger(getClass()).error(e.getMessage());
 		}
 	}
 
@@ -181,7 +184,7 @@ public class MessageBean implements Serializable {
 
 	@Named
 	public List<Message> getUnreadMessages() {
-		return (List<Message>) controller.getUnreadMessages(sessionController.getUser());
+		return controller.getUnreadMessages(sessionController.getUser());
 	}
 
 }

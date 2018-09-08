@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.controller.skill.SkillController;
 import de.hallerweb.enterprise.prioritize.model.skill.Skill;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillCategory;
@@ -41,22 +40,25 @@ public class NewSkillBean implements Serializable {
 
 	@EJB
 	SkillController skillController;
-	@EJB
-	UserRoleController roleController;
 	@Inject
 	SessionController sessionController;
 	@Inject
 	MQTTService service;
 
 	String selectedSkillCategoryId;
-	Skill newSkill;
+	transient Skill newSkill;
 	String newSkillName;
 	String newSkillDescription;
 	String propertyNumericName;
 	String propertyNumericDescription;
 	String propertyTextName;
 	String propertyTextDescription;
-	Set<SkillProperty> skillProperties = new HashSet<SkillProperty>();
+	transient Set<SkillProperty> skillProperties = new HashSet<>();
+	String propertyNumericMinValue;
+	String propertyNumericMaxValue;
+	transient Set<SkillProperty> propertiesNumeric;
+	transient Set<SkillProperty> propertiesText;
+	transient List<SkillCategory> skillCategories;
 
 	public String getPropertyTextDescription() {
 		return propertyTextDescription;
@@ -69,11 +71,6 @@ public class NewSkillBean implements Serializable {
 	public void setPropertyTextDescription(String propertyTextDescription) {
 		this.propertyTextDescription = propertyTextDescription;
 	}
-
-	String propertyNumericMinValue;
-	String propertyNumericMaxValue;
-	Set<SkillProperty> propertiesNumeric;
-	Set<SkillProperty> propertiesText;
 
 	public Set<SkillProperty> getPropertiesText() {
 		return propertiesText;
@@ -147,7 +144,7 @@ public class NewSkillBean implements Serializable {
 		this.newSkillDescription = newSkillDescription;
 	}
 
-	List<SkillCategory> skillCategories;
+
 
 	public String getSelectedSkillCategoryId() {
 		return selectedSkillCategoryId;
@@ -163,17 +160,12 @@ public class NewSkillBean implements Serializable {
 	}
 
 	public String createSkill() {
-
 		if (newSkillName != null && newSkillDescription != null) {
 			SkillCategory selectedCategory = skillController.getCategoryById(this.selectedSkillCategoryId);
 			List<Skill> definedSkills = skillController.getSkillsForCategory(selectedCategory, sessionController.getUser());
 			boolean exists = false;
 			if (definedSkills != null) {
-				for (Skill s : definedSkills) {
-					if (s.getName().equals(newSkillName)) {
-						exists = true;
-					}
-				}
+				exists = skillExists(definedSkills, exists);
 			}
 			if (!exists) {
 				this.newSkill = skillController.createSkill(newSkillName, newSkillDescription, "", selectedCategory, skillProperties,
@@ -202,12 +194,21 @@ public class NewSkillBean implements Serializable {
 		return "skills";
 	}
 
+	private boolean skillExists(List<Skill> definedSkills, boolean exists) {
+		for (Skill s : definedSkills) {
+			if (s.getName().equals(newSkillName)) {
+				exists = true;
+			}
+		}
+		return exists;
+	}
+
 	public void addNumericProperty() {
 		if (skillProperties == null) {
-			skillProperties = new HashSet<SkillProperty>();
+			skillProperties = new HashSet<>();
 		}
 		if (propertiesNumeric == null) {
-			this.propertiesNumeric = new HashSet<SkillProperty>();
+			this.propertiesNumeric = new HashSet<>();
 		}
 		SkillPropertyNumeric prop = new SkillPropertyNumeric();
 		prop.setName(propertyNumericName);
@@ -227,10 +228,10 @@ public class NewSkillBean implements Serializable {
 
 	public void addTextProperty() {
 		if (skillProperties == null) {
-			skillProperties = new HashSet<SkillProperty>();
+			skillProperties = new HashSet<>();
 		}
 		if (propertiesText == null) {
-			this.propertiesText = new HashSet<SkillProperty>();
+			this.propertiesText = new HashSet<>();
 		}
 		SkillPropertyText prop = new SkillPropertyText();
 		prop.setName(propertyTextName);

@@ -49,48 +49,13 @@ public class NameValueEntry implements Comparable<Object> {
 	}
 
 	@Override
-	public int compareTo(Object o) {
-		NameValueEntry e = (NameValueEntry) o;
+	public int compareTo(Object obj) {
+		NameValueEntry e = (NameValueEntry) obj;
 		return mqttName.compareTo(e.getName());
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + id;
-		result = prime * result + ((mqttName == null) ? 0 : mqttName.hashCode());
-		result = prime * result + ((mqttValues == null) ? 0 : mqttValues.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		NameValueEntry other = (NameValueEntry) obj;
-		if (id != other.id)
-			return false;
-		if (mqttName == null) {
-			if (other.mqttName != null)
-				return false;
-		} else if (!mqttName.equals(other.mqttName))
-			return false;
-		if (mqttValues == null) {
-			if (other.mqttValues != null)
-				return false;
-		} else if (!mqttValues.equals(other.mqttValues))
-			return false;
-		return true;
 	}
 	
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return this.mqttName;
 	}
 

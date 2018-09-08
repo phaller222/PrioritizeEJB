@@ -9,21 +9,17 @@ import java.util.SortedSet;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
-import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.PObject;
-import de.hallerweb.enterprise.prioritize.model.event.PObjectType;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
 import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
@@ -48,6 +44,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 		@NamedQuery(name = "findDocumentInfosByDocumentGroup", query = "select di FROM DocumentInfo di WHERE di.documentGroup.id = :dgid"),
 		@NamedQuery(name = "findDocumentInfoById", query = "select di FROM DocumentInfo di WHERE di.id = :docInfoId"),
 		@NamedQuery(name = "findAllDocumentInfos", query = "select di FROM DocumentInfo di"),
+		@NamedQuery(name = "findDocumentInfoByDocumentId", query = "select di FROM DocumentInfo di WHERE di.currentDocument.id = :documentId"),
 		@NamedQuery(name = "findDocumentInfoByDocumentGroupAndName", query = "select di FROM DocumentInfo di WHERE di.documentGroup.id = :groupId AND di.currentDocument.name = :name"),
 		@NamedQuery(name = "findDocumentGroupByNameAndDepartment", query = "select dg FROM DocumentGroup dg WHERE dg.name = :name AND dg.department.id = :deptId") })
 public class DocumentInfo extends PObject implements PAuthorizedObject, PSearchable {
@@ -56,7 +53,7 @@ public class DocumentInfo extends PObject implements PAuthorizedObject, PSearcha
 
 	@Override
 	public List<SearchResult> find(String phrase) {
-		ArrayList<SearchResult> results = new ArrayList<SearchResult>();
+		ArrayList<SearchResult> results = new ArrayList<>();
 		// Search document name
 		if (this.currentDocument.getName().toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
 			// Match found
@@ -69,6 +66,11 @@ public class DocumentInfo extends PObject implements PAuthorizedObject, PSearcha
 			results.add(result);
 		}
 		return results;
+	}
+	
+	@Override
+	public List<SearchResult> find(String phrase, SearchProperty property) {
+		return new ArrayList<>();
 	}
 
 	private SearchResult generateResult() {
@@ -83,15 +85,9 @@ public class DocumentInfo extends PObject implements PAuthorizedObject, PSearcha
 	}
 
 	@Override
-	public List<SearchResult> find(String phrase, SearchProperty property) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public List<SearchProperty> getSearchProperties() {
 		if (this.searchProperties == null) {
-			searchProperties = new ArrayList<SearchProperty>();
+			searchProperties = new ArrayList<>();
 			SearchProperty prop = new SearchProperty("VERSION");
 			prop.setName("Version");
 			SearchProperty prop2 = new SearchProperty("NAME");

@@ -23,17 +23,16 @@ import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 @NamedQueries({
 		@NamedQuery(name = "findProjectGoalRecordById", query = "select pgr FROM ProjectGoalRecord pgr WHERE pgr.id = :projectGoalRecordId"),
 		@NamedQuery(name = "findProjectGoalRecordsByProject", query = "select pgr FROM ProjectGoalRecord pgr WHERE pgr.project.id = :projectId"),
-		@NamedQuery(name = "findActiveProjectGoalRecordsByProject", query = "select pgr FROM ProjectGoalRecord pgr WHERE pgr.project.id = :projectId AND pgr.task IS NOT NULL")})
+		@NamedQuery(name = "findActiveProjectGoalRecordsByProject", query = "select pgr FROM ProjectGoalRecord pgr WHERE pgr.project.id = :projectId AND pgr.task IS NOT NULL") })
 public class ProjectGoalRecord {
-	
-	
+
 	public ProjectGoalRecord(ProjectGoalRecord origin, ProjectGoalPropertyRecord rec, Task task) {
 		this.project = origin.getProject();
 		this.task = task;
 		this.projectGoal = origin.getProjectGoal();
 		this.propertyRecord = rec;
 	}
-	
+
 	public ProjectGoalRecord() {
 		super();
 	}
@@ -42,20 +41,19 @@ public class ProjectGoalRecord {
 	@GeneratedValue
 	int id;
 
-	
 	@OneToOne
 	Task task;											// null if describing target goal, Link to task if concrete progress.
 
 	@JsonBackReference
 	@OneToOne
 	Project project;									// Project this ProjectGoalRecord belongs to.
-	
+
 	@OneToOne
 	ProjectGoal projectGoal;							// The base ProjectGoal
-	
+
 	@OneToOne
 	ProjectGoalPropertyRecord propertyRecord;		// Property record if NumericProperty is used.
-	
+
 	int percentage;										// percentage of completion of this ProjectGoalRecord
 
 	public int getPercentage() {
@@ -97,7 +95,7 @@ public class ProjectGoalRecord {
 	public void setPropertyRecord(ProjectGoalPropertyRecord property) {
 		this.propertyRecord = property;
 	}
-	
+
 	public int getId() {
 		return id;
 	}

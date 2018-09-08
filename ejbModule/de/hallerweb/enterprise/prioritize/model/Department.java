@@ -3,6 +3,7 @@ package de.hallerweb.enterprise.prioritize.model;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -40,18 +41,16 @@ import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
  * @author peter
  */
 @Entity(name = "Department")
-@NamedQueries({
-		@NamedQuery(name = "findAllDepartments", query = "SELECT d FROM Department d ORDER BY d.company.name"),
-		@NamedQuery(name = "findDepartmentById", query = "SELECT d FROM Department d WHERE d.id = :deptId"),
-		@NamedQuery(name = "findDepartmentByToken", query = "SELECT d FROM Department d WHERE d.token = :token"),
-		@NamedQuery(name = "findResourceGroupInDepartment", query = "SELECT g FROM ResourceGroup g WHERE g.department.id= :deptId AND g.name=:groupName"),
-		@NamedQuery(name = "findDefaultDepartmentAndCompany", query = "SELECT d FROM Department d WHERE d.company.name='Default Company' and d.name = 'Default Department'") })
+@NamedQueries({ @NamedQuery(name = "findAllDepartments", query = "SELECT d FROM Department d ORDER BY d.company.name"),
+		@NamedQuery(name = "findDepartmentById", query = "SELECT d FROM Department d WHERE d.id = ?1 ORDER BY d.name"),
+		@NamedQuery(name = "findDepartmentByToken", query = "SELECT d FROM Department d WHERE d.token = ?1 ORDER BY d.name"),
+		@NamedQuery(name = "findDepartmentsByCompany", query = "SELECT d FROM Department d WHERE d.company.id = ?1 ORDER BY d.name"),
+		@NamedQuery(name = "findResourceGroupInDepartment", query = "SELECT g FROM ResourceGroup g WHERE g.department.id= :deptId AND g.name=:groupName") })
 public class Department extends PObject implements PAuthorizedObject, PSearchable {
 
-	static final public String PROPERTY_NAME="name";
-	static final public String PROPERTY_DESCRIPTION="description";
-	static final public String PROPERTY_ADDRESS="address";
-
+	public static final String PROPERTY_NAME = "name";
+	public static final String PROPERTY_DESCRIPTION = "description";
+	public static final String PROPERTY_ADDRESS = "address";
 
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	Address address;
@@ -59,18 +58,17 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JsonBackReference
 	Company company;
+	
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	Set<DocumentGroup> documentGroups;
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	List<DocumentGroup> documentGroups;
-
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	List<ResourceGroup> resourceGroups;
+	Set<ResourceGroup> resourceGroups;
 
 	String name;
 
 	@Column(length = 3000)
 	String description;
-
 
 	@JsonIgnore
 	String token; // Secret token for things to be placed in this department
@@ -79,7 +77,7 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 
 	@Override
 	public List<SearchResult> find(String phrase) {
-		ArrayList<SearchResult> results = new ArrayList<SearchResult>();
+		ArrayList<SearchResult> results = new ArrayList<>();
 		// Search document name
 		if (name.toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
 			// Match found
@@ -94,6 +92,22 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 		return results;
 	}
 
+	@Override
+	public List<SearchResult> find(String phrase, SearchProperty property) {
+		return new ArrayList<>();
+	}
+
+	@Override
+	public List<SearchProperty> getSearchProperties() {
+		if (this.searchProperties == null) {
+			searchProperties = new ArrayList<>();
+			SearchProperty prop = new SearchProperty("DOCUMENT");
+			prop.setName("DocumentInfo");
+			searchProperties.add(prop);
+		}
+		return this.searchProperties;
+	}
+
 	private SearchResult generateResult() {
 		SearchResult result = new SearchResult();
 		result.setResult(this);
@@ -102,23 +116,6 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 		result.setProvidesExcerpt(true);
 		result.setSubresults(new HashSet<SearchResult>());
 		return result;
-	}
-
-	@Override
-	public List<SearchResult> find(String phrase, SearchProperty property) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<SearchProperty> getSearchProperties() {
-		if (this.searchProperties == null) {
-			searchProperties = new ArrayList<SearchProperty>();
-			SearchProperty prop = new SearchProperty("DOCUMENT");
-			prop.setName("DocumentInfo");
-			searchProperties.add(prop);
-		}
-		return this.searchProperties;
 	}
 
 	public String getToken() {
@@ -131,19 +128,19 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 
 	public Department() {
 		super();
-		this.documentGroups = new ArrayList<DocumentGroup>();
-		this.resourceGroups = new ArrayList<ResourceGroup>();
+		this.documentGroups = new HashSet<>();
+		this.resourceGroups = new HashSet<>();
 	}
 
 	public int getId() {
 		return id;
 	}
 
-	public List<DocumentGroup> getDocumentGroups() {
+	public Set<DocumentGroup> getDocumentGroups() {
 		return documentGroups;
 	}
 
-	public void setDocumentGroups(List<DocumentGroup> documentGroups) {
+	public void setDocumentGroups(Set<DocumentGroup> documentGroups) {
 		this.documentGroups = documentGroups;
 	}
 
@@ -164,11 +161,11 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 
 	}
 
-	public List<ResourceGroup> getResourceGroups() {
+	public Set<ResourceGroup> getResourceGroups() {
 		return resourceGroups;
 	}
 
-	public void setResourceGroups(List<ResourceGroup> resourceGroups) {
+	public void setResourceGroups(Set<ResourceGroup> resourceGroups) {
 		this.resourceGroups = resourceGroups;
 	}
 
@@ -237,66 +234,14 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((address == null) ? 0 : address.hashCode());
-		result = prime * result + ((company == null) ? 0 : company.hashCode());
-		result = prime * result + ((description == null) ? 0 : description.hashCode());
-		result = prime * result + ((documentGroups == null) ? 0 : documentGroups.hashCode());
-		result = prime * result + id;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((resourceGroups == null) ? 0 : resourceGroups.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Department other = (Department) obj;
-		if (address == null) {
-			if (other.address != null)
-				return false;
-		} else if (!address.equals(other.address))
-			return false;
-		if (company == null) {
-			if (other.company != null)
-				return false;
-		} else if (!company.equals(other.company))
-			return false;
-		if (description == null) {
-			if (other.description != null)
-				return false;
-		} else if (!description.equals(other.description))
-			return false;
-		if (documentGroups == null) {
-			if (other.documentGroups != null)
-				return false;
-		} else if (!documentGroups.equals(other.documentGroups))
-			return false;
-		if (id != other.id)
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (resourceGroups == null) {
-			if (other.resourceGroups != null)
-				return false;
-		} else if (!resourceGroups.equals(other.resourceGroups))
-			return false;
-		return true;
-	}
-
-	@Override
+	@JsonBackReference
 	public Department getDepartment() {
 		return this;
+	}
+
+	@Override
+	public String toString() {
+		return this.getName();
 	}
 
 }

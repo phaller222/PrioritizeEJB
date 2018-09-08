@@ -7,10 +7,8 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 @Entity
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class PObject {
 
 	public int getId() {
@@ -18,7 +16,7 @@ public abstract class PObject {
 	}
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	protected int id;
 
 }

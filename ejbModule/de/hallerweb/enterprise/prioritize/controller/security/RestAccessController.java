@@ -29,7 +29,8 @@ public class RestAccessController {
 		if (u != null) {
 			sessionController.setUser(u);
 			return u;
-		} else
+		} else {
 			return null;
+		}
 	}
 }

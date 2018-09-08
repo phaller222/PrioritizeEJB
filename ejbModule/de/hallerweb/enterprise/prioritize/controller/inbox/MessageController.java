@@ -36,13 +36,16 @@ public class MessageController {
 
 	@Inject
 	SessionController sessionController;
+	
+	private static final String PARAMETER_USER_ID = "userId";
+	private static final String LITERAL_MESSAGE = "Message";
 
 	public Message createMessage(User from, User to, String subject, String message) {
 		Message msg = new Message();
 		msg.setFrom(userRoleController.findUserById(from.getId(),from));
 		msg.setTo(userRoleController.findUserById(to.getId(),from));
 		msg.setSubject(subject);
-		msg.setMessage(message);
+		msg.setContent(message);
 		msg.setMessageRead(false);
 		msg.setDateReceived(new java.util.Date());
 		msg.setDateRead(null);
@@ -50,10 +53,10 @@ public class MessageController {
 		em.flush();
 
 		try {
-			logger.log(sessionController.getUser().getUsername(), "Message", Action.CREATE, msg.getId(), " Message \"" + msg.getSubject()
+			logger.log(sessionController.getUser().getUsername(), LITERAL_MESSAGE, Action.CREATE, msg.getId(), " " + LITERAL_MESSAGE + " \"" + msg.getSubject()
 					+ "\" created.");
 		} catch (ContextNotActiveException ex) {
-			logger.log("SYSTEM", "Message", Action.CREATE, msg.getId(), " Message \"" + msg.getSubject() + "\" created.");
+			logger.log("SYSTEM", LITERAL_MESSAGE , Action.CREATE, msg.getId(), " Message \"" + msg.getSubject() + "\" created.");
 		}
 		return msg;
 	}
@@ -62,7 +65,7 @@ public class MessageController {
 		Message msg = findMessageById(id);
 		em.remove(msg);
 		em.flush();
-		logger.log(sessionController.getUser().getUsername(), "Message", Action.DELETE, msg.getId(), " Message \"" + msg.getSubject()
+		logger.log(sessionController.getUser().getUsername(), LITERAL_MESSAGE, Action.DELETE, msg.getId(), " Message \"" + msg.getSubject()
 				+ "\" deleted.");
 	}
 
@@ -73,21 +76,21 @@ public class MessageController {
 	@SuppressWarnings("unchecked")
 	public List<Message> getReceivedMessages(User user) {
 		Query query = em.createNamedQuery("findReceivedMessagesForUser");
-		query.setParameter("userId", user.getId());
+		query.setParameter(PARAMETER_USER_ID, user.getId());
 		return (List<Message>) query.getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<Message> getUnreadMessages(User user) {
 		Query query = em.createNamedQuery("findUnreadMessagesForUser");
-		query.setParameter("userId", user.getId());
+		query.setParameter(PARAMETER_USER_ID, user.getId());
 		return (List<Message>) query.getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Message> getSentMessages(User user) {
 		Query query = em.createNamedQuery("findSentMessagesForUser");
-		query.setParameter("userId", user.getId());
+		query.setParameter(PARAMETER_USER_ID, user.getId());
 		return (List<Message>) query.getResultList();
 	}
 

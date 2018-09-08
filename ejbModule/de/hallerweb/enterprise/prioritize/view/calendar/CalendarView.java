@@ -150,6 +150,7 @@ public class CalendarView implements Serializable {
 	}
 
 	private void addUsersIllnessWithinTimeSpan(TimeSpan requestedTimeSpan, List<User> users) {
+		updateLazyModel();
 		for (User user : users) {
 			if (user.getIllness() != null) {
 				TimeSpan illnessTimeSpan = user.getIllness();
@@ -179,6 +180,7 @@ public class CalendarView implements Serializable {
 	}
 
 	private void addUserVaccationWithinTimeSpan(TimeSpan requestedTimeSpan, List<User> users) {
+		updateLazyModel();
 		for (User user : users) {
 			for (TimeSpan vacationTimespan : user.getVacation()) {
 				if (vacationTimespan.intersects(requestedTimeSpan)) {

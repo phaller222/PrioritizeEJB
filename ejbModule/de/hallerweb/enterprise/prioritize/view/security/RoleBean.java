@@ -213,6 +213,12 @@ public class RoleBean implements Serializable {
 
 		return NAVIGATION_EDITROLE;
 	}
+	
+	@Named
+	public String editRoleName() {
+		controller.editRole(role, role.getName(), role.getDescription());
+		return NAVIGATION_ROLES;
+	}
 
 	@Named
 	String editPermission(PermissionRecord rec) {

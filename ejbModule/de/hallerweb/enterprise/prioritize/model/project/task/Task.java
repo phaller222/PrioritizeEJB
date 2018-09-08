@@ -26,13 +26,12 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 @NamedQueries({ 
 	@NamedQuery(name = "findTaskById", query = "select t FROM Task t WHERE t.id = :taskId"),
 	@NamedQuery(name = "findTasksByAssignee", query = "select t FROM Task t WHERE :assignee = t.assignee"),
-		//@NamedQuery(name = "findTasksInProjectNotAssignedToUser", query = "select t FROM Task t WHERE t.projectGoalRecord.project = :project AND NOT :assignee MEMBER OF  t.assignees"),
 	@NamedQuery(name = "findTasksInProjectNotAssignedToUser", query="select DISTINCT t FROM Task t " + 
 																	"LEFT JOIN ProjectGoalRecord PGR2 ON PGR2.project = :project WHERE "+ 
 																	"NOT :assignee = t.assignee OR t.assignee IS NULL AND PGR2.project = :project"),
-	@NamedQuery(name = "findTasksInProjectAssignedToUser", query =  "select t FROM Task t " +  
-																	"LEFT JOIN ProjectGoalRecord PGR2 ON PGR2.project = :project WHERE "+ 
-																	":assignee = t.assignee AND PGR2.project = :project") })
+	@NamedQuery(name = "findTasksInProjectAssignedToUser", query =  "select pgr.task AS t FROM ProjectGoalRecord pgr " +  
+																	"WHERE "+ 
+																	":assignee = pgr.task.assignee AND pgr.project = :project") })
 public class Task extends PObject implements Comparable {
 
 	private int priority;

@@ -248,8 +248,8 @@ public class AuthorizationController {
 					if (perm.getObjectId() == targetObject.getId()) {
 						return true;
 					}
-					boolean canDelete = perm.getDepartment() == null
-							|| (perm.getDepartment().getId() == targetObject.getDepartment().getId());
+					boolean canDelete = perm.getDepartment() == null || targetObject.getDepartment() == null ||
+							 (perm.getDepartment().getId() == targetObject.getDepartment().getId());
 					if (canDelete) {
 						return true;
 					}

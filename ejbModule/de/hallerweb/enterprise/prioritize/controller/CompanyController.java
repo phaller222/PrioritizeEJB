@@ -177,11 +177,22 @@ public class CompanyController extends PEventConsumerProducer {
 			deptDocs.setAbsoluteObjectType(DocumentInfo.class.getCanonicalName());
 			deptDocs.setDepartment(dept);
 			records.add(deptDocs);
+			
+			PermissionRecord deptDocsDir = new PermissionRecord(true, true, true, true);
+			deptDocsDir.setAbsoluteObjectType(DocumentGroup.class.getCanonicalName());
+			deptDocsDir.setDepartment(dept);
+			records.add(deptDocsDir);
 
 			PermissionRecord deptResources = new PermissionRecord(true, true, true, true);
 			deptResources.setAbsoluteObjectType(Resource.class.getCanonicalName());
 			deptResources.setDepartment(dept);
 			records.add(deptResources);
+			
+			PermissionRecord deptResourcesDir = new PermissionRecord(true, true, true, true);
+			deptResourcesDir.setAbsoluteObjectType(ResourceGroup.class.getCanonicalName());
+			deptResourcesDir.setDepartment(dept);
+			records.add(deptResourcesDir);
+			
 
 			Role r = userRoleController.createRole(company.getName() + "-" + dept.getName() + "-Admin",
 					company.getName() + " - " + dept.getName() + " - Admin", records, sessionUser);

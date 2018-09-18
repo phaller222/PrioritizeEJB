@@ -14,9 +14,9 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/Prioritize/lib/primefaces-6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Prioritize/lib/org.eclipse.paho.client.mqttv3-1.2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Prioritize/lib/primefaces-extensions-6.0.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.jboss.ide.eclipse.as.core.server.runtime.runtimeTarget/WildFly 13.0"/>
+	<classpathentry kind="lib" path="/Prioritize/lib/primefaces-6.2.jar" sourcepath="C:/Users/peter/.m2/repository/org/primefaces/primefaces/6.2/primefaces-6.2-sources.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.primefaces.context.RequestContext;
+import org.primefaces.event.SelectEvent;
 import org.primefaces.model.SelectableDataModel;
 
 import de.hallerweb.enterprise.prioritize.controller.project.ProjectController;
@@ -50,6 +51,7 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 
 	private static final String NAVIGATION_EDITPROJECT = "editproject";
 	private static final String NAVIGATION_BLACKBOARD = "blackboard";
+	private static final String NAVIGATION_TASKLIST = "tasklist";
 
 	public Project getCurrentProject() {
 		return currentProject;
@@ -65,6 +67,9 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 		loadProjects();
 		loadForeignTasks();
 		loadMyTasks();
+		if (selectedTask == null && !myTasks.isEmpty()) {
+			this.selectedTask = myTasks.get(0);
+		}
 	}
 
 	public void loadProjects() {
@@ -100,8 +105,6 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 		this.projects = projects;
 	}
 
-
-
 	public String editProject() {
 		return NAVIGATION_EDITPROJECT;
 	}
@@ -123,6 +126,9 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 
 	public List<Task> getMyTasksForCurrentProject() {
 		loadMyTasks();
+		if (selectedTask == null && !myTasks.isEmpty()) {
+			this.selectedTask = myTasks.get(0);
+		}
 		return myTasks;
 	}
 
@@ -142,7 +148,7 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 			return new TreeSet<>();
 		}
 	}
-	
+
 	public List<Task> getBlackboardTasks(Project pr) {
 		Project project = projectController.findProjectById(pr.getId());
 		Blackboard board = project.getBlackboard();
@@ -156,7 +162,7 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 		taskController.updateTaskStatus(managedTask.getId(), TaskStatus.ASSIGNED);
 		taskController.setTaskAssignee(managedTask, currentUser);
 		userRoleController.assignTask(currentUser, managedTask);
-		
+
 		loadForeignTasks();
 
 		return NAVIGATION_BLACKBOARD;
@@ -172,9 +178,19 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 		return NAVIGATION_BLACKBOARD;
 	}
 
+	public String unassignTaskFromTasklist(Task t) {
+		unassignTask(t);
+		return NAVIGATION_TASKLIST;
+	}
+
 	public String resolveTask(Task task) {
 		taskController.resolveTask(task, sessionController.getUser());
 		return NAVIGATION_BLACKBOARD;
+	}
+
+	public String resolveTaskFromTasklist(Task task) {
+		taskController.resolveTask(task, sessionController.getUser());
+		return NAVIGATION_TASKLIST;
 	}
 
 	public String setTaskProgress(Task task, int percentage) {
@@ -188,6 +204,10 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 
 	public void setSelectedTask(Task task) {
 		this.selectedTask = task;
+	}
+
+	public void onTaskSelected(SelectEvent event) {
+		setSelectedTask((Task) event.getObject());
 	}
 
 	@Override

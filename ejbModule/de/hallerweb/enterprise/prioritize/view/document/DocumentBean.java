@@ -166,6 +166,7 @@ public class DocumentBean implements Serializable {
 	public String createDocument() {
 		if (controller.createDocumentInfo(document.getName(), Integer.parseInt(selectedDocumentGroup), sessionController.getUser(),
 				tmpMimeType, false, tmpBytes, "") != null) {
+		updateDocumentTree();
 			return NAVIGATION_DOCUMENTS;
 		} else {
 			ViewUtilities.addErrorMessage("name",
@@ -540,9 +541,10 @@ public class DocumentBean implements Serializable {
 	}
 
 	public void updateDocumentTree() {
-		if (isNewRequest()) {
+		//if (isNewRequest()) {
 			this.documentTreeRoot = createDocumentTree();
-		}
+			documentTreeRoot.setExpanded(true);
+		//}
 	}
 
 	public void nodeExpand(NodeExpandEvent event) {

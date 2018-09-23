@@ -17,6 +17,8 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.keycloak.KeycloakPrincipal;
+
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
@@ -40,7 +42,6 @@ import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
  */
 @Named
 @SessionScoped
-
 public class LoginBean implements Serializable {
 
 	@EJB
@@ -135,21 +136,21 @@ public class LoginBean implements Serializable {
 	 */
 	public String clientLogin() {
 
-		boolean autoLogin = InitializationController.getAsBoolean(InitializationController.ADMIN_AUTO_LOGIN);
-		if (autoLogin) {
-			User user = userRoleController.findUserByUsername("admin", AuthorizationController.getSystemUser());
-			user.setLastLogin(new Date());
-			sessionController.setUser(user);
-			loggedIn = true;
+		if (!Boolean.parseBoolean(InitializationController.getConfig().get(InitializationController.USE_KEYCLOAK_AUTH))) {
+			return initializeBasicSession();
+		} else {
+			String userName = username;
+		
 			ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
-			try {
-				context.redirect(context.getApplicationContextPath() + "/client/dashboard/dashboard.xhtml");
-			} catch (IOException e) {
-				Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
+			if (context.getUserPrincipal() != null) {
+				userName = context.getUserPrincipal().getName();
 			}
-			return "dashboard";
+			this.username = userName;
+			return initializeKeycloakSession();
 		}
+	}
 
+	private String initializeBasicSession() {
 		User user = userRoleController.findUserByUsername(username, AuthorizationController.getSystemUser());
 		if (user == null) {
 			loggedIn = false;
@@ -157,6 +158,24 @@ public class LoginBean implements Serializable {
 		}
 
 		if (!user.getPassword().equals(password)) {
+			loggedIn = false;
+			return NAVIGATION_LOGIN;
+		}
+		user.setLastLogin(new Date());
+		sessionController.setUser(user);
+		loggedIn = true;
+		ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+		try {
+			context.redirect(context.getApplicationContextPath() + "/client/dashboard/dashboard.xhtml");
+		} catch (IOException e) {
+			Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
+		}
+		return "dashboard";
+	}
+	
+	private String initializeKeycloakSession() {
+		User user = userRoleController.findUserByUsername(username, AuthorizationController.getSystemUser());
+		if (user == null) {
 			loggedIn = false;
 			return NAVIGATION_LOGIN;
 		}

@@ -122,6 +122,10 @@ public class InitializationController {
 	public static final String ADMIN_AUTO_LOGIN = "ADMIN_AUTO_LOGIN";
 	// resource / device.
 	public static final String DEFAULT_DEPARTMENT_TOKEN = "09eb3067d0fe446bbe7788218fec9bdd";
+	
+	// Use KEycloak as authorization server
+	public static final String USE_KEYCLOAK_AUTH = "USE_KEYCLOAK_AUTH";
+	
 
 	@PostConstruct
 	public void initialize() {
@@ -164,6 +168,7 @@ public class InitializationController {
 		config.put(FIRE_TASK_EVENTS, "true");
 
 		config.put(ADMIN_AUTO_LOGIN, "false");
+		config.put(USE_KEYCLOAK_AUTH, "false");
 
 		try {
 			BufferedReader reader = new BufferedReader(

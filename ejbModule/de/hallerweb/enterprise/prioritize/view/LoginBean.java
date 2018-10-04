@@ -16,8 +16,8 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.keycloak.KeycloakPrincipal;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Context;
 
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
@@ -140,7 +140,7 @@ public class LoginBean implements Serializable {
 			return initializeBasicSession();
 		} else {
 			String userName = username;
-		
+
 			ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
 			if (context.getUserPrincipal() != null) {
 				userName = context.getUserPrincipal().getName();
@@ -157,10 +157,10 @@ public class LoginBean implements Serializable {
 			return NAVIGATION_LOGIN;
 		}
 
-		if (!user.getPassword().equals(password)) {
-			loggedIn = false;
-			return NAVIGATION_LOGIN;
-		}
+//		if (!user.getPassword().equals(password)) {
+//			loggedIn = false;
+//			return NAVIGATION_LOGIN;
+//		}
 		user.setLastLogin(new Date());
 		sessionController.setUser(user);
 		loggedIn = true;
@@ -172,7 +172,7 @@ public class LoginBean implements Serializable {
 		}
 		return "dashboard";
 	}
-	
+
 	private String initializeKeycloakSession() {
 		User user = userRoleController.findUserByUsername(username, AuthorizationController.getSystemUser());
 		if (user == null) {
@@ -194,7 +194,19 @@ public class LoginBean implements Serializable {
 	public String logout() {
 		sessionController.setUser(null);
 		loggedIn = false;
+		if (Boolean.parseBoolean(InitializationController.getConfig().get(InitializationController.USE_KEYCLOAK_AUTH))) {
+			ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+			try {
+				context.redirect("https://steamrunner.info:8443/auth/realms/master/protocol/openid-connect/logout?" +
+								 "redirect_uri=https://prioritize-iot.com/PrioritizeWeb/client/dashboard/dashboard.xhtml");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return InitializationController.getConfig().get(InitializationController.KEYCLOAK_LOGOUT_URL);
+		} else {
 		return NAVIGATION_LOGIN;
+		}
 	}
 
 	@Named

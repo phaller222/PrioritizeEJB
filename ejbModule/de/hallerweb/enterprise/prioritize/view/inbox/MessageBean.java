@@ -151,7 +151,7 @@ public class MessageBean implements Serializable {
 
 	@Named
 	public String sendMessage() {
-		controller.createMessage(sessionController.getUser(), userRoleController.findUserById(Integer.valueOf(this.to), sessionController.getUser()),
+		controller.createMessage(sessionController.getUser(), userRoleController.findUserByUsername(this.to, sessionController.getUser()),
 				this.subject, this.message);
 		return NAVIGATION_MESSAGES;
 	}

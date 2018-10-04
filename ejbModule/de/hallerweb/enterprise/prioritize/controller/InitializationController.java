@@ -16,8 +16,6 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 
-
-
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.nfc.counter.IndustrieCounterController;
@@ -74,24 +72,26 @@ public class InitializationController {
 	DocumentController documentController;
 	@Inject
 	EventRegistry eventRegistry;
-	@EJB IndustrieCounterController industrieCounterController;
-	@EJB TimeTrackerController timeTrackerController;
-	
+	@EJB
+	IndustrieCounterController industrieCounterController;
+	@EJB
+	TimeTrackerController timeTrackerController;
+
 	private static Map<String, String> config = new HashMap<>();
-	
+
 	public static Map<String, String> getConfig() {
 		return config;
 	}
 
 	private static int defaultDepartmentId;
-	
+
 	public static int getDefaultDepartmentId() {
 		return defaultDepartmentId;
 	}
 
 	public static final String LITERAL_ADMIN = "admin";
 
-	// Deployment configuration keys 
+	// Deployment configuration keys
 	public static final String CREATE_DEFAULT_COMPANY = "CREATE_DEFAULT_COMPANY"; // Create a default company on deployment?
 	public static final String CREATE_DEFAULT_DEPARTMENT = "CREATE_DEFAULT_DEPARTMENT"; // Create a default department on deployment?
 	public static final String MAXIMUM_FILE_UPLOAD_SIZE = "MAXIMUM_FILE_UPLOAD_SIZE"; // Max.filesize for uploads in bytes
@@ -122,10 +122,11 @@ public class InitializationController {
 	public static final String ADMIN_AUTO_LOGIN = "ADMIN_AUTO_LOGIN";
 	// resource / device.
 	public static final String DEFAULT_DEPARTMENT_TOKEN = "09eb3067d0fe446bbe7788218fec9bdd";
-	
+
 	// Use KEycloak as authorization server
 	public static final String USE_KEYCLOAK_AUTH = "USE_KEYCLOAK_AUTH";
-	
+	// Keycloak logout URL
+	public static final String KEYCLOAK_LOGOUT_URL = "KEYCLOAK_LOGOUT_URL";
 
 	@PostConstruct
 	public void initialize() {
@@ -151,7 +152,7 @@ public class InitializationController {
 		config.put(MQTT_MAX_VALUES_BYTES, "20");
 		config.put(MQTT_MAX_DEVICE_VALUES, "1");
 		config.put(MQTT_PING_TIMEOUT, "60000");
-		
+
 		config.put(MQTT_USERNAME, "prioritizeclient");
 		config.put(MQTT_PASSWORD, "");
 
@@ -169,6 +170,9 @@ public class InitializationController {
 
 		config.put(ADMIN_AUTO_LOGIN, "false");
 		config.put(USE_KEYCLOAK_AUTH, "false");
+		config.put(KEYCLOAK_LOGOUT_URL,
+				"https://steamrunner.info:8443/auth/realms/master/protocol/openid-connect/logout?" +
+				"redirect_uri=https://www.prioritize-iot.com/PrioritizeWeb/client/dashboard/dashboard.xhtml");
 
 		try {
 			BufferedReader reader = new BufferedReader(
@@ -184,22 +188,21 @@ public class InitializationController {
 		} catch (Exception ex) {
 			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Could not load configuration. Using default values...");
 		}
-		
-		
+
 		// Add all standard objects which can be protected by PermissionRecord entries.
 		authController.addObservedObjectType(Company.class.getCanonicalName());
 		authController.addObservedObjectType(Department.class.getCanonicalName());
 		authController.addObservedObjectType(User.class.getCanonicalName());
 		authController.addObservedObjectType(Role.class.getCanonicalName());
 		authController.addObservedObjectType(PermissionRecord.class.getCanonicalName());
-		
+
 		authController.addObservedObjectType(DocumentInfo.class.getCanonicalName());
 		authController.addObservedObjectType(DocumentGroup.class.getCanonicalName());
 		authController.addObservedObjectType(Resource.class.getCanonicalName());
 		authController.addObservedObjectType(ResourceGroup.class.getCanonicalName());
 		authController.addObservedObjectType(Skill.class.getCanonicalName());
 		authController.addObservedObjectType(SkillCategory.class.getCanonicalName());
-		
+
 		authController.addObservedObjectType(IndustrieCounter.class.getCanonicalName());
 		authController.addObservedObjectType(TimeTracker.class.getCanonicalName());
 	}
@@ -219,8 +222,9 @@ public class InitializationController {
 	public void createAdminAccountIfNotPresent() {
 		if (userRoleController.getAllUsers(AuthorizationController.getSystemUser()).isEmpty()) {
 			// No user present yet. Create admin user...
-			Logger.getLogger(this.getClass().getName()).log(Level.INFO, "No users present. Assuming clean deployment. recreating admin user...");
-			
+			Logger.getLogger(this.getClass().getName()).log(Level.INFO,
+					"No users present. Assuming clean deployment. recreating admin user...");
+
 			// Create default company and default department
 			boolean createDefaultCompany = Boolean.parseBoolean(config.get(CREATE_DEFAULT_COMPANY));
 			Department d = null;
@@ -231,7 +235,7 @@ public class InitializationController {
 				adr.setPhone("00000-00000");
 				adr.setStreet("Street of Admins");
 				adr.setZipCode("00000");
-				Company c = companyController.createCompany("Default Company", adr,AuthorizationController.getSystemUser());
+				Company c = companyController.createCompany("Default Company", adr, AuthorizationController.getSystemUser());
 				c.setMainAddress(adr);
 
 				if (Boolean.valueOf(config.get(CREATE_DEFAULT_DEPARTMENT))) {
@@ -240,16 +244,16 @@ public class InitializationController {
 					defaultDepartmentId = d.getId();
 				}
 			}
-			
+
 			// Admin will get all permissions on all objects!
 			HashSet<PermissionRecord> records = new HashSet<>();
-			
+
 			PermissionRecord adminCompanies = new PermissionRecord(true, true, true, true, Company.class.getCanonicalName());
 			PermissionRecord adminDepartments = new PermissionRecord(true, true, true, true, Department.class.getCanonicalName());
 			PermissionRecord adminRoles = new PermissionRecord(true, true, true, true, Role.class.getCanonicalName());
 			PermissionRecord adminUsers = new PermissionRecord(true, true, true, true, User.class.getCanonicalName());
 			PermissionRecord adminPermissions = new PermissionRecord(true, true, true, true, PermissionRecord.class.getCanonicalName());
-			
+
 			PermissionRecord adminDocumentGroups = new PermissionRecord(true, true, true, true, DocumentGroup.class.getCanonicalName());
 			PermissionRecord adminDocumentInfos = new PermissionRecord(true, true, true, true, DocumentInfo.class.getCanonicalName());
 			PermissionRecord adminDocuments = new PermissionRecord(true, true, true, true, Document.class.getCanonicalName());
@@ -259,7 +263,7 @@ public class InitializationController {
 
 			PermissionRecord adminSkills = new PermissionRecord(true, true, true, true, Skill.class.getCanonicalName());
 			PermissionRecord adminSkillCategories = new PermissionRecord(true, true, true, true, SkillCategory.class.getCanonicalName());
-			
+
 			PermissionRecord adminTimeTracker = new PermissionRecord(true, true, true, true, TimeTracker.class.getCanonicalName());
 
 			records.add(adminCompanies);
@@ -287,12 +291,11 @@ public class InitializationController {
 			admin.setPassword("13rikMyElTw");
 			admin.setOccupation("Systemadministrator");
 
-			
-			User adminUser = userRoleController.createUser(admin, null, roles,AuthorizationController.getSystemUser());
-				
+			User adminUser = userRoleController.createUser(admin, null, roles, AuthorizationController.getSystemUser());
+
 			// TODO: Remove admin API-Key!
 			adminUser.setApiKey("ABCDEFG");
-			
+
 		} else {
 			Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Deploymeent OK.");
 		}

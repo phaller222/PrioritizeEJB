@@ -39,6 +39,7 @@ import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
+import de.hallerweb.enterprise.prioritize.view.BasicTimelineController;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 
 /**
@@ -75,6 +76,9 @@ public class DocumentBean implements Serializable {
 	AuthorizationController authController;
 	@EJB
 	ItemCollectionController itemCollectionController;
+	
+	@Inject
+	BasicTimelineController timelineBean;
 
 	String selectedItemCollectionName;
 
@@ -523,8 +527,10 @@ public class DocumentBean implements Serializable {
 				sortDocumentList(docList);
 				for (DocumentInfo docInfo : docList) {
 					if (authController.canRead(docInfo, sessionController.getUser())) {
+						if (docInfo.getCurrentDocument().getLastModified().before(timelineBean.getSelectedDate())) {
 						new DefaultTreeNode(new DocumentTreeInfo(docInfo.getCurrentDocument().getName(), true, false, null, docInfo),
 								group);
+						}
 					}
 				}
 			}
@@ -549,10 +555,12 @@ public class DocumentBean implements Serializable {
 
 	public void nodeExpand(NodeExpandEvent event) {
 		event.getTreeNode().setExpanded(true);
+		event.getTreeNode().getParent().setExpanded(true);
 	}
 
 	public void nodeCollapse(NodeCollapseEvent event) {
 		event.getTreeNode().setExpanded(false);
+		event.getTreeNode().getParent().setExpanded(false);
 	}
 
 	public boolean isNewRequest() {

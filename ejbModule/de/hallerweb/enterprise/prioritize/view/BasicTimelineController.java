@@ -13,6 +13,8 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.primefaces.event.timeline.TimelineModificationEvent;
+import org.primefaces.event.timeline.TimelineRangeEvent;
 import org.primefaces.model.timeline.TimelineEvent;
 import org.primefaces.model.timeline.TimelineModel;
 
@@ -28,6 +30,7 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
+import de.hallerweb.enterprise.prioritize.view.document.DocumentBean;
 
 @Named
 @SessionScoped
@@ -42,6 +45,18 @@ public class BasicTimelineController implements Serializable {
 	private String eventStyle = "box";
 	private boolean axisOnTop;
 	private boolean showCurrentTime = true;
+	
+//	private Date currentStartDate;
+//	private Date currentEndDate;
+	
+	public Date getSelectedDate() {
+		return selectedDate;
+	}
+
+	public void setSelectedDate(Date selectedDate) {
+		this.selectedDate = selectedDate;
+	}
+
 	private boolean showNavigation = false;
 
 	private TimelineEvent selectedTime;
@@ -51,25 +66,61 @@ public class BasicTimelineController implements Serializable {
 	@EJB
 	private CompanyController companyController;
 	@Inject
+	private DocumentBean documentBean;
+	@Inject
 	private AuthorizationController authController;
 
 	@Inject
 	private SessionController sessionController;
 	String contextPath;
 
+	private Date selectedDate;
+	
 	@PostConstruct
 	protected void initialize() {
+		
+		// initialize range of timeline to 4 days
+//		Calendar cal = Calendar.getInstance();
+//		Calendar cal2 = Calendar.getInstance();
+//		cal.add(Calendar.HOUR, -48);
+//		cal2.add(Calendar.HOUR, 48);
+//		this.currentStartDate = cal.getTime();
+//		this.currentEndDate = cal2.getTime();
+		
 		contextPath = FacesContext.getCurrentInstance().getExternalContext().getRequestContextPath();
 		updateTimeline();
+		Calendar calSelected = Calendar.getInstance();
+		this.selectedDate = calSelected.getTime();
 	}
 
+//	public Date getCurrentStartDate() {
+//		return currentStartDate;
+//	}
+//
+//	public void setCurrentStartDate(Date currentStartDate) {
+//		this.currentStartDate = currentStartDate;
+//	}
+//
+//	public Date getCurrentEndDate() {
+//		return currentEndDate;
+//	}
+//
+//	public void setCurrentEndDate(Date currentEndDate) {
+//		this.currentEndDate = currentEndDate;
+//	}
+
 	public void updateTimeline() {
+		
 		if (sessionController.getUser() != null) {
 			model = new TimelineModel();
 
 			Calendar cal = Calendar.getInstance();
+			Calendar cal2 = Calendar.getInstance();
 			// cal.set(2013, Calendar.MAY, 4, 0, 0, 0);
-			selectedTime = new TimelineEvent("-Drag to travel in time-", cal.getTime(), true);
+			if (selectedDate == null) {
+				selectedDate = cal.getTime();
+			}
+			selectedTime = new TimelineEvent("-Drag to travel in time-", selectedDate,true);
 			model.add(selectedTime);
 
 			// Add the current Users vacation to the Timeline
@@ -92,7 +143,7 @@ public class BasicTimelineController implements Serializable {
 		model = new TimelineModel();
 
 		Calendar cal = Calendar.getInstance();
-		selectedTime = new TimelineEvent("TimeMachine(Beta)", cal.getTime(), true);
+		selectedTime = new TimelineEvent("TimeMachine(Beta)", selectedDate, true);
 		model.add(selectedTime);
 
 		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
@@ -148,7 +199,7 @@ public class BasicTimelineController implements Serializable {
 	public void displayAgentsTimeline() {
 		model = new TimelineModel();
 		Calendar cal = Calendar.getInstance();
-		selectedTime = new TimelineEvent("TimeMachine(Beta)", cal.getTime(), true);
+		selectedTime = new TimelineEvent("TimeMachine(Beta)", selectedDate, true);
 		model.add(selectedTime);
 
 		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
@@ -182,7 +233,7 @@ public class BasicTimelineController implements Serializable {
 		model = new TimelineModel();
 
 		Calendar cal = Calendar.getInstance();
-		selectedTime = new TimelineEvent("-Drag to travel in time-", cal.getTime(), true);
+		selectedTime = new TimelineEvent("-Drag to travel in time-", selectedDate,true);
 		model.add(selectedTime);
 
 		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
@@ -194,11 +245,14 @@ public class BasicTimelineController implements Serializable {
 					Set<DocumentInfo> documents = g.getDocuments();
 					for (DocumentInfo docInfo : documents) {
 						if (authController.canRead(docInfo, sessionController.getUser())) {
+							if(docInfo.getCurrentDocument().getLastModified().before(selectedDate)) {
 							String iconName = lookupMimeIcon(docInfo.getCurrentDocument().getMimeType());
 							model.add(new TimelineEvent(
 									"<div>" + docInfo.getCurrentDocument().getName() + "</div><img src='" + contextPath + "/images/"
 											+ iconName + ".png' style='width:26px;height:26px;'>",
 									docInfo.getCurrentDocument().getLastModified()));
+							}
+							documentBean.updateDocumentTree();
 						}
 					}
 
@@ -239,6 +293,33 @@ public class BasicTimelineController implements Serializable {
 		}
 	}
 
+//	public void onSelect(TimelineSelectEvent event) {
+//		System.out.println("SELECT: Start " + event.getTimelineEvent().getStartDate());
+//		System.out.println("SELECT: End " + event.getTimelineEvent().getEndDate());
+//		System.out.println("Object:  " + ((Timeline)event.getSource()).getEventNames().toString());
+//	}
+//	
+//	public void onRangeChange(TimelineRangeEvent event) {
+//		
+//		this.currentStartDate = event.getStartDate();
+//		this.currentEndDate = event.getEndDate();
+//	}
+	
+	public void onChanged(TimelineModificationEvent event) {
+	  this.selectedDate = event.getTimelineEvent().getStartDate();
+	  selectedTime = new TimelineEvent("-Drag to travel in time-", selectedDate, true);
+	}
+	
+//	public void onEdit(TimelineModificationEvent event) {
+//		System.out.println("EDIT: Start " + event.getTimelineEvent().getStartDate());
+//		System.out.println("EDIT: End " + event.getTimelineEvent().getEndDate());
+//		System.out.println("Object:  " + event.getSource().toString());
+//	}
+	
+	
+	public void onRangeChanged(TimelineRangeEvent event) {
+		
+	}
 //	public void onSelect(TimelineSelectEvent event) {
 //		TimelineEvent timelineEvent = event.getTimelineEvent();
 //		this.selectedEvent = timelineEvent;
@@ -338,4 +419,7 @@ public class BasicTimelineController implements Serializable {
 	public void setShowNavigation(boolean showNavigation) {
 		this.showNavigation = showNavigation;
 	}
+	
+	
+	
 }

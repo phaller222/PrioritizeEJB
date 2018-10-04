@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
@@ -67,12 +68,20 @@ public class AuthorizationController {
 	 * @return
 	 */
 	public boolean canCreate(PAuthorizedObject targetObject, User user) {
+		
 		// if no user provided, always deny permissions!
 		if (user == null) {
 			return false;
 		}
 		if (user.equals(systemUser)) {
 			return true;
+		}
+		
+		if (targetObject instanceof User) {
+			User u = (User) targetObject;
+			if (u.getUsername() != null && u.getUsername().equals("admin") && !user.getUsername().equalsIgnoreCase("admin")) {
+				return false;
+			}
 		}
 
 		if (targetObject instanceof Company && !checkCompanyPermission(targetObject, user)) {
@@ -111,6 +120,13 @@ public class AuthorizationController {
 		if (user.equals(systemUser)) {
 			return true;
 		}
+		
+		if (targetObject instanceof User) {
+			User u = (User) targetObject;
+			if (u.getUsername() != null && u.getUsername().equals("admin") && !user.getUsername().equalsIgnoreCase("admin")) {
+				return false;
+			}
+		}
 
 		if (targetObject instanceof Company && !checkCompanyPermission(targetObject, user)) {
 			// User must not create foreign companies!
@@ -146,6 +162,13 @@ public class AuthorizationController {
 		}
 		if (user.equals(systemUser)) {
 			return true;
+		}
+		
+		if (targetObject instanceof User) {
+			User u = (User) targetObject;
+			if (u.getUsername() != null && u.getUsername().equals("admin") && !user.getUsername().equalsIgnoreCase("admin")) {
+				return false;
+			}
 		}
 
 		if ((targetObject instanceof Company) && (!checkCompanyPermission(targetObject, user))) {
@@ -192,6 +215,13 @@ public class AuthorizationController {
 		if (user.equals(systemUser)) {
 			return true;
 		}
+		
+		if (targetObject instanceof User) {
+			User u = (User) targetObject;
+			if (u.getUsername() != null && u.getUsername().equals("admin") && !user.getUsername().equalsIgnoreCase("admin")) {
+				return false;
+			}
+		}
 
 		if (targetObject instanceof Company && !checkCompanyPermission(targetObject, user)) {
 			// User must not update foreign companies!
@@ -232,6 +262,13 @@ public class AuthorizationController {
 		}
 		if (user.equals(systemUser)) {
 			return true;
+		}
+		
+		if (targetObject instanceof User) {
+			User u = (User) targetObject;
+			if (u.getUsername() != null && u.getUsername().equals("admin") && !user.getUsername().equalsIgnoreCase("admin")) {
+				return false;
+			}
 		}
 
 		if (targetObject instanceof Company && !checkCompanyPermission(targetObject, user)) {

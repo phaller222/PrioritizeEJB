@@ -118,8 +118,6 @@ public class InitializationController {
 	public static final String FIRE_ACTIONBOARD_EVENTS = "FIRE_ACTIONBOARD_EVENTS";
 	public static final String FIRE_TASK_EVENTS = "FIRE_TASK_EVENTS";
 
-	// !!! Use with caution! Admin auto login!
-	public static final String ADMIN_AUTO_LOGIN = "ADMIN_AUTO_LOGIN";
 	// resource / device.
 	public static final String DEFAULT_DEPARTMENT_TOKEN = "09eb3067d0fe446bbe7788218fec9bdd";
 
@@ -168,7 +166,6 @@ public class InitializationController {
 		config.put(FIRE_ACTIONBOARD_EVENTS, "true");
 		config.put(FIRE_TASK_EVENTS, "true");
 
-		config.put(ADMIN_AUTO_LOGIN, "false");
 		config.put(USE_KEYCLOAK_AUTH, "false");
 		config.put(KEYCLOAK_LOGOUT_URL,
 				"https://steamrunner.info:8443/auth/realms/master/protocol/openid-connect/logout?" +

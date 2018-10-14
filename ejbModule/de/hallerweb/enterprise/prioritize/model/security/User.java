@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import de.hallerweb.enterprise.prioritize.model.Address;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
@@ -115,14 +116,6 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	@JsonIgnore
 	Date lastLogin;
 
-	public Date getLastLogin() {
-		return lastLogin;
-	}
-
-	public void setLastLogin(Date lastLogin) {
-		this.lastLogin = lastLogin;
-	}
-
 	transient List<SearchProperty> searchProperties;
 
 	@JsonIgnore
@@ -132,7 +125,43 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	@JsonIgnore
 	@OneToOne
 	TimeSpan illness;
+	
+	@ManyToOne
+	@JsonBackReference
+	Department department;
 
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JsonBackReference
+	Set<Role> roles;
+
+	@JsonIgnore
+	@OneToMany(fetch = FetchType.EAGER)
+	Set<SkillRecord> skills;
+
+	@JsonIgnore
+	@OneToOne(fetch = FetchType.EAGER)
+	UserPreference preference;
+	
+	@OneToOne
+	Address address;
+	
+
+	public Address getAddress() {
+		return address;
+	}
+
+	public void setAddress(Address address) {
+		this.address = address;
+	}
+
+	public Date getLastLogin() {
+		return lastLogin;
+	}
+
+	public void setLastLogin(Date lastLogin) {
+		this.lastLogin = lastLogin;
+	}
+	
 	public TimeSpan getIllness() {
 		return illness;
 	}
@@ -192,22 +221,6 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JsonBackReference
-	Department department;
-
-	@ManyToMany(fetch = FetchType.EAGER)
-	@JsonBackReference
-	Set<Role> roles;
-
-	@JsonIgnore
-	@OneToMany(fetch = FetchType.EAGER)
-	Set<SkillRecord> skills;
-
-	@JsonIgnore
-	@OneToOne(fetch = FetchType.EAGER)
-	UserPreference preference;
 
 	public UserPreference getPreference() {
 		return preference;

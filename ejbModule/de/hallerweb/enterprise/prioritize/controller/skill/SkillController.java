@@ -8,6 +8,8 @@ import javax.ejb.Stateless;
 import javax.enterprise.context.ContextNotActiveException;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
@@ -202,8 +204,14 @@ public class SkillController {
 
 	public SkillCategory getCategoryByName(String categoryName) {
 		Query query = em.createNamedQuery("findCategoryByName");
+		SkillCategory category = null;
 		query.setParameter("categoryName", categoryName);
-		return (SkillCategory) query.getSingleResult();
+		try {
+		 category = (SkillCategory) query.getSingleResult();
+		} catch(NoResultException ex) {
+			return category;
+		}
+		return category;
 	}
 
 	public SkillCategory getCategoryById(String categoryId) {

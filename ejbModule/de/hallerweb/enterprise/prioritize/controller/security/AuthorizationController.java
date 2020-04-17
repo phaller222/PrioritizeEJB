@@ -31,7 +31,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillCategory;
 @Stateless
 public class AuthorizationController {
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 
 	static User systemUser;

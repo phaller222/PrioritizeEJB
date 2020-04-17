@@ -65,7 +65,7 @@ public class ProjectController extends PEventConsumerProducer {
 	private static final String LITERAL_DELETED = "\" deleted.";
 	private static final String LITERAL_PROJECTGOAL = " ProjectGoal ";
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 
 	@Inject

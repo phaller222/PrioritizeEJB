@@ -25,7 +25,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @Stateless
 public class TimeTrackerController implements Serializable {
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 
 	@EJB

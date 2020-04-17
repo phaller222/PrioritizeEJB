@@ -1,6 +1,14 @@
 eclipse.preferences.version=1
 entitygen.DEFAULT_PACKAGE=model
-org.eclipse.jpt.core.platform=generic2_1
+org.eclipse.jpt.core.platform=hibernate2_1
 org.eclipse.jpt.jpa.core.discoverAnnotatedClasses=true
+problem.ATTRIBUTE_TYPE_IS_NOT_SUPPORTED_COLLECTION_TYPE=ignore
+problem.ENTITY_NAME_MISSING=ignore
+problem.ENTITY_NON_ROOT_ID_ATTRIBUTE_SPECIFIED=warning
+problem.ENTITY_NO_PK=warning
 problem.PROJECT_NO_PERSISTENCE_XML=warning
+problem.TARGET_ENTITY_IS_NOT_AN_ENTITY=warning
+problem.TARGET_ENTITY_NOT_DEFINED=ignore
+problem.TARGET_ENTITY_NOT_EXIST=warning
+problem.TARGET_NOT_AN_EMBEDDABLE=warning
 workspace_validation_preferences_overridden=true

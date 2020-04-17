@@ -26,7 +26,7 @@ import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 @Stateless
 public class BlackboardController extends PEventConsumerProducer {
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext(unitName = "Prioritze")
 	EntityManager em;
 
 	@EJB

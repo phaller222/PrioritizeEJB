@@ -25,7 +25,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @Stateless
 public class MessageController {
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext(unitName = "Prioritze")
 	EntityManager em;
 
 	@EJB

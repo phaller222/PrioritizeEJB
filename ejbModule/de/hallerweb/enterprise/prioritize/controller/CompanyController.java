@@ -46,7 +46,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @Stateless
 public class CompanyController extends PEventConsumerProducer {
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 	@EJB
 	AuthorizationController authController;

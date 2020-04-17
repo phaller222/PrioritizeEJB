@@ -33,7 +33,7 @@ public class ActionBoardController extends PEventConsumerProducer {
 
 	private static final String EVENT_ENTRY_ADDED = "entry";
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 
 	@Inject

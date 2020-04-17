@@ -15,7 +15,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @Stateless
 public class RestAccessController {
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 
 	@EJB

@@ -38,7 +38,7 @@ import de.hallerweb.enterprise.prioritize.service.mqtt.MQTTService;
  */
 @Stateless
 public class ResourceReservationController extends PEventConsumerProducer {
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 
 	@EJB

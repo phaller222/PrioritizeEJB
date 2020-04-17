@@ -28,7 +28,7 @@ import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
 @Stateless
 public class UserPreferenceController {
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 
 	@EJB

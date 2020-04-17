@@ -33,7 +33,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.Skill;
 @Stateless
 public class SearchController {
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 
 	@EJB

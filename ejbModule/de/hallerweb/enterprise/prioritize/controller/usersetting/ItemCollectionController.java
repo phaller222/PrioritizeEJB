@@ -26,7 +26,7 @@ import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 @Stateless
 public class ItemCollectionController {
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 
 	@EJB

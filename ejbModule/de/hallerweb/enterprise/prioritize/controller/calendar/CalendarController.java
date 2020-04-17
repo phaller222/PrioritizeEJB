@@ -23,7 +23,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @Stateless
 public class CalendarController {
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 
 

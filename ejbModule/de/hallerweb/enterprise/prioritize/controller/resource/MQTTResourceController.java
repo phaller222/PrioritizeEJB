@@ -50,7 +50,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
 	private static final String LITERAL_RESOURCE_SPACE = " Resource \"";
 	private static final String LITERAL_RESOURCE_CREATED = "\" created.";
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 
 	@EJB

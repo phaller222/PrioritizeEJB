@@ -285,7 +285,7 @@ public class InitializationController {
 			admin.setName(LITERAL_ADMIN);
 			admin.setUsername(LITERAL_ADMIN);
 			admin.setEmail("nobody@localhost");
-			admin.setPassword("13rikMyElTw");
+			admin.setPassword("admin");
 			admin.setOccupation("Systemadministrator");
 
 			User adminUser = userRoleController.createUser(admin, null, roles, AuthorizationController.getSystemUser());

@@ -44,7 +44,7 @@ import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
 @Stateless
 public class UserRoleController extends PEventConsumerProducer {
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 
 	@EJB

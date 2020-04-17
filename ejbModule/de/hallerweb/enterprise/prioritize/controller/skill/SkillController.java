@@ -35,7 +35,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecordProperty;
 @Stateless
 public class SkillController {
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext
 	EntityManager em;
 
 	@EJB

@@ -12,7 +12,7 @@ import de.hallerweb.enterprise.prioritize.model.resource.VirtualDevice;
 @Stateless
 public class VirtualDeviceController implements Serializable {
 
-   @PersistenceContext(unitName = "MySqlDS")
+   @PersistenceContext
 	EntityManager em;
 //	
 	public void createDevice() {

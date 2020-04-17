@@ -42,7 +42,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @Stateless
 public class DocumentController extends PEventConsumerProducer {
 
-	@PersistenceContext(unitName = "MySqlDS")
+	@PersistenceContext(unitName = "Prioritze")
 	EntityManager em;
 
 	@EJB

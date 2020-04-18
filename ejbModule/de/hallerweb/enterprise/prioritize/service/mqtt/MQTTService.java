@@ -38,12 +38,16 @@ import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 
 /**
- * MQTTservice.java - Implements a Service to connect to a MQTT broker and automatically discover resources and manage them. Resources must
- * publish a message to a topic with the name "DISCOVERY" containing the following payload data:
+ * MQTTservice.java - Implements a Service to connect to a MQTT broker and
+ * automatically discover resources and manage them. Resources must publish a
+ * message to a topic with the name "DISCOVERY" containing the following payload
+ * data:
  * 
- * [UUID]:[DEPARTMENT_TOKEN][GROUP][NAME]:[DESCRIPTION]:[DATA SEND TOPIC]:[DATA RECEIVE TOPIC]:[MAX NUMBER OF SLOTS]
+ * [UUID]:[DEPARTMENT_TOKEN][GROUP][NAME]:[DESCRIPTION]:[DATA SEND TOPIC]:[DATA
+ * RECEIVE TOPIC]:[MAX NUMBER OF SLOTS]
  * 
- * Example: e2ff27c8-2120-11e5-b5f7-727283247c7f:e94bbf75-1d30-484e-a900-aedf737558bd:group1:Test:Testresource:SEND:RECEIVE:1
+ * Example:
+ * e2ff27c8-2120-11e5-b5f7-727283247c7f:e94bbf75-1d30-484e-a900-aedf737558bd:group1:Test:Testresource:SEND:RECEIVE:1
  **/
 @Singleton
 @LocalBean
@@ -88,7 +92,8 @@ public class MQTTService implements MqttCallback {
 	CompanyController companyController;
 
 	private void connect() {
-		if (Boolean.parseBoolean(InitializationController.getConfig().get(InitializationController.ENABLE_MQTT_SERVICE))) {
+		if (Boolean
+				.parseBoolean(InitializationController.getConfig().get(InitializationController.ENABLE_MQTT_SERVICE))) {
 			Map<String, String> config = InitializationController.getConfig();
 			String mqttHost = "tcp://" + config.get(InitializationController.MQTT_HOST) + ":"
 					+ config.get(InitializationController.MQTT_PORT);
@@ -100,8 +105,10 @@ public class MQTTService implements MqttCallback {
 
 					Logger.getLogger(this.getClass())
 							.info("Using username " + config.get(InitializationController.MQTT_USERNAME) + " for MQTT");
-					Logger.getLogger(this.getClass()).info("Using pass "
-							+ Arrays.toString(config.get(InitializationController.MQTT_PASSWORD).toCharArray()) + " for MQTT");
+					Logger.getLogger(this.getClass())
+							.info("Using pass "
+									+ Arrays.toString(config.get(InitializationController.MQTT_PASSWORD).toCharArray())
+									+ " for MQTT");
 					options.setUserName(config.get(InitializationController.MQTT_USERNAME));
 					options.setPassword(config.get(InitializationController.MQTT_PASSWORD).toCharArray());
 					MemoryPersistence persistence = new MemoryPersistence();
@@ -133,7 +140,8 @@ public class MQTTService implements MqttCallback {
 	 */
 	@PreDestroy
 	public void shutdown() {
-		if (Boolean.parseBoolean(InitializationController.getConfig().get(InitializationController.ENABLE_MQTT_SERVICE))) {
+		if (Boolean
+				.parseBoolean(InitializationController.getConfig().get(InitializationController.ENABLE_MQTT_SERVICE))) {
 			try {
 				client.disconnect();
 				client.close();
@@ -144,7 +152,8 @@ public class MQTTService implements MqttCallback {
 	}
 
 	/**
-	 * Test connection to MQTT broker every 30 seconds. If connection is lost, try to reconnect
+	 * Test connection to MQTT broker every 30 seconds. If connection is lost, try
+	 * to reconnect
 	 */
 	@Schedule(second = "*/30", hour = "*", minute = "*", persistent = false)
 	@PostConstruct
@@ -167,7 +176,8 @@ public class MQTTService implements MqttCallback {
 	}
 
 	private void reconnect() {
-		if (Boolean.parseBoolean(InitializationController.getConfig().get(InitializationController.ENABLE_MQTT_SERVICE))) {
+		if (Boolean
+				.parseBoolean(InitializationController.getConfig().get(InitializationController.ENABLE_MQTT_SERVICE))) {
 			try {
 				Thread.sleep(100);
 				if (!client.isConnected()) {
@@ -217,8 +227,8 @@ public class MQTTService implements MqttCallback {
 
 			String uuid = data[0];
 			String token = data[1];
-			if ((token == null) || (token.length() < 1) && Boolean
-					.valueOf(InitializationController.getConfig().get(InitializationController.DISCOVERY_ALLOW_DEFAULT_DEPARTMENT))) {
+			if ((token == null) || (token.length() < 1) && Boolean.valueOf(InitializationController.getConfig()
+					.get(InitializationController.DISCOVERY_ALLOW_DEFAULT_DEPARTMENT))) {
 				token = InitializationController.DEFAULT_DEPARTMENT_TOKEN;
 			}
 			String group = data[2];
@@ -244,7 +254,8 @@ public class MQTTService implements MqttCallback {
 				tempResource.setDataReceiveTopic(dataReceiveTopic);
 				tempResource.setDataSendTopic(dataSendTopic);
 				tempResource.setIp("");
-				Resource resource = controller.createMqttResource(tempResource, token, group, AuthorizationController.getSystemUser());
+				Resource resource = controller.createMqttResource(tempResource, token, group,
+						AuthorizationController.getSystemUser());
 
 				String[] subscription = new String[3];
 				subscription[0] = uuid;
@@ -358,9 +369,11 @@ public class MQTTService implements MqttCallback {
 		case COMMAND_GET_COMMANDS:
 			String uuidToQuery = data;
 			if (controller.exists(uuidToQuery)) {
-				// Resource targetResource = controller.getResource(uuidToQuery, AuthorizationController.getSystemUser());
+				// Resource targetResource = controller.getResource(uuidToQuery,
+				// AuthorizationController.getSystemUser());
 				// TODO: Implement GET_COMMANDS!
-				// String[] targetCommandList = targetResource.getMqttCommands().toArray(new String[] {});
+				// String[] targetCommandList = targetResource.getMqttCommands().toArray(new
+				// String[] {});
 			}
 			break;
 		case COMMAND_SCAN_DEVICES:
@@ -392,7 +405,8 @@ public class MQTTService implements MqttCallback {
 		String departmentKey = scanDevicesData[2];
 		StringBuilder scanResult = new StringBuilder("");
 		if (controller.exists(deviceUuid)) {
-			Department department = companyController.getDepartmentByToken(departmentKey, AuthorizationController.getSystemUser());
+			Department department = companyController.getDepartmentByToken(departmentKey,
+					AuthorizationController.getSystemUser());
 			Set<ResourceGroup> groups = department.getResourceGroups();
 			List<Resource> devicesFound = scanDevices(deviceUuid, groups);
 			if (!devicesFound.isEmpty()) {

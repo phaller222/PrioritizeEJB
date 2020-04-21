@@ -1,7 +1,3 @@
-/**
- * 
- */
-
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import java.util.ArrayList;

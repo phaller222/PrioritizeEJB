@@ -144,3 +144,11 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## License
 [Apache] (http://www.apache.org/licenses/LICENSE-2.0)
+
+  PLEASE NOTE:
+  
+  The Program includes all or portions of the following software 
+  which was obtained under the terms and conditions of the 
+  Eclipse Public Licence 1.0  (https://www.eclipse.org/legal/epl-v10.html):
+  
+  Eclipse Paho Java Client https://www.eclipse.org/paho/clients/java/

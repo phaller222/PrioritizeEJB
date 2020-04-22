@@ -13,6 +13,10 @@
 If you want to install and run Prioritize or contribute please make sure you have checked out all projects above from git. 
 <br/>Also take a look at http://prioritize-iot.de for a short overview of the capabilites.
 
+If you have contributed code which has already been merged/accepted you can watch the build state here:
+<p></p>
+<a href="http://jenkins.prioauth.com:8080/">http://jenkins.prioauth.com:8080/</a>
+ 
 
 
 ## What it is:

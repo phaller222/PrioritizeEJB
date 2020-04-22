@@ -78,6 +78,29 @@ is simply stored as the hashcode value of the string e.G. : String.valueOf(passw
 This will be changed in the future to be more secure. For now just call hashCode() and save the value
  directly to the database or call User.editUser() to change the users data.** 
  
+<p></p>
+
+Also don't forget to edit persistence.xml to hold the datasource you have created on your Application Server.
+By default the following datasource configuration is used assuming that there is a DataSource called "MySqlDS":
+
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+	<persistence-unit name="Prioritze">
+	 <jta-data-source>java:jboss/datasources/MySqlDS</jta-data-source>
+	 <properties>
+      <!-- Properties for Hibernate -->
+       <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
+         <property name="hibernate.hbm2ddl.auto" value="none" />
+         <property name="hibernate.show_sql" value="false" />
+      </properties>
+	</persistence-unit> 
+</persistence>
+```
+
+
+
 
 
 ## Getting started 

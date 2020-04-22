@@ -11,6 +11,7 @@
 [Prioritize](https://github.com/phaller222/Prioritize) - main project which builds an .ear archive from the other two.
 
 If you want to install and run Prioritize or contribute please make sure you have checked out all projects above from git. 
+<br/>Also take a look at http://prioritize-iot.de for a short overview of the capabilites.
 
 
 

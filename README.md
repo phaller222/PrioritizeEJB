@@ -72,7 +72,12 @@ You can use your favorite IDE to accomplish this. After the build is finished yo
 Now you can access the main Prioritize admin pages by entering the following URL:
 http://localhost:8080/PrioritizeWeb/admin/index.xhtml
  
-default user is "admin" with default password "prioritizeadmin". 
+default user is "admin" with default password "admin".<p></p>
+**IMPORTANT: Make sure to change the password after installation! At the moment the password
+is simply stored as the hashcode value of the string e.G. : String.valueOf(password.hashCode()).
+This will be changed in the future to be more secure. For now just call hashCode() and save the value
+ directly to the database or call User.editUser() to change the users data.** 
+ 
 
 
 ## Getting started 

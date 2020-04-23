@@ -198,8 +198,8 @@ public class LoginBean implements Serializable {
 		if (Boolean.parseBoolean(InitializationController.getConfig().get(InitializationController.USE_KEYCLOAK_AUTH))) {
 			ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
 			try {
-				context.redirect("https://steamrunner.info:8443/auth/realms/master/protocol/openid-connect/logout?"
-						+ "redirect_uri=https://prioritize-iot.com/PrioritizeWeb/client/dashboard/dashboard.xhtml");
+				context.redirect("https://localhost:8443/auth/realms/master/protocol/openid-connect/logout?"
+						+ "redirect_uri=https://localhost/PrioritizeWeb/client/dashboard/dashboard.xhtml");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

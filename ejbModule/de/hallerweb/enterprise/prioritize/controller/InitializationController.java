@@ -156,9 +156,9 @@ public class InitializationController {
 		config.put(MAXIMUM_FILE_UPLOAD_SIZE, "50000000");
 
 		config.put(ENABLE_MQTT_SERVICE, "false");
-		config.put(MQTT_HOST, "prioritize-iot.com");
+		config.put(MQTT_HOST, "localhost");
 		config.put(MQTT_PORT, "1883");
-		config.put(MQTT_HOST_WRITE, "prioritize-iot.com");
+		config.put(MQTT_HOST_WRITE, "localhost");
 		config.put(MQTT_PORT_WRITE, "1883");
 
 		config.put(MQTT_MAX_COMMUNICATION_BYTES, "5000");
@@ -166,7 +166,7 @@ public class InitializationController {
 		config.put(MQTT_MAX_DEVICE_VALUES, "1");
 		config.put(MQTT_PING_TIMEOUT, "60000");
 
-		config.put(MQTT_USERNAME, "prioritizeclient");
+		config.put(MQTT_USERNAME, "localhost");
 		config.put(MQTT_PASSWORD, "");
 
 		config.put(DISCOVERY_ALLOW_DEFAULT_DEPARTMENT, "true");
@@ -183,8 +183,8 @@ public class InitializationController {
 
 		config.put(USE_KEYCLOAK_AUTH, "false");
 		config.put(KEYCLOAK_LOGOUT_URL,
-				"https://steamrunner.info:8443/auth/realms/master/protocol/openid-connect/logout?" +
-				"redirect_uri=https://www.prioritize-iot.com/PrioritizeWeb/client/dashboard/dashboard.xhtml");
+				"https://localhost:8443/auth/realms/master/protocol/openid-connect/logout?" +
+				"redirect_uri=https://localhost/PrioritizeWeb/client/dashboard/dashboard.xhtml");
 
 		try {
 			BufferedReader reader = new BufferedReader(
@@ -239,7 +239,6 @@ public class InitializationController {
 
 			// Create default company and default department
 			boolean createDefaultCompany = Boolean.parseBoolean(config.get(CREATE_DEFAULT_COMPANY));
-			Department d = null;
 			if (createDefaultCompany) {
 				Address adr = new Address();
 				adr.setCity("City of Admin");
@@ -251,7 +250,7 @@ public class InitializationController {
 				c.setMainAddress(adr);
 
 				if (Boolean.valueOf(config.get(CREATE_DEFAULT_DEPARTMENT))) {
-					d = companyController.createDepartment(c, "default", "Auto generated default department", adr,
+					Department d = companyController.createDepartment(c, "default", "Auto generated default department", adr,
 							AuthorizationController.getSystemUser());
 					defaultDepartmentId = d.getId();
 				}

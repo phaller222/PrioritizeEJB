@@ -2,8 +2,6 @@
 
 ![Prioritize logo](http://www.prioritize-iot.de/logo.png)
 
-**PLEASE NOTE: Still having problems when trying to deploy. trying to fix...** 
-
 **IMPORTANT: This project consists of three projects:**
 
 [PrioritizeEJB](https://github.com/phaller222/PrioritizeEJB.git) - model and controller classes for the backend

@@ -84,7 +84,7 @@ public class ResourceReservationController extends PEventConsumerProducer {
 		Logger.getLogger(this.getClass()).info("Object " + evt.getSource() + " raised event: " + evt.getPropertyName() + " with new Value: "
 				+ evt.getNewValue() + "--- Resource listening: " + ((Resource) destination).getId());
 	}
-	
+
 	public boolean isResourceActiveForUser(User user, Set<ResourceReservation> reservations) {
 		Date now = new Date();
 		Date now2 = new Date(System.currentTimeMillis() + 10000);
@@ -222,7 +222,8 @@ public class ResourceReservationController extends PEventConsumerProducer {
 			res.addReservation(reservation);
 			em.flush();
 
-			logger.log(user.getUsername(), "ResourceReservation", Action.CREATE, reservation.getId(), " ResourceReservation created.");
+			logger.log(user.getUsername(), "ResourceReservation", Action.CREATE, reservation.getId(),
+					" ResourceReservation created.");
 			return reservation;
 		}
 
@@ -298,8 +299,8 @@ public class ResourceReservationController extends PEventConsumerProducer {
 		}
 		return true;
 	}
-	
-	
+
+
 }
 	
 	

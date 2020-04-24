@@ -43,10 +43,4 @@ public class NFCUnitBean implements Serializable {
 		log.log("TEST", "TEST", Action.CREATE, 0);
 
 	}
-
-	public void doTestLog() {
-		Logger.getLogger(this.getClass().getName()).log(Level.INFO, "LOG... ::::::::::         ::::::::: .......");
-		ctl.createNFCUnit();
-	}
-
 }

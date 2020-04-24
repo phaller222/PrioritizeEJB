@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -135,8 +137,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
 					logger.log(sessionController.getUser().getUsername(), LITERAL_RESOURCE, Action.CREATE, resource.getId(),
 							LITERAL_RESOURCE_SPACE + resource.getName() + LITERAL_RESOURCE_CREATED);
 				} catch (ContextNotActiveException ex) {
-					// Log message omitted here because this can only happen during
-					// automatic tests (no session).
+					LogManager.getLogManager().getLogger(getClass().getName()).log(Level.WARNING, ex.getMessage());
 				}
 				return resource;
 			} else {
@@ -312,8 +313,8 @@ public class MQTTResourceController extends PEventConsumerProducer {
 
 	private void insertValue(String value, StringBuilder builder, NameValueEntry entry) {
 		String values = entry.getValues();
-		if (values != null
-				&& values.length() > Integer.valueOf(InitializationController.getConfig().get(InitializationController.MQTT_MAX_VALUES_BYTES))) {
+		if ((values != null)
+				&& (values.length() > Integer.valueOf(InitializationController.getConfig().get(InitializationController.MQTT_MAX_VALUES_BYTES)))) {
 			int firstEntryEnd = values.indexOf(';');
 			builder.append(values.substring(firstEntryEnd + 1, values.length()));
 			entry.setValues(builder.toString() + ";" + value);
@@ -333,9 +334,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
 		if (res.isMqttOnline()) {
 			Resource managedResource = em.find(Resource.class, res.getId());
 			if (!managedResource.getMqttValues().isEmpty()) {
-				Iterator<NameValueEntry> it = managedResource.getMqttValues().iterator();
-				while (it.hasNext()) {
-					NameValueEntry entry = it.next();
+				for (NameValueEntry entry : managedResource.getMqttValues()) {
 					if (entry.getName().equals(name)) {
 						NameValueEntry managedEntry = em.find(NameValueEntry.class, entry.getId());
 						managedResource.getMqttValues().remove(managedEntry);
@@ -430,9 +429,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
 
 	private void updateValueIfEntryAlreadyExists(String name, String value, Resource managedResource, int valuesSize) {
 		List<NameValueEntry> valuesCopy = new ArrayList<>(valuesSize);
-		for (NameValueEntry e : managedResource.getMqttValues()) {
-			valuesCopy.add(e);
-		}
+		valuesCopy.addAll(managedResource.getMqttValues());
 
 		Iterator<NameValueEntry> it = valuesCopy.iterator();
 		StringBuilder buff = new StringBuilder();
@@ -444,7 +441,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
 				found = true;
 			}
 		}
-		if (!found && valuesSize <= Integer.valueOf(InitializationController.getConfig().get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
+		if (!found && valuesSize <= Integer.parseInt(InitializationController.getConfig().get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
 			createMqttNameValuePair(name, value, managedResource);
 		}
 	}
@@ -485,7 +482,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
 	@Override
 	public void consumeEvent(PObject destination, Event evt) {
 		Logger.getLogger(this.getClass()).info("Object " + evt.getSource() + " raised event: " + evt.getPropertyName() + " with new Value: "
-				+ evt.getNewValue() + "--- Resource listening: " + ((Resource) destination).getId());
+				+ evt.getNewValue() + "--- Resource listening: " + (destination).getId());
 	}
 
 	public void fireScanResult(String sourceUuid, String scanResult) {

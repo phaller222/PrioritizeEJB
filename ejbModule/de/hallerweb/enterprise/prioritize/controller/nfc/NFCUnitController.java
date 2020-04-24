@@ -50,29 +50,6 @@ public class NFCUnitController implements Serializable {
 	@EJB
 	SessionController sessionController;
 
-	// TODO: DEMOCODE, REMOVE! -----------------------------------------------------------
-	public void createNFCUnit() {
-		NFCUnit vd = new NFCUnit();
-
-		Resource tempResource = new Resource();
-		tempResource.setName("TEST");
-		tempResource.setDescription("TEST");
-		tempResource.setMaxSlots(1);
-		tempResource.setStationary(false);
-		tempResource.setRemote(true);
-		tempResource.setAgent(false);
-		tempResource.setIp("10.0.0.1");
-
-		Resource resource = resourceController.createResource(tempResource, resourceController
-				.findResourceGroupByNameAndDepartment("default", 6, userRoleController.findUserById(18, sessionController.getUser()))
-				.getId(), sessionController.getUser());
-
-		vd.setWrappedResource(resource);
-		em.persist(vd);
-		System.out.println("------------- VD CREATED. ------------");
-	}
-	// ---------------------------------------------------------------------------------
-
 	public NFCUnit findNFCUnitByUUID(String uuid) {
 		Query query = em.createNamedQuery("findNFCUnitByUUID");
 		query.setParameter("uuid", uuid);
@@ -126,7 +103,7 @@ public class NFCUnitController implements Serializable {
 	}
 
 	public String readPayload(String uuid, long sequenceNumber) {
-		NFCUnit unit = (NFCUnit) findNFCUnitByUUID(uuid);
+		NFCUnit unit = findNFCUnitByUUID(uuid);
 		if (unit != null) {
 			if (sequenceNumber == unit.getSequenceNumber()) {
 				return unit.getPayload();
@@ -139,7 +116,7 @@ public class NFCUnitController implements Serializable {
 	}
 
 	public void writePayload(String uuid, String payload, Resource device) {
-		NFCUnit unit = (NFCUnit) findNFCUnitByUUID(uuid);
+		NFCUnit unit =  findNFCUnitByUUID(uuid);
 		if (unit != null) {
 			unit.setSequenceNumber(unit.getSequenceNumber() + 1);
 			unit.setPayload(payload);

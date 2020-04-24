@@ -32,7 +32,6 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 
 /**
  * CalendarController.java 
- * CalenderController
  */
 @Stateless
 public class CalendarController {
@@ -40,9 +39,9 @@ public class CalendarController {
 	@PersistenceContext
 	EntityManager em;
 
-
 	@EJB
 	LoggingController logger;
+
 	@Inject
 	SessionController sessionController;
 

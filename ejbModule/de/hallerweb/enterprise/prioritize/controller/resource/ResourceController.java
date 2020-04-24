@@ -15,25 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.resource;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.context.ContextNotActiveException;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
-import org.jboss.resteasy.logging.Logger;
-
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
@@ -53,6 +34,17 @@ import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 import de.hallerweb.enterprise.prioritize.service.mqtt.MQTTService;
+import org.jboss.resteasy.logging.Logger;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.context.ContextNotActiveException;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.util.*;
 
 /**
  * ResourceController.java - Controls the creation, modification and deletion of
@@ -129,24 +121,6 @@ public class ResourceController extends PEventConsumerProducer {
 		}
 	}
 
-	/**
-	 * Same as createResource(), but creates a MQTT Resource.
-	 * 
-	 * @param name
-	 * @param groupId
-	 * @param user
-	 * @param description
-	 * @param ip
-	 * @param maxSlots
-	 * @param isStationary
-	 * @param isRemote
-	 * @param uuid
-	 * @param dataSendTopic
-	 * @param dataReceiveTopic
-	 * @return
-	 */
-	
-
 	public ResourceGroup createResourceGroup(int departmentId, String name, User sessionUser) {
 
 		// first get department and check if group already exists
@@ -156,7 +130,7 @@ public class ResourceController extends PEventConsumerProducer {
 			if (authController.canCreate(resourceGroup, sessionUser)) {
 				resourceGroup.setName(name);
 				resourceGroup.setDepartment(managedDepartment);
-				resourceGroup.setResources(new TreeSet<Resource>());
+				resourceGroup.setResources(new TreeSet<>());
 
 				em.persist(resourceGroup);
 				managedDepartment.addResourceGroup(resourceGroup);
@@ -273,7 +247,8 @@ public class ResourceController extends PEventConsumerProducer {
 				logger.log(sessionUser.getUsername(), LITERAL_RESOURCE, Action.DELETE, res.getId(),
 						LITERAL_RESOURCE_SPACE + res.getName() + "\" deleted.");
 			} catch (ContextNotActiveException ex) {
-				logger.log("SYSTEM", LITERAL_RESOURCE, Action.DELETE, res.getId(), LITERAL_RESOURCE_SPACE + res.getName() + "\" deleted.");
+				logger.log("SYSTEM", LITERAL_RESOURCE, Action.DELETE, res.getId(),
+						LITERAL_RESOURCE_SPACE + res.getName() + "\" deleted.");
 			}
 		}
 	}
@@ -403,11 +378,10 @@ public class ResourceController extends PEventConsumerProducer {
 		if (authController.canUpdate(res, sessionUser)) {
 			SkillRecord rec = em.find(SkillRecord.class, skillRecordId);
 
-			for (SkillRecord resSkillRecord : res.getSkills()) {
+			for (SkillRecord resSkillRecord : res.getSkills())
 				if (resSkillRecord.getSkill().getId() == rec.getId()) {
 					alreadyAssigned = true;
 				}
-			}
 
 			if (!alreadyAssigned) {
 				res.addSkill(rec);
@@ -481,6 +455,6 @@ public class ResourceController extends PEventConsumerProducer {
 	@Override
 	public void consumeEvent(PObject destination, Event evt) {
 		Logger.getLogger(this.getClass()).info("Object " + evt.getSource() + " raised event: " + evt.getPropertyName() + " with new Value: "
-				+ evt.getNewValue() + "--- Resource listening: " + ((Resource) destination).getId());
+				+ evt.getNewValue() + "--- Resource listening: " + (destination).getId());
 	}
 }

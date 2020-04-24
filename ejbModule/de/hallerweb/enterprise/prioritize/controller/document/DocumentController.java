@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import javax.ejb.EJB;
@@ -59,7 +60,6 @@ public class DocumentController extends PEventConsumerProducer {
 
 	@PersistenceContext(unitName = "Prioritze")
 	EntityManager em;
-
 	@EJB
 	UserRoleController userRoleController;
 	@EJB
@@ -123,7 +123,7 @@ public class DocumentController extends PEventConsumerProducer {
 					logger.log(user.getUsername(), DOCUMENT_LITERAL, Action.CREATE, documentInfo.getId(),
 							" " + DOCUMENT_LITERAL + " \"" + documentInfo.getCurrentDocument().getName() + "\" created.");
 				} catch (ContextNotActiveException ex) {
-					// Log omitted here.
+					LogManager.getLogManager().getLogger(getClass().getName()).log(Level.WARNING,ex.getMessage());
 				}
 				return documentInfo;
 			} else {
@@ -154,7 +154,7 @@ public class DocumentController extends PEventConsumerProducer {
 					logger.log(sessionController.getUser().getUsername(), "DocumentGroup", Action.CREATE, documentGroup.getId(),
 							" DocumentGroup \"" + documentGroup.getName() + "\" created.");
 				} catch (ContextNotActiveException ex) {
-					// Log omitted here...
+					LogManager.getLogManager().getLogger(getClass().getName()).log(Level.WARNING,ex.getMessage());
 				}
 
 				return documentGroup;
@@ -341,7 +341,7 @@ public class DocumentController extends PEventConsumerProducer {
 
 			// Then edit the DocumentInfo information
 			if (managedInfo.getRecentDocuments() == null) {
-				managedInfo.setRecentDocuments(new TreeSet<Document>());
+				managedInfo.setRecentDocuments(new TreeSet<>());
 			}
 			managedInfo.getRecentDocuments().add(managedInfo.getCurrentDocument());
 			managedInfo.setCurrentDocument(document);

@@ -69,7 +69,6 @@ public class TimeTrackerController implements Serializable {
 	 * - Assigns the task to the sessionUser
 	 * - Sets the underlying task to "ASSIGNED" or "STARTED" depending on the previous state.
 	 * 
-	 * @param uuid
 	 * @param sessionUser
 	 */
 	public void startTracking(TimeTracker tracker, User sessionUser) {
@@ -112,7 +111,6 @@ public class TimeTrackerController implements Serializable {
 	 * 		- Creates a new activeTimeSpan object with current user and sets start time to server time.
 	 * 		- Sets active to "true" again.
 	 * 		- Sets task status to "STARTED".
-	 * @param uuid
 	 * @param sessionUser
 	 */
 	public void stopTracking(TimeTracker tracker, User sessionUser) {
@@ -184,19 +182,9 @@ public class TimeTrackerController implements Serializable {
 	public List<TimeTracker> getAllTimeTrackers(User sessionUser) {
 		if (authController.canRead(new TimeTracker(), sessionUser)) {
 			Query q = em.createNamedQuery("findAllTimeTrackers");
-			List<TimeTracker> trackers = q.getResultList();
-			return trackers;
+			return q.getResultList();
 		} else {
-			return new ArrayList<TimeTracker>();
+			return new ArrayList<>();
 		}
 	}
-//
-//	public IndustrieCounter editCounter(String uuid, String name, String description, long value) {
-//		IndustrieCounter counter = getIndustrieCounter(uuid);
-//		counter.setName(name);
-//		counter.setDescription(description);
-//		counter.getCounter().setValue(value);
-//		return counter;
-//	}
-
 }

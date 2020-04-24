@@ -15,28 +15,22 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.security;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
-import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
-import de.hallerweb.enterprise.prioritize.model.security.ObservedObjectType;
-import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
-import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
-import de.hallerweb.enterprise.prioritize.model.security.Role;
-import de.hallerweb.enterprise.prioritize.model.security.User;
+import de.hallerweb.enterprise.prioritize.model.security.*;
 import de.hallerweb.enterprise.prioritize.model.skill.Skill;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillCategory;
+
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * AuthorizationController.java - Retrieves information of the permissions a user has for the creation, modification and deletion of
@@ -333,7 +327,8 @@ public class AuthorizationController {
 		Department dept = user.getDepartment();
 		// User must not read foreign companies!
 		if (dept != null) {
-		return (dept.getCompany().getId() == comp.getId());
+			final boolean b = dept.getCompany().getId() == comp.getId();
+			return b;
 		} else {
 			return true;
 		}

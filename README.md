@@ -2,13 +2,11 @@
 
 ![Prioritize logo](http://www.prioritize-iot.de/logo.png)
 
-##IMPORTANT: This project consists of three projects:
+**IMPORTANT: This project consists of two projects:**
 
 [PrioritizeEJB](https://github.com/phaller222/PrioritizeEJB.git) - model and controller classes for the backend
 
 [PrioritizeWeb](https://github.com/phaller222/PrioritizeWeb.git) - mainly xhtml GUI files
-
-[Prioritize](https://github.com/phaller222/Prioritize) - main project which builds an .ear archive from the other two.
 
 If you want to install and run Prioritize or contribute please make sure you have checked out all projects above from git. 
 <br/>Also take a look at http://prioritize-iot.de for a short overview of the capabilites.

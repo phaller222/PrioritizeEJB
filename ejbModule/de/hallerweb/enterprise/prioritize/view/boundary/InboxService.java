@@ -52,7 +52,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  * @author peter REST-Service to send and receive messages.
  */
 @RequestScoped
-@Path("inbox")
+@Path("v1/inbox")
 public class InboxService {
 
 	@EJB

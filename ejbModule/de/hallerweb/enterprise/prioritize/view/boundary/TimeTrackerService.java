@@ -37,7 +37,7 @@ import de.hallerweb.enterprise.prioritize.model.project.task.TimeTracker;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
 @RequestScoped
-@Path("timetrackers")
+@Path("v1/timetrackers")
 public class TimeTrackerService {
 
 	@EJB

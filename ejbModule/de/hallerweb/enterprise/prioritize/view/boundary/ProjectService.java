@@ -50,7 +50,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  *         objects.
  */
 @RequestScoped
-@Path("projects")
+@Path("v1/projects")
 public class ProjectService {
 
 	@EJB

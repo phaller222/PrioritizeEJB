@@ -36,7 +36,7 @@ import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.model.nfc.counter.IndustrieCounter;
 
 @RequestScoped
-@Path("counters")
+@Path("v1/counters")
 public class IndustrieCounterService {
 
 	@EJB

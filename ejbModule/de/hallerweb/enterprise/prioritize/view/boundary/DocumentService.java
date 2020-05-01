@@ -62,7 +62,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  * @author peter REST-Service to create, update and delete {@link Resource} objects.
  */
 @RequestScoped
-@Path("documents")
+@Path("v1/documents")
 public class DocumentService {
 
 	@EJB
@@ -146,7 +146,7 @@ public class DocumentService {
 	 * @apiError NotAuthorized  APIKey incorrect.
 	 *
 	 * @param departmentToken - The department token.
-	 * @param group - The document group to look for dcuments.
+	 * @param  {@link DocumentGroup} - The document group to look for douments.
 	 * @return JSON object with documents in that department.
 	 */
 	@GET

@@ -29,7 +29,6 @@ import javax.ws.rs.core.Application;
  * 
  * @author peter
  */
-@ApplicationPath("/api/v1")
+@ApplicationPath("/api")
 public class ApiApplication extends Application {
-
 }

@@ -15,25 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.controller;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import javax.ejb.EJB;
-import javax.ejb.EJBException;
-import javax.ejb.Stateless;
-import javax.enterprise.context.ContextNotActiveException;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
@@ -52,6 +33,20 @@ import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+
+import javax.ejb.EJB;
+import javax.ejb.EJBException;
+import javax.ejb.Stateless;
+import javax.enterprise.context.ContextNotActiveException;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * CompanyController.java - Controls the creation, modification and deletion of {@link Company} objects. Also the associated {@link Address}
@@ -327,7 +322,7 @@ public class CompanyController extends PEventConsumerProducer {
 	 * Edits the {@link Company} data in the underlying persistence architecture. The new data for the {@link Company} like name, Address
 	 * and so on can be passed here as a detached {@link Company} object. Also changes to the companies departments will be persisted here.
 	 * 
-	 * @param c
+	 * @param company
 	 *            The {@link Company} object with the changed data of the {@link Company}. the primary key must be set.
 	 */
 	public void editCompany(Company company, User sessionUser) {
@@ -375,7 +370,7 @@ public class CompanyController extends PEventConsumerProducer {
 
 	/**
 	 * Changes the data of a department in the underlying persistence architecture.
-	 * @param d - the {@link Department} with the new {@link Department} data. The primary key (ID) must be set.
+	 * @param department - the {@link Department} with the new {@link Department} data. The primary key (ID) must be set.
 	 */
 	public void editDepartment(Department department, User sessionUser) {
 		Department orig = getDepartmentById(department.getId(), sessionUser);
@@ -486,9 +481,14 @@ public class CompanyController extends PEventConsumerProducer {
 	}
 
 	public Department getDepartmentByToken(String token, User sessionUser) {
+		Department dept = null;
 		Query query = em.createNamedQuery("findDepartmentByToken");
 		query.setParameter(1, token);
-		Department dept = (Department) query.getSingleResult();
+		try {
+			dept = (Department) query.getSingleResult();
+		} catch (Exception ex) {
+			return null;
+		}
 		if (authController.canRead(dept, sessionUser)) {
 			return dept;
 		} else {

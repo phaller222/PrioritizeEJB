@@ -151,7 +151,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
 	/**
 	 * Updates the "ping" of a mqtt resource in the database to avoid the
 	 * resource getting shut down. The timeout period for this is configured in
-	 * the config.ini file in the manifest.
+	 * the config.properties file in the manifest.
 	 * 
 	 * @param resource
 	 */

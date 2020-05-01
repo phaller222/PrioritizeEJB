@@ -150,8 +150,12 @@ public class CalendarService {
 			if (authController.canRead(res.getResource(), sessionUser)) {
 				TimeSpan reservationTimeSpan = res.getTimeSpan();
 				TimeSpan searchSpan = new TimeSpan();
-				searchSpan.setDateFrom(new Date(Long.parseLong(timeSpanFrom)));
-				searchSpan.setDateUntil(new Date(Long.parseLong(timeSpanTo)));
+				try {
+					searchSpan.setDateFrom(new Date(Long.parseLong(timeSpanFrom)));
+					searchSpan.setDateUntil(new Date(Long.parseLong(timeSpanTo)));
+				} catch (Exception ex) {
+					throw new NotFoundException(createNegativeResponse("Missing or invalid Date parameters 'from' or 'to'!"));
+				}
 
 				// Add to search result if TimeSpan objects intersect
 				if (reservationTimeSpan.intersects(searchSpan)) {
@@ -212,6 +216,6 @@ public class CalendarService {
 	}
 
 	private Response createNegativeResponse(String responseText) {
-		return Response.status(405).entity("{\"response\" : \"" + responseText + "\"}").build();
+		return Response.status(404).entity("{\"response\" : \"" + responseText + "\"}").build();
 	}
 }

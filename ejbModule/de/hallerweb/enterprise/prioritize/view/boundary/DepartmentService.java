@@ -49,7 +49,7 @@ import de.hallerweb.enterprise.prioritize.model.Department;
  * 
  */
 @RequestScoped
-@Path("departments")
+@Path("v1/departments")
 public class DepartmentService {
 
 	@EJB

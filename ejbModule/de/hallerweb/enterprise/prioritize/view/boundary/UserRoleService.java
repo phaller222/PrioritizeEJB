@@ -57,7 +57,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  * @author peter REST-Service to retrieve {@link User} objects.
  */
 @RequestScoped
-@Path("users")
+@Path("v1/users")
 public class UserRoleService {
 
 	@EJB
@@ -157,27 +157,7 @@ public class UserRoleService {
 
 	}
 
-	/**
-	 * Return the {@link User} object with the given id.
-	 *
-	 * @api {get} /users/username/{username} getUserByUsername
-	 * @apiName getUserByUsername
-	 * @apiGroup /users
-	 * @apiDescription Returns user with the given {username}
-	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
-	 * @apiSuccess {User}  JSON-Object with the user with username {username}.
-	 * @apiSuccessExample Success-Response:
-	 *     HTTP/1.1 200 OK
-	 *  {
-	 *   "id": 48,
-	 *   "name": "peter",
-	 *   "username": "peter"
-	 *  }
-	 *
-	 * @apiError NotAuthorized APIKey incorrect.
-	 * @param id - The id of the {@link Resource}.
-	 * @return {@link Company} - JSON Representation of the company.
-	 */
+
 	@GET
 	@Path("username/{username}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -191,13 +171,7 @@ public class UserRoleService {
 
 	}
 
-	/**
-	 * Returns all the users matching the search phrase.
-	 *
-	 * @param departmentToken
-	 *            - The department token.
-	 * @return JSON object with documents in that department.
-	 */
+
 	@GET
 	@Path("search/users")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -221,14 +195,7 @@ public class UserRoleService {
 		}
 	}
 
-	/**
-	 * Returns all the users matching the search phrase.
-	 *
-	 * @param departmentToken
-	 *            - The department token.
-	 * @return JSON object with documents in that department.
-	 */
-	@GET
+
 	@Path("search/roles")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Set<Role> searchRoles(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "phrase") String phrase) {

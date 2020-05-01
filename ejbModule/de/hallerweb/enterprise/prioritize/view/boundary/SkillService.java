@@ -56,7 +56,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillCategory;
  * @author peter REST-Service to create, update and delete skill related objects.
  */
 @RequestScoped
-@Path("skills")
+@Path("v1/skills")
 public class SkillService {
 
 	@EJB
@@ -81,7 +81,7 @@ public class SkillService {
 	AuthorizationController authController;
 
 	/**
-	 * Returns {@link skill} objects containing the given phrase in name or description. *
+	 * Returns {@link Skill} objects containing the given phrase in name or description. *
 	 *
 	 * @param phrase - The search phrase.
 	 * @return JSON object with {@link TimeSpan} objects for that department.
@@ -99,7 +99,7 @@ public class SkillService {
 			for (SearchResult result : results) {
 				Skill skill = (Skill) result.getResult();
 				if (authController.canRead(skill, user)) {
-					searchResult.add((Skill) skill);
+					searchResult.add(skill);
 				} else {
 					break;
 				}

@@ -56,7 +56,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  * @author peter REST-Service to create, update and delete calendar related objects.
  */
 @RequestScoped
-@Path("calendar")
+@Path("v1/calendar")
 public class CalendarService {
 
 	@EJB

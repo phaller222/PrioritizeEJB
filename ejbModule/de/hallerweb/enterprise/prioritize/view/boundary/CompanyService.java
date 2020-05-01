@@ -56,7 +56,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  * 
  */
 @RequestScoped
-@Path("companies")
+@Path("v1/companies")
 public class CompanyService {
 
 	@EJB
@@ -137,7 +137,6 @@ public class CompanyService {
 	 *
 	 * @apiError NotAuthorized  APIKey incorrect.
 	 *
-	 * @param id - The id of the {@link Company}.
 	 *
 	 * @return JSON object with departments in that company.
 	 */

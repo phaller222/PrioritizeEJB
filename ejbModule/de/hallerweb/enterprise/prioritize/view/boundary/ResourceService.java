@@ -67,7 +67,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  *         objects.
  */
 @RequestScoped
-@Path("resources")
+@Path("v1/resources")
 public class ResourceService {
 
 	@EJB

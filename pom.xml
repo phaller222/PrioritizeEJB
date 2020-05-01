@@ -80,28 +80,18 @@
 		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
-			<version>1.1.0.Final</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
 			<version>2.0.1.Final</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- <dependency> <groupId>org.jboss.spec.javax.ws.rs</groupId> <artifactId>jboss-jaxrs-api_2.0_spec</artifactId> 
+		<!--<dependency> <groupId>org.jboss.spec.javax.ws.rs</groupId> <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
 			<version>1.0.1.Final</version> <scope>provided</scope> </dependency> <dependency> 
 			<groupId>org.jboss.spec.javax.ws.rs</groupId> <artifactId>jboss-jaxrs-api_2.1_spec</artifactId> 
 			<version>1.0.0.Final</version> <scope>provided</scope> </dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-server -->
 		 <!-- https://mvnrepository.com/artifact/org.jboss.resteasy/jaxrs-api -->
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>jaxrs-api</artifactId>
-            <version>3.0.12.Final</version>
-            <scope>provided</scope>
-        </dependency>
+
+
 
 		<dependency>
 			<groupId>javax.ejb</groupId>
@@ -112,45 +102,23 @@
 		<dependency>
 			<groupId>javax.enterprise</groupId>
 			<artifactId>cdi-api</artifactId>
-			<version>1.2</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
 			<version>2.0</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxb-provider</artifactId>
-			<version>3.5.1.Final</version>
-		</dependency>
-		<dependency>
+
+		<!--<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-client-20</artifactId>
 			<version>3.5.1.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-client</artifactId>
-			<version>3.5.1.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs-20</artifactId>
-			<version>3.5.1.Final</version>
-		</dependency>
+		</dependency> -->
+		<!-- https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-jaxrs -->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxrs</artifactId>
 			<version>3.5.1.Final</version>
+			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-multipart-provider</artifactId>
-			<version>3.5.1.Final</version>
-		</dependency>
+
 		<dependency>
 			<groupId>javax.faces</groupId>
 			<artifactId>javax.faces-api</artifactId>

@@ -15,22 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.controller;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.inject.Inject;
-
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.nfc.counter.IndustrieCounterController;
@@ -57,6 +41,21 @@ import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.Skill;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillCategory;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.ejb.LocalBean;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+import javax.inject.Inject;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Session Bean implementation class InitializationController. Singleton implementation and starts on Startup. this initializer bean is used
@@ -109,6 +108,7 @@ public class InitializationController {
 	// Deployment configuration keys
 	public static final String CREATE_DEFAULT_COMPANY = "CREATE_DEFAULT_COMPANY"; // Create a default company on deployment?
 	public static final String CREATE_DEFAULT_DEPARTMENT = "CREATE_DEFAULT_DEPARTMENT"; // Create a default department on deployment?
+	public static final String CREATE_DEFAULT_APIKEY = "CREATE_DEFAULT_APIKEY"; // Create a default REST-api key for admin for development
 	public static final String MAXIMUM_FILE_UPLOAD_SIZE = "MAXIMUM_FILE_UPLOAD_SIZE"; // Max.filesize for uploads in bytes
 	public static final String ENABLE_MQTT_SERVICE = "ENABLE_MQTT_SERVICE"; // enable IoT MQTT Resource scanning?
 	public static final String MQTT_HOST = "MQTT_HOST"; // Host of MQTT Broker service
@@ -153,6 +153,7 @@ public class InitializationController {
 		config.clear();
 		config.put(CREATE_DEFAULT_COMPANY, "true");
 		config.put(CREATE_DEFAULT_DEPARTMENT, "true");
+		config.put(CREATE_DEFAULT_APIKEY, "false");
 		config.put(MAXIMUM_FILE_UPLOAD_SIZE, "50000000");
 
 		config.put(ENABLE_MQTT_SERVICE, "false");
@@ -188,7 +189,7 @@ public class InitializationController {
 
 		try {
 			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(getClass().getResourceAsStream("/META-INF/resources/config.ini")));
+					new InputStreamReader(getClass().getResourceAsStream("/META-INF/resources/config.properties")));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				if (!line.isEmpty() && !line.startsWith("#")) {
@@ -198,7 +199,7 @@ public class InitializationController {
 			}
 			reader.close();
 		} catch (Exception ex) {
-			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Could not load configuration. Using default values...");
+			Logger.getLogger(this.getClass().getName()).log(Level.WARNING, "Could not load configuration. Using default values...",ex);
 		}
 
 		// Add all standard objects which can be protected by PermissionRecord entries.
@@ -301,11 +302,12 @@ public class InitializationController {
 			admin.setEmail("nobody@localhost");
 			admin.setPassword("admin");
 			admin.setOccupation("Systemadministrator");
+			if (Boolean.parseBoolean(config.get(CREATE_DEFAULT_APIKEY))) {
+				admin.setApiKey("ABCDEFG");
+				Logger.getLogger(this.getClass().getName()).log(Level.INFO,"--- ATTENTION: DEFAULT API-KEY HJAS BEEN CREATED: ABCDEFG. DON'T USE THIS INSTALLATION IN PRODUCTION---");
+			}
 
 			User adminUser = userRoleController.createUser(admin, null, roles, AuthorizationController.getSystemUser());
-
-			// TODO: Remove admin API-Key!
-			adminUser.setApiKey("ABCDEFG");
 
 		} else {
 			Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Deploymeent OK.");

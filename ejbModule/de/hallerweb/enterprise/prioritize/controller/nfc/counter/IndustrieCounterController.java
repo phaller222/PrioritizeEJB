@@ -131,6 +131,18 @@ public class IndustrieCounterController implements Serializable {
 		return getIndustrieCounter(uuid);
 	}
 
+	// TODO: Perform the reset to the original initialValue of the counter,
+	//not just to 0!
+	public IndustrieCounter resetCounter(IndustrieCounter counter) {
+		String uuid = counter.getCounter().getUuid();
+		NFCUnit managedUnit = nfcUnitController.findNFCUnitByUUID(uuid);
+		long newValue = 0;
+		managedUnit.setPayload(String.valueOf(newValue));
+		nfcUnitController.updateNFCUnit(uuid, managedUnit, null);
+		return getIndustrieCounter(uuid);
+	}
+
+
 	public IndustrieCounter getIndustrieCounter(String uuid) {
 		Query q = em.createNamedQuery("findAllIndustrieCounters");
 		try {

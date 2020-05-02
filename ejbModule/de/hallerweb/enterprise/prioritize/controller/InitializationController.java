@@ -277,6 +277,7 @@ public class InitializationController {
 			PermissionRecord adminSkillCategories = new PermissionRecord(true, true, true, true, SkillCategory.class.getCanonicalName());
 
 			PermissionRecord adminTimeTracker = new PermissionRecord(true, true, true, true, TimeTracker.class.getCanonicalName());
+			PermissionRecord adminCounter = new PermissionRecord(true, true, true, true, IndustrieCounter.class.getCanonicalName());
 
 			records.add(adminCompanies);
 			records.add(adminDepartments);
@@ -291,6 +292,7 @@ public class InitializationController {
 			records.add(adminSkillCategories);
 			records.add(adminSkills);
 			records.add(adminTimeTracker);
+			records.add(adminCounter);
 
 			Role r = userRoleController.createRole(LITERAL_ADMIN, "admin Role", records, AuthorizationController.getSystemUser());
 			Set<Role> roles = new HashSet<>();

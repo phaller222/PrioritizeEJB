@@ -74,9 +74,6 @@ public class DepartmentService {
 	 *     HTTP/1.1 200 OK
 	 *
 	 * @apiError NotAuthorized APIKey incorrect.
-	 *
-	 * @param id - The id of the {@link Department}.
-	 * @return {@link Department} - JSON Representation of the department.
 	 */
 	@GET
 	@Path("{id}")

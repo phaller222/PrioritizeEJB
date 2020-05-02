@@ -90,10 +90,6 @@ public class DocumentService {
 	 *     HTTP/1.1 200 OK
 	 *
 	 * @apiError NotAuthorized  APIKey incorrect.
-	 *
-	 * @param departmentToken - The department token.
-	 * @param group - The document group to look for dcuments.
-	 * @return JSON object with documents in that department.
 	 */
 	@GET
 	@Path("list/{departmentToken}/{group}")
@@ -135,10 +131,6 @@ public class DocumentService {
 	 *     HTTP/1.1 200 OK
 	 *
 	 * @apiError NotAuthorized  APIKey incorrect.
-	 *
-	 * @param departmentToken - The department token.
-	 * @param  {@link DocumentGroup} - The document group to look for douments.
-	 * @return JSON object with documents in that department.
 	 */
 	@GET
 	@Path("list/{departmentToken}/groups")
@@ -171,12 +163,7 @@ public class DocumentService {
 	 * @apiSuccess {DocumentInfo} documents JSON DocumentInfo-Objects with information about found documents.
 	 * @apiSuccessExample Success-Response:
 	 *     HTTP/1.1 200 OK
-	 *
 	 * @apiError NotAuthorized  APIKey incorrect.
-	 *
-	 * @param departmentToken - The department token.
-	 * @param documentGroup name - The name of the document group
-	 * @return JSON object with documents in that department.
 	 */
 	@GET
 	@Path("search/{departmentToken}/{documentGroup}")
@@ -220,18 +207,21 @@ public class DocumentService {
 	 *     HTTP/1.1 200 OK
 	 *
 	 * @apiError NotAuthorized  APIKey incorrect.
-	 * @param id - The id of the {@link Document}.
-	 * @return {@link Document} - JSON Representation of the Document.
 	 */
 	@GET
 	@Path("id/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public DocumentInfo getDocumentById(@PathParam(value = "id") String id, @QueryParam(value = "apiKey") String apiKey) {
+	public Response getDocumentById(@PathParam(value = "id") String id, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
+		DocumentInfo docInfo;
 		if (user != null) {
-			DocumentInfo docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
+			try {
+				docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
+			} catch (Exception ex) {
+				return createNegativeResponse("Document not found!");
+			}
 			if (authController.canRead(docInfo, user)) {
-				return docInfo;
+				return Response.ok(docInfo, MediaType.APPLICATION_JSON).build();
 			} else {
 				throw new NotAuthorizedException(Response.serverError());
 			}
@@ -252,15 +242,18 @@ public class DocumentService {
 	 *     HTTP/1.1 200 OK
 	 *
 	 * @apiError NotAuthorized  APIKey incorrect.
-	 * @param id - The id of the {@link Document}.
-	 * @return {@link Document} - JSON Representation of the Document.
 	 */
 	@GET
 	@Path("id/{id}/content")
 	public Response getDocumentContent(@PathParam(value = "id") String id, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
+		DocumentInfo docInfo = null;
 		if (user != null) {
-			DocumentInfo docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
+			try {
+				docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
+			} catch (Exception ex) {
+				return createNegativeResponse("Document not found!");
+			}
 			Document document = docInfo.getCurrentDocument();
 			if (authController.canRead(docInfo, user)) {
 				return Response.ok(document.getData(), document.getMimeType()).build();
@@ -287,7 +280,6 @@ public class DocumentService {
 	 *     HTTP/1.1 200 OK
 	 *
 	 * @apiError NotAuthorized  APIKey incorrect.
-	 * @param id - The id of the {@link Document}.
 	 */
 	@PUT
 	@Path("id/{id}/")

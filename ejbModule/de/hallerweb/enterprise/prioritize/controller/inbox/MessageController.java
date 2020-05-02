@@ -55,10 +55,10 @@ public class MessageController {
 	private static final String PARAMETER_USER_ID = "userId";
 	private static final String LITERAL_MESSAGE = "Message";
 
-	public Message createMessage(User from, User to, String subject, String message) {
+	public Message createMessage(User from, String to, String subject, String message) {
 		Message msg = new Message();
 		msg.setFrom(userRoleController.findUserById(from.getId(),from));
-		msg.setTo(userRoleController.findUserById(to.getId(),from));
+		msg.setTo(userRoleController.findUserByUsername(to,from));
 		msg.setSubject(subject);
 		msg.setContent(message);
 		msg.setMessageRead(false);

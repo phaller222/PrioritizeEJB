@@ -15,24 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ejb.EJB;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import de.hallerweb.enterprise.prioritize.controller.inbox.MessageController;
 import de.hallerweb.enterprise.prioritize.controller.security.RestAccessController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
@@ -40,15 +22,24 @@ import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController
 import de.hallerweb.enterprise.prioritize.model.inbox.Message;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
+import javax.ejb.EJB;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * 
+ *
  * <p>
  * Copyright: (c) 2015
  * </p>
  * <p>
  * Peter Haller
  * </p>
- * 
+ *
  * @author peter REST-Service to send and receive messages.
  */
 @RequestScoped
@@ -65,11 +56,43 @@ public class InboxService {
 	SessionController sessionController;
 
 	public static final String LITERAL_MESSAGE_WITH_ID = "Message with ID ";
-	
-	
+
+
 	/**
-	 * Returns all received messages for this user
-	 * @return JSON object with users in that department.
+	 * Returns all the messages received for the current user or the user specified.
+	 *
+	 * @api {get} /list/received getInboxMessages
+	 * @apiName getInboxMessages
+	 * @apiGroup /inbox
+	 * @apiDescription Returns all the messages received for the current user or the user specified by param from.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} from The user which inbox to read - if specified
+	 * @apiSuccess {List} messages of the user.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	*[
+		*{
+			*"id": 48,
+			*"dateReceived": 1588448673369,
+			*"dateRead": 1588448711115,
+			*"messageRead": true,
+			*"subject": "test11",
+			*"from": {
+				*"id": 44,
+				*"name": "admin",
+				*"username": "admin",
+				*"address": null
+			*},
+			*"to": {
+				*"id": 44,
+				*"name": "admin",
+				*"username": "admin",
+				*"address": null
+			*}
+		*}
+	 *]
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 */
 	@GET
 	@Path("list/received")
@@ -82,7 +105,7 @@ public class InboxService {
 				return messages;
 			} else {
 				List<Message> messagesReceivedFrom = new ArrayList<>();
-				User userReceivedFrom = userRoleController.getUserById(Integer.parseInt(fromUserId), user);
+				User userReceivedFrom = userRoleController.findUserByUsername(fromUserId, user);
 				for (Message msg : messages) {
 					if (msg.getFrom().getId() == userReceivedFrom.getId()) {
 						messagesReceivedFrom.add(msg);
@@ -97,28 +120,54 @@ public class InboxService {
 	}
 
 	/**
-	 * Returns all sent messages for this user
-	 * 
-	 * @return JSON object with users in that department.
+	 * Returns all the messages sent by the current user or the user specified.
+	 *
+	 * @api {get} /list/sent getSentMessages
+	 * @apiName getSentMessages
+	 * @apiGroup /inbox
+	 * @apiDescription Returns all the messages sent by the current user or the user specified by param from.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} from The user which outbox to read - if specified
+	 * @apiSuccess {List} messages sent by the user.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *[
+	 	*{
+	 		*"id": 48,
+	 		*"dateReceived": 1588448673369,
+	 		*"dateRead": 1588448711115,
+			 *"messageRead": true,
+			 *"subject": "test11",
+			 *"from": {
+				 *"id": 44,
+				 *"name": "admin",
+				 *"username": "admin",
+	 			*"address": null
+			 *},
+	 		*"to": {
+				 *"id": 44,
+				 *"name": "admin",
+				 *"username": "admin",
+				 *"address": null
+			 *}
+		 *}
+	 *]
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 */
 	@GET
 	@Path("list/sent")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Message> getSentMessages(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "to") String toUserId) {
+	public List<Message> getSentMessages(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String fromUserId) {
 		User user = accessController.checkApiKey(apiKey);
+		List<Message> messages = new ArrayList<>();
 		if (user != null) {
-			List<Message> messages = messagController.getSentMessages(user);
-			if (toUserId == null) {
-				return messages;
-			} else {
-				List<Message> messagesSentTo = new ArrayList<>();
-				User userSentTo = userRoleController.getUserById(Integer.parseInt(toUserId), user);
-				for (Message msg : messages) {
-					if (msg.getTo().getId() == userSentTo.getId()) {
-						messagesSentTo.add(msg);
-					}
-				}
-				return messagesSentTo;
+			if (fromUserId ==null) {
+				return messagController.getSentMessages(user);
+			}
+			else {
+				User userSentTo = userRoleController.findUserByUsername(fromUserId, user);
+				return messagController.getSentMessages(userSentTo);
 			}
 		} else {
 			throw new NotAuthorizedException(Response.serverError());
@@ -126,16 +175,27 @@ public class InboxService {
 	}
 
 	/**
-	 * Return the {@link Message} object with the given id.
+	 * Returns the message with the given id.
 	 *
-	 * @param id
-	 *            - The id of the {@link Message}.
-	 * @return {@link Message} - JSON Representation of the message.
+	 * @api {get} /id/{id} getMessageById
+	 * @apiName getMessageById
+	 * @apiGroup /inbox
+	 * @apiDescription Returns the message with the given id.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {int} id The id of the message content to read.
+	 * @apiSuccess {String} message content
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *  Test message OK.
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 *
+	 *
 	 */
 	@GET
 	@Path("id/{id}")
 	@Produces(MediaType.TEXT_HTML)
-	public String getMessageById(@PathParam(value = "id") String id, @QueryParam(value = "apiKey") String apiKey) {
+	public Response getMessageById(@PathParam(value = "id") String id, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			List<Message> messages = messagController.getReceivedMessages(user);
@@ -143,31 +203,54 @@ public class InboxService {
 				for (Message msg : messages) {
 					if (msg.getId() == Integer.parseInt(id)) {
 						messagController.setMessageRead(msg, true);
-						return msg.getContent();
+						return Response.status(200).entity(msg.getContent()).build();
 					}
 				}
-				throw new NotFoundException(createNegativeResponse("User has no message with the given id!"));
+				return Response.status(404).entity("{\"response\" : \"" + "\"User has no message with the given id!\"" + "\"}").build();
 
 			} else {
-				throw new NotFoundException(createNegativeResponse("User has no message with the given id!"));
+				return Response.status(404).entity("{\"response\" : \"" + "\"User has no message with the given id!\"" + "\"}").build();
 			}
 
 		} else {
-			throw new NotFoundException(createNegativeResponse("User not found or api key invalid!"));
+			return Response.status(404).entity("{\"response\" : \"" + "\"User not found or invalid api key!\"" + "\"}").build();
+
 		}
 
 	}
 
+
+	/**
+	 * Sends a new message to the inbox of a user.
+	 *
+	 * @api {post} /new newMessage
+	 * @apiName newMessage
+	 * @apiGroup /inbox
+	 * @apiDescription sends a new message to an inbox.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} username the recipiants username.
+	 * @apiParam {String} subject the subject of the message.
+	 * @apiParam {String} message the message to send.
+	 * @apiSuccess {String} success message.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *{
+	 * "response": "Message has succcessfully been sent to User admin."
+	 *}
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 *
+	 *
+	 */
 	@POST
 	@Path("new")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response newMessageByUsername(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "username") String username,
+	public Response newMessage(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "username") String username,
 			@QueryParam(value = "subject") String subject, @QueryParam(value = "message") String message) {
 		User from = accessController.checkApiKey(apiKey);
 		if (from != null) {
-			User to = userRoleController.findUserByUsername(username, from);
-			if (to != null) {
-				messagController.createMessage(from, to, subject, message);
+			if (username != null) {
+				messagController.createMessage(from, username, subject, message);
 				return createPositiveResponse("Message " + subject + "has succcessfully been sent to User " + username + ".");
 			} else {
 				return createNegativeResponse("User with username " + username + " not found!");
@@ -177,25 +260,25 @@ public class InboxService {
 		}
 	}
 
-	@POST
-	@Path("new")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response newMessageById(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "id") String id,
-			@QueryParam(value = "subject") String subject, @QueryParam(value = "message") String message) {
-		User from = accessController.checkApiKey(apiKey);
-		if (from != null) {
-			User to = userRoleController.findUserById(Integer.parseInt(id), from);
-			if (to != null) {
-				messagController.createMessage(from, to, subject, message);
-				return createPositiveResponse("Message " + subject + "has succcessfully been sent to User " + to.getUsername() + ".");
-			} else {
-				return createNegativeResponse("User with ID " + id + " not found!");
-			}
-		} else {
-			throw new NotAuthorizedException(Response.serverError());
-		}
-	}
 
+	/**
+	 * Deletes the message with the given id.
+	 *
+	 * @api {delete} /remove removeMessage
+	 * @apiName removeMessage
+	 * @apiGroup /inbox
+	 * @apiDescription deletes the message with the given id.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {Integer} id the id of the message to be deleted.
+	 * @apiSuccess {String} success message.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *{
+	 * "response": "Message has succcessfully been removed."
+	 *}
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 */
 	@DELETE
 	@Path("remove")
 	@Produces(MediaType.APPLICATION_JSON)

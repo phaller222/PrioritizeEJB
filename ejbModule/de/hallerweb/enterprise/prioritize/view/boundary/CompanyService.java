@@ -94,9 +94,6 @@ public class CompanyService {
 	 *  }
 	 *
 	 * @apiError NotAuthorized APIKey incorrect.
-	 *
-	 * @param id - The id of the {@link Company}.
-	 * @return {@link Company} - JSON Representation of the company.
 	 */
 	@GET
 	@Path("{id}")
@@ -137,8 +134,6 @@ public class CompanyService {
 	 *
 	 * @apiError NotAuthorized  APIKey incorrect.
 	 *
-	 *
-	 * @return JSON object with departments in that company.
 	 */
 	@GET
 	@Path("search/departments")

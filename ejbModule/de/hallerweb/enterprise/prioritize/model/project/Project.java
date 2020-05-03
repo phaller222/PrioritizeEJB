@@ -40,7 +40,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 
 @Entity
 @NamedQueries({ @NamedQuery(name = "findProjectById", query = "select p FROM Project p WHERE p.id = :projectId"),
-		@NamedQuery(name = "findProjectsByManagerRole", query = "select p FROM Project p WHERE p.manager.id = :roleId"),
+		@NamedQuery(name = "findProjectsByManager", query = "select p FROM Project p WHERE p.manager = :managerId"),
 		@NamedQuery(name = "findProjectsByMember", query = "select p FROM Project p WHERE :user MEMBER OF p.users ORDER BY p.name") })
 public class Project {
 
@@ -66,7 +66,7 @@ public class Project {
 	@ManyToMany
 	List<Resource> resources;							// Resources assigned to this project
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.EAGER)
 	List<User> users;									// Users assigned to this project
 
 	@JsonIgnore

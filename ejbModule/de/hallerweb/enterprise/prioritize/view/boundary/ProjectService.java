@@ -75,21 +75,103 @@ public class ProjectService {
 	AuthorizationController authController;
 
 	/**
-	 * Returns all projects
-	 * 
-	 * @return JSON object with all projects.
+	 * Returns all projects the current user is project lead
+	 *
+	 * @api {get} /projects getProjects
+	 * @apiName getProjects
+	 * @apiGroup /projects
+	 * @apiDescription Returns all projects the current user is project lead
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiSuccess {String} JSON Array projects found
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *[
+	 *{
+	 *"id": 51,
+	 *"manager": {
+	 *"id": 45,
+	 *"name": "admin",
+	 *"username": "admin",
+	 *"address": null
+	 *},
+	 *"name": "aaa",
+	 *"description": "aaa",
+	 *"beginDate": 1588525293108,
+	 *"dueDate": 1590357600000,
+	 *"maxManDays": 0,
+	 *"priority": 0,
+	 *"users": [
+	 *	{
+	 *"id": 45,
+	 *"name": "admin",
+	 *"username": "admin",
+	 *"address": null
+	 *	}
+	 *],
+	 *"progress": {
+	 *"id": 57,
+	 *"targetGoals": [
+	 *	{
+	 *"id": 55,
+	 *"task": {
+	 *"id": 49,
+	 *"priority": 1,
+	 *"name": "aaa",
+	 *"description": "aaa",
+	 *"taskStatus": "CREATED",
+	 *"assignee": null,
+	 *"timeSpent": []
+	 *},
+	 *"projectGoal": {
+	 *"id": 52,
+	 *"name": "aaa",
+	 *"description": "aaa",
+	 *"category": null,
+	 *"properties": [
+	*{
+	 *"id": 53,
+	*"name": "Task completeness)",
+	 *"description": "Indicates the percentage value of completeness of a task.",
+	 *"min": 0.0,
+	 *"max": 100.0,
+	 *"tempValue": 0.0
+	 *	}
+	 *	]
+	 *},
+	 *"propertyRecord": {
+	 *"id": 56,
+	 *"property": {
+	 *"id": 53,
+	 *"name": "Task completeness)",
+	 *"description": "Indicates the percentage value of completeness of a task.",
+	 *"min": 0.0,
+	 *"max": 100.0,
+	 *"tempValue": 0.0
+	 *},
+	 *"value": 0.0,
+	 *"documentInfo": null,
+	 *"documentPropertyRecord": false,
+	 *"numericPropertyRecord": true
+	 *},
+	 *"percentage": 0
+	 *}
+	 *],
+	 *"progress": 0
+	 *	}
+	 *}
+	*]
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 *
+	 *
 	 */
 	@GET
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Project> getProjects(@QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
-		List<Project> projects = new ArrayList<>();
 		if (user != null) {
-			Set<Role> roles = user.getRoles();
-			for (Role r : roles) {
-				projects.addAll(projectController.findProjectsByManagerRole(r.getId()));
-			}
+			List<Project> projects = new ArrayList<>(projectController.findProjectsByManager(user.getId()));
 			return projects;
 		} else {
 			throw new NotAuthorizedException(Response.serverError());
@@ -97,9 +179,28 @@ public class ProjectService {
 	}
 
 	/**
-	 * Returns all tasks of a project
-	 * 
-	 * @return JSON object with all tasks of a projects.
+	 * Returns all tasks of the given project
+	 *
+	 * @api {get} /{projectId}/tasks getProjectTasks
+	 * @apiName getProjectTasks
+	 * @apiGroup /projects
+	 * @apiDescription Returns all tasks for the project with the given id
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} projectId ID of the project to retrieve the tasks from.
+	 * @apiSuccess {String} JSON Array projects found
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *[
+	 *{
+	 *"id": 49,
+	 *"priority": 1,
+	 *"name": "aaa",
+	 *"description": "aaa",
+	 *"taskStatus": "CREATED",
+	 *"assignee": null,
+	 *"timeSpent": []
+	 *}
+	 *]
 	 */
 	@GET
 	@Path("/{projectId}/tasks")
@@ -108,7 +209,12 @@ public class ProjectService {
 
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
-			Project project = projectController.findProjectById(Integer.valueOf(projectId));
+			Project project;
+			try {
+				project = projectController.findProjectById(Integer.parseInt(projectId));
+			} catch (Exception ex) {
+				return new ArrayList<>();
+			}
 			Blackboard bb = project.getBlackboard();
 			List<Task> tasks = blackboardController.getBlackboardTasks(bb);
 			if (tasks != null && !tasks.isEmpty()) {
@@ -120,11 +226,31 @@ public class ProjectService {
 			throw new NotAuthorizedException(Response.serverError());
 		}
 	}
-
 	/**
-	 * Edit a task
-	 * 
-	 * @return JSON object with edited task.
+	 * Assignes a task, sets it's status and percentage complete
+	 *
+	 * @api {post} /tasks/{taskId}/edit assignTask
+	 * @apiName assignTask
+	 * @apiGroup /projects
+	 * @apiDescription Assignes a task, sets it's status and percentage complete
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} status The state of the task (ASSIGNED / CREATED / FINISHED...)
+	 * @apiParam {Integer} assignee The id of the user the task should be assigned to.
+	 * @apiParam {Integer} percentage The percentage complete value for the task.
+	 * @apiSuccess {String} JSON Array with the task
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *[
+	 *{
+	 *"id": 49,
+	 *"priority": 1,
+	 *"name": "aaa",
+	 *"description": "aaa",
+	 *"taskStatus": "CREATED",
+	 *"assignee": null,
+	 *"timeSpent": []
+	 *}
+	 *]
 	 */
 	@POST
 	@Path("/tasks/{taskId}/edit")
@@ -148,11 +274,11 @@ public class ProjectService {
 
 	private Task editTask(Task task, String assigneeId, String percentage, String status, User sessionUser) {
 		if (assigneeId != null) {
-			User assignee = userRoleController.findUserById(Integer.valueOf(assigneeId), sessionUser);
+			User assignee = userRoleController.findUserById(Integer.parseInt(assigneeId), sessionUser);
 			Task managedTask = taskController.findTaskById(task.getId());
 			taskController.setTaskAssignee(managedTask, assignee);
 			if (percentage != null) {
-				taskController.setTaskProgress(task, assignee, Integer.valueOf(percentage));
+				taskController.setTaskProgress(task, assignee, Integer.parseInt(percentage));
 			}
 		} else {
 			setTaskStatus(task, status);

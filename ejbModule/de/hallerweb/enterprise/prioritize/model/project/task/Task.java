@@ -53,11 +53,6 @@ public class Task extends PObject implements Comparable {
 	private String name;
 	private String description;
 	private TaskStatus taskStatus;
-	@OneToOne(fetch = FetchType.EAGER)
-	private Task parent;
-
-	@OneToMany(fetch = FetchType.LAZY)
-	private List<Task> subTasks;
 
 	@JsonIgnore
 	@OneToMany
@@ -78,14 +73,14 @@ public class Task extends PObject implements Comparable {
 	@OneToOne
 	ProjectGoalRecord projectGoalRecord;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	List<TimeSpan> timeSpent;
+	@OneToMany(fetch = FetchType.EAGER)
+	Set<TimeSpan> timeSpent;
 
-	public List<TimeSpan> getTimeSpent() {
+	public Set<TimeSpan> getTimeSpent() {
 		return timeSpent;
 	}
 
-	public void setTimeSpent(List<TimeSpan> timeSpent) {
+	public void setTimeSpent(Set<TimeSpan> timeSpent) {
 		this.timeSpent = timeSpent;
 	}
 
@@ -163,26 +158,6 @@ public class Task extends PObject implements Comparable {
 
 	public void setAssignee(PActor assignee) {
 		this.assignee = assignee;
-	}
-
-	public void setParent(Task parent) {
-		this.parent = parent;
-	}
-
-	public void setSubTasks(List<Task> subTasks) {
-		this.subTasks = subTasks;
-	}
-
-	public Task getParent() {
-		return parent;
-	}
-
-	public List<Task> getSubTasks() {
-		return subTasks;
-	}
-
-	public boolean isSubTask() {
-		return parent != null;
 	}
 
 	public void removeAssignee() {

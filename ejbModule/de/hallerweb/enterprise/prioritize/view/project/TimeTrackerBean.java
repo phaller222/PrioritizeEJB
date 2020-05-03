@@ -17,6 +17,7 @@ package de.hallerweb.enterprise.prioritize.view.project;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
@@ -60,7 +61,7 @@ public class TimeTrackerBean implements Serializable {
 		return timeTrackerController.getAllTimeTrackers(sessionController.getUser());
 	}
 
-	public List<TimeSpan> getTimeSpentForTask(Task task) {
+	public Set<TimeSpan> getTimeSpentForTask(Task task) {
 		Task managedTask = taskController.findTaskById(task.getId());
 		return managedTask.getTimeSpent();
 	}

@@ -3,13 +3,13 @@ define({
   "version": "1.0.0",
   "description": "Prioritize REST-API documentation including the basic accessible prioritize object types.",
   "title": "Prioritize REST API",
-  "url": "https://localhost:9443/api/v1",
+  "url": "https://localhost:8080/api/v1",
   "sampleUrl": false,
   "defaultVersion": "0.0.0",
   "apidoc": "0.3.0",
   "generator": {
     "name": "apidoc",
-    "time": "2020-05-02T21:48:16.511Z",
+    "time": "2020-05-03T21:12:12.391Z",
     "url": "http://apidocjs.com",
     "version": "0.17.5"
   }

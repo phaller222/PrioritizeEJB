@@ -16,7 +16,9 @@
 package de.hallerweb.enterprise.prioritize.model.project;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -43,23 +45,23 @@ public class ProjectProgress {
 	@GeneratedValue
 	int id;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	List<ProjectGoalRecord> targetGoals;		// Goals for this project. If concrete tasks are build for this goal,
+	@OneToMany(fetch = FetchType.EAGER)
+	Set<ProjectGoalRecord> targetGoals;		// Goals for this project. If concrete tasks are build for this goal,
 												// a copy of this goal is created and assigned to a task.
 
 	int progress;											// Project progress in percent (0-100)
 
-	public List<ProjectGoalRecord> getTargetGoals() {
+	public Set<ProjectGoalRecord> getTargetGoals() {
 		return targetGoals;
 	}
 
-	public void setTargetGoals(List<ProjectGoalRecord> targetGoals) {
+	public void setTargetGoals(Set<ProjectGoalRecord> targetGoals) {
 		this.targetGoals = targetGoals;
 	}
 
 	public void addTargetGoal(ProjectGoalRecord targetGoal) {
 		if (this.targetGoals == null) {
-			this.targetGoals = new ArrayList<>();
+			this.targetGoals = new HashSet<>();
 		}
 		this.targetGoals.add(targetGoal);
 	}

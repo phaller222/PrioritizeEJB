@@ -44,7 +44,7 @@ public class ActionBoard extends PObject {
 	@OneToOne
 	private PObject owner;
 
-	@OneToMany(fetch = FetchType.EAGER)
+	@OneToMany(fetch = FetchType.LAZY)
 	private List<ActionBoardEntry> entries;
 
 	public String getDescription() {

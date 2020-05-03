@@ -16,7 +16,9 @@
 package de.hallerweb.enterprise.prioritize.controller.project.task;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -110,29 +112,7 @@ public class TaskController extends PEventConsumerProducer {
 
 	public void removeTask(int taskId) {
 		Task task = findTaskById(taskId);
-		for (Task t : task.getSubTasks()) {
-			removeTask(t.getId());
-		}
 		em.remove(task);
-	}
-
-	public List<Task> getSubTasks(Task task) {
-		if (!task.getSubTasks().isEmpty()) {
-			return task.getSubTasks();
-		} else {
-			return new ArrayList<>();
-		}
-	}
-
-	public void addSubTask(Task parent, Task child) {
-		Task managedParent = findTaskById(parent.getId());
-		Task managedChild = findTaskById(child.getId());
-		List<Task> children = managedParent.getSubTasks();
-		if (children == null) {
-			children = new ArrayList<>();
-		}
-		children.add(managedChild);
-		managedParent.setSubTasks(children);
 	}
 
 	public void editTask(int taskId, Task detachedTask) {

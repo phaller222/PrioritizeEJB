@@ -107,7 +107,7 @@ public class IndustrieCounterService {
 	 * @apiParam {String} name  the name of the counter to be created.
 	 * @apiParam {String} description the description of the counter to be created.
 	 * @apiParam {String} initialValue  the initial value (long) of the counter to be created.
-	 * @apiSuccess {{@link IndustrieCounter} JSON representation of the counter just created.
+	 * @apiSuccess IndustrieCounter JSON representation of the counter just created.
 	 * @apiSuccessExample Success-Response:
 	 *     HTTP/1.1 200 OK
 	 *{
@@ -144,11 +144,6 @@ public class IndustrieCounterService {
 	@POST
 	@Path("/create")
 	@Produces(MediaType.APPLICATION_JSON)
-	/**
-	 * 
-	 * @param apiKey - API-Key
-	 * @return IndustrieCounter
-	 */
 	public IndustrieCounter createCounter(@QueryParam(value = "apiKey") String apiKey, @FormParam(value = "uuid") String uuid,
 			@FormParam(value = "name") String name, @FormParam(value = "description") String desc,
 			@FormParam(value = "initialValue") long initialValue) {
@@ -173,7 +168,7 @@ public class IndustrieCounterService {
 	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
 	 * @apiParam {String} action  - on of increase, decrease or reset.
 	 * @apiParam {String} uuid  the uuid of the counter to be retrieved.
-	 * @apiSuccess {{@link IndustrieCounter} JSON representation of the counter just edited.
+	 * @apiSuccess IndustrieCounter JSON representation of the counter just edited.
 	 * @apiSuccessExample Success-Response:
 	 *     HTTP/1.1 200 OK
 	 *{

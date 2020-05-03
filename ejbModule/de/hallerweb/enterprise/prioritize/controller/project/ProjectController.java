@@ -17,6 +17,7 @@ package de.hallerweb.enterprise.prioritize.controller.project;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -64,14 +65,14 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 public class ProjectController extends PEventConsumerProducer {
 
 	private static final String QUERY_FIND_PROJECT_BY_ID = "findProjectById";
-	private static final String QUERY_FIND_PROJECTS_BY_MANAGER_ROLE = "findProjectsByManagerRole";
+	private static final String QUERY_FIND_PROJECTS_BY_MANAGER = "findProjectsByManager";
 	private static final String QUERY_FIND_PROJECTS_BY_MEMBER = "findProjectsByMember";
 	private static final String QUERY_FIND_PROJECTGOAL_RECORD_BY_ID = "findProjectGoalRecordById";
 	private static final String QUERY_FIND_PROJECTGOAL_RECORDS_BY_PROJECT = "findProjectGoalRecordByProject";
 	private static final String QUERY_FIND_ACTIVE_PROJECTGOAL_RECORDS_BY_PROJECT = "findActiveProjectGoalRecordsByProject";
 
 	private static final String PARAM_PROJECT_ID = "projectId";
-	private static final String PARAM_ROLE_ID = "roleId";
+	private static final String PARAM_MANAGER_ID = "managerId";
 	private static final String PARAM_USER = "user";
 	private static final String PARAM_PROJECTGOAL_RECORD_ID = "projectGoalRecordId";
 
@@ -105,9 +106,10 @@ public class ProjectController extends PEventConsumerProducer {
 		return (Project) q.getSingleResult();
 	}
 
-	public List<Project> findProjectsByManagerRole(int managerRoleId) {
-		Query q = em.createNamedQuery(QUERY_FIND_PROJECTS_BY_MANAGER_ROLE);
-		q.setParameter(PARAM_ROLE_ID, managerRoleId);
+	public List<Project> findProjectsByManager(int managerId) {
+		User user = em.find(User.class,managerId);
+		Query q = em.createNamedQuery(QUERY_FIND_PROJECTS_BY_MANAGER);
+		q.setParameter(PARAM_MANAGER_ID, user);
 		List<Project> projects = (List<Project>) q.getResultList();
 		if (projects.isEmpty()) {
 			return new ArrayList<>();
@@ -280,6 +282,7 @@ public class ProjectController extends PEventConsumerProducer {
 				if (category.getName().equals(name)) {
 					// TODO: Allow same project goal categories in different categories!
 					alreadyExists = true;
+					break;
 				}
 			}
 		}
@@ -526,7 +529,6 @@ public class ProjectController extends PEventConsumerProducer {
 				if (targetTag.equals(docInfo.getCurrentDocument().getTag())) {
 					currentProjectGoalRecord.setPercentage(100);
 					sum += 100;
-					continue;
 				} else {
 					if (docInfo.getRecentDocuments() != null) {
 						sum = calcRecentDocumentsProgress(sum, currentProjectGoalRecord, docInfo, targetTag);
@@ -597,7 +599,7 @@ public class ProjectController extends PEventConsumerProducer {
 	public void removeProjectProgress(int projectId) {
 		Project managedProject = findProjectById(projectId);
 		ProjectProgress progress = managedProject.getProgress();
-		List<ProjectGoalRecord> targetGoals = progress.getTargetGoals();
+		Set<ProjectGoalRecord> targetGoals = progress.getTargetGoals();
 		for (ProjectGoalRecord rec : targetGoals) {
 			em.remove(rec);
 		}

@@ -46,9 +46,16 @@ public abstract class SkillProperty implements SkillType {
 	@GeneratedValue
 	int id;
 
+	@Version
+	private int entityVersion; // For optimistic locks
+
 	String name;
 	String description;
 	boolean numericProperty; // Is the property numeric? If set to false then it is a String property.
+
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JsonBackReference
+	Skill skill;
 
 	public boolean getNumericProperty() {
 		return numericProperty;
@@ -57,10 +64,6 @@ public abstract class SkillProperty implements SkillType {
 	public void setNumericProperty(boolean numeric) {
 		this.numericProperty = numeric;
 	}
-
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JsonBackReference
-	Skill skill;
 
 	public Skill getSkill() {
 		return skill;
@@ -77,9 +80,6 @@ public abstract class SkillProperty implements SkillType {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
-	@Version
-	private int entityVersion; // For optimistic locks
 
 	public int getId() {
 		return id;

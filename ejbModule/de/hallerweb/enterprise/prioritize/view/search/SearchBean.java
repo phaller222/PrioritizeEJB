@@ -79,6 +79,10 @@ public class SearchBean implements Serializable {
 	@EJB
 	CompanyController companyController;
 
+	private String searchPhrase;
+
+	transient List<SearchResult> searchResults; // Stores the SearchResult
+
 	public List<SearchResult> getSearchResults() {
 		return searchResults;
 	}
@@ -86,8 +90,6 @@ public class SearchBean implements Serializable {
 	public void setSearchResults(List<SearchResult> searchResults) {
 		this.searchResults = searchResults;
 	}
-
-	private String searchPhrase;
 
 	public String getSearchPhrase() {
 		return searchPhrase;
@@ -104,8 +106,6 @@ public class SearchBean implements Serializable {
 	public void setSearchResult(List<SearchResult> searchResult) {
 		this.searchResults = searchResult;
 	}
-
-	transient List<SearchResult> searchResults; // Stores the SearchResult
 
 	@Named
 	public List<SearchResult> search() {

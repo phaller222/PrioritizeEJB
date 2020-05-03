@@ -48,10 +48,6 @@ public class Project {
 	@Id
 	int id;
 
-	public void setId(int id) {
-		this.id = id;
-	}
-
 	@OneToOne
 	PActor manager;
 
@@ -91,6 +87,11 @@ public class Project {
 
 	@OneToOne
 	ProjectProgress progress;							// Observe project goals and progress.
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 
 	public PActor getManager() {
 		return manager;

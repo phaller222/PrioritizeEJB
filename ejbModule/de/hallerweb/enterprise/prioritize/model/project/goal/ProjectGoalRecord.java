@@ -41,6 +41,26 @@ import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 		@NamedQuery(name = "findActiveProjectGoalRecordsByProject", query = "select pgr FROM ProjectGoalRecord pgr WHERE pgr.project.id = :projectId AND pgr.task IS NOT NULL") })
 public class ProjectGoalRecord {
 
+	@Id
+	@GeneratedValue
+	int id;
+
+	@OneToOne
+	Task task;	// null if describing target goal, Link to task if concrete progress.
+
+	@JsonBackReference
+	@OneToOne
+	Project project; // Project this ProjectGoalRecord belongs to.
+
+	@OneToOne
+	ProjectGoal projectGoal; // The base ProjectGoal
+
+	@OneToOne
+	ProjectGoalPropertyRecord propertyRecord; // Property record if NumericProperty is used.
+
+	int percentage; // percentage of completion of this ProjectGoalRecord
+
+
 	public ProjectGoalRecord(ProjectGoalRecord origin, ProjectGoalPropertyRecord rec, Task task) {
 		this.project = origin.getProject();
 		this.task = task;
@@ -51,25 +71,6 @@ public class ProjectGoalRecord {
 	public ProjectGoalRecord() {
 		super();
 	}
-
-	@Id
-	@GeneratedValue
-	int id;
-
-	@OneToOne
-	Task task;											// null if describing target goal, Link to task if concrete progress.
-
-	@JsonBackReference
-	@OneToOne
-	Project project;									// Project this ProjectGoalRecord belongs to.
-
-	@OneToOne
-	ProjectGoal projectGoal;							// The base ProjectGoal
-
-	@OneToOne
-	ProjectGoalPropertyRecord propertyRecord;		// Property record if NumericProperty is used.
-
-	int percentage;										// percentage of completion of this ProjectGoalRecord
 
 	public int getPercentage() {
 		return percentage;

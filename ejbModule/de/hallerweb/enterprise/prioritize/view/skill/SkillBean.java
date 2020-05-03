@@ -90,6 +90,8 @@ public class SkillBean implements Serializable {
 
 	private static final String NAVIGATION_SKILLS = "skills";
 
+	int selectedEnthusiasmLevel;
+
 	public Skill getSelectedSkill() {
 		return selectedSkill;
 	}
@@ -101,8 +103,6 @@ public class SkillBean implements Serializable {
 		}
 
 	}
-
-	int selectedEnthusiasmLevel;
 
 	public int getSelectedEnthusiasmLevel() {
 		return selectedEnthusiasmLevel;
@@ -401,5 +401,4 @@ public class SkillBean implements Serializable {
 	public void nodeCollapse(NodeCollapseEvent event) {
 		event.getTreeNode().setExpanded(false);
 	}
-
 }

@@ -34,6 +34,13 @@ import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 
 public class SearchResult implements Comparable {
 
+	PAuthorizedObject result;
+	String resultType;
+	String excerpt;
+	boolean providesExcerpt;
+
+	Set<SearchResult> subresults;
+
 	public PAuthorizedObject getResult() {
 		return result;
 	}
@@ -74,12 +81,6 @@ public class SearchResult implements Comparable {
 		this.subresults = subresults;
 	}
 
-	PAuthorizedObject result;
-	String resultType;
-	String excerpt;
-	boolean providesExcerpt;
-
-	Set<SearchResult> subresults;
 
 	@Override
 	public int compareTo(Object obj) {

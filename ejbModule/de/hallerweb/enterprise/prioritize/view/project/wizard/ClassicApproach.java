@@ -73,6 +73,22 @@ public class ClassicApproach implements Serializable {
 	@Inject
 	ListProjectsBean listProjectsBean;
 
+	private transient Project project;					// Holds the current project instance to be created
+	private transient List<Task> tasks;					// Holds current Tasks to be created
+	private transient List<User> members;					// A list of all Members (Users) for the project to be created.
+	private transient List<DocumentInfo> documents;		// A list of all documents relevant to the project
+	private transient  List<Resource> resources;			// A list of all documents relevant to the project
+	private transient  String managerUserName;				// The name of the User which will act as project lead.
+
+	private String userToAdd;					// Current username to add to the project (selected by autocomplete)
+	private String documentToAdd;				// Current DocumentInfo-Object to add to the project.
+	private String resourceToAdd;				// Current Resource-Object to add to the project.
+	private String taskNameToAdd;				// Name of the task to add
+
+	private String projectName;					// Project Name
+	private String projectDescription;			// Project description
+	private Date projectDueDate;				// Project due date
+
 	public List<Resource> getResources() {
 		return resources;
 	}
@@ -106,21 +122,6 @@ public class ClassicApproach implements Serializable {
 		this.projectDescription = projectDescription;
 	}
 
-	private transient Project project;					// Holds the current project instance to be created
-	private transient List<Task> tasks;					// Holds current Tasks to be created
-	private transient List<User> members;					// A list of all Members (Users) for the project to be created.
-	private transient List<DocumentInfo> documents;		// A list of all documents relevant to the project
-	private transient  List<Resource> resources;			// A list of all documents relevant to the project
-	private transient  String managerUserName;				// The name of the User which will act as project lead.
-
-	private String userToAdd;					// Current username to add to the project (selected by autocomplete)
-	private String documentToAdd;				// Current DocumentInfo-Object to add to the project.
-	private String resourceToAdd;				// Current Resource-Object to add to the project.
-	private String taskNameToAdd;				// Name of the task to add
-
-	private String projectName;					// Project Name
-	private String projectDescription;			// Project description
-	private Date projectDueDate;				// Project due date
 
 	public Date getProjectDueDate() {
 		return projectDueDate;

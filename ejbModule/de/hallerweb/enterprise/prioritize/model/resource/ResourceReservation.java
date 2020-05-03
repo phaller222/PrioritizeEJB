@@ -66,14 +66,6 @@ public class ResourceReservation implements ITimeSpan {
 	@Version
 	private int entityVersion; // For optimistic locks
 
-	public int getSlotNumber() {
-		return slotNumber;
-	}
-
-	public void setSlotNumber(int slotNumber) {
-		this.slotNumber = slotNumber;
-	}
-
 	@OneToOne(cascade = CascadeType.ALL)
 	private TimeSpan timespan; // TimeSpan indication when the resource has been reserved (from/until).
 
@@ -82,6 +74,14 @@ public class ResourceReservation implements ITimeSpan {
 	 * one slot available. So in that case always slot nr. 1 is assigned.
 	 */
 	int slotNumber;
+
+	public int getSlotNumber() {
+		return slotNumber;
+	}
+
+	public void setSlotNumber(int slotNumber) {
+		this.slotNumber = slotNumber;
+	}
 
 	public int getId() {
 		return id;

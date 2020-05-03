@@ -99,10 +99,6 @@ public class InitializationController {
 
 	private static int defaultDepartmentId;
 
-	public static int getDefaultDepartmentId() {
-		return defaultDepartmentId;
-	}
-
 	public static final String LITERAL_ADMIN = "admin";
 
 	// Deployment configuration keys
@@ -140,6 +136,10 @@ public class InitializationController {
 	public static final String USE_KEYCLOAK_AUTH = "USE_KEYCLOAK_AUTH";
 	// Keycloak logout URL
 	public static final String KEYCLOAK_LOGOUT_URL = "KEYCLOAK_LOGOUT_URL";
+
+	public static int getDefaultDepartmentId() {
+		return defaultDepartmentId;
+	}
 
 	@PostConstruct
 	public void initialize() {
@@ -250,7 +250,7 @@ public class InitializationController {
 				Company c = companyController.createCompany("Default Company", adr, AuthorizationController.getSystemUser());
 				c.setMainAddress(adr);
 
-				if (Boolean.valueOf(config.get(CREATE_DEFAULT_DEPARTMENT))) {
+				if (Boolean.parseBoolean(config.get(CREATE_DEFAULT_DEPARTMENT))) {
 					Department d = companyController.createDepartment(c, "default", "Auto generated default department", adr,
 							AuthorizationController.getSystemUser());
 					defaultDepartmentId = d.getId();

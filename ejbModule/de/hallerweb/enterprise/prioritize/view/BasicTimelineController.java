@@ -60,17 +60,6 @@ public class BasicTimelineController implements Serializable {
 	private String eventStyle = "box";
 	private boolean axisOnTop;
 	private boolean showCurrentTime = true;
-	
-//	private Date currentStartDate;
-//	private Date currentEndDate;
-	
-	public Date getSelectedDate() {
-		return selectedDate;
-	}
-
-	public void setSelectedDate(Date selectedDate) {
-		this.selectedDate = selectedDate;
-	}
 
 	private boolean showNavigation = false;
 
@@ -90,7 +79,15 @@ public class BasicTimelineController implements Serializable {
 	String contextPath;
 
 	private Date selectedDate;
-	
+
+	public Date getSelectedDate() {
+		return selectedDate;
+	}
+
+	public void setSelectedDate(Date selectedDate) {
+		this.selectedDate = selectedDate;
+	}
+
 	@PostConstruct
 	protected void initialize() {
 		
@@ -108,29 +105,12 @@ public class BasicTimelineController implements Serializable {
 		this.selectedDate = calSelected.getTime();
 	}
 
-//	public Date getCurrentStartDate() {
-//		return currentStartDate;
-//	}
-//
-//	public void setCurrentStartDate(Date currentStartDate) {
-//		this.currentStartDate = currentStartDate;
-//	}
-//
-//	public Date getCurrentEndDate() {
-//		return currentEndDate;
-//	}
-//
-//	public void setCurrentEndDate(Date currentEndDate) {
-//		this.currentEndDate = currentEndDate;
-//	}
-
 	public void updateTimeline() {
 		
 		if (sessionController.getUser() != null) {
 			model = new TimelineModel();
 
 			Calendar cal = Calendar.getInstance();
-			Calendar cal2 = Calendar.getInstance();
 			// cal.set(2013, Calendar.MAY, 4, 0, 0, 0);
 			if (selectedDate == null) {
 				selectedDate = cal.getTime();

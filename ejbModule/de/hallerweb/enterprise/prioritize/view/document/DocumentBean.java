@@ -75,7 +75,6 @@ import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 public class DocumentBean implements Serializable {
 
 	private static final long serialVersionUID = -9021544577054017322L;
-
 	private static final String NAVIGATION_HISTORY = "history";
 	private static final String NAVIGATION_DOCUMENTS = "documents";
 
@@ -99,22 +98,6 @@ public class DocumentBean implements Serializable {
 
 	transient TreeNode documentTreeRoot;
 	transient TreeNode selectedNode;
-
-	public TreeNode getSelectedNode() {
-		return selectedNode;
-	}
-
-	public void setSelectedNode(TreeNode selectedNode) {
-		this.selectedNode = selectedNode;
-	}
-
-	public String getSelectedItemCollectionName() {
-		return selectedItemCollectionName;
-	}
-
-	public void setSelectedItemCollectionName(String selectedItemCollectionName) {
-		this.selectedItemCollectionName = selectedItemCollectionName;
-	}
 
 	transient List<DocumentInfo> documentInfos; // Current List with documentInfo objects
 	// in the view.
@@ -143,6 +126,23 @@ public class DocumentBean implements Serializable {
 		selectedDocumentGroup = "";
 		this.documentTreeRoot = createDocumentTree();
 	}
+
+	public TreeNode getSelectedNode() {
+		return selectedNode;
+	}
+
+	public void setSelectedNode(TreeNode selectedNode) {
+		this.selectedNode = selectedNode;
+	}
+
+	public String getSelectedItemCollectionName() {
+		return selectedItemCollectionName;
+	}
+
+	public void setSelectedItemCollectionName(String selectedItemCollectionName) {
+		this.selectedItemCollectionName = selectedItemCollectionName;
+	}
+
 
 	@Named
 	public void setDocumentInfo(DocumentInfo documentInfo) {
@@ -537,8 +537,7 @@ public class DocumentBean implements Serializable {
 					group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, false, null, null), department);
 				}
 				Set<DocumentInfo> documents = g.getDocuments();
-				List<DocumentInfo> docList = new ArrayList<>();
-				docList.addAll(documents);
+				List<DocumentInfo> docList = new ArrayList<>(documents);
 				sortDocumentList(docList);
 				for (DocumentInfo docInfo : docList) {
 					if (authController.canRead(docInfo, sessionController.getUser())) {
@@ -553,7 +552,7 @@ public class DocumentBean implements Serializable {
 	}
 
 	private void sortDocumentList(List<DocumentInfo> docList) {
-		Collections.sort(docList, new Comparator<DocumentInfo>() {
+		docList.sort(new Comparator<DocumentInfo>() {
 			@Override
 			public int compare(DocumentInfo o1, DocumentInfo o2) {
 				return o2.getCurrentDocument().getLastModified().compareTo(o1.getCurrentDocument().getLastModified());
@@ -562,10 +561,8 @@ public class DocumentBean implements Serializable {
 	}
 
 	public void updateDocumentTree() {
-		//if (isNewRequest()) {
 			this.documentTreeRoot = createDocumentTree();
 			documentTreeRoot.setExpanded(true);
-		//}
 	}
 
 	public void nodeExpand(NodeExpandEvent event) {

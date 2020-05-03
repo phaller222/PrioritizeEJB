@@ -22,6 +22,13 @@ import javax.persistence.Id;
 @Entity()
 public class Location {
 
+	@Id
+	@GeneratedValue
+	private int id;
+	String name;
+	double x;
+	double y;
+
 	public Location() {
 		super();
 	}
@@ -31,12 +38,6 @@ public class Location {
 		this.y = y;
 	}
 
-	@Id
-	@GeneratedValue
-	private int id;
-	String name;
-	double x;
-	double y;
 
 	public String getName() {
 		return name;

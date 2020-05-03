@@ -77,6 +77,8 @@ public class Skill implements PAuthorizedObject, PSearchable {
 	@Version
 	private int entityVersion; // For optimistic locks
 
+	transient List<SearchProperty> searchProperties;
+
 	public Skill() {
 		super();
 		this.skillProperties = new HashSet<>();
@@ -139,9 +141,6 @@ public class Skill implements PAuthorizedObject, PSearchable {
 		return this.getName();
 	}
 
-	transient List<SearchProperty> searchProperties;
-
-	
 
 	private SearchResult generateResult() {
 		SearchResult result = new SearchResult();
@@ -149,7 +148,7 @@ public class Skill implements PAuthorizedObject, PSearchable {
 		result.setResultType(SearchResultType.SKILL);
 		result.setExcerpt(name + " : " + this.getDescription());
 		result.setProvidesExcerpt(true);
-		result.setSubresults(new HashSet<SearchResult>());
+		result.setSubresults(new HashSet<>());
 		return result;
 	}
 
@@ -157,13 +156,13 @@ public class Skill implements PAuthorizedObject, PSearchable {
 	public List<SearchResult> find(String phrase) {
 		ArrayList<SearchResult> results = new ArrayList<>();
 		// Search skill name
-		if (name.toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
+		if (name.toLowerCase().contains(phrase.toLowerCase())) {
 			// Match found
 			SearchResult result = generateResult();
 			results.add(result);
 			return results;
 		}
-		if (this.description.toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
+		if (this.description.toLowerCase().contains(phrase.toLowerCase())) {
 			// Match found
 			SearchResult result = generateResult();
 			results.add(result);

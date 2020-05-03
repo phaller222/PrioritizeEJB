@@ -68,15 +68,7 @@ public class LoginBean implements Serializable {
 	private String password;
 	private boolean loggedIn;
 
-	public void setLoggedIn(boolean loggedIn) {
-		this.loggedIn = loggedIn;
-	}
-
 	private static final String NAVIGATION_LOGIN = "login";
-
-	public User getCurrentUser() {
-		return sessionController.getUser();
-	}
 
 	int dashboardTabsActiveIndex = 0;
 
@@ -86,6 +78,14 @@ public class LoginBean implements Serializable {
 
 	public void setDashboardTabsActiveIndex(int dashboardTabsActiveIndex) {
 		this.dashboardTabsActiveIndex = dashboardTabsActiveIndex;
+	}
+
+	public User getCurrentUser() {
+		return sessionController.getUser();
+	}
+
+	public void setLoggedIn(boolean loggedIn) {
+		this.loggedIn = loggedIn;
 	}
 
 	@Named
@@ -185,10 +185,11 @@ public class LoginBean implements Serializable {
 			User user = userRoleController.findUserByUsername(username, AuthorizationController.getSystemUser());
 			if (user == null) {
 				loggedIn = false;
+			} else {
+				user.setLastLogin(new Date());
+				sessionController.setUser(user);
+				loggedIn = true;
 			}
-			user.setLastLogin(new Date());
-			sessionController.setUser(user);
-			loggedIn = true;
 		}
 	}
 

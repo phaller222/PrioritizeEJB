@@ -70,24 +70,6 @@ import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
 @JsonIgnoreProperties(value = { "vacation", "searchProperties", })
 public class User extends PActor implements PAuthorizedObject, PSearchable {
 
-	public User(String username) {
-		this.username = username;
-		this.name = username;
-	}
-
-	public static User newInstane(User userToCopy) {
-		User clonedUser = new User();
-		clonedUser.setApiKey(userToCopy.apiKey);
-		clonedUser.setEmail(userToCopy.email);
-		clonedUser.setIllness(userToCopy.illness);
-		clonedUser.setLastLogin(userToCopy.lastLogin);
-		clonedUser.setName(userToCopy.name);
-		clonedUser.setOccupation(userToCopy.occupation);
-		clonedUser.setPassword(userToCopy.password);
-		clonedUser.setUsername(userToCopy.username);
-		return clonedUser;
-	}
-
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_EMAIL = "email";
 	public static final String PROPERTY_OCCUPATION = "occupation";
@@ -101,24 +83,6 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	@OneToMany(fetch = FetchType.LAZY)
 	List<Task> assignedTasks;
 
-	public List<Task> getAssignedTasks() {
-		return assignedTasks;
-	}
-
-	public void setAssignedTasks(List<Task> assignedTasks) {
-		this.assignedTasks = assignedTasks;
-	}
-
-	public void addAssignedTask(Task task) {
-		if (this.assignedTasks == null) {
-			this.assignedTasks = new ArrayList<>();
-		}
-		this.assignedTasks.add(task);
-	}
-
-	public void removeAssignedTask(Task task) {
-		this.assignedTasks.remove(task);
-	}
 
 	@JsonIgnore
 	String email;
@@ -159,7 +123,45 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	
 	@OneToOne
 	Address address;
-	
+
+	public User(String username) {
+		this.username = username;
+		this.name = username;
+	}
+
+	public List<Task> getAssignedTasks() {
+		return assignedTasks;
+	}
+
+	public void setAssignedTasks(List<Task> assignedTasks) {
+		this.assignedTasks = assignedTasks;
+	}
+
+	public void addAssignedTask(Task task) {
+		if (this.assignedTasks == null) {
+			this.assignedTasks = new ArrayList<>();
+		}
+		this.assignedTasks.add(task);
+	}
+
+	public void removeAssignedTask(Task task) {
+		this.assignedTasks.remove(task);
+	}
+
+
+
+	public static User newInstane(User userToCopy) {
+		User clonedUser = new User();
+		clonedUser.setApiKey(userToCopy.apiKey);
+		clonedUser.setEmail(userToCopy.email);
+		clonedUser.setIllness(userToCopy.illness);
+		clonedUser.setLastLogin(userToCopy.lastLogin);
+		clonedUser.setName(userToCopy.name);
+		clonedUser.setOccupation(userToCopy.occupation);
+		clonedUser.setPassword(userToCopy.password);
+		clonedUser.setUsername(userToCopy.username);
+		return clonedUser;
+	}
 
 	public Address getAddress() {
 		return address;
@@ -311,9 +313,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	}
 
 	public void addRole(Role role) {
-		if (!roles.contains(role)) {
-			roles.add(role);
-		}
+		roles.add(role);
 	}
 
 	public void removeRole(Role role) {
@@ -336,7 +336,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		result.setResultType(SearchResultType.USER);
 		result.setExcerpt(excerpt);
 		result.setProvidesExcerpt(true);
-		result.setSubresults(new HashSet<SearchResult>());
+		result.setSubresults(new HashSet<>());
 		return result;
 	}
 
@@ -345,27 +345,27 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		ArrayList<SearchResult> results = new ArrayList<>();
 		SearchResult result;
 		// Search username
-		if (this.username.toLowerCase().indexOf(phrase) != -1) {
+		if (this.username.toLowerCase().contains(phrase)) {
 			// Match found
 			result = generateResult(this.getUsername() + " - " + this.getOccupation() + " - " + this.getEmail());
 			results.add(result);
 			return results;
 		}
-		if (this.name.toLowerCase().indexOf(phrase) != -1) {
-			// Match found
-			result = generateResult(this.getUsername() + " - " + this.getOccupation() + " - " + this.getEmail());
-			results.add(result);
-			return results;
-		}
-
-		if (this.email.indexOf(phrase) != -1) {
+		if (this.name.toLowerCase().contains(phrase)) {
 			// Match found
 			result = generateResult(this.getUsername() + " - " + this.getOccupation() + " - " + this.getEmail());
 			results.add(result);
 			return results;
 		}
 
-		if (this.occupation.indexOf(phrase) != -1) {
+		if (this.email.contains(phrase)) {
+			// Match found
+			result = generateResult(this.getUsername() + " - " + this.getOccupation() + " - " + this.getEmail());
+			results.add(result);
+			return results;
+		}
+
+		if (this.occupation.contains(phrase)) {
 			// Match found
 			result = generateResult(this.getUsername() + " - " + this.getOccupation() + " - " + this.getEmail());
 			results.add(result);
@@ -390,14 +390,14 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		if (property.getType() == SearchPropertyType.SKILL) {
 			// TODO: find(...) von Sub-Objekten (hier:SkillRecord) aufrufen
 			for (SkillRecord skillRecord : this.getSkills()) {
-				if (skillRecord.getSkill().getName().toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
+				if (skillRecord.getSkill().getName().toLowerCase().contains(phrase.toLowerCase())) {
 					// Match found
 					SearchResult result = new SearchResult();
 					result.setResult(this);
 					result.setResultType(SearchResultType.USER);
 					result.setProvidesExcerpt(true);
 					result.setExcerpt(skillRecord.getUser().getName() + " Skill: " + skillRecord.getSkill().getDescription());
-					result.setSubresults(new HashSet<SearchResult>());
+					result.setSubresults(new HashSet<>());
 					results.add(result);
 				}
 			}

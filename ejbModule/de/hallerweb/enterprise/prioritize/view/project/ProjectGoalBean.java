@@ -72,6 +72,9 @@ public class ProjectGoalBean implements Serializable {
 	private static final String TYPE_CATEGORY = "category";
 	private static final String TYPE_GOAL = "goal";
 	private static final String TYPE_GOAL_PROPERTY = "goalproperty";
+	private transient Object selectedProjectGoalItem = null;
+	private transient ProjectGoalCategory newProjectGoalCategory = new ProjectGoalCategory();
+	private String currentTreeOrientation = "horizontal";
 
 	public Object getSelectedProjectGoal() {
 		return selectedGoal;
@@ -84,9 +87,6 @@ public class ProjectGoalBean implements Serializable {
 
 	}
 
-	private transient Object selectedProjectGoalItem = null;
-	private transient ProjectGoalCategory newProjectGoalCategory = new ProjectGoalCategory();
-	private String currentTreeOrientation = "horizontal";
 
 	public String getCurrentTreeOrientation() {
 		return currentTreeOrientation;

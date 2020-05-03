@@ -51,14 +51,6 @@ public class ActionBoardEntry {
 	@OneToOne
 	private ActionBoard actionBoard;
 
-	public ActionBoard getActionBoard() {
-		return actionBoard;
-	}
-
-	public void setActionBoard(ActionBoard actionBoard) {
-		this.actionBoard = actionBoard;
-	}
-
 	@OneToOne
 	private Event source;
 
@@ -67,6 +59,14 @@ public class ActionBoardEntry {
 
 	@OneToMany
 	private List<Resource> attachedResources;
+
+	public ActionBoard getActionBoard() {
+		return actionBoard;
+	}
+
+	public void setActionBoard(ActionBoard actionBoard) {
+		this.actionBoard = actionBoard;
+	}
 
 	public String getTitle() {
 		return title;

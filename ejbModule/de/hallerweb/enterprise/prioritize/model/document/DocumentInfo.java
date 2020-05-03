@@ -66,17 +66,34 @@ public class DocumentInfo extends PObject implements PAuthorizedObject, PSearcha
 
 	transient List<SearchProperty> searchProperties;
 
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+	private Document currentDocument;
+
+	@OneToOne
+	@JsonBackReference
+	private DocumentGroup documentGroup;
+
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OrderBy(value = "version")
+	private SortedSet<Document> recentDocuments;
+
+	private boolean locked;
+
+	@OneToOne
+	private User lockedBy;
+
+
 	@Override
 	public List<SearchResult> find(String phrase) {
 		ArrayList<SearchResult> results = new ArrayList<>();
 		// Search document name
-		if (this.currentDocument.getName().toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
+		if (this.currentDocument.getName().toLowerCase().contains(phrase.toLowerCase())) {
 			// Match found
 			SearchResult result = generateResult();
 			results.add(result);
 			return results;
 		}
-		if (this.getCurrentDocument().getChanges().toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
+		if (this.getCurrentDocument().getChanges().toLowerCase().contains(phrase.toLowerCase())) {
 			SearchResult result = generateResult();
 			results.add(result);
 		}
@@ -95,7 +112,7 @@ public class DocumentInfo extends PObject implements PAuthorizedObject, PSearcha
 		result.setExcerpt(this.currentDocument.getName() + " Version: " + this.getCurrentDocument().getVersion() + " "
 				+ this.getCurrentDocument().getChanges());
 		result.setProvidesExcerpt(true);
-		result.setSubresults(new HashSet<SearchResult>());
+		result.setSubresults(new HashSet<>());
 		return result;
 	}
 
@@ -112,22 +129,6 @@ public class DocumentInfo extends PObject implements PAuthorizedObject, PSearcha
 		}
 		return this.searchProperties;
 	}
-
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Document currentDocument;
-
-	@OneToOne
-	@JsonBackReference
-	private DocumentGroup documentGroup;
-
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@OrderBy(value = "version")
-	private SortedSet<Document> recentDocuments;
-
-	private boolean locked;
-
-	@OneToOne
-	private User lockedBy;
 
 	public DocumentGroup getDocumentGroup() {
 		return documentGroup;

@@ -44,6 +44,21 @@ import de.hallerweb.enterprise.prioritize.model.Department;
 		+ "WHERE p.department.id = :deptId"))
 public class PermissionRecord implements PAuthorizedObject {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	int id;
+
+	boolean createPermission;
+	boolean readPermission;
+	boolean updatePermission;
+	boolean deletePermission;
+	String absoluteObjectType;
+	String objectName;
+	int objectId;
+
+	@ManyToOne(fetch = FetchType.EAGER)
+	Department department;
+
 	public PermissionRecord() {
 
 	}
@@ -96,18 +111,6 @@ public class PermissionRecord implements PAuthorizedObject {
 		this.deletePermission = deletePermission;
 	}
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	int id;
-
-	boolean createPermission;
-	boolean readPermission;
-	boolean updatePermission;
-	boolean deletePermission;
-	String absoluteObjectType;
-	String objectName;
-	int objectId;
-
 	public int getObjectId() {
 		return objectId;
 	}
@@ -134,9 +137,6 @@ public class PermissionRecord implements PAuthorizedObject {
 		this.objectName = this.absoluteObjectType.substring(this.absoluteObjectType.lastIndexOf('.') + 1, this.absoluteObjectType.length());
 		}
 	}
-
-	@ManyToOne(fetch = FetchType.EAGER)
-	Department department;
 
 	public Department getDepartment() {
 		return department;

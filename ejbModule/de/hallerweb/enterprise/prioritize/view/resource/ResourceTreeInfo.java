@@ -21,6 +21,9 @@ public class ResourceTreeInfo {
 
 	private boolean leaf;
 	private boolean resourceGroupNode;
+	private String name;
+	private Resource resource;
+	private String resourceGroupId;
 
 	public boolean isResourceGroupNode() {
 		return resourceGroupNode;
@@ -29,10 +32,6 @@ public class ResourceTreeInfo {
 	public void setResourceGroupNode(boolean resourceGroupNode) {
 		this.resourceGroupNode = resourceGroupNode;
 	}
-
-	private String name;
-	private Resource resource;
-	private String resourceGroupId;
 
 	public String getResourceGroupId() {
 		return resourceGroupId;

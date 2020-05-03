@@ -38,6 +38,15 @@ import de.hallerweb.enterprise.prioritize.model.PObject;
 		@NamedQuery(name = "findActionBoardByOwner", query = "select ab FROM ActionBoard ab WHERE ab.owner.id = :ownerId") })
 public class ActionBoard extends PObject {
 
+	private String name;
+	private String description;
+
+	@OneToOne
+	private PObject owner;
+
+	@OneToMany(fetch = FetchType.EAGER)
+	private List<ActionBoardEntry> entries;
+
 	public String getDescription() {
 		return description;
 	}
@@ -70,16 +79,7 @@ public class ActionBoard extends PObject {
 		entries.remove(entry);
 	}
 
-	private String name;
-	private String description;
-
-	@OneToOne
-	private PObject owner;
-
-	@OneToMany(fetch = FetchType.EAGER)
-	private List<ActionBoardEntry> entries;
-
-	public String getName() {
+ 	public String getName() {
 		return name;
 	}
 

@@ -2,6 +2,11 @@
 
 ![Prioritize logo](http://www.prioritize-iot.de/logo.png)
 
+![code qualitiy](https://www.code-inspector.com/project/7651/score/svg) 
+
+![code grade](https://www.code-inspector.com/project/7651/status/svg)
+
+
 **IMPORTANT: This project consists of two projects:**
 
 [PrioritizeEJB](https://github.com/phaller222/PrioritizeEJB.git) - model and controller classes for the backend

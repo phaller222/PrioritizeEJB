@@ -2439,6 +2439,123 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/categories/",
+    "title": "listCategories",
+    "name": "listCategories",
+    "group": "_skills",
+    "description": "<p>Lists all skill categories</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "apiKey",
+            "description": "<p>The API-Key of the user accessing the service.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "optional": false,
+            "field": "A",
+            "description": "<p>List with SkillCategory objects</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "NotAuthorized",
+            "description": "<p>APIKey incorrect.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./SkillService.java",
+    "groupTitle": "_skills"
+  },
+  {
+    "type": "get",
+    "url": "/search/",
+    "title": "searchSkills",
+    "name": "searchSkills",
+    "group": "_skills",
+    "description": "<p>Searches for a skill containing the searchphrase.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "apiKey",
+            "description": "<p>The API-Key of the user accessing the service.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "phrase",
+            "description": "<p>The search phrase to use.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "optional": false,
+            "field": "A",
+            "description": "<p>Set with Skill objects</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "NotAuthorized",
+            "description": "<p>APIKey incorrect.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./SkillService.java",
+    "groupTitle": "_skills"
+  },
+  {
+    "type": "get",
     "url": "/users/{id}",
     "title": "getUserById",
     "name": "getUserById",

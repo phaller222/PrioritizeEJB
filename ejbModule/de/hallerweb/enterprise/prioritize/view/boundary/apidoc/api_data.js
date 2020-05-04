@@ -2555,6 +2555,201 @@ define({ "api": [
     "groupTitle": "_skills"
   },
   {
+    "type": "post",
+    "url": "/create",
+    "title": "createTimeTracker",
+    "name": "createTimeTracker",
+    "group": "_timetrackers",
+    "description": "<p>Creates a timetracker</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "apiKey",
+            "description": "<p>The API-Key of the user accessing the service.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "uuid",
+            "description": "<p>The uuid to assign to the timetracker.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Long",
+            "optional": false,
+            "field": "The",
+            "description": "<p>id of the task the timetracker shall track.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "TimeTracker",
+            "optional": false,
+            "field": "TimeTracker",
+            "description": "<p>object</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "NotAuthorized",
+            "description": "<p>APIKey incorrect.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./TimeTrackerService.java",
+    "groupTitle": "_timetrackers"
+  },
+  {
+    "type": "get",
+    "url": "/uuid/{uuid}",
+    "title": "getTimeTracker",
+    "name": "getTimeTracker",
+    "group": "_timetrackers",
+    "description": "<p>Gets the timetracker with the given UUID</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "apiKey",
+            "description": "<p>The API-Key of the user accessing the service.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "uuid",
+            "description": "<p>The uuid of the timetracker.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "TimeTracker",
+            "optional": false,
+            "field": "TimeTracker",
+            "description": "<p>object</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "NotAuthorized",
+            "description": "<p>APIKey incorrect.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./TimeTrackerService.java",
+    "groupTitle": "_timetrackers"
+  },
+  {
+    "type": "post",
+    "url": "/create",
+    "title": "toggleTimeTracker",
+    "name": "toggleTimeTracker",
+    "group": "_timetrackers",
+    "description": "<p>Toggles a timetracker (run - pause/stop)</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "apiKey",
+            "description": "<p>The API-Key of the user accessing the service.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "uuid",
+            "description": "<p>The uuid of the timetracker to start or stop (toggle).</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "optional": false,
+            "field": "void",
+            "description": ""
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "NotAuthorized",
+            "description": "<p>APIKey incorrect.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./TimeTrackerService.java",
+    "groupTitle": "_timetrackers"
+  },
+  {
     "type": "get",
     "url": "/users/{id}",
     "title": "getUserById",

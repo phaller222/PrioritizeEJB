@@ -49,14 +49,24 @@ public class TimeTrackerService {
 	@EJB
 	TaskController taskController;
 
+
+	/**
+	 * Gets the timetracker with the given UUID
+	 * @api {get} /uuid/{uuid} getTimeTracker
+	 * @apiName getTimeTracker
+	 * @apiGroup /timetrackers
+	 * @apiDescription  Gets the timetracker with the given UUID
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} uuid The uuid of the timetracker.
+	 * @apiSuccess {TimeTracker} TimeTracker object
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 */
 	@GET
 	@Path("/uuid/{uuid}")
 	@Produces(MediaType.APPLICATION_JSON)
-	/**
-	 * @param uuid - UUID
-	 * @param apiKey - API-Key
-	 * @return TimeTracker
-	 */
 	public TimeTracker getTimeTracker(@PathParam(value = "uuid") String uuid, @QueryParam(value = "apiKey") String apiKey) {
 		User sessionUser = accessController.checkApiKey(apiKey);
 		if (sessionUser != null) {
@@ -66,14 +76,25 @@ public class TimeTrackerService {
 		}
 	}
 
+
+	/**
+	 * Creates a timetracker
+	 * @api {post} /create createTimeTracker
+	 * @apiName createTimeTracker
+	 * @apiGroup /timetrackers
+	 * @apiDescription  Creates a timetracker
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} uuid The uuid to assign to the timetracker.
+	 * @apiParam {Long} The id of the task the timetracker shall track.
+	 * @apiSuccess {TimeTracker}  TimeTracker object
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 */
 	@POST
 	@Path("/create")
 	@Produces(MediaType.APPLICATION_JSON)
-	/**
-	 * 
-	 * @param apiKey - API-Key
-	 * @return TimeTracker
-	 */
 	public TimeTracker createTimeTracker(@QueryParam(value = "apiKey") String apiKey, @FormParam(value = "uuid") String uuid,
 			@FormParam(value = "taskId") String taskId) {
 		User user = accessController.checkApiKey(apiKey);
@@ -85,6 +106,20 @@ public class TimeTrackerService {
 		}
 	}
 
+	/**
+	 * Toggles a timetracker (run - pause/stop)
+	 * @api {post} /create toggleTimeTracker
+	 * @apiName toggleTimeTracker
+	 * @apiGroup /timetrackers
+	 * @apiDescription  Toggles a timetracker (run - pause/stop)
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} uuid The uuid of the timetracker to start or stop (toggle).
+	 * @apiSuccess void
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 */
 	@POST
 	@Path("/toggle")
 	public void toggleTimeTracker(@QueryParam(value = "apiKey") String apiKey, @FormParam(value = "uuid") String uuid) {

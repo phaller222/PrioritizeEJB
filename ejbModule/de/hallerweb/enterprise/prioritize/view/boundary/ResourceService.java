@@ -144,8 +144,6 @@ public class ResourceService {
 	 *     HTTP/1.1 200 OK
 	 *
 	 * @apiError NotAuthorized  APIKey incorrect.
-	 * @param departmentToken - The department token.
-	 * @return JSON object with resources in that department.
 	 */
 	@GET
 	@Path("list/{departmentToken}/{group}")
@@ -169,11 +167,18 @@ public class ResourceService {
 	}
 
 	/**
-	 * searches resources in the given department
-	 * 
-	 * @param departmentToken - The department token.
-	 * @param phrase - the search phrase
-	 * @return JSON object with resources in that department.
+	 * Searches the given department for resources with phrase.
+	 * @api {get} search/{departmentToken}
+	 * @apiName searchResources
+	 * @apiGroup /resources
+	 * @apiDescription Searches the given department for resources with phrase.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} departmentToken The department token of the department.
+	 * @apiSuccess Set of {Resource} objects.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 */
 	@GET
 	@Path("search/{departmentToken}")
@@ -205,18 +210,28 @@ public class ResourceService {
 	}
 
 	/**
-	 * Return the {@link Resource} object with the given uuid.
-	 * 
-	 * @param uuid - The uuid of the {@link Resource}.
-	 * @return {@link Company} - JSON Representation of the company.
+	 * Searches for a resource with the given uuid.
+	 * @api {get} uuid/{uuid}
+	 * @apiName getResourceByUuid
+	 * @apiGroup /resources
+	 * @apiDescription Searches for a resource with the given uuid.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiSuccess Resource object found.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 */
 	@GET
 	@Path("uuid/{uuid}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Resource getResourceByUuid(@PathParam(value = "uuid") String uuid, @QueryParam(value = "apiKey") String apiKey) {
+	public Object getResourceByUuid(@PathParam(value = "uuid") String uuid, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			Resource resource = mqttResourceController.getResource(uuid, user);
+			if (resource == null) {
+				return createNegativeResponse("Resource not found!");
+			}
 			if (authController.canRead(resource, user)) {
 				return resource;
 			} else {
@@ -228,10 +243,17 @@ public class ResourceService {
 	}
 
 	/**
-	 * Returns if the {@link Resource} object with the given uuid is online.
-	 * 
-	 * @param uuid - The uuid of the {@link Resource}.
-	 * @return {@link Company} - JSON Representation of the company.
+	 * returns if the resource with the given uuid is online.
+	 * @api {get} uuid/{uuid}/mqttOnline
+	 * @apiName isResourceOnline
+	 * @apiGroup /resources
+	 * @apiDescription  returns if the resource with the given uuid is online.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiSuccess true or false
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 */
 	@GET
 	@Path("uuid/{uuid}/mqttOnline")
@@ -251,10 +273,23 @@ public class ResourceService {
 	}
 
 	/**
-	 * Updates a resource and sets different attributtes if present
-	 * 
-	 * @param uuid - The uuid of the {@link Resource}.
+	 * sets the attributes of a resource identified by it's uuid
+	 * @api {put} uuid/{uuid}
+	 * @apiName setResourceAttributesByUuid
+	 * @apiGroup /resources
+	 * @apiDescription Changes different attributes of a resource
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} name The new name of the resource. omit if no changes.
+	 * @apiParam {String} description The new description of the resource. omit if no changes.
+	 * @apiParam {String} mqttOnline (true/false) - Set the resources online state. omit if no changes.
+	 * @apiParam {String} commands update command set the resource understands. separate by colon (e.G ON:OFF:RESET)
+	 * @apiParam {String} geo new coordinates of the resource (LAT:LONG)- leave blank if no changes
+	 * @apiParam {String} set set a specific resource attribute to a specific value (e.G. NAME:WERT)
+	 * @apiSuccess true or false
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
 	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 */
 	@PUT
 	@Path("uuid/{uuid}")
@@ -306,10 +341,17 @@ public class ResourceService {
 	}
 
 	/**
-	 * Returns if the {@link Resource} object with the given id is online.
-	 * 
-	 * @param id - The id of the {@link Resource}.
-	 * @return boolean true or false
+	 * returns if the resource with the given id is online.
+	 * @api {get} id/{id}/mqttOnline
+	 * @apiName isResourceOnlineById
+	 * @apiGroup /resources
+	 * @apiDescription  returns if the resource with the given id is online.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiSuccess true or false
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 */
 	@GET
 	@Path("id/{id}/mqttOnline")
@@ -364,97 +406,6 @@ public class ResourceService {
 
 	}
 
-	private Response setResourceAttributes(Resource resource, String mqttOnline, String name, String description, String commands,
-			String geo, String apiKey, String set) {
-		User user = accessController.checkApiKey(apiKey);
-		if (user != null) {
-			boolean processed = false;
-			processed = handleSetResourceAttributes(resource, mqttOnline, name, description, commands, geo, set, processed);
-
-			if (!processed) {
-				return createNegativeResponse("ERROR: None of the given resource property names found! Nothing changed.");
-			} else {
-				return createPositiveResponse("OK");
-			}
-
-		} else {
-			throw new NotAuthorizedException(Response.serverError());
-		}
-	}
-
-	private boolean handleSetResourceAttributes(Resource resource, String mqttOnline, String name, String description, String commands,
-			String geo, String set, boolean processed) {
-		if (mqttOnline != null) {
-			processed = true;
-			boolean online = Boolean.parseBoolean(mqttOnline);
-
-			resourceController.raiseEvent(resource, "mqttOnline", String.valueOf(resource.isMqttOnline()), mqttOnline,
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-
-			mqttResourceController.setMqttResourceStatus(resource, online);
-		}
-
-		if (name != null) {
-			processed = true;
-			resourceController.raiseEvent(resource, "name", resource.getName(), name,
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-			resourceController.setResourceName(resource, name, sessionController.getUser());
-		}
-		if (description != null) {
-			processed = true;
-			resourceController.raiseEvent(resource, "description", resource.getDescription(), description,
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-			resourceController.setResourceDescription(resource, description, sessionController.getUser());
-		}
-		if (commands != null) {
-			processed = handleSetCommands(resource, commands);
-		}
-		if (geo != null) {
-			processed = true;
-			String[] geoString = geo.split(":");
-			mqttResourceController.setCoordinates(resource, geoString[0], geoString[1]);
-		}
-
-		if (set != null) {
-			processed = handleSetNameValuePairs(resource, set);
-		}
-		return processed;
-	}
-
-	private boolean handleSetCommands(Resource resource, String commands) {
-		boolean processed;
-		processed = true;
-		String[] commandString = commands.split(":");
-		HashSet<String> commandsForResource = new HashSet<>();
-		for (String cmd : commandString) {
-			commandsForResource.add(cmd);
-		}
-		resourceController.raiseEvent(resource, "commands", resource.getMqttCommands().toString(), commands,
-				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-		mqttResourceController.setCommands(resource, commandsForResource);
-		return processed;
-	}
-
-	private boolean handleSetNameValuePairs(Resource resource, String set) {
-		boolean processed;
-		processed = true;
-		String[] nameValuePair = set.split(":");
-
-		// ----------------- Raise event for value change
-		Set<NameValueEntry> valuesOld = mqttResourceController.getNameValueEntries(resource);
-		String oldValue = "";
-		for (NameValueEntry entry : valuesOld) {
-			if (entry.getName().equals(nameValuePair[0])) {
-				oldValue = entry.getValues();
-			}
-		}
-		resourceController.raiseEvent(resource, nameValuePair[0], oldValue, nameValuePair[1],
-				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-		// ------------------------------------------------------
-
-		mqttResourceController.addMqttValueForResource(resource, nameValuePair[0], nameValuePair[1]);
-		return processed;
-	}
 
 	@POST
 	@Path("create/{departmentToken}/{group}")
@@ -528,6 +479,23 @@ public class ResourceService {
 
 	}
 
+	/**
+	 * @api {post} /command?apiKey={apiKey} sendCommand
+	 * @apiName sendCommand
+	 * @apiGroup /resources
+	 * @apiDescription sends a command to a resource
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} departmentToken The department token of the department.
+	 * @apiParam {String} group The resource group of the device.
+	 * @apiParam {String} uuid The uuid of the resource.
+	 * @apiParam {String} command - the command to send
+	 * @apiParam {String} value - the value sent with the command
+	 * @apiSuccess 200 OK.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *
+	 * @apiError NotAuthorized  APIKey incorrect.
+	 */
 	@POST
 	@Path("command")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -642,4 +610,98 @@ public class ResourceService {
 	private Response createNegativeResponse(String responseText) {
 		return Response.status(405).entity("{\"response\" : \"" + responseText + "\"}").build();
 	}
+
+	private Response setResourceAttributes(Resource resource, String mqttOnline, String name, String description, String commands,
+										   String geo, String apiKey, String set) {
+		User user = accessController.checkApiKey(apiKey);
+		if (user != null) {
+			boolean processed = false;
+			processed = handleSetResourceAttributes(resource, mqttOnline, name, description, commands, geo, set, processed);
+
+			if (!processed) {
+				return createNegativeResponse("ERROR: None of the given resource property names found! Nothing changed.");
+			} else {
+				return createPositiveResponse("OK");
+			}
+
+		} else {
+			throw new NotAuthorizedException(Response.serverError());
+		}
+	}
+
+	private boolean handleSetResourceAttributes(Resource resource, String mqttOnline, String name, String description, String commands,
+												String geo, String set, boolean processed) {
+		if (mqttOnline != null) {
+			processed = true;
+			boolean online = Boolean.parseBoolean(mqttOnline);
+
+			resourceController.raiseEvent(resource, "mqttOnline", String.valueOf(resource.isMqttOnline()), mqttOnline,
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+
+			mqttResourceController.setMqttResourceStatus(resource, online);
+		}
+
+		if (name != null) {
+			processed = true;
+			resourceController.raiseEvent(resource, "name", resource.getName(), name,
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+			resourceController.setResourceName(resource, name, sessionController.getUser());
+		}
+		if (description != null) {
+			processed = true;
+			resourceController.raiseEvent(resource, "description", resource.getDescription(), description,
+					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+			resourceController.setResourceDescription(resource, description, sessionController.getUser());
+		}
+		if (commands != null) {
+			processed = handleSetCommands(resource, commands);
+		}
+		if (geo != null) {
+			processed = true;
+			String[] geoString = geo.split(":");
+			mqttResourceController.setCoordinates(resource, geoString[0], geoString[1]);
+		}
+
+		if (set != null) {
+			processed = handleSetNameValuePairs(resource, set);
+		}
+		return processed;
+	}
+
+	private boolean handleSetCommands(Resource resource, String commands) {
+		boolean processed;
+		processed = true;
+		String[] commandString = commands.split(":");
+		HashSet<String> commandsForResource = new HashSet<>();
+		for (String cmd : commandString) {
+			commandsForResource.add(cmd);
+		}
+		resourceController.raiseEvent(resource, "commands", resource.getMqttCommands().toString(), commands,
+				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+		mqttResourceController.setCommands(resource, commandsForResource);
+		return processed;
+	}
+
+	private boolean handleSetNameValuePairs(Resource resource, String set) {
+		boolean processed;
+		processed = true;
+		String[] nameValuePair = set.split(":");
+
+		// ----------------- Raise event for value change
+		Set<NameValueEntry> valuesOld = mqttResourceController.getNameValueEntries(resource);
+		String oldValue = "";
+		for (NameValueEntry entry : valuesOld) {
+			if (entry.getName().equals(nameValuePair[0])) {
+				oldValue = entry.getValues();
+			}
+		}
+		resourceController.raiseEvent(resource, nameValuePair[0], oldValue, nameValuePair[1],
+				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+		// ------------------------------------------------------
+
+		mqttResourceController.addMqttValueForResource(resource, nameValuePair[0], nameValuePair[1]);
+		return processed;
+	}
+
+
 }

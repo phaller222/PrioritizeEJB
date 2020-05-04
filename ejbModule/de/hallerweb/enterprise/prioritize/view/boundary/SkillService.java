@@ -81,10 +81,18 @@ public class SkillService {
 	AuthorizationController authController;
 
 	/**
-	 * Returns {@link Skill} objects containing the given phrase in name or description. *
+	 * Searches for a skill containing the searchphrase.
+	 * @api {get} /search/ searchSkills
+	 * @apiName searchSkills
+	 * @apiGroup /skills
+	 * @apiDescription  Searches for a skill containing the searchphrase.
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} phrase The search phrase to use.
+	 * @apiSuccess A Set with Skill objects
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
 	 *
-	 * @param phrase - The search phrase.
-	 * @return JSON object with {@link TimeSpan} objects for that department.
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 */
 	@GET
 	@Path("search/")
@@ -115,9 +123,17 @@ public class SkillService {
 	}
 
 	/**
-	 * Returns all defined SkillCategory objects. *
+	 * Lists all skill categories
+	 * @api {get} /categories/ listCategories
+	 * @apiName listCategories
+	 * @apiGroup /skills
+	 * @apiDescription  Lists all skill categories
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiSuccess A List with SkillCategory objects
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
 	 *
-	 * @return JSON object with all defined {@link SkillCategory} objects.
+	 * @apiError NotAuthorized  APIKey incorrect.
 	 */
 	@GET
 	@Path("categories/")
@@ -141,6 +157,6 @@ public class SkillService {
 	}
 
 	private Response createNegativeResponse(String responseText) {
-		return Response.status(405).entity("{\"response\" : \"" + responseText + "\"}").build();
+		return Response.status(404).entity("{\"response\" : \"" + responseText + "\"}").build();
 	}
 }

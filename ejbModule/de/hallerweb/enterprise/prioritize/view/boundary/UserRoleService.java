@@ -86,6 +86,7 @@ public class UserRoleService {
 	 * @apiGroup /users
 	 * @apiDescription Returns all users within the department with token {departmentToken}
 	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} departmentToken The department token of the department to search for users.
 	 * @apiSuccess {List}  JSON-Array with all users in this department.
 	 * @apiSuccessExample Success-Response:
 	 *     HTTP/1.1 200 OK
@@ -103,9 +104,6 @@ public class UserRoleService {
 	 * ]
 	 *
 	 * @apiError NotAuthorized APIKey incorrect.
-	 * 
-	 * @param departmentToken - The department token.
-	 * @return JSON object with users in that department.
 	 */
 	@GET
 	@Path("department/{departmentToken}")
@@ -131,6 +129,7 @@ public class UserRoleService {
 	 * @apiGroup /users
 	 * @apiDescription Returns user with the given {id}
 	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {Integer} id - The user id of the user to retrieve.
 	 * @apiSuccess {User}  JSON-Object with the user with id {id}.
 	 * @apiSuccessExample Success-Response:
 	 *     HTTP/1.1 200 OK
@@ -141,8 +140,6 @@ public class UserRoleService {
 	 *  }
 	 *
 	 * @apiError NotAuthorized APIKey incorrect.
-	 * @param id - The id of the {@link Resource}.
-	 * @return {@link Company} - JSON Representation of the company.
 	 */
 	@GET
 	@Path("{id}")
@@ -158,6 +155,26 @@ public class UserRoleService {
 	}
 
 
+	/**
+	 * Return the {@link User} object with the given username
+	 *
+	 * @api {get} /users/username/{username} getUserByUsername
+	 * @apiName getUserByUsername
+	 * @apiGroup /users
+	 * @apiDescription Returns user with the given {username}
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} username - The username of the user to retrieve.
+	 * @apiSuccess {User}  JSON-Object with the user with id {id}.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *  {
+	 *   "id": 48,
+	 *   "name": "peter",
+	 *   "username": "peter"
+	 *  }
+	 *
+	 * @apiError NotAuthorized APIKey incorrect.
+	 */
 	@GET
 	@Path("username/{username}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -172,6 +189,26 @@ public class UserRoleService {
 	}
 
 
+	/**
+	 * Searches for users by the given phrase.
+	 *
+	 * @api {get} /search/users searchUsers
+	 * @apiName searchUsers
+	 * @apiGroup /users
+	 * @apiDescription searches for users
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} phrase - The searchstring to search for.
+	 * @apiSuccess {User}  JSON-Object with the users found.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	 *  {
+	 *   "id": 48,
+	 *   "name": "peter",
+	 *   "username": "peter"
+	 *  }
+	 *
+	 * @apiError NotAuthorized APIKey incorrect.
+	 */
 	@GET
 	@Path("search/users")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -195,7 +232,69 @@ public class UserRoleService {
 		}
 	}
 
-
+	/**
+	 * Searches for roles by the given phrase.
+	 *
+	 * @api {get} /search/roles searchRoles
+	 * @apiName searchRoles
+	 * @apiGroup /users
+	 * @apiDescription searches for roles
+	 * @apiParam {String} apiKey The API-Key of the user accessing the service.
+	 * @apiParam {String} phrase - The searchstring to search for.
+	 * @apiSuccess {User}  JSON-Object with the roles found.
+	 * @apiSuccessExample Success-Response:
+	 *     HTTP/1.1 200 OK
+	*{
+	 *"id": 21,
+	 *"name": "Default Company-default-Admin",
+	 *"description": "Default Company - default - Admin",
+	 *"permissions": [
+	 *	{
+	 *"id": 24,
+	 *"createPermission": true,
+	 *"readPermission": true,
+	 *"updatePermission": true,
+	 *"deletePermission": true,
+	 *"absoluteObjectType": "de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup",
+	 *"objectName": "ResourceGroup",
+	 *"objectId": 0,
+	 *"department": {
+	 *"id": 19,
+	 *"address": {
+	 *"id": 18,
+	 *"zipCode": "00000",
+	 *"phone": "00000-00000",
+	 *"fax": "00000-00000",
+	 *"city": "City of Admin",
+	 *"street": "Street of Admins",
+	 *"email": null
+	 *},
+	 *"documentGroups": [
+	 *	{
+	*"id": 16,
+	 *"name": "default"
+	 *}
+	 *],
+	 *"resourceGroups": [
+	 *	{
+	 *"id": 17,
+	 *"name": "default"
+	 *	}
+	 *],
+	 *"name": "default",
+	 *"description": "Auto generated default department",
+	 *"searchProperties": [
+	 *	{
+	 *"name": "DocumentInfo",
+	 *"type": "NAME"
+	 *	}
+	 *]
+	 *}
+	 *}
+	 *
+	 * @apiError NotAuthorized APIKey incorrect.
+	 */
+	@GET
 	@Path("search/roles")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Set<Role> searchRoles(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "phrase") String phrase) {

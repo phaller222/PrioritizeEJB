@@ -212,8 +212,13 @@ public class UserBean implements Serializable {
 			}
 
 			if (selectedRolesId != null && !selectedRolesId.isEmpty()) {
-				for (String roleId : selectedRolesId) {
-					Role role = controller.findRoleById(Integer.valueOf(roleId));
+				Role role = null;
+				for (Object roleId : selectedRolesId) {
+					if (roleId instanceof String) {
+						role = controller.findRoleById(Integer.valueOf((String) roleId));
+					} else {
+						role = controller.findRoleById((Integer)roleId);
+					}
 					user.addRole(role);
 				}
 			}

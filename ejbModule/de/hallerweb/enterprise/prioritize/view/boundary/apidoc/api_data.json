@@ -2765,6 +2765,76 @@
             "optional": false,
             "field": "apiKey",
             "description": "<p>The API-Key of the user accessing the service.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "id",
+            "description": "<ul> <li>The user id of the user to retrieve.</li> </ul>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "User",
+            "optional": false,
+            "field": "JSON-Object",
+            "description": "<p>with the user with id {id}.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "   HTTP/1.1 200 OK\n{\n \"id\": 48,\n \"name\": \"peter\",\n \"username\": \"peter\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "NotAuthorized",
+            "description": "<p>APIKey incorrect.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./UserRoleService.java",
+    "groupTitle": "_users"
+  },
+  {
+    "type": "get",
+    "url": "/users/username/{username}",
+    "title": "getUserByUsername",
+    "name": "getUserByUsername",
+    "group": "_users",
+    "description": "<p>Returns user with the given {username}</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "apiKey",
+            "description": "<p>The API-Key of the user accessing the service.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": "<ul> <li>The username of the user to retrieve.</li> </ul>"
           }
         ]
       }
@@ -2821,6 +2891,13 @@
             "optional": false,
             "field": "apiKey",
             "description": "<p>The API-Key of the user accessing the service.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "departmentToken",
+            "description": "<p>The department token of the department to search for users.</p>"
           }
         ]
       }
@@ -2841,6 +2918,132 @@
         {
           "title": "Success-Response:",
           "content": "    HTTP/1.1 200 OK\n[\n {\n  \"id\": 48,\n  \"name\": \"peter\",\n  \"username\": \"peter\"\n },\n {\n  \"id\": 54,\n  \"name\": \"torsten\",\n  \"username\": \"torsten\"\n }\n]",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "NotAuthorized",
+            "description": "<p>APIKey incorrect.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./UserRoleService.java",
+    "groupTitle": "_users"
+  },
+  {
+    "type": "get",
+    "url": "/search/roles",
+    "title": "searchRoles",
+    "name": "searchRoles",
+    "group": "_users",
+    "description": "<p>searches for roles</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "apiKey",
+            "description": "<p>The API-Key of the user accessing the service.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "phrase",
+            "description": "<ul> <li>The searchstring to search for.</li> </ul>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "User",
+            "optional": false,
+            "field": "JSON-Object",
+            "description": "<p>with the roles found.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "    HTTP/1.1 200 OK\n{\n\"id\": 21,\n\"name\": \"Default Company-default-Admin\",\n\"description\": \"Default Company - default - Admin\",\n\"permissions\": [\n\t{\n\"id\": 24,\n\"createPermission\": true,\n\"readPermission\": true,\n\"updatePermission\": true,\n\"deletePermission\": true,\n\"absoluteObjectType\": \"de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup\",\n\"objectName\": \"ResourceGroup\",\n\"objectId\": 0,\n\"department\": {\n\"id\": 19,\n\"address\": {\n\"id\": 18,\n\"zipCode\": \"00000\",\n\"phone\": \"00000-00000\",\n\"fax\": \"00000-00000\",\n\"city\": \"City of Admin\",\n\"street\": \"Street of Admins\",\n\"email\": null\n},\n\"documentGroups\": [\n\t{\n\"id\": 16,\n\"name\": \"default\"\n}\n],\n\"resourceGroups\": [\n\t{\n\"id\": 17,\n\"name\": \"default\"\n\t}\n],\n\"name\": \"default\",\n\"description\": \"Auto generated default department\",\n\"searchProperties\": [\n\t{\n\"name\": \"DocumentInfo\",\n\"type\": \"NAME\"\n\t}\n]\n}\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "NotAuthorized",
+            "description": "<p>APIKey incorrect.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "./UserRoleService.java",
+    "groupTitle": "_users"
+  },
+  {
+    "type": "get",
+    "url": "/search/users",
+    "title": "searchUsers",
+    "name": "searchUsers",
+    "group": "_users",
+    "description": "<p>searches for users</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "apiKey",
+            "description": "<p>The API-Key of the user accessing the service.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "phrase",
+            "description": "<ul> <li>The searchstring to search for.</li> </ul>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "User",
+            "optional": false,
+            "field": "JSON-Object",
+            "description": "<p>with the users found.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "   HTTP/1.1 200 OK\n{\n \"id\": 48,\n \"name\": \"peter\",\n \"username\": \"peter\"\n}",
           "type": "json"
         }
       ]

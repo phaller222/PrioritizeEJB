@@ -6,6 +6,8 @@
 
 ![code grade](https://www.code-inspector.com/project/7651/status/svg)
 
+**NEW: REST API docs now available (First version):**
+[Prioritize REST apiDocs](http://www.prioritize-iot.de/apiDoc) - Prioritize REST apiDocs
 
 **IMPORTANT: This project consists of two projects:**
 

@@ -15,7 +15,7 @@
  */
 package de.hallerweb.enterprise.prioritize.model.search;
 
-public abstract class SearchResultType {
+public  final class SearchResultType {
 	private SearchResultType() {
 		super();
 	}

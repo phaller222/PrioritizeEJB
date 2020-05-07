@@ -15,27 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.ejb.EJB;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.resource.MQTTResourceController;
@@ -46,13 +25,20 @@ import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationContr
 import de.hallerweb.enterprise.prioritize.controller.security.RestAccessController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
-import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.resource.NameValueEntry;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+
+import javax.ejb.EJB;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.*;
 
 /**
  * 
@@ -111,7 +97,9 @@ public class ResourceService {
 	public List<ResourceGroup> getResourceGroups(@PathParam(value = "departmentToken") String departmentToken,
 			@QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
-		if (user != null) {
+		if (user == null) {
+			throw new NotAuthorizedException(Response.serverError());
+		} else {
 			Department dept = companyController.getDepartmentByToken(departmentToken, user);
 			if (dept != null) {
 				List<ResourceGroup> groups = resourceController.getResourceGroupsForDepartment(dept.getId(), user);
@@ -125,8 +113,6 @@ public class ResourceService {
 				throw new NotFoundException(createNegativeResponse("no resource groups found!"));
 			}
 			throw new NotFoundException(createNegativeResponse("Department not found or department token invalid!"));
-		} else {
-			throw new NotAuthorizedException(Response.serverError());
 		}
 	}
 
@@ -186,9 +172,13 @@ public class ResourceService {
 	public Set<Resource> searchResources(@PathParam(value = "departmentToken") String departmentToken,
 			@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "phrase") String phrase) {
 		User user = accessController.checkApiKey(apiKey);
-		if (user != null) {
+		if (user == null) {
+			throw new NotAuthorizedException(Response.serverError());
+		} else {
 			Department dept = companyController.getDepartmentByToken(departmentToken, user);
-			if (dept != null) {
+			if (dept == null) {
+				throw new NotAuthorizedException(Response.serverError());
+			} else {
 				Set<Resource> searchResult = new HashSet<>();
 				List<SearchResult> results = searchController.searchResources(phrase, user);
 				for (SearchResult result : results) {
@@ -201,11 +191,7 @@ public class ResourceService {
 					}
 				}
 				return searchResult;
-			} else {
-				throw new NotAuthorizedException(Response.serverError());
 			}
-		} else {
-			throw new NotAuthorizedException(Response.serverError());
 		}
 	}
 
@@ -227,7 +213,9 @@ public class ResourceService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Object getResourceByUuid(@PathParam(value = "uuid") String uuid, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
-		if (user != null) {
+		if (user == null) {
+			throw new NotAuthorizedException(Response.serverError());
+		} else {
 			Resource resource = mqttResourceController.getResource(uuid, user);
 			if (resource == null) {
 				return createNegativeResponse("Resource not found!");
@@ -237,8 +225,6 @@ public class ResourceService {
 			} else {
 				throw new NotAuthorizedException(Response.serverError());
 			}
-		} else {
-			throw new NotAuthorizedException(Response.serverError());
 		}
 	}
 
@@ -260,15 +246,15 @@ public class ResourceService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public boolean isResourceOnline(@PathParam(value = "uuid") String uuid, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
-		if (user != null) {
+		if (user == null) {
+			throw new NotAuthorizedException(Response.serverError());
+		} else {
 			Resource resource = mqttResourceController.getResource(uuid, user);
 			if (authController.canRead(resource, user)) {
 				return resource.isMqttOnline();
 			} else {
 				throw new NotAuthorizedException(Response.serverError());
 			}
-		} else {
-			throw new NotAuthorizedException(Response.serverError());
 		}
 	}
 
@@ -328,15 +314,15 @@ public class ResourceService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Resource getResourceById(@PathParam(value = "id") String id, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
-		if (user != null) {
+		if (user == null) {
+			throw new NotAuthorizedException(Response.serverError());
+		} else {
 			Resource resource = resourceController.getResource(Integer.parseInt(id), user);
 			if (authController.canRead(resource, user)) {
 				return resource;
 			} else {
 				throw new NotAuthorizedException(Response.serverError());
 			}
-		} else {
-			throw new NotAuthorizedException(Response.serverError());
 		}
 	}
 
@@ -358,15 +344,15 @@ public class ResourceService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public boolean isResourceOnlineById(@PathParam(value = "id") String id, @QueryParam(value = "apiKey") String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
-		if (user != null) {
+		if (user == null) {
+			throw new NotAuthorizedException(Response.serverError());
+		} else {
 			Resource resource = resourceController.getResource(Integer.parseInt(id), user);
 			if (authController.canRead(resource, user)) {
 				return resource.isMqttOnline();
 			} else {
 				throw new NotAuthorizedException(Response.serverError());
 			}
-		} else {
-			throw new NotAuthorizedException(Response.serverError());
 		}
 	}
 
@@ -438,13 +424,15 @@ public class ResourceService {
 			@QueryParam(value = "slots") String slots, @QueryParam(value = "ip") String ip, @QueryParam(value = "commands") String commands,
 			@QueryParam(value = "isAgent") boolean isAgent) {
 		User user = accessController.checkApiKey(apiKey);
-		if (user != null) {
+		if (user == null) {
+			throw new NotAuthorizedException(Response.serverError());
+		} else {
 			Department dept = companyController.getDepartmentByToken(departmentToken, user);
 			if (authController.canCreate(dept.getId(), new Resource(), user)) {
 				Resource tempResource = new Resource();
 				tempResource.setName(name);
 				tempResource.setDescription(description);
-				tempResource.setMaxSlots(Integer.valueOf(slots));
+				tempResource.setMaxSlots(Integer.parseInt(slots));
 				tempResource.setStationary(false);
 				tempResource.setRemote(true);
 				tempResource.setAgent(false);
@@ -458,25 +446,19 @@ public class ResourceService {
 				if (commands != null) {
 					HashSet<String> cmds = new HashSet<>();
 					String[] commandsArray = commands.split(":");
-					for (String cmd : commandsArray) {
-						cmds.add(cmd);
-					}
+					Collections.addAll(cmds, commandsArray);
 					mqttResourceController.setCommands(resource, cmds);
 				}
 
-				if (resource != null) {
-					return createPositiveResponse("Resource has been discovered and created.");
-				} else {
+				if (resource == null) {
 					return createNegativeResponse("Resource could not be created!");
+				} else {
+					return createPositiveResponse("Resource has been discovered and created.");
 				}
 			} else {
 				throw new NotAuthorizedException(Response.serverError());
 			}
-
-		} else {
-			throw new NotAuthorizedException(Response.serverError());
 		}
-
 	}
 
 	/**
@@ -673,9 +655,7 @@ public class ResourceService {
 		processed = true;
 		String[] commandString = commands.split(":");
 		HashSet<String> commandsForResource = new HashSet<>();
-		for (String cmd : commandString) {
-			commandsForResource.add(cmd);
-		}
+		Collections.addAll(commandsForResource, commandString);
 		resourceController.raiseEvent(resource, "commands", resource.getMqttCommands().toString(), commands,
 				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		mqttResourceController.setCommands(resource, commandsForResource);

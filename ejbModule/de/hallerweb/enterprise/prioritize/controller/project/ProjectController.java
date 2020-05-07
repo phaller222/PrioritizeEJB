@@ -15,18 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.project;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.context.ContextNotActiveException;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
@@ -43,18 +31,23 @@ import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.project.Project;
 import de.hallerweb.enterprise.prioritize.model.project.ProjectProgress;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoal;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalCategory;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalProperty;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyDocument;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyNumeric;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalPropertyRecord;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
+import de.hallerweb.enterprise.prioritize.model.project.goal.*;
 import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.project.task.TaskStatus;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.context.ContextNotActiveException;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * TaskController - Manages tasks.
@@ -140,10 +133,10 @@ public class ProjectController extends PEventConsumerProducer {
 		Query q = em.createNamedQuery(QUERY_FIND_PROJECTGOAL_RECORDS_BY_PROJECT);
 		q.setParameter(PARAM_PROJECT_ID, projectId);
 		List<ProjectGoalRecord> projectGoalRecords = (List<ProjectGoalRecord>) q.getResultList();
-		if (!projectGoalRecords.isEmpty()) {
-			return projectGoalRecords;
-		} else {
+		if (projectGoalRecords.isEmpty()) {
 			return new ArrayList<>();
+		} else {
+			return projectGoalRecords;
 		}
 	}
 
@@ -151,10 +144,10 @@ public class ProjectController extends PEventConsumerProducer {
 		Query q = em.createNamedQuery(QUERY_FIND_ACTIVE_PROJECTGOAL_RECORDS_BY_PROJECT);
 		q.setParameter(PARAM_PROJECT_ID, projectId);
 		List<ProjectGoalRecord> projectGoalRecords = (List<ProjectGoalRecord>) q.getResultList();
-		if (!projectGoalRecords.isEmpty()) {
-			return projectGoalRecords;
-		} else {
+		if (projectGoalRecords.isEmpty()) {
 			return new ArrayList<>();
+		} else {
+			return projectGoalRecords;
 		}
 	}
 
@@ -223,10 +216,10 @@ public class ProjectController extends PEventConsumerProducer {
 	}
 
 	public List<DocumentInfo> getProjectDocuments(Project project) {
-		if (!project.getDocuments().isEmpty()) {
-			return project.getDocuments();
-		} else {
+		if (project.getDocuments().isEmpty()) {
 			return new ArrayList<>();
+		} else {
+			return project.getDocuments();
 		}
 	}
 
@@ -267,10 +260,10 @@ public class ProjectController extends PEventConsumerProducer {
 		Query query = em.createNamedQuery("findAllProjectGoalCategories");
 
 		List<ProjectGoalCategory> result = query.getResultList();
-		if (!result.isEmpty()) {
-			return result;
-		} else {
+		if (result.isEmpty()) {
 			return new ArrayList<>();
+		} else {
+			return result;
 		}
 	}
 
@@ -287,7 +280,9 @@ public class ProjectController extends PEventConsumerProducer {
 			}
 		}
 
-		if (!alreadyExists) {
+		if (alreadyExists) {
+			return null;
+		} else {
 			ProjectGoalCategory category = new ProjectGoalCategory();
 			category.setName(name);
 			category.setDescription(description);
@@ -307,8 +302,6 @@ public class ProjectController extends PEventConsumerProducer {
 						" SkillCategory \"" + category.getName() + LITERAL_CREATED);
 			}
 			return category;
-		} else {
-			return null;
 		}
 	}
 
@@ -366,10 +359,10 @@ public class ProjectController extends PEventConsumerProducer {
 
 		@SuppressWarnings("unchecked")
 		List<ProjectGoalProperty> result = query.getResultList();
-		if (!result.isEmpty()) {
-			return result;
-		} else {
+		if (result.isEmpty()) {
 			return new ArrayList<>();
+		} else {
+			return result;
 		}
 	}
 
@@ -378,10 +371,10 @@ public class ProjectController extends PEventConsumerProducer {
 		query.setParameter("parentCategoryId", cat.getId());
 
 		List<ProjectGoalCategory> result = query.getResultList();
-		if (!result.isEmpty()) {
-			return result;
-		} else {
+		if (result.isEmpty()) {
 			return new ArrayList<>();
+		} else {
+			return result;
 		}
 	}
 
@@ -394,10 +387,10 @@ public class ProjectController extends PEventConsumerProducer {
 		Query query = em.createNamedQuery("findProjectGoalRootCategories");
 
 		List<ProjectGoalCategory> result = query.getResultList();
-		if (!result.isEmpty()) {
-			return result;
+		if (result.isEmpty()) {
+			return new ArrayList<>();
 		} else {
-			return null;
+			return result;
 		}
 	}
 
@@ -540,14 +533,15 @@ public class ProjectController extends PEventConsumerProducer {
 	}
 
 	private int calcRecentDocumentsProgress(int sum, ProjectGoalRecord currentProjectGoalRecord, DocumentInfo docInfo, String targetTag) {
+		int sumCopy = sum;
 		for (Document doc : docInfo.getRecentDocuments()) {
 			if (targetTag.equals(doc.getTag())) {
 				currentProjectGoalRecord.setPercentage(100);
-				sum += 100;
+				sumCopy += 100;
 				break;
 			}
 		}
-		return sum;
+		return sumCopy;
 	}
 
 	private int calcNumericProgress(ProjectGoalRecord currentProjectGoalRecord, ProjectGoalRecord origProjectGoalRecord) {

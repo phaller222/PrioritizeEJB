@@ -180,7 +180,7 @@ public class NewSkillBean implements Serializable {
 			List<Skill> definedSkills = skillController.getSkillsForCategory(selectedCategory, sessionController.getUser());
 			boolean exists = false;
 			if (definedSkills != null) {
-				exists = skillExists(definedSkills, exists);
+				exists = skillExists(definedSkills);
 			}
 			if (!exists) {
 				this.newSkill = skillController.createSkill(newSkillName, newSkillDescription, "", selectedCategory, skillProperties,
@@ -209,13 +209,15 @@ public class NewSkillBean implements Serializable {
 		return "skills";
 	}
 
-	private boolean skillExists(List<Skill> definedSkills, boolean exists) {
+	private boolean skillExists(List<Skill> definedSkills) {
+		boolean skillExists = false;
 		for (Skill s : definedSkills) {
 			if (s.getName().equals(newSkillName)) {
-				exists = true;
+				skillExists = true;
+				break;
 			}
 		}
-		return exists;
+		return skillExists;
 	}
 
 	public void addNumericProperty() {

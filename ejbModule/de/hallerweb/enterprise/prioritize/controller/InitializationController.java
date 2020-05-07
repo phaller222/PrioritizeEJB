@@ -91,12 +91,6 @@ public class InitializationController {
 	@EJB
 	TimeTrackerController timeTrackerController;
 
-	private static Map<String, String> config = new HashMap<>();
-
-	public static Map<String, String> getConfig() {
-		return config;
-	}
-
 	private static int defaultDepartmentId;
 
 	public static final String LITERAL_ADMIN = "admin";
@@ -136,6 +130,12 @@ public class InitializationController {
 	public static final String USE_KEYCLOAK_AUTH = "USE_KEYCLOAK_AUTH";
 	// Keycloak logout URL
 	public static final String KEYCLOAK_LOGOUT_URL = "KEYCLOAK_LOGOUT_URL";
+
+	private static Map<String, String> config = new HashMap<>();
+
+	public static Map<String, String> getConfig() {
+		return config;
+	}
 
 	public static int getDefaultDepartmentId() {
 		return defaultDepartmentId;

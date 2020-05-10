@@ -150,15 +150,15 @@ public class ResourceController extends PEventConsumerProducer {
 	public Set<Resource> getResourcesInResourceGroup(int resourceGroupId, User sessionUser) {
 		ResourceGroup rg = em.find(ResourceGroup.class, resourceGroupId);
 		Set<Resource> result = rg.getResources();
-		if (!result.isEmpty()) {
+		if (result.isEmpty()) {
+			return new HashSet<>();
+		} else {
 			Resource res = result.iterator().next();
 			if (authController.canRead(res, sessionUser)) {
 				return result;
 			} else {
 				return new HashSet<>();
 			}
-		} else {
-			return new HashSet<>();
 		}
 	}
 
@@ -364,10 +364,10 @@ public class ResourceController extends PEventConsumerProducer {
 	
 	public String getLongitude(Resource resource) {
 		Resource res = em.find(Resource.class, resource.getId());
-		if (res.getLongitude() != null) {
-			return resource.getLongitude();
-		} else {
+		if (res.getLongitude() == null) {
 			return "";
+		} else {
+			return resource.getLongitude();
 		}
 	}
 
@@ -381,6 +381,7 @@ public class ResourceController extends PEventConsumerProducer {
 			for (SkillRecord resSkillRecord : res.getSkills())
 				if (resSkillRecord.getSkill().getId() == rec.getId()) {
 					alreadyAssigned = true;
+					break;
 				}
 
 			if (!alreadyAssigned) {

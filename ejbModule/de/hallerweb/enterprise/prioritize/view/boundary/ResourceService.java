@@ -613,8 +613,9 @@ public class ResourceService {
 
 	private boolean handleSetResourceAttributes(Resource resource, String mqttOnline, String name, String description, String commands,
 												String geo, String set, boolean processed) {
+		boolean processedCopy = processed;
 		if (mqttOnline != null) {
-			processed = true;
+			processedCopy = true;
 			boolean online = Boolean.parseBoolean(mqttOnline);
 
 			resourceController.raiseEvent(resource, "mqttOnline", String.valueOf(resource.isMqttOnline()), mqttOnline,
@@ -624,30 +625,30 @@ public class ResourceService {
 		}
 
 		if (name != null) {
-			processed = true;
+			processedCopy = true;
 			resourceController.raiseEvent(resource, "name", resource.getName(), name,
 					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 			resourceController.setResourceName(resource, name, sessionController.getUser());
 		}
 		if (description != null) {
-			processed = true;
+			processedCopy = true;
 			resourceController.raiseEvent(resource, "description", resource.getDescription(), description,
 					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 			resourceController.setResourceDescription(resource, description, sessionController.getUser());
 		}
 		if (commands != null) {
-			processed = handleSetCommands(resource, commands);
+			processedCopy = handleSetCommands(resource, commands);
 		}
 		if (geo != null) {
-			processed = true;
+			processedCopy = true;
 			String[] geoString = geo.split(":");
 			mqttResourceController.setCoordinates(resource, geoString[0], geoString[1]);
 		}
 
 		if (set != null) {
-			processed = handleSetNameValuePairs(resource, set);
+			processedCopy = handleSetNameValuePairs(resource, set);
 		}
-		return processed;
+		return processedCopy;
 	}
 
 	private boolean handleSetCommands(Resource resource, String commands) {

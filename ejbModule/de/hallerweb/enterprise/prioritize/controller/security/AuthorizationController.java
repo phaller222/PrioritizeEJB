@@ -77,26 +77,8 @@ public class AuthorizationController {
 	 * @return
 	 */
 	public boolean canCreate(PAuthorizedObject targetObject, User user) {
-		
-		// if no user provided, always deny permissions!
-		if (user == null) {
-			return false;
-		}
-		if (user.equals(systemUser)) {
-			return true;
-		}
-		
-		if (targetObject instanceof User) {
-			User u = (User) targetObject;
-			if (u.getUsername() != null && u.getUsername().equals("admin") && !user.getUsername().equalsIgnoreCase("admin")) {
-				return false;
-			}
-		}
-
-		if (targetObject instanceof Company && !checkCompanyPermission(targetObject, user)) {
-			// User must not create foreign companies!
-			return false;
-		}
+		Boolean x = canCreatePreCheck(targetObject, user);
+		if (x != null) return x;
 
 		String absoluteObjectType = targetObject.getClass().getCanonicalName();
 		for (Role role : user.getRoles()) {
@@ -114,14 +96,7 @@ public class AuthorizationController {
 		return false;
 	}
 
-	/**
-	 * Generally check create permission of {@link User} for a given {@link Department}
-	 * 
-	 * @param departmentId
-	 * @param user
-	 * @return
-	 */
-	public boolean canCreate(int departmentId, PAuthorizedObject targetObject, User user) {
+	private Boolean canCreatePreCheck(PAuthorizedObject targetObject, User user) {
 		// if no user provided, always deny permissions!
 		if (user == null) {
 			return false;
@@ -129,7 +104,7 @@ public class AuthorizationController {
 		if (user.equals(systemUser)) {
 			return true;
 		}
-		
+
 		if (targetObject instanceof User) {
 			User u = (User) targetObject;
 			if (u.getUsername() != null && u.getUsername().equals("admin") && !user.getUsername().equalsIgnoreCase("admin")) {
@@ -141,6 +116,19 @@ public class AuthorizationController {
 			// User must not create foreign companies!
 			return false;
 		}
+		return null;
+	}
+
+	/**
+	 * Generally check create permission of {@link User} for a given {@link Department}
+	 * 
+	 * @param departmentId
+	 * @param user
+	 * @return
+	 */
+	public boolean canCreate(int departmentId, PAuthorizedObject targetObject, User user) {
+		Boolean x = canCreatePreCheck(targetObject, user);
+		if (x != null) return x;
 
 		String absoluteObjectType = targetObject.getClass().getCanonicalName();
 		for (Role role : user.getRoles()) {
@@ -327,8 +315,7 @@ public class AuthorizationController {
 		Department dept = user.getDepartment();
 		// User must not read foreign companies!
 		if (dept != null) {
-			final boolean b = dept.getCompany().getId() == comp.getId();
-			return b;
+			return dept.getCompany().getId() == comp.getId();
 		} else {
 			return true;
 		}

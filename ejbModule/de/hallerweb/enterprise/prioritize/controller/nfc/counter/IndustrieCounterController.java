@@ -15,22 +15,21 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.nfc.counter;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
 import de.hallerweb.enterprise.prioritize.controller.nfc.NFCUnitController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.model.nfc.NFCUnit;
 import de.hallerweb.enterprise.prioritize.model.nfc.PCounter;
 import de.hallerweb.enterprise.prioritize.model.nfc.counter.IndustrieCounter;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Stateless
 public class IndustrieCounterController implements Serializable {
@@ -65,11 +64,9 @@ public class IndustrieCounterController implements Serializable {
 			IndustrieCounter existingCounter = getIndustrieCounter(uuid);
 			if (existingCounter == null) {
 
-				switch (type) {
-				case NFC:
+				if (type == CounterType.NFC) {
 					embeddedCounter = nfcUnitController.createNFCCounterWithUUID(uuid);
-					break;
-				default:
+				} else {
 					embeddedCounter = nfcUnitController.createNFCCounterWithUUID(uuid);
 				}
 
@@ -88,13 +85,10 @@ public class IndustrieCounterController implements Serializable {
 	public IndustrieCounter createCounter(long initialValue, CounterType type) {
 		PCounter embeddedCounter;
 
-		switch (type) {
-		case NFC:
+		if (type == CounterType.NFC) {
 			embeddedCounter = nfcUnitController.createNFCCounter();
 			embeddedCounter.setValue(initialValue);
-			break;
-
-		default:
+		} else {
 			embeddedCounter = nfcUnitController.createNFCCounter();
 			embeddedCounter.setValue(initialValue);
 		}
@@ -161,10 +155,9 @@ public class IndustrieCounterController implements Serializable {
 	public List<IndustrieCounter> getAllCounters(User sessionUser) {
 		if (authController.canRead(new IndustrieCounter(), sessionUser)) {
 			Query q = em.createNamedQuery("findAllIndustrieCounters");
-			List<IndustrieCounter> counters = q.getResultList();
-			return counters;
+			return q.getResultList();
 		} else {
-			return new ArrayList<IndustrieCounter>();
+			return new ArrayList<>();
 		}
 	}
 

@@ -78,10 +78,10 @@ public class NFCUnitController implements Serializable {
 		unit.setLastConnectedDevice(device);
 		unit.setLastConnectedTime(new Date());
 		unit.setPayload(payload);
-		if (payload != null) {
-			unit.setPayloadSize(payload.length());
-		} else {
+		if (payload == null) {
 			unit.setPayloadSize(0);
+		} else {
+			unit.setPayloadSize(payload.length());
 		}
 		em.persist(unit);
 		return unit;
@@ -104,15 +104,16 @@ public class NFCUnitController implements Serializable {
 
 	public String readPayload(String uuid, long sequenceNumber) {
 		NFCUnit unit = findNFCUnitByUUID(uuid);
-		if (unit != null) {
+		if (unit == null) {
+		return "";
+		} else {
 			if (sequenceNumber == unit.getSequenceNumber()) {
 				return unit.getPayload();
 			} else {
 				// If sequence number does not match (tampered with?) do NOT return payload data!
 				return "";
 			}
-		} else
-			return "";
+		}
 	}
 
 	public void writePayload(String uuid, String payload, Resource device) {

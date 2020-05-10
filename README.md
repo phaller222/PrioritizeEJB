@@ -9,6 +9,8 @@
 **NEW: REST API docs now available (First version):**
 [Prioritize REST apiDocs](http://www.prioritize-iot.de/apiDoc) - Prioritize REST apiDocs
 
+**Binaries can be found here: http://www.prioritize-iot.de/download**
+
 **IMPORTANT: This project consists of two projects:**
 
 [PrioritizeEJB](https://github.com/phaller222/PrioritizeEJB.git) - model and controller classes for the backend

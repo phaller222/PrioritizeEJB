@@ -16,10 +16,6 @@
 package de.hallerweb.enterprise.prioritize.model.search;
 
 public  final class SearchResultType {
-	private SearchResultType() {
-		super();
-	}
-	
 	public static final String DOCUMENT = "Document";
 	public static final String DOCUMENTINFO = "DocumentInfo";
 	public static final String RESOURCE = "Resource";
@@ -27,4 +23,8 @@ public  final class SearchResultType {
 	public static final String ROLE = "Role";
 	public static final String DEPARTMENT = "Department";
 	public static final String SKILL = "Skill";
+	private SearchResultType() {
+		super();
+	}
+
 }

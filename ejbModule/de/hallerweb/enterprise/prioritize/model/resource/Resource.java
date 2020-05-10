@@ -147,13 +147,13 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 	public List<SearchResult> find(String phrase) {
 		ArrayList<SearchResult> results = new ArrayList<>();
 		// Search document name
-		if (name.toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
+		if (name.toLowerCase().contains(phrase.toLowerCase())) {
 			// Match found
 			SearchResult result = generateResult();
 			results.add(result);
 			return results;
 		}
-		if (this.description.toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
+		if (this.description.toLowerCase().contains(phrase.toLowerCase())) {
 			// Match found
 			SearchResult result = generateResult();
 			results.add(result);
@@ -183,7 +183,7 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 		result.setResultType(SearchResultType.RESOURCE);
 		result.setExcerpt(name + " : " + this.getDescription());
 		result.setProvidesExcerpt(true);
-		result.setSubresults(new HashSet<SearchResult>());
+		result.setSubresults(new HashSet<>());
 		return result;
 	}
 
@@ -375,10 +375,10 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 	}
 
 	public String getMqttDataReceivedAsString() {
-		if (mqttDataReceived != null) {
-			return new String(mqttDataReceived);
-		} else {
+		if (mqttDataReceived == null) {
 			return "";
+		} else {
+			return new String(mqttDataReceived);
 		}
 	}
 
@@ -396,10 +396,10 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 	 * @return
 	 */
 	public String getMqttDataSentAsString() {
-		if (mqttDataToSend != null) {
-			return new String(mqttDataToSend);
-		} else {
+		if (mqttDataToSend == null) {
 			return "";
+		} else {
+			return new String(mqttDataToSend);
 		}
 	}
 
@@ -438,13 +438,7 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 	@Override
 	public int compareTo(Object obj) {
 		Resource res = (Resource) obj;
-		if (res.getId() == id) {
-			return 0;
-		} else if (res.getId() > id) {
-			return -1;
-		} else {
-			return 1;
-		}
+		return Integer.compare(id, res.getId());
 	}
 
 	@Override

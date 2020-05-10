@@ -88,10 +88,7 @@ public class DocumentController extends PEventConsumerProducer {
 		if (managedDocumentGroup == null) {
 			return null;
 		}
-		if (findDocumentInfoByGroupAndName(managedDocumentGroup.getId(), name, user) != null) {
-			return null;
-		} else {
-
+		if (findDocumentInfoByGroupAndName(managedDocumentGroup.getId(), name, user) == null) {
 			// Then create the Document
 			Document document = new Document();
 			document.setName(name);
@@ -129,6 +126,8 @@ public class DocumentController extends PEventConsumerProducer {
 			} else {
 				return null;
 			}
+		} else {
+			return null;
 		}
 	}
 
@@ -136,9 +135,7 @@ public class DocumentController extends PEventConsumerProducer {
 		// first get department and check if group (directory) already exists
 		Department managedDepartment = em.find(Department.class, departmentId);
 
-		if (findDocumentGroupByNameAndDepartment(managedDepartment.getId(), name, user) != null) {
-			return null;
-		} else {
+		if (findDocumentGroupByNameAndDepartment(managedDepartment.getId(), name, user) == null) {
 
 			// Create DocumentGroup and return
 			DocumentGroup documentGroup = new DocumentGroup();
@@ -161,6 +158,8 @@ public class DocumentController extends PEventConsumerProducer {
 			} else {
 				return null;
 			}
+		} else {
+			return null;
 		}
 	}
 
@@ -169,15 +168,15 @@ public class DocumentController extends PEventConsumerProducer {
 		query.setParameter("dgid", documentGroupId);
 
 		List<DocumentInfo> result = (List<DocumentInfo>) query.getResultList();
-		if (!result.isEmpty()) {
+		if (result.isEmpty()) {
+			return new ArrayList<>();
+		} else {
 			// ------------- AUTH check ----------------
 			if (authController.canRead(result.get(0), user)) {
 				return result;
 			} else {
 				return new ArrayList<>();
 			}
-		} else {
-			return new ArrayList<>();
 		}
 	}
 

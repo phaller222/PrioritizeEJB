@@ -346,10 +346,10 @@ public class ProjectController extends PEventConsumerProducer {
 
 		@SuppressWarnings("unchecked")
 		List<ProjectGoal> result = query.getResultList();
-		if (!result.isEmpty()) {
-			return result;
-		} else {
+		if (result.isEmpty()) {
 			return new ArrayList<>();
+		} else {
+			return result;
 		}
 	}
 

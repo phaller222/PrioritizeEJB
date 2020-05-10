@@ -15,7 +15,11 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.calendar;
 
-import java.util.List;
+import de.hallerweb.enterprise.prioritize.controller.LoggingController;
+import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
+import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
+import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan.TimeSpanType;
+import de.hallerweb.enterprise.prioritize.model.security.User;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -23,12 +27,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-
-import de.hallerweb.enterprise.prioritize.controller.LoggingController;
-import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
-import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan.TimeSpanType;
-import de.hallerweb.enterprise.prioritize.model.security.User;
+import java.util.List;
 
 /**
  * CalendarController.java 
@@ -55,10 +54,10 @@ public class CalendarController {
 		Query query = em.createNamedQuery("findTimeSpansByUser");
 		query.setParameter("user", user);
 		List<TimeSpan> timespans = query.getResultList();
-		if (!timespans.isEmpty()) {
-			return timespans;
-		} else {
+		if (timespans.isEmpty()) {
 			return null;
+		} else {
+			return timespans;
 		}
 	}
 
@@ -67,10 +66,10 @@ public class CalendarController {
 		query.setParameter("user", user);
 		query.setParameter("type", type);
 		List<TimeSpan> timespans = query.getResultList();
-		if (!timespans.isEmpty()) {
-			return timespans;
-		} else {
+		if (timespans.isEmpty()) {
 			return null;
+		} else {
+			return timespans;
 		}
 	}
 

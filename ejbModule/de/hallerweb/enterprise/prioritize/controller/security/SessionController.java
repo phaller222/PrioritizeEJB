@@ -15,14 +15,14 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.security;
 
+import de.hallerweb.enterprise.prioritize.model.security.User;
+
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateful;
 import javax.enterprise.context.SessionScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
-import de.hallerweb.enterprise.prioritize.model.security.User;
 
 /**
  * Session Bean implementation class SessionController. Holds information of the current logged in user.
@@ -32,24 +32,22 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @LocalBean
 public class SessionController {
 
-	private User user;
+    private User user;
 
-	@PersistenceContext
-	EntityManager em;
-	@EJB
-	UserRoleController controller;
+    @PersistenceContext
+    EntityManager em;
+    @EJB
+    UserRoleController controller;
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-	public User getUser() {
-		if (user != null) {
-			User sessionUser = em.find(User.class, user.getId());
-			return sessionUser;
-		} else {
-			return null;
-		}
-	}
-
+    public User getUser() {
+        if (user == null) {
+            return null;
+        } else {
+            return em.find(User.class, user.getId());
+        }
+    }
 }

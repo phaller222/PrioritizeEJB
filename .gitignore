@@ -1,6 +1,6 @@
 /build/
 /target/
-/ejbModule/META-INF/persistence.xml
+/WebContent/META-INF/persistence.xml
 .idea/compiler.xml
 .idea/encodings.xml
 .idea/jarRepositories.xml

@@ -58,7 +58,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @Stateless
 public class DocumentController extends PEventConsumerProducer {
 
-	@PersistenceContext(unitName = "Prioritze")
+	@PersistenceContext
 	EntityManager em;
 	@EJB
 	UserRoleController userRoleController;

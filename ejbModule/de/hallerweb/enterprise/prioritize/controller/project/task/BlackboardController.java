@@ -41,7 +41,7 @@ import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 @Stateless
 public class BlackboardController extends PEventConsumerProducer {
 
-	@PersistenceContext(unitName = "Prioritze")
+	@PersistenceContext
 	EntityManager em;
 
 	@EJB

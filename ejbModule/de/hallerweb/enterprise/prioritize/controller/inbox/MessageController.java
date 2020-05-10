@@ -40,7 +40,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @Stateless
 public class MessageController {
 
-	@PersistenceContext(unitName = "Prioritze")
+	@PersistenceContext
 	EntityManager em;
 
 	@EJB

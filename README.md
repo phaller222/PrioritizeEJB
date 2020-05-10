@@ -94,7 +94,7 @@ By default the following datasource configuration is used assuming that there is
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
-	<persistence-unit name="Prioritze">
+	<persistence-unit name="Prioritize">
 	 <jta-data-source>java:jboss/datasources/MySqlDS</jta-data-source>
 	 <properties>
       <!-- Properties for Hibernate -->

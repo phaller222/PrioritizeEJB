@@ -38,7 +38,7 @@ import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 @Stateless
 public class NFCUnitController implements Serializable {
 
-	@PersistenceContext(unitName = "Prioritze")
+	@PersistenceContext
 	EntityManager em;
 
 	@EJB

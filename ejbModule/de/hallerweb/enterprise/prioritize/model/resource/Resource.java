@@ -58,7 +58,7 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
  * Peter Haller
  * </p>
  * 
- * @author peter
+ * @author peter haller
  * 
  */
 
@@ -83,7 +83,6 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 	public static final String PROPERTY_MQTTONLINE = "mqttOnline";
 
 	private String name; // Name of the resource.
-	@Column(length = 65535)
 	private String description; // Human readable description of the resource.
 	private boolean isStationary; // Is the resource bound to a specific location?
 	private boolean isRemote; // Can the resource be accessed remotely (e.G. IP Address?)

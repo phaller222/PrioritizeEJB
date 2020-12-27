@@ -60,12 +60,12 @@ public class TimeSpan implements PAuthorizedObject {
 	}
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	int id;
 
 	private String title;
 
-	@Column(length = 3000)
+
 	private String description;
 
 	@ManyToMany(fetch = FetchType.EAGER)

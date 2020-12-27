@@ -63,7 +63,7 @@ public class Skill implements PAuthorizedObject, PSearchable {
 
 	String name;
 
-	@Column(length = 3000)
+
 	String description;
 
 	@OneToOne

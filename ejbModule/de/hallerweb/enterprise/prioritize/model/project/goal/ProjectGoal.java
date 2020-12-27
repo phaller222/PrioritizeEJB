@@ -16,7 +16,9 @@
 package de.hallerweb.enterprise.prioritize.model.project.goal;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -51,7 +53,7 @@ public class ProjectGoal {
 	ProjectGoalCategory category;
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "projectGoal", cascade = CascadeType.ALL)
-	List<ProjectGoalProperty> properties;
+	Set<ProjectGoalProperty> properties;
 
 	public ProjectGoalCategory getCategory() {
 		return category;
@@ -77,17 +79,17 @@ public class ProjectGoal {
 		this.description = description;
 	}
 
-	public List<ProjectGoalProperty> getProperties() {
+	public Set<ProjectGoalProperty> getProperties() {
 		return properties;
 	}
 
-	public void setProperties(List<ProjectGoalProperty> properties) {
+	public void setProperties(Set<ProjectGoalProperty> properties) {
 		this.properties = properties;
 	}
 
 	public void addProjectGoalProperty(ProjectGoalProperty prop) {
 		if (this.properties == null) {
-			this.properties = new ArrayList<>();
+			this.properties = new HashSet<>();
 		}
 		this.properties.add(prop);
 	}

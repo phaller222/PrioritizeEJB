@@ -39,7 +39,7 @@ import de.hallerweb.enterprise.prioritize.model.PObject;
 public class EventListener {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	int id;
 	
 	@OneToOne

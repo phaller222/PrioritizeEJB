@@ -82,7 +82,7 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 
 	String name;
 
-	@Column(length = 3000)
+
 	String description;
 
 	@JsonIgnore
@@ -94,13 +94,13 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 	public List<SearchResult> find(String phrase) {
 		ArrayList<SearchResult> results = new ArrayList<>();
 		// Search document name
-		if (name.toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
+		if (name.toLowerCase().contains(phrase.toLowerCase())) {
 			// Match found
 			SearchResult result = generateResult();
 			results.add(result);
 			return results;
 		}
-		if (description.toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
+		if (description.toLowerCase().contains(phrase.toLowerCase())) {
 			SearchResult result = generateResult();
 			results.add(result);
 		}
@@ -129,7 +129,7 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 		result.setResultType(SearchResultType.DEPARTMENT);
 		result.setExcerpt(name + " : " + description + " Company: " + this.getCompany().getName());
 		result.setProvidesExcerpt(true);
-		result.setSubresults(new HashSet<SearchResult>());
+		result.setSubresults(new HashSet<>());
 		return result;
 	}
 
@@ -162,16 +162,13 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 	public void addDocumentGroup(DocumentGroup documentGroup) {
 		if (this.documentGroups.isEmpty()) {
 			documentGroups.add(documentGroup);
-			return;
 		} else {
 			for (DocumentGroup g : documentGroups) {
 				if (g.getId() == documentGroup.getId()) {
 					return;
 				}
 			}
-			if (!documentGroups.contains(documentGroup)) {
-				documentGroups.add(documentGroup);
-			}
+			documentGroups.add(documentGroup);
 		}
 
 	}
@@ -187,16 +184,13 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 	public void addResourceGroup(ResourceGroup resourceGroup) {
 		if (this.resourceGroups.isEmpty()) {
 			resourceGroups.add(resourceGroup);
-			return;
 		} else {
 			for (ResourceGroup g : resourceGroups) {
 				if (g.getId() == resourceGroup.getId()) {
 					return;
 				}
 			}
-			if (!resourceGroups.contains(resourceGroup)) {
-				resourceGroups.add(resourceGroup);
-			}
+			resourceGroups.add(resourceGroup);
 		}
 
 	}

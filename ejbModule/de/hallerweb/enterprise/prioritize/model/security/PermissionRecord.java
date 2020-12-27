@@ -45,7 +45,7 @@ import de.hallerweb.enterprise.prioritize.model.Department;
 public class PermissionRecord implements PAuthorizedObject {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	int id;
 
 	boolean createPermission;
@@ -134,7 +134,7 @@ public class PermissionRecord implements PAuthorizedObject {
 
 	private void setObjectNameFromAbsoluteObjectType() {
 		if (this.absoluteObjectType != null) {
-		this.objectName = this.absoluteObjectType.substring(this.absoluteObjectType.lastIndexOf('.') + 1, this.absoluteObjectType.length());
+		this.objectName = this.absoluteObjectType.substring(this.absoluteObjectType.lastIndexOf('.') + 1);
 		}
 	}
 

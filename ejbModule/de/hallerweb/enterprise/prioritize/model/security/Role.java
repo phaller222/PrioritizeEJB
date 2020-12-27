@@ -56,7 +56,6 @@ public class Role extends PActor implements PAuthorizedObject, PSearchable {
 
 	String name;
 
-	@Column(length = 3000)
 	String description;
 
 	@OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
@@ -73,7 +72,7 @@ public class Role extends PActor implements PAuthorizedObject, PSearchable {
 		result.setResultType(SearchResultType.ROLE);
 		result.setExcerpt(name + " : " + this.getDescription());
 		result.setProvidesExcerpt(true);
-		result.setSubresults(new HashSet<SearchResult>());
+		result.setSubresults(new HashSet<>());
 		return result;
 	}
 
@@ -81,13 +80,13 @@ public class Role extends PActor implements PAuthorizedObject, PSearchable {
 	public List<SearchResult> find(String phrase) {
 		ArrayList<SearchResult> results = new ArrayList<>();
 		// Search role name
-		if (name.toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
+		if (name.toLowerCase().contains(phrase.toLowerCase())) {
 			// Match found
 			SearchResult result = generateResult();
 			results.add(result);
 			return results;
 		}
-		if (this.description != null && this.description.toLowerCase().indexOf(phrase.toLowerCase()) != -1) {
+		if (this.description != null && this.description.toLowerCase().contains(phrase.toLowerCase())) {
 			// Match found
 			SearchResult result = generateResult();
 			results.add(result);

@@ -59,7 +59,7 @@ public class Company implements PAuthorizedObject {
 
 	String name;
 
-	@Column(length = 3000)
+
 	String description;
 
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)

@@ -34,7 +34,7 @@ import javax.persistence.NamedQuery;
 public class ObservedObjectType {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	int id;
 
 	String objectType;
@@ -53,7 +53,7 @@ public class ObservedObjectType {
 	
 	@Override
 	public String toString() {
-		return objectType.substring(objectType.lastIndexOf('.') + 1,objectType.length());
+		return objectType.substring(objectType.lastIndexOf('.') + 1);
 	}
 
 }

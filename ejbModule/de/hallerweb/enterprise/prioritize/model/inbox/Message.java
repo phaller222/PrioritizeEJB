@@ -64,8 +64,6 @@ public class Message {
 	@OneToOne
 	User to;
 
-	@JsonIgnore
-	@Column(length = 65535)
 	String content;
 
 	@Version

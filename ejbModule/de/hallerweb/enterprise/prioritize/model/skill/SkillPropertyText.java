@@ -36,7 +36,7 @@ import javax.persistence.InheritanceType;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class SkillPropertyText extends SkillProperty implements SkillType {
 
-	@Column(length = 3000)
+
 	private String text;
 	private String type;
 

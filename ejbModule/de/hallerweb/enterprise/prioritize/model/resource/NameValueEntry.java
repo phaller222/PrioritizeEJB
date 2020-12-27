@@ -39,7 +39,7 @@ public class NameValueEntry implements Comparable<Object> {
 	@Id
 	@GeneratedValue
 	int id;
-	@Column(length = 65535)
+
 	private String mqttValues; // comma separated mqttValues (if historic data).
 	private String mqttName; // Name of the mqttName/value pair.
 

@@ -64,7 +64,7 @@ public class SkillCategory implements PAuthorizedObject, SkillType {
 	String name;
 	String qualifiedName;
 
-	@Column(length = 3000)
+
 	String description;
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)

@@ -15,26 +15,20 @@
  */
 package de.hallerweb.enterprise.prioritize.view.skill;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
+import de.hallerweb.enterprise.prioritize.controller.skill.SkillController;
+import de.hallerweb.enterprise.prioritize.model.skill.*;
+import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 
 import javax.annotation.ManagedBean;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.skill.SkillController;
-import de.hallerweb.enterprise.prioritize.model.skill.Skill;
-import de.hallerweb.enterprise.prioritize.model.skill.SkillCategory;
-import de.hallerweb.enterprise.prioritize.model.skill.SkillProperty;
-import de.hallerweb.enterprise.prioritize.model.skill.SkillPropertyNumeric;
-import de.hallerweb.enterprise.prioritize.model.skill.SkillPropertyText;
-import de.hallerweb.enterprise.prioritize.service.mqtt.MQTTService;
-import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * NewSkillBean - JSF Backing-Bean to manage new skills
@@ -57,8 +51,6 @@ public class NewSkillBean implements Serializable {
 	SkillController skillController;
 	@Inject
 	SessionController sessionController;
-	@Inject
-	MQTTService service;
 
 	String selectedSkillCategoryId;
 	transient Skill newSkill;

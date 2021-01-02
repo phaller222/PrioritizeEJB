@@ -15,24 +15,8 @@
  */
 package de.hallerweb.enterprise.prioritize.model;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
@@ -40,6 +24,12 @@ import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResultType;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * JPA entity to represent a {@link Department} of a {@link Company}. A Department has a key role in the Prioritize authorization mechanism.
@@ -160,9 +150,8 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 	}
 
 	public void addDocumentGroup(DocumentGroup documentGroup) {
-		if (this.documentGroups.isEmpty()) {
-			documentGroups.add(documentGroup);
-		} else {
+		if (this.documentGroups.isEmpty()) documentGroups.add(documentGroup);
+		else {
 			for (DocumentGroup g : documentGroups) {
 				if (g.getId() == documentGroup.getId()) {
 					return;

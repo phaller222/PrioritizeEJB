@@ -123,12 +123,11 @@ public class CompanyBean implements Serializable {
 			Company createdCompany = controller.createCompany(company.getName(), adr, sessionController.getUser());
 			controller.createDepartment(createdCompany, "default", "Auto generated default department", adr, sessionController.getUser());
 
-			return NAVIGATION_COMPANIES;
 		} else {
 			ViewUtilities.addErrorMessage("name",
 					"A company with name " + company.getName() + " already exists. Company has not been created!");
-			return NAVIGATION_COMPANIES;
 		}
+		return NAVIGATION_COMPANIES;
 	}
 
 	@Named

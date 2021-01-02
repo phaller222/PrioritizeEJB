@@ -654,20 +654,16 @@ public class ResourceService {
 	}
 
 	private boolean handleSetCommands(Resource resource, String commands) {
-		boolean processed;
-		processed = true;
 		String[] commandString = commands.split(":");
 		HashSet<String> commandsForResource = new HashSet<>();
 		Collections.addAll(commandsForResource, commandString);
 		resourceController.raiseEvent(resource, "commands", resource.getMqttCommands().toString(), commands,
 				initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		mqttResourceController.setCommands(resource, commandsForResource);
-		return processed;
+		return true;
 	}
 
 	private boolean handleSetNameValuePairs(Resource resource, String set) {
-		boolean processed;
-		processed = true;
 		String[] nameValuePair = set.split(":");
 
 		// ----------------- Raise event for value change
@@ -683,7 +679,7 @@ public class ResourceService {
 		// ------------------------------------------------------
 
 		mqttResourceController.addMqttValueForResource(resource, nameValuePair[0], nameValuePair[1]);
-		return processed;
+		return true;
 	}
 
 

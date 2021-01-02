@@ -15,7 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.view.document;
 
-import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 
 public class DocumentTreeInfo {
@@ -52,10 +51,6 @@ public class DocumentTreeInfo {
 		this.documentInfo = info;
 		this.documentGroupId = documentGroupId;
 		this.documentGroupNode = isDocumentGroupNode;
-//		if (info == null) {
-//			info = new DocumentInfo();
-//			info.setCurrentDocument(new Document());
-//		}
 	}
 
 }

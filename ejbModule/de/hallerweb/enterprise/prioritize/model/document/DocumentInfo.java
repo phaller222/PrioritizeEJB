@@ -75,7 +75,7 @@ public class DocumentInfo extends PObject implements PAuthorizedObject, PSearcha
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@OrderBy(value = "version")
-	private SortedSet<Document> recentDocuments;
+	private Set<Document> recentDocuments;
 
 	private boolean locked;
 

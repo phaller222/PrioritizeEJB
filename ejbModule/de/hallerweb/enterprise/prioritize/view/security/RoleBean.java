@@ -188,7 +188,7 @@ public class RoleBean implements Serializable {
 
 			// Set department only if permission record is not set for ALL departments!
 			if (selectedDepartmentId != null) {
-				Department d = companyController.findDepartmentById(Integer.valueOf(selectedDepartmentId));
+				Department d = companyController.findDepartmentById(Integer.parseInt(selectedDepartmentId));
 				rec.setDepartment(d);
 			}
 
@@ -197,11 +197,10 @@ public class RoleBean implements Serializable {
 
 			controller.createRole(role.getName(), role.getDescription(), role.getPermissions(), sessionController.getUser());
 			init();
-			return NAVIGATION_ROLES;
 		} else {
 			ViewUtilities.addErrorMessage("rolename", "The Rolename " + role.getName() + " already exists. Role has not been created!");
-			return NAVIGATION_ROLES;
 		}
+		return NAVIGATION_ROLES;
 	}
 
 	@Named
@@ -264,7 +263,7 @@ public class RoleBean implements Serializable {
 
 		// Only set department if record is for a specific department
 		if (selectedDepartmentId != null) {
-			Department d = companyController.findDepartmentById(Integer.valueOf(selectedDepartmentId));
+			Department d = companyController.findDepartmentById(Integer.parseInt(selectedDepartmentId));
 			rec.setDepartment(d);
 		}
 

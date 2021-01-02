@@ -28,8 +28,7 @@ import de.hallerweb.enterprise.prioritize.model.nfc.PCounter;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 
 @Entity
-@NamedQueries({ @NamedQuery(name = "findAllIndustrieCounters", query = "select ic FROM IndustrieCounter ic"),
-		@NamedQuery(name = "findIndustrieCounterByUUID", query = "select ic FROM IndustrieCounter ic WHERE ic.counter.uuid = :uuid") })
+@NamedQueries({ @NamedQuery(name = "findAllIndustrieCounters", query = "select ic FROM IndustrieCounter ic")})
 public class IndustrieCounter implements PAuthorizedObject {
 
 	@Id

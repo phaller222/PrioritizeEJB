@@ -15,21 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.view.skill;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.primefaces.event.NodeCollapseEvent;
-import org.primefaces.event.NodeExpandEvent;
-import org.primefaces.model.DefaultTreeNode;
-
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
@@ -37,14 +22,19 @@ import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController
 import de.hallerweb.enterprise.prioritize.controller.skill.SkillController;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
-import de.hallerweb.enterprise.prioritize.model.skill.Skill;
-import de.hallerweb.enterprise.prioritize.model.skill.SkillCategory;
-import de.hallerweb.enterprise.prioritize.model.skill.SkillProperty;
-import de.hallerweb.enterprise.prioritize.model.skill.SkillPropertyNumeric;
-import de.hallerweb.enterprise.prioritize.model.skill.SkillPropertyText;
-import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
-import de.hallerweb.enterprise.prioritize.model.skill.SkillRecordProperty;
-import de.hallerweb.enterprise.prioritize.service.mqtt.MQTTService;
+import de.hallerweb.enterprise.prioritize.model.skill.*;
+import org.primefaces.event.NodeCollapseEvent;
+import org.primefaces.event.NodeExpandEvent;
+import org.primefaces.model.DefaultTreeNode;
+
+import javax.ejb.EJB;
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * SkillBean - JSF Backing-Bean to manage skills
@@ -72,8 +62,6 @@ public class SkillBean implements Serializable {
 	UserRoleController roleController;
 	@EJB
 	ResourceController resourceController;
-	@Inject
-	MQTTService service;
 
 	transient SkillCategory selectedSkillCategory;
 	transient Skill selectedSkill;

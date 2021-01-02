@@ -345,7 +345,7 @@ public class DocumentService {
             if (dept == null) {
                 throw new NotAuthorizedException(Response.serverError());
             } else {
-                DocumentInfo docInfo = null;
+                DocumentInfo docInfo ;
                 try {
                     docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
                 } catch (Exception ex) {

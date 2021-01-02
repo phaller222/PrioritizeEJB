@@ -15,26 +15,22 @@
  */
 package de.hallerweb.enterprise.prioritize.view.project;
 
-import java.io.Serializable;
-import java.util.List;
+import de.hallerweb.enterprise.prioritize.controller.project.ProjectController;
+import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
+import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
+import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoal;
+import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalCategory;
+import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalProperty;
+import org.primefaces.event.NodeCollapseEvent;
+import org.primefaces.event.NodeExpandEvent;
+import org.primefaces.model.DefaultTreeNode;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.primefaces.event.NodeCollapseEvent;
-import org.primefaces.event.NodeExpandEvent;
-import org.primefaces.model.DefaultTreeNode;
-
-import de.hallerweb.enterprise.prioritize.controller.project.ProjectController;
-import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
-import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
-import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoal;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalCategory;
-import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalProperty;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * ProjectGoalBean - JSF Backing-Bean to manage project goals.
@@ -54,14 +50,8 @@ public class ProjectGoalBean implements Serializable {
 
 	@EJB
 	ProjectController controller;
-	@EJB
-	AuthorizationController authController;
 	@Inject
 	SessionController sessionController;
-	@EJB
-	UserRoleController roleController;
-	@EJB
-	ResourceController resourceController;
 
 	transient ProjectGoalCategory selectedProjectGoalCategory;
 	transient Object selectedGoal;

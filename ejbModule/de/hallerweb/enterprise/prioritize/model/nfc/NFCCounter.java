@@ -43,7 +43,7 @@ public class NFCCounter extends PCounter {
 	@Override
 	public long getValue() {
 		String payload = nfcUnit.getPayload();
-		if (payload != null && StringUtils.isNumeric(payload)) {
+		if (StringUtils.isNumeric(payload)) {
 			return Long.parseLong(payload);
 		} else {
 			return -1;
@@ -58,7 +58,7 @@ public class NFCCounter extends PCounter {
 	@Override
 	public void incCounter() {
 		String payload = nfcUnit.getPayload();
-		if (payload != null && StringUtils.isNumeric(payload)) {
+		if (StringUtils.isNumeric(payload)) {
 			long newValue = Long.parseLong(payload) + 1;
 			System.out.println("SET: " + newValue);
 			nfcUnit.setPayload(String.valueOf(newValue));
@@ -68,7 +68,7 @@ public class NFCCounter extends PCounter {
 	@Override
 	public void decCounter() {
 		String payload = nfcUnit.getPayload();
-		if (payload != null && StringUtils.isNumeric(payload)) {
+		if (StringUtils.isNumeric(payload)) {
 			long newValue = Long.parseLong(payload) - 1;
 			nfcUnit.setPayload(String.valueOf(newValue));
 		}

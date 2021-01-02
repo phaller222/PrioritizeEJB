@@ -178,7 +178,7 @@ public class UserBean implements Serializable {
 	}
 
 	public void clearRoles() {
-		user.setRoles(new HashSet<Role>());
+		user.setRoles(new HashSet<>());
 	}
 
 	@Produces
@@ -207,15 +207,15 @@ public class UserBean implements Serializable {
 			Department department = null;
 
 			if (selectedDepartmentId != null && !selectedDepartmentId.isEmpty()) {
-				department = companyController.findDepartmentById(Integer.valueOf(selectedDepartmentId));
+				department = companyController.findDepartmentById(Integer.parseInt(selectedDepartmentId));
 				user.setDepartment(department);
 			}
 
 			if (selectedRolesId != null && !selectedRolesId.isEmpty()) {
-				Role role = null;
+				Role role;
 				for (Object roleId : selectedRolesId) {
 					if (roleId instanceof String) {
-						role = controller.findRoleById(Integer.valueOf((String) roleId));
+						role = controller.findRoleById(Integer.parseInt((String) roleId));
 					} else {
 						role = controller.findRoleById((Integer)roleId);
 					}
@@ -226,11 +226,10 @@ public class UserBean implements Serializable {
 			controller.createUser(user, department, user.getRoles(), sessionController.getUser());
 
 			init();
-			return NAVIGATION_USERS;
 		} else {
 			ViewUtilities.addErrorMessage("username", "The username " + user.getUsername() + " already exists. User has not been created!");
-			return NAVIGATION_USERS;
 		}
+		return NAVIGATION_USERS;
 	}
 
 	@Named
@@ -242,7 +241,7 @@ public class UserBean implements Serializable {
 
 	@Named
 	public String addRole() {
-		Role r = controller.findRoleById(Integer.valueOf(roleToAddId));
+		Role r = controller.findRoleById(Integer.parseInt(roleToAddId));
 		if (!user.getRoles().contains(r)) {
 			user.addRole(r);
 			controller.addRoleToUser(user.getId(), r.getId(), sessionController.getUser());

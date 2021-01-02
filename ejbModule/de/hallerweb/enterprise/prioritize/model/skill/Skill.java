@@ -15,29 +15,18 @@
  */
 package de.hallerweb.enterprise.prioritize.model.skill;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Version;
-
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
 import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResultType;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * JPA entity to represent a Skill. Skills are assigned to users and can be used to asses possible candidates for an upcoming project.

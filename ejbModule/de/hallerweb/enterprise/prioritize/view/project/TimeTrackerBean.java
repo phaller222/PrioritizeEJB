@@ -38,21 +38,11 @@ import de.hallerweb.enterprise.prioritize.model.project.task.TimeTracker;
 @SessionScoped
 public class TimeTrackerBean implements Serializable {
 
-	@EJB
-	LoggingController log;
 
 	@Inject
 	SessionController sessionController;
-
-	@EJB
-	IndustrieCounterController industrieCounterController;
-
-	@EJB
-	NFCUnitController nfcController;
-
 	@EJB
 	TimeTrackerController timeTrackerController;
-
 	@EJB
 	TaskController taskController;
 

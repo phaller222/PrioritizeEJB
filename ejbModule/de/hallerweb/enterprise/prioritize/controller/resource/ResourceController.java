@@ -68,6 +68,9 @@ public class ResourceController extends PEventConsumerProducer {
 	LoggingController logger;
 	@EJB
 	ResourceReservationController resourceReservationcontroller;
+	@EJB
+	InitializationController initController;
+
 	@Inject
 	MQTTService mqttService;
 	@Inject
@@ -320,7 +323,7 @@ public class ResourceController extends PEventConsumerProducer {
 			if (managedResource.getResourceGroup().getId() != managedGroup.getId()) {
 				this.raiseEvent(managedResource, Resource.PROPERTY_RESOURCEGROUP,
 						String.valueOf(managedResource.getResourceGroup().getId()), String.valueOf(newGroup.getId()),
-						InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+						initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 			}
 
 			managedResource.setName(newName);
@@ -446,7 +449,7 @@ public class ResourceController extends PEventConsumerProducer {
 	}
 
 	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (InitializationController.getAsBoolean(InitializationController.FIRE_RESOURCE_EVENTS)) {
+		if (initController.getAsBoolean(InitializationController.FIRE_RESOURCE_EVENTS)) {
 			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
 					.setPropertyName(name).setLifetime(lifetime).getEvent();
 			eventRegistry.addEvent(evt);

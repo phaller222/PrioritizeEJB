@@ -66,13 +66,15 @@ public class ResourceReservationController extends PEventConsumerProducer {
 	AuthorizationController authController;
 	@EJB
 	LoggingController logger;
+	@EJB
+	InitializationController initController;
 	@Inject
 	MQTTService mqttService;
 	@Inject
 	EventRegistry eventRegistry;
 	
 	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (InitializationController.getAsBoolean(InitializationController.FIRE_RESOURCE_EVENTS)) {
+		if (initController.getAsBoolean(InitializationController.FIRE_RESOURCE_EVENTS)) {
 			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
 					.setPropertyName(name).setLifetime(lifetime).getEvent();
 			eventRegistry.addEvent(evt);
@@ -180,7 +182,7 @@ public class ResourceReservationController extends PEventConsumerProducer {
 
 	public List<ResourceReservation> getResourceReservationsForUser(User user) {
 		Query query = em.createNamedQuery("findResourceReservationsForUser");
-		query.setParameter("UserId", user.getId());
+		query.setParameter("userId", user.getId());
 		return query.getResultList();
 	}
 	

@@ -63,6 +63,9 @@ public class TaskController extends PEventConsumerProducer {
 	@EJB
 	ProjectController projectController;
 
+	@EJB
+	InitializationController initController;
+
 	public Task findTaskById(int id) {
 		Query q = em.createNamedQuery("findTaskById");
 		q.setParameter("taskId", id);
@@ -187,7 +190,7 @@ public class TaskController extends PEventConsumerProducer {
 
 	@Override
 	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (InitializationController.getAsBoolean(InitializationController.FIRE_TASK_EVENTS)) {
+		if (initController.getAsBoolean(InitializationController.FIRE_TASK_EVENTS)) {
 			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
 					.setPropertyName(name).setLifetime(lifetime).getEvent();
 			eventRegistry.addEvent(evt);

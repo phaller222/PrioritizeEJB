@@ -58,6 +58,7 @@ public class LoginBean implements Serializable {
     UserPreferenceController preferenceController;
     @Inject
     SessionController sessionController;
+    @EJB InitializationController initController;
 
     private String username;
     private String password;
@@ -170,7 +171,7 @@ public class LoginBean implements Serializable {
     }
 
     public void initializeNoParamKeycloakSession() {
-        if (Boolean.parseBoolean(InitializationController.getConfig().get(InitializationController.USE_KEYCLOAK_AUTH))) {
+        if (Boolean.parseBoolean(initController.getConfig().get(InitializationController.USE_KEYCLOAK_AUTH))) {
             String userName = username;
             ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
             if (context.getUserPrincipal() != null) {
@@ -191,7 +192,7 @@ public class LoginBean implements Serializable {
     public String logout() {
         sessionController.setUser(null);
         loggedIn = false;
-        if (Boolean.parseBoolean(InitializationController.getConfig().get(InitializationController.USE_KEYCLOAK_AUTH))) {
+        if (Boolean.parseBoolean(initController.getConfig().get(InitializationController.USE_KEYCLOAK_AUTH))) {
             ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
             try {
                 context.redirect("https://localhost:8443/auth/realms/master/protocol/openid-connect/logout?"
@@ -200,7 +201,7 @@ public class LoginBean implements Serializable {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            return InitializationController.getConfig().get(InitializationController.KEYCLOAK_LOGOUT_URL);
+            return initController.getConfig().get(InitializationController.KEYCLOAK_LOGOUT_URL);
         } else {
             return NAVIGATION_LOGIN;
         }

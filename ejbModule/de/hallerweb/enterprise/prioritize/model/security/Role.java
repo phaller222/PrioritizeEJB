@@ -20,13 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
@@ -55,7 +49,6 @@ public class Role extends PActor implements PAuthorizedObject, PSearchable {
 
 
 	String name;
-
 	String description;
 
 	@OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
@@ -63,6 +56,9 @@ public class Role extends PActor implements PAuthorizedObject, PSearchable {
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	Set<User> users;
+
+	@OneToOne
+	Department department;
 
 	transient List<SearchProperty> searchProperties;
 
@@ -167,11 +163,12 @@ public class Role extends PActor implements PAuthorizedObject, PSearchable {
 		this.description = description;
 	}
 
-	/**
-	 * Necessary to be an PAuthorizedObject. Department for Roles always return null here.
-	 */
 	public Department getDepartment() {
-		return null;
+		return department;
+	}
+
+	public void setDepartment(Department department) {
+		this.department = department;
 	}
 
 	@Override

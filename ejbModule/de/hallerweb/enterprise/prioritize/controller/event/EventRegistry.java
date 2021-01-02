@@ -87,7 +87,7 @@ public class EventRegistry {
 
 		// Override Event Strategy value with config
 		try {
-			if (InitializationController.getConfig().get(InitializationController.EVENT_DEFAULT_STRATEGY).equals("IMMEDIATE")) {
+			if (initController.getConfig().get(InitializationController.EVENT_DEFAULT_STRATEGY).equals("IMMEDIATE")) {
 				eventStrategie = EventStrategy.IMMEDIATE;
 			} else {
 				eventStrategie = EventStrategy.DELAYED;

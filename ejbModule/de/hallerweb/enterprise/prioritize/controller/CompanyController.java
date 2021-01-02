@@ -64,6 +64,8 @@ public class CompanyController extends PEventConsumerProducer {
 	UserRoleController userRoleController;
 	@EJB
 	LoggingController logger;
+	@EJB
+	InitializationController initController;
 	@Inject
 	SessionController sessionController;
 	@Inject
@@ -377,18 +379,18 @@ public class CompanyController extends PEventConsumerProducer {
 		if (orig != null && authController.canUpdate(orig, sessionUser)) {
 			try {
 				// Fire events if configured
-				if (InitializationController.getAsBoolean(InitializationController.FIRE_DEPARTMENT_EVENTS)) {
+				if (initController.getAsBoolean(InitializationController.FIRE_DEPARTMENT_EVENTS)) {
 					if (!orig.getName().equals(department.getName())) {
 						this.raiseEvent(orig, Department.PROPERTY_NAME, orig.getName(), department.getName(),
-								InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+								initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 					}
 					if (!orig.getAddress().equals(department.getAddress())) {
 						this.raiseEvent(orig, Department.PROPERTY_ADDRESS, orig.getAddress().toString(), department.getAddress().toString(),
-								InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+								initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 					}
 					if (!orig.getDescription().equals(department.getDescription())) {
 						this.raiseEvent(orig, Department.PROPERTY_DESCRIPTION, orig.getDescription(), department.getDescription(),
-								InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+								initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 					}
 				}
 
@@ -477,7 +479,7 @@ public class CompanyController extends PEventConsumerProducer {
 	}
 
 	public Department getDefaultDepartmentInDefaultCompany() {
-		return findDepartmentById(InitializationController.getDefaultDepartmentId());
+		return findDepartmentById(initController.getDefaultDepartmentId());
 	}
 
 	public Department getDepartmentByToken(String token, User sessionUser) {
@@ -550,7 +552,7 @@ public class CompanyController extends PEventConsumerProducer {
 	}
 
 	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (InitializationController.getAsBoolean(InitializationController.FIRE_DEPARTMENT_EVENTS)) {
+		if (initController.getAsBoolean(InitializationController.FIRE_DEPARTMENT_EVENTS)) {
 			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
 					.setPropertyName(name).setLifetime(lifetime).getEvent();
 			eventRegistry.addEvent(evt);

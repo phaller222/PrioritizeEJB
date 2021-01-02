@@ -74,6 +74,8 @@ public class ResourceService {
 	SessionController sessionController;
 	@EJB
 	AuthorizationController authController;
+	@EJB
+	InitializationController initController;
 
 	/**
 	 * Returns all the resource groups in the given department
@@ -619,7 +621,7 @@ public class ResourceService {
 			boolean online = Boolean.parseBoolean(mqttOnline);
 
 			resourceController.raiseEvent(resource, "mqttOnline", String.valueOf(resource.isMqttOnline()), mqttOnline,
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 
 			mqttResourceController.setMqttResourceStatus(resource, online);
 		}
@@ -627,13 +629,13 @@ public class ResourceService {
 		if (name != null) {
 			processedCopy = true;
 			resourceController.raiseEvent(resource, "name", resource.getName(), name,
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 			resourceController.setResourceName(resource, name, sessionController.getUser());
 		}
 		if (description != null) {
 			processedCopy = true;
 			resourceController.raiseEvent(resource, "description", resource.getDescription(), description,
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 			resourceController.setResourceDescription(resource, description, sessionController.getUser());
 		}
 		if (commands != null) {
@@ -658,7 +660,7 @@ public class ResourceService {
 		HashSet<String> commandsForResource = new HashSet<>();
 		Collections.addAll(commandsForResource, commandString);
 		resourceController.raiseEvent(resource, "commands", resource.getMqttCommands().toString(), commands,
-				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		mqttResourceController.setCommands(resource, commandsForResource);
 		return processed;
 	}
@@ -677,7 +679,7 @@ public class ResourceService {
 			}
 		}
 		resourceController.raiseEvent(resource, nameValuePair[0], oldValue, nameValuePair[1],
-				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		// ------------------------------------------------------
 
 		mqttResourceController.addMqttValueForResource(resource, nameValuePair[0], nameValuePair[1]);

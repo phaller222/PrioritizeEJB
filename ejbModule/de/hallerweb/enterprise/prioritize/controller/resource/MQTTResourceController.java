@@ -76,6 +76,8 @@ public class MQTTResourceController extends PEventConsumerProducer {
     ResourceReservationController resourceReservationcontroller;
     @EJB
     ResourceController resourceController;
+    @EJB
+    InitializationController initController;
     @Inject
     MQTTService mqttService;
     @Inject
@@ -262,14 +264,14 @@ public class MQTTResourceController extends PEventConsumerProducer {
     public void setMqttResourceOnline(Resource res) {
         Resource managed = em.find(Resource.class, res.getId());
         raiseEvent(managed, Resource.PROPERTY_MQTTONLINE, String.valueOf(managed.isMqttOnline()), "true",
-                InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+                initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
         managed.setMqttOnline(true);
     }
 
     public void setMqttResourceOffline(Resource res) {
         Resource managed = em.find(Resource.class, res.getId());
         raiseEvent(managed, Resource.PROPERTY_MQTTONLINE, String.valueOf(managed.isMqttOnline()), "false",
-                InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+                initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
         managed.setMqttOnline(false);
     }
 
@@ -296,7 +298,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
         }
         int valuesSize = managedResource.getMqttValues().size();
         if (managedResource.getMqttValues().isEmpty()) {
-            if (valuesSize <= Integer.parseInt(InitializationController.getConfig().get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
+            if (valuesSize <= Integer.parseInt(initController.getConfig().get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
                 createMqttNameValuePair(name, valueCopy, managedResource);
             }
         } else {
@@ -307,7 +309,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
     private void insertValue(String value, StringBuilder builder, NameValueEntry entry) {
         String values = entry.getValues();
         if ((values == null)
-                || (values.length() <= Integer.parseInt(InitializationController.getConfig().get(InitializationController.MQTT_MAX_VALUES_BYTES)))) {
+                || (values.length() <= Integer.parseInt(initController.getConfig().get(InitializationController.MQTT_MAX_VALUES_BYTES)))) {
                     entry.setValues(entry.getValues() + ";" + value);
                 } else {
             int firstEntryEnd = values.indexOf(';');
@@ -345,7 +347,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
         newEntry.setValues(value);
         em.persist(newEntry);
         raiseEvent(managedResource, name, "", newEntry.getValues(),
-                InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+                initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
         managedResource.getMqttValues().add(newEntry);
     }
 
@@ -436,7 +438,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
                 found = true;
             }
         }
-        if (!found && valuesSize <= Integer.parseInt(InitializationController.getConfig().get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
+        if (!found && valuesSize <= Integer.parseInt(initController.getConfig().get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
             createMqttNameValuePair(name, value, managedResource);
         }
     }
@@ -452,7 +454,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
     public void setCoordinates(Resource resource, String latitude, String longitude) {
         Resource res = em.find(Resource.class, resource.getId());
         raiseEvent(res, "geo", resource.getLatitude() + ":" + resource.getLongitude(), latitude + ":" + longitude,
-                InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+                initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
         res.setLongitude(longitude);
         res.setLatitude(latitude);
     }
@@ -467,7 +469,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
     }
 
     public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-        if (InitializationController.getAsBoolean(InitializationController.FIRE_RESOURCE_EVENTS)) {
+        if (initController.getAsBoolean(InitializationController.FIRE_RESOURCE_EVENTS)) {
             Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
                     .setPropertyName(name).setLifetime(lifetime).getEvent();
             eventRegistry.addEvent(evt);

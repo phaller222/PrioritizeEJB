@@ -133,11 +133,11 @@ public class InitializationController {
 
 	private static Map<String, String> config = new HashMap<>();
 
-	public static Map<String, String> getConfig() {
+	public  Map<String, String> getConfig() {
 		return config;
 	}
 
-	public static int getDefaultDepartmentId() {
+	public int getDefaultDepartmentId() {
 		return defaultDepartmentId;
 	}
 
@@ -220,20 +220,21 @@ public class InitializationController {
 		authController.addObservedObjectType(TimeTracker.class.getCanonicalName());
 	}
 
-	public static String get(String name) {
+	public String get(String name) {
 		return config.get(name);
 	}
 
-	public static int getAsInt(String name) {
+	public int getAsInt(String name) {
 		return Integer.parseInt(config.get(name));
 	}
 
-	public static boolean getAsBoolean(String name) {
+	public boolean getAsBoolean(String name) {
 		return Boolean.parseBoolean(config.get(name));
 	}
 
 	public void createAdminAccountIfNotPresent() {
 		if (userRoleController.getAllUsers(AuthorizationController.getSystemUser()).isEmpty()) {
+			Department d = null;
 			// No user present yet. Create admin user...
 			Logger.getLogger(this.getClass().getName()).log(Level.INFO,
 					"No users present. Assuming clean deployment. recreating admin user...");
@@ -250,8 +251,10 @@ public class InitializationController {
 				Company c = companyController.createCompany("Default Company", adr, AuthorizationController.getSystemUser());
 				c.setMainAddress(adr);
 
+
+
 				if (Boolean.parseBoolean(config.get(CREATE_DEFAULT_DEPARTMENT))) {
-					Department d = companyController.createDepartment(c, "default", "Auto generated default department", adr,
+					d = companyController.createDepartment(c, "default", "Auto generated default department", adr,
 							AuthorizationController.getSystemUser());
 					defaultDepartmentId = d.getId();
 				}
@@ -295,6 +298,7 @@ public class InitializationController {
 			records.add(adminCounter);
 
 			Role r = userRoleController.createRole(LITERAL_ADMIN, "admin Role", records, AuthorizationController.getSystemUser());
+			userRoleController.setRoleDepartment(r,d);
 			Set<Role> roles = new HashSet<>();
 			roles.add(r);
 
@@ -310,6 +314,10 @@ public class InitializationController {
 			}
 
 			User adminUser = userRoleController.createUser(admin, null, roles, AuthorizationController.getSystemUser());
+
+
+
+
 
 		} else {
 			Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Deploymeent OK.");

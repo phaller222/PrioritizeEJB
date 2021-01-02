@@ -17,6 +17,7 @@ package de.hallerweb.enterprise.prioritize.controller.project;
 
 import java.util.List;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -50,6 +51,9 @@ public class ActionBoardController extends PEventConsumerProducer {
 
 	@PersistenceContext
 	EntityManager em;
+
+	@EJB
+	InitializationController initController;
 
 	@Inject
 	EventRegistry eventRegistry;
@@ -160,7 +164,7 @@ public class ActionBoardController extends PEventConsumerProducer {
 
 	@Override
 	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (InitializationController.getAsBoolean(InitializationController.FIRE_ACTIONBOARD_EVENTS)) {
+		if (initController.getAsBoolean(InitializationController.FIRE_ACTIONBOARD_EVENTS)) {
 			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
 					.setPropertyName(name).setLifetime(lifetime).getEvent();
 			eventRegistry.addEvent(evt);

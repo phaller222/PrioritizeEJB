@@ -38,6 +38,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillGroup;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 
+/* Entity for projects */
 @Entity
 @NamedQueries({ @NamedQuery(name = "findProjectById", query = "select p FROM Project p WHERE p.id = :projectId"),
 		@NamedQuery(name = "findProjectsByManager", query = "select p FROM Project p WHERE p.manager = :managerId"),

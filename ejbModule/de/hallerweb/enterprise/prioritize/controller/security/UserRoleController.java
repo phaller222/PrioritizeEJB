@@ -72,6 +72,8 @@ public class UserRoleController extends PEventConsumerProducer {
 	ItemCollectionController itemCollectionController;
 	@EJB
 	TaskController taskController;
+	@EJB
+	InitializationController initController;
 	@Inject
 	SessionController sessionController;
 	@Inject
@@ -327,7 +329,7 @@ public class UserRoleController extends PEventConsumerProducer {
 			em.flush();
 
 			// Raise events if configured
-			if (InitializationController.getAsBoolean(InitializationController.FIRE_USER_EVENTS)) {
+			if (initController.getAsBoolean(InitializationController.FIRE_USER_EVENTS)) {
 				fireEditUserEvents(newUserData, user);
 			}
 
@@ -339,24 +341,24 @@ public class UserRoleController extends PEventConsumerProducer {
 	private void fireEditUserEvents(User newUserData, User user) {
 		if (!user.getName().equals(newUserData.getName())) {
 			this.raiseEvent(user, User.PROPERTY_NAME, user.getName(), newUserData.getName(),
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		}
 		if (!user.getUsername().equals(newUserData.getUsername())) {
 			this.raiseEvent(user, User.PROPERTY_USERNAME, user.getUsername(), newUserData.getUsername(),
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		}
 		if (!user.getEmail().equals(newUserData.getEmail())) {
 			this.raiseEvent(user, User.PROPERTY_EMAIL, user.getEmail(), newUserData.getEmail(),
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		}
 		if (!user.getOccupation().equals(newUserData.getOccupation())) {
 			this.raiseEvent(user, User.PROPERTY_OCCUPATION, user.getOccupation(), newUserData.getOccupation(),
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		}
 		if (user.getDepartment() != null && user.getDepartment().getId() != newUserData.getDepartment().getId()) {
 			this.raiseEvent(user, User.PROPERTY_DEPARTMENT, String.valueOf(user.getDepartment().getId()),
 					String.valueOf(newUserData.getDepartment().getId()),
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		}
 	}
 
@@ -366,6 +368,13 @@ public class UserRoleController extends PEventConsumerProducer {
 		managedRole.setDescription(newDescription);
 		em.flush();
 	}
+
+	public void setRoleDepartment(Role role, Department dept) {
+		Role managedRole = em.find(Role.class, role.getId());
+		managedRole.setDepartment(dept);
+		em.flush();
+	}
+
 
 	public List<User> getAllUsers(User sessionUser) {
 		Query query = em.createNamedQuery("findAllUsers");
@@ -654,7 +663,7 @@ public class UserRoleController extends PEventConsumerProducer {
 	}
 
 	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (InitializationController.getAsBoolean(InitializationController.FIRE_USER_EVENTS)) {
+		if (initController.getAsBoolean(InitializationController.FIRE_USER_EVENTS)) {
 			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
 					.setPropertyName(name).setLifetime(lifetime).getEvent();
 			eventRegistry.addEvent(evt);

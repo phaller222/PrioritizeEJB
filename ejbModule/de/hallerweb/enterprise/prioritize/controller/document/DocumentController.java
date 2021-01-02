@@ -51,7 +51,7 @@ import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
 /**
- * DocumentController.java - Controls the creation, modification and deletion of {@link DocumentInfo}, {@link DocumentGroup} and
+ * DocumentController.java - Handles the creation, modification and deletion of {@link DocumentInfo}, {@link DocumentGroup} and
  * {@link Document} objects.
  * 
  */
@@ -76,7 +76,7 @@ public class DocumentController extends PEventConsumerProducer {
 	static final String DOCUMENT_LITERAL = "Document";
 
 	public DocumentInfo createDocumentInfo(String name, int groupId, User user, String mimeType, boolean encrypt, byte[] data, String changes) {
-		int maxsize = Integer.parseInt(InitializationController.getConfig().get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
+		int maxsize = Integer.parseInt(initController.getConfig().get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
 		if (data.length > maxsize) {
 			return null;
 		}
@@ -308,7 +308,7 @@ public class DocumentController extends PEventConsumerProducer {
 
 	public DocumentInfo editDocumentInfo(DocumentInfo info, Document newDocumentData, byte[] data, String mimeType, User user,
 			boolean encrypt) {
-		int maxsize = Integer.parseInt(InitializationController.getConfig().get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
+		int maxsize = Integer.parseInt(initController.getConfig().get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
 		if (data.length > maxsize) {
 			return null;
 		}
@@ -334,7 +334,7 @@ public class DocumentController extends PEventConsumerProducer {
 			document.setData(data);
 
 			// Fire events for changed properties if configured.
-			if (InitializationController.getAsBoolean(InitializationController.FIRE_DOCUMENT_EVENTS)) {
+			if (initController.getAsBoolean(InitializationController.FIRE_DOCUMENT_EVENTS)) {
 				checkEventsToFire(newDocumentData, managedInfo);
 			}
 
@@ -365,20 +365,20 @@ public class DocumentController extends PEventConsumerProducer {
 		Document current = managedInfo.getCurrentDocument();
 		if (!current.getName().equals(newDocumentData.getName())) {
 			this.raiseEvent(managedInfo, Document.PROPERTY_NAME, current.getName(), newDocumentData.getName(),
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		}
 		if (!current.getMimeType().equals(newDocumentData.getMimeType())) {
 			this.raiseEvent(managedInfo, Document.PROPERTY_MIMETYPE, current.getMimeType(), newDocumentData.getMimeType(),
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		}
 		if (!current.getChanges().equals(newDocumentData.getChanges())) {
 			this.raiseEvent(managedInfo, Document.PROPERTY_CHANGES, current.getChanges(), newDocumentData.getChanges(),
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		}
 		if (!current.isEncrypted() == newDocumentData.isEncrypted()) {
 			this.raiseEvent(managedInfo, Document.PROPERTY_ENCRYPTED, String.valueOf(current.isEncrypted()),
 					String.valueOf(newDocumentData.isEncrypted()),
-					InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		}
 	}
 
@@ -394,7 +394,7 @@ public class DocumentController extends PEventConsumerProducer {
 		}
 
 		this.raiseEvent(managedDocument, Document.PROPERTY_TAG, "", managedDocument.getTag(),
-				InitializationController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+				initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 
 		return managedDocument;
 	}
@@ -488,7 +488,7 @@ public class DocumentController extends PEventConsumerProducer {
 	}
 
 	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (InitializationController.getAsBoolean(InitializationController.FIRE_DOCUMENT_EVENTS)) {
+		if (initController.getAsBoolean(InitializationController.FIRE_DOCUMENT_EVENTS)) {
 			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
 					.setPropertyName(name).setLifetime(lifetime).getEvent();
 			eventRegistry.addEvent(evt);

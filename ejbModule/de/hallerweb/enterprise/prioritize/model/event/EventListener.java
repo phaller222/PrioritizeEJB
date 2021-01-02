@@ -34,7 +34,8 @@ import de.hallerweb.enterprise.prioritize.model.PObject;
  */
 @Entity
 @NamedQueries({ @NamedQuery(name = "findEventListenersBySourceAndPropertyName", query = "select el FROM EventListener el WHERE el.propertyName = :propertyName AND el.source.id = :id"),
-	@NamedQuery(name = "findEventListenersWithLimitedLifetime", query = "select el FROM EventListener el WHERE el.lifetime > 0")
+	@NamedQuery(name = "findEventListenersWithLimitedLifetime", query = "select el FROM EventListener el WHERE el.lifetime > 0"),
+		@NamedQuery(name="findEventListenersById" , query="select el FROM EventListener el WHERE el.id = :id")
 })
 public class EventListener {
 

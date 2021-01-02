@@ -15,25 +15,22 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.nfc;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
+import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
+import de.hallerweb.enterprise.prioritize.model.nfc.NFCCounter;
+import de.hallerweb.enterprise.prioritize.model.nfc.NFCUnit;
+import de.hallerweb.enterprise.prioritize.model.nfc.NFCUnit.NFCUnitType;
+import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-
-import de.hallerweb.enterprise.prioritize.controller.CompanyController;
-import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
-import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
-import de.hallerweb.enterprise.prioritize.model.nfc.NFCCounter;
-import de.hallerweb.enterprise.prioritize.model.nfc.NFCUnit;
-import de.hallerweb.enterprise.prioritize.model.nfc.NFCUnit.NFCUnitType;
-import de.hallerweb.enterprise.prioritize.model.resource.Resource;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 @Stateless
 public class NFCUnitController implements Serializable {
@@ -43,10 +40,6 @@ public class NFCUnitController implements Serializable {
 
 	@EJB
 	ResourceController resourceController;
-	@EJB
-	CompanyController companyController;
-	@EJB
-	UserRoleController userRoleController;
 	@EJB
 	SessionController sessionController;
 

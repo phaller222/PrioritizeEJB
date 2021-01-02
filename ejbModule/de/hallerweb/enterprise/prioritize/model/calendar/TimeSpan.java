@@ -15,27 +15,16 @@
  */
 package de.hallerweb.enterprise.prioritize.model.calendar;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Version;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+
+import javax.persistence.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * JPA entity to represent a {@link TimeSpan}. A TimeSpan object represents a time span between 2 dates and is used by the calendar to
@@ -75,9 +64,6 @@ public class TimeSpan implements PAuthorizedObject {
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JsonBackReference
 	private Set<User> involvedUsers;
-
-	@Version
-	private int entityVersion; // For optimistic locks
 
 	private Date dateFrom;
 	private Date dateUntil;
@@ -175,11 +161,7 @@ public class TimeSpan implements PAuthorizedObject {
 
 		if (from.after(this.dateUntil)) {
 			return false;
-		} else if (until.before(this.dateFrom)) {
-			return false;
-		} else {
-			return true;
-		}
+		} else return !until.before(this.dateFrom);
 	}
 
 	@Override

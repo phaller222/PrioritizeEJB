@@ -48,9 +48,6 @@ import de.hallerweb.enterprise.prioritize.model.skill.Skill;
 @Stateless
 public class SearchController {
 
-	@PersistenceContext
-	EntityManager em;
-
 	@EJB
 	UserRoleController userRoleController;
 	@EJB
@@ -61,8 +58,6 @@ public class SearchController {
 	CompanyController companyController;
 	@EJB
 	SkillController skillController;
-	@EJB
-	LoggingController logger;
 	@EJB
 	AuthorizationController authController;
 

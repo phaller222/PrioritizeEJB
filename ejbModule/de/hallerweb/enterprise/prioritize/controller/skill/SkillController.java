@@ -43,9 +43,6 @@ public class SkillController {
 
     @PersistenceContext
     EntityManager em;
-
-    @EJB
-    UserRoleController userRoleController;
     @EJB
     LoggingController logger;
     @Inject
@@ -54,8 +51,6 @@ public class SkillController {
     AuthorizationController authController;
 
     public static final String LITERAL_SKILLCATEGORY = "SkillCategory";
-    public static final String LITERAL_CREATED = "\" created.";
-
     /**
      * Creates a new SkillCategory with the given data
      *

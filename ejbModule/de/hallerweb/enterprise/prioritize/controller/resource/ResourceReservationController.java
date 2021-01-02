@@ -15,28 +15,11 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.resource;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
-
-import org.jboss.resteasy.logging.Logger;
-
-import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
-import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan.TimeSpanType;
@@ -45,7 +28,18 @@ import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.model.security.User;
-import de.hallerweb.enterprise.prioritize.service.mqtt.MQTTService;
+import org.jboss.resteasy.logging.Logger;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TemporalType;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * ResourceReservationController.java - Controls the creation, modification and deletion of
@@ -55,21 +49,12 @@ import de.hallerweb.enterprise.prioritize.service.mqtt.MQTTService;
 public class ResourceReservationController extends PEventConsumerProducer {
 	@PersistenceContext
 	EntityManager em;
-
-	@EJB
-	UserRoleController userRoleController;
-	@EJB
-	CompanyController companyController;
 	@Inject
 	SessionController sessionController;
-	@EJB
-	AuthorizationController authController;
 	@EJB
 	LoggingController logger;
 	@EJB
 	InitializationController initController;
-	@Inject
-	MQTTService mqttService;
 	@Inject
 	EventRegistry eventRegistry;
 	
@@ -84,7 +69,7 @@ public class ResourceReservationController extends PEventConsumerProducer {
 	@Override
 	public void consumeEvent(PObject destination, Event evt) {
 		Logger.getLogger(this.getClass()).info("Object " + evt.getSource() + " raised event: " + evt.getPropertyName() + " with new Value: "
-				+ evt.getNewValue() + "--- Resource listening: " + ((Resource) destination).getId());
+				+ evt.getNewValue() + "--- Resource listening: " + (destination).getId());
 	}
 
 	public boolean isResourceActiveForUser(User user, Set<ResourceReservation> reservations) {
@@ -296,10 +281,7 @@ public class ResourceReservationController extends PEventConsumerProducer {
 
 		if (requestedFrom.after(res.getTimeSpan().getDateUntil())) {
 			return false;
-		} else if (requestedTo.before(res.getTimeSpan().getDateFrom())){
-			return false;
-		}
-		return true;
+		} else return !requestedTo.before(res.getTimeSpan().getDateFrom());
 	}
 
 

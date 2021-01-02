@@ -53,11 +53,11 @@ public class LoggingController {
 		// Auto-generated constructor stub
 	}
 
-	public static void enableLogging() {
+	public void enableLogging() {
 		loggingEnabled = true;
 	}
 
-	public static void disableLogging() {
+	public void disableLogging() {
 		loggingEnabled = false;
 	}
 

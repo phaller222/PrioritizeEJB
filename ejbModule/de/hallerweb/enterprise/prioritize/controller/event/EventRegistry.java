@@ -15,30 +15,8 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.event;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
-import org.jboss.resteasy.logging.Logger;
-
-import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
-import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
@@ -46,6 +24,16 @@ import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.EventListener;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+import org.jboss.resteasy.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.*;
+import javax.inject.Inject;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Session Bean implementation class EventRegistry. Handles Events and EventListeners and their lifecycle.
@@ -61,13 +49,9 @@ public class EventRegistry {
 	EntityManager mng;
 
 	@EJB
-	ResourceController resourceController;
-	@EJB
 	DocumentController documentController;
 	@EJB
 	UserRoleController userController;
-	@EJB
-	CompanyController companyController;
 	@Inject
 	InitializationController initController;
 

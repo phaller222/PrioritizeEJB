@@ -57,6 +57,6 @@ public class MqttClientPing {
 	private boolean isResourceTimedOut(Resource resource) {
 		Date lastPing = resource.getMqttLastPing();
 		return (System.currentTimeMillis() - lastPing.getTime() > Long
-				.valueOf(initController.getConfig().get(InitializationController.MQTT_PING_TIMEOUT)));
+				.parseLong(initController.getConfig().get(InitializationController.MQTT_PING_TIMEOUT)));
 	}
 }

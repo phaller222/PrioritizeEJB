@@ -64,12 +64,7 @@ public class IndustrieCounterController implements Serializable {
 			IndustrieCounter existingCounter = getIndustrieCounter(uuid);
 			if (existingCounter == null) {
 
-				if (type == CounterType.NFC) {
-					embeddedCounter = nfcUnitController.createNFCCounterWithUUID(uuid);
-				} else {
-					embeddedCounter = nfcUnitController.createNFCCounterWithUUID(uuid);
-				}
-
+				embeddedCounter = nfcUnitController.createNFCCounterWithUUID(uuid);
 				IndustrieCounter counter = new IndustrieCounter();
 				counter.setCounter(embeddedCounter);
 				em.persist(counter);

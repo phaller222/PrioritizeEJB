@@ -15,15 +15,11 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.calendar;
 
-import de.hallerweb.enterprise.prioritize.controller.LoggingController;
-import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan.TimeSpanType;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -37,12 +33,6 @@ public class CalendarController {
 
 	@PersistenceContext
 	EntityManager em;
-
-	@EJB
-	LoggingController logger;
-
-	@Inject
-	SessionController sessionController;
 
 	public void mergeTimeSpan(TimeSpan newTimeSpan) {
 		TimeSpan managedTimeSpan = em.find(TimeSpan.class, newTimeSpan.getId());

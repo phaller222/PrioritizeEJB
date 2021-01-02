@@ -15,24 +15,18 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.usersetting;
 
-import java.util.List;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
-import de.hallerweb.enterprise.prioritize.controller.LoggingController;
-import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
-import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
+
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.util.List;
 
 /**
  * UserRoleController.java - Controls the creation, modification and deletion of
@@ -43,15 +37,6 @@ public class ItemCollectionController {
 
 	@PersistenceContext
 	EntityManager em;
-
-	@EJB
-	LoggingController logger;
-
-	@EJB
-	AuthorizationController authController;
-
-	@Inject
-	SessionController sessionController;
 
 	/**
 	 * Default constructor.

@@ -45,12 +45,12 @@ public class LoggingBean implements Serializable {
 	boolean loggingEnabled;
 
 	public String enableLogging() {
-		LoggingController.enableLogging();
+		controller.enableLogging();
 		return "index";
 	}
 
 	public String disableLogging() {
-		LoggingController.disableLogging();
+		controller.disableLogging();
 		return "index";
 	}
 

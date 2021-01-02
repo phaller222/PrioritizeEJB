@@ -15,13 +15,11 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.security;
 
+import de.hallerweb.enterprise.prioritize.model.security.User;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
-import de.hallerweb.enterprise.prioritize.model.security.User;
 
 /**
  * RestAccessController.java - Authorizes REST users and assigns the session
@@ -29,9 +27,6 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  * */
 @Stateless
 public class RestAccessController {
-
-	@PersistenceContext
-	EntityManager em;
 
 	@EJB
 	UserRoleController userRoleController;

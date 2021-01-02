@@ -15,16 +15,7 @@
  */
 package de.hallerweb.enterprise.prioritize.controller;
 
-import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
-import de.hallerweb.enterprise.prioritize.controller.nfc.counter.IndustrieCounterController;
-import de.hallerweb.enterprise.prioritize.controller.project.ActionBoardController;
-import de.hallerweb.enterprise.prioritize.controller.project.ProjectController;
-import de.hallerweb.enterprise.prioritize.controller.project.task.BlackboardController;
-import de.hallerweb.enterprise.prioritize.controller.project.task.TaskController;
-import de.hallerweb.enterprise.prioritize.controller.project.task.TimeTrackerController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
-import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Address;
 import de.hallerweb.enterprise.prioritize.model.Company;
@@ -47,7 +38,6 @@ import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -71,25 +61,7 @@ public class InitializationController {
 	@EJB
 	CompanyController companyController;
 	@EJB
-	ActionBoardController actionBoardController;
-	@EJB
-	TaskController taskController;
-	@EJB
-	ProjectController projectController;
-	@EJB
-	BlackboardController blackboardController;
-	@EJB
-	SessionController sessionController;
-	@EJB
 	AuthorizationController authController;
-	@EJB
-	DocumentController documentController;
-	@Inject
-	EventRegistry eventRegistry;
-	@EJB
-	IndustrieCounterController industrieCounterController;
-	@EJB
-	TimeTrackerController timeTrackerController;
 
 	private static int defaultDepartmentId;
 
@@ -131,7 +103,7 @@ public class InitializationController {
 	// Keycloak logout URL
 	public static final String KEYCLOAK_LOGOUT_URL = "KEYCLOAK_LOGOUT_URL";
 
-	private static Map<String, String> config = new HashMap<>();
+	private final static Map<String, String> config = new HashMap<>();
 
 	public  Map<String, String> getConfig() {
 		return config;
@@ -313,11 +285,7 @@ public class InitializationController {
 				Logger.getLogger(this.getClass().getName()).log(Level.INFO,"--- ATTENTION: DEFAULT API-KEY HJAS BEEN CREATED: ABCDEFG. DON'T USE THIS INSTALLATION IN PRODUCTION---");
 			}
 
-			User adminUser = userRoleController.createUser(admin, null, roles, AuthorizationController.getSystemUser());
-
-
-
-
+			userRoleController.createUser(admin, null, roles, AuthorizationController.getSystemUser());
 
 		} else {
 			Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Deploymeent OK.");

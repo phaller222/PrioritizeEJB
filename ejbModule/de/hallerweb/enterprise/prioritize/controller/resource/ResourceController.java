@@ -15,14 +15,12 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.resource;
 
-import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
@@ -33,7 +31,6 @@ import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
-import de.hallerweb.enterprise.prioritize.service.mqtt.MQTTService;
 import org.jboss.resteasy.logging.Logger;
 
 import javax.ejb.EJB;
@@ -55,11 +52,6 @@ import java.util.*;
 public class ResourceController extends PEventConsumerProducer {
 	@PersistenceContext
 	EntityManager em;
-
-	@EJB
-	UserRoleController userRoleController;
-	@EJB
-	CompanyController companyController;
 	@Inject
 	SessionController sessionController;
 	@EJB
@@ -67,12 +59,7 @@ public class ResourceController extends PEventConsumerProducer {
 	@EJB
 	LoggingController logger;
 	@EJB
-	ResourceReservationController resourceReservationcontroller;
-	@EJB
 	InitializationController initController;
-
-	@Inject
-	MQTTService mqttService;
 	@Inject
 	EventRegistry eventRegistry;
 

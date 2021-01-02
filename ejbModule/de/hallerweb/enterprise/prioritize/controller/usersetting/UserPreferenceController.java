@@ -15,26 +15,14 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.usersetting;
 
-import java.util.List;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
-import de.hallerweb.enterprise.prioritize.controller.LoggingController;
-import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
-import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
-import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
-import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
-import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
+
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.List;
 
 /**
  * UserSettingController.java - Controls the creation, modification and deletion of
@@ -45,18 +33,6 @@ public class UserPreferenceController {
 
 	@PersistenceContext
 	EntityManager em;
-
-	@EJB
-	LoggingController logger;
-
-	@EJB
-	AuthorizationController authController;
-	
-	@EJB
-	ResourceController resourceController;
-
-	@Inject
-	SessionController sessionController;
 
 	/**
 	 * Default constructor.

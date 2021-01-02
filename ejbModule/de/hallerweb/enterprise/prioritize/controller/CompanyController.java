@@ -247,10 +247,7 @@ public class CompanyController extends PEventConsumerProducer {
 		Company c = findCompanyById(id);
 		if (authController.canDelete(c, sessionUser)) {
 			List<Department> departments = c.getDepartments();
-			List<Department> departmentsToDelete = new ArrayList<>();
-			for (Department dept : departments) {
-				departmentsToDelete.add(dept);
-			}
+			List<Department> departmentsToDelete = new ArrayList<>(departments);
 			for (Department d : departmentsToDelete) {
 				deleteDepartment(d.getId(), sessionUser);
 			}
@@ -358,7 +355,7 @@ public class CompanyController extends PEventConsumerProducer {
 				}
 				orig.setDepartments(origDepts);
 			} else {
-				company.setDepartments(new ArrayList<Department>());
+				company.setDepartments(new ArrayList<>());
 			}
 			em.flush();
 			try {
@@ -483,7 +480,7 @@ public class CompanyController extends PEventConsumerProducer {
 	}
 
 	public Department getDepartmentByToken(String token, User sessionUser) {
-		Department dept = null;
+		Department dept;
 		Query query = em.createNamedQuery("findDepartmentByToken");
 		query.setParameter(1, token);
 		try {

@@ -23,6 +23,7 @@ import javax.ejb.Stateful;
 import javax.enterprise.context.SessionScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.io.Serializable;
 
 /**
  * Session Bean implementation class SessionController. Holds information of the current logged in user.
@@ -30,7 +31,7 @@ import javax.persistence.PersistenceContext;
 @Stateful
 @SessionScoped
 @LocalBean
-public class SessionController {
+public class SessionController implements Serializable {
 
     private User user;
 

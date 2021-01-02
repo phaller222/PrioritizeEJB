@@ -22,7 +22,6 @@ import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
@@ -61,9 +60,6 @@ public class MQTTResourceController extends PEventConsumerProducer {
 
     @PersistenceContext
     EntityManager em;
-
-    @EJB
-    UserRoleController userRoleController;
     @EJB
     CompanyController companyController;
     @Inject
@@ -313,7 +309,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
                     entry.setValues(entry.getValues() + ";" + value);
                 } else {
             int firstEntryEnd = values.indexOf(';');
-            builder.append(values.substring(firstEntryEnd + 1, values.length()));
+            builder.append(values.substring(firstEntryEnd + 1));
             entry.setValues(builder.toString() + ";" + value);
         }
     }

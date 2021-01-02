@@ -163,12 +163,6 @@ public class Document extends PObject implements Comparable {
 	@Override
 	public int compareTo(Object obj) {
 		Document doc = (Document) obj;
-		if (doc.getVersion() == version) {
-			return 0;
-		} else if (doc.getVersion() > version) {
-			return -1;
-		} else {
-			return 1;
-		}
+		return Integer.compare(version, doc.getVersion());
 	}
 }

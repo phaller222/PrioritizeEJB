@@ -23,7 +23,6 @@ import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.project.task.TaskController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
@@ -87,8 +86,6 @@ public class ProjectController extends PEventConsumerProducer {
 	@EJB
 	TaskController taskController;
 	@EJB
-	UserRoleController userRoleController;
-	@EJB
 	LoggingController logger;
 	@EJB
 	InitializationController initController;
@@ -133,8 +130,12 @@ public class ProjectController extends PEventConsumerProducer {
 
 	public List<ProjectGoalRecord> findProjectGoalRecordsByProject(int projectId) {
 		Query q = em.createNamedQuery(QUERY_FIND_PROJECTGOAL_RECORDS_BY_PROJECT);
-		q.setParameter(PARAM_PROJECT_ID, projectId);
-		List<ProjectGoalRecord> projectGoalRecords = (List<ProjectGoalRecord>) q.getResultList();
+		return getProjectGoalRecords(projectId, q);
+	}
+
+	private List<ProjectGoalRecord> getProjectGoalRecords(int projectId, Query query) {
+		query.setParameter(PARAM_PROJECT_ID, projectId);
+		List<ProjectGoalRecord> projectGoalRecords = (List<ProjectGoalRecord>) query.getResultList();
 		if (projectGoalRecords.isEmpty()) {
 			return new ArrayList<>();
 		} else {
@@ -144,13 +145,7 @@ public class ProjectController extends PEventConsumerProducer {
 
 	public List<ProjectGoalRecord> findActiveProjectGoalRecordsByProject(int projectId) {
 		Query q = em.createNamedQuery(QUERY_FIND_ACTIVE_PROJECTGOAL_RECORDS_BY_PROJECT);
-		q.setParameter(PARAM_PROJECT_ID, projectId);
-		List<ProjectGoalRecord> projectGoalRecords = (List<ProjectGoalRecord>) q.getResultList();
-		if (projectGoalRecords.isEmpty()) {
-			return new ArrayList<>();
-		} else {
-			return projectGoalRecords;
-		}
+		return getProjectGoalRecords(projectId, q);
 	}
 
 	public ProjectProgress findProjectProgressById(int id) {

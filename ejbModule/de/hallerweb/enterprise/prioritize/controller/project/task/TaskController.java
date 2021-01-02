@@ -15,18 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.project.task;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.project.ProjectController;
@@ -42,6 +30,15 @@ import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.project.task.TaskStatus;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * TaskController - Manages tasks.
@@ -135,7 +132,6 @@ public class TaskController extends PEventConsumerProducer {
 
 	public void removeTaskAssignee(int taskId, PActor assignee, User sessionUser) {
 		Task task = findTaskById(taskId);
-		User user = userRoleController.findUserById(assignee.getId(), sessionUser);
 		task.removeAssignee();
 	}
 

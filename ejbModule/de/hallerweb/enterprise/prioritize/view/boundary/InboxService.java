@@ -253,7 +253,7 @@ public class InboxService {
 				messagController.createMessage(from, username, subject, message);
 				return createPositiveResponse("Message " + subject + "has succcessfully been sent to User " + username + ".");
 			} else {
-				return createNegativeResponse("User with username " + username + " not found!");
+				return createNegativeResponse("User with username null not found. username is null!");
 			}
 		} else {
 			throw new NotAuthorizedException(Response.serverError());

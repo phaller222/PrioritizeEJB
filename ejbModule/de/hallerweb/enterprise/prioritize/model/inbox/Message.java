@@ -15,20 +15,10 @@
  */
 package de.hallerweb.enterprise.prioritize.model.inbox;
 
-import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
-import javax.persistence.Version;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import de.hallerweb.enterprise.prioritize.model.security.User;
+
+import javax.persistence.*;
+import java.util.Date;
 
 /**
  * JPA entity to represent a {@link Message}. Simply a Message (text or text with references) to other Users.
@@ -65,9 +55,6 @@ public class Message {
 	User to;
 
 	String content;
-
-	@Version
-	private int entityVersion; // For optimistic locks
 
 	public int getId() {
 		return id;

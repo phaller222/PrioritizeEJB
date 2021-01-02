@@ -15,24 +15,13 @@
  */
 package de.hallerweb.enterprise.prioritize.model.document;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Version;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
+
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * JPA entity to represent a Directory of documents within a department.
@@ -64,9 +53,6 @@ public class DocumentGroup implements PAuthorizedObject {
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JsonBackReference
 	private Set<DocumentInfo> documents;
-
-	@Version
-	private int entityVersion; // For optimistic locks
 
 	public String getName() {
 		return name;

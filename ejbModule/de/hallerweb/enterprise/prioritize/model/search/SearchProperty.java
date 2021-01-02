@@ -40,9 +40,6 @@ public class SearchProperty {
 
 	public SearchProperty(String type) {
 		switch (type) {
-		case "NAME":
-			this.type = SearchPropertyType.NAME;
-			break;
 		case "SKILL":
 			this.type = SearchPropertyType.SKILL;
 			break;
@@ -52,7 +49,8 @@ public class SearchProperty {
 		case "DESCRIPTION":
 			this.type = SearchPropertyType.DESCRIPTION;
 			break;
-		default:
+			case "NAME":
+			default:
 			this.type = SearchPropertyType.NAME;
 		}
 	}

@@ -15,10 +15,12 @@
  */
 package de.hallerweb.enterprise.prioritize.view.inbox;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import de.hallerweb.enterprise.prioritize.controller.inbox.MessageController;
+import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
+import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
+import de.hallerweb.enterprise.prioritize.model.inbox.Message;
+import de.hallerweb.enterprise.prioritize.model.security.User;
+import org.jboss.resteasy.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -28,15 +30,10 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.jboss.resteasy.logging.Logger;
-
-import de.hallerweb.enterprise.prioritize.controller.inbox.MessageController;
-import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
-import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
-import de.hallerweb.enterprise.prioritize.model.inbox.Message;
-import de.hallerweb.enterprise.prioritize.model.security.User;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * MessageBean - JSF Backing-Bean to store information about Messages.
@@ -61,8 +58,6 @@ public class MessageBean implements Serializable {
 	MessageController controller;
 	@EJB
 	UserRoleController userRoleController;
-	@EJB
-	AuthorizationController authController;
 
 	transient List<Message> messages; // List of messages
 	String message; // Stores the newly composed Message

@@ -15,7 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.model.skill;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;

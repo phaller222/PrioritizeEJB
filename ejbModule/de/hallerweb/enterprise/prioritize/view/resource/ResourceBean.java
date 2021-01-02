@@ -281,12 +281,11 @@ public class ResourceBean implements Serializable {
 
 		if (resourceController.createResource(resource, resourceGroupId, sessionController.getUser()) != null) {
 			updateResourceTree();
-			return NAVIGATION_RESOURCES;
 		} else {
 			ViewUtilities.addErrorMessage("name", "A resource with the name " + resource.getName()
 					+ " already exists in this resource group. Please change name or select a different Resource Group!");
-			return NAVIGATION_RESOURCES;
 		}
+		return NAVIGATION_RESOURCES;
 	}
 
 	@Named
@@ -355,11 +354,10 @@ public class ResourceBean implements Serializable {
 		if (resourceController.createResourceGroup(Integer.parseInt(selectedDepartmentId), resourceGroupName,
 				sessionController.getUser()) != null) {
 			init();
-			return NAVIGATION_RESOURCES;
 		} else {
 			ViewUtilities.addErrorMessage("name", "A resource group with the name " + resourceGroupName + " already exists!");
-			return NAVIGATION_RESOURCES;
 		}
+		return NAVIGATION_RESOURCES;
 	}
 
 	public String deleteResourceGroup() {
@@ -482,8 +480,6 @@ public class ResourceBean implements Serializable {
 		if (!valId.isEmpty()) {
 			Resource managedResource = resourceController.getResource(Integer.parseInt(valId), sessionController.getUser());
 			return managedResource.isAgent();
-		} else {
-			// Resource is null
 		}
 		return false;
 	}
@@ -641,7 +637,7 @@ public class ResourceBean implements Serializable {
 		LatLng coord;
 		if ((resource.getLatitude() != null) && (resource.getLongitude() != null)) {
 			try {
-				coord = new LatLng(Float.valueOf(resource.getLatitude()), Float.valueOf(resource.getLongitude()));
+				coord = new LatLng(Float.parseFloat(resource.getLatitude()), Float.parseFloat(resource.getLongitude()));
 
 				// Basic marker
 				simpleModel.addOverlay(new Marker(coord, resource.getName()));
@@ -687,10 +683,10 @@ public class ResourceBean implements Serializable {
 		if (this.selectedNode != null) {
 			Resource res = (Resource) this.selectedNode.getData();
 			Set<NameValueEntry> data = res.getMqttValues();
-			StringBuilder currentEntry = new StringBuilder("");
+			StringBuilder currentEntry = new StringBuilder();
 			for (NameValueEntry entry : data) {
 				String values = entry.getValues();
-				currentEntry.append(entry.getName()).append(" : ").append(values.substring(values.lastIndexOf(','), values.length()))
+				currentEntry.append(entry.getName()).append(" : ").append(values.substring(values.lastIndexOf(',')))
 						.append("\n");
 			}
 			return currentEntry.toString();
@@ -740,7 +736,7 @@ public class ResourceBean implements Serializable {
 
 	private void buildGroupResourceSubtree(TreeNode department, ResourceGroup resourceGroup) {
 		if (authController.canRead(resourceGroup, sessionController.getUser())) {
-			TreeNode groupTreeNode = null;
+			TreeNode groupTreeNode;
 			if (authController.canCreate(resourceGroup, sessionController.getUser())) {
 				groupTreeNode = new DefaultTreeNode(
 						new ResourceTreeInfo(resourceGroup.getName(), false, true, String.valueOf(resourceGroup.getId()), null),
@@ -779,7 +775,7 @@ public class ResourceBean implements Serializable {
 
 	private void buildGroupAgentSubtree(TreeNode department, ResourceGroup resourceGroup) {
 		if (authController.canRead(resourceGroup, sessionController.getUser())) {
-			TreeNode groupTreeNode = null;
+			TreeNode groupTreeNode;
 			if (authController.canCreate(resourceGroup, sessionController.getUser())) {
 				groupTreeNode = new DefaultTreeNode(
 						new ResourceTreeInfo(resourceGroup.getName(), false, true, String.valueOf(resourceGroup.getId()), null),

@@ -35,17 +35,11 @@ import de.hallerweb.enterprise.prioritize.model.nfc.counter.IndustrieCounter;
 @SessionScoped
 public class IndustrieCounterBean implements Serializable {
 
-	@EJB
-	LoggingController log;
-
 	@Inject
 	SessionController sessionController;
 
 	@EJB
 	IndustrieCounterController industrieCounterController;
-
-	@EJB
-	NFCUnitController nfcController;
 
 	@Named
 	public List<IndustrieCounter> getCounters() {

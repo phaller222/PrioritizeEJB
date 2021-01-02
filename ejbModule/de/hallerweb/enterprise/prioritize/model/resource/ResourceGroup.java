@@ -64,7 +64,7 @@ public class ResourceGroup implements PAuthorizedObject {
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@OrderBy(value = "id")
 	@JsonBackReference
-	private SortedSet<Resource> resources;
+	private Set<Resource> resources;
 
 	@Version
 	private int entityVersion; // For optimistic locks

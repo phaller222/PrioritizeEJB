@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import de.hallerweb.enterprise.prioritize.model.project.Project;
 
+@SuppressWarnings("ALL")
 @Entity
 @NamedQueries({ @NamedQuery(name = "findBlackboardById", query = "select bb FROM Blackboard bb WHERE bb.id = :blackboardId"),
 				@NamedQuery(name = "findBlackboardTasks", query = "select t FROM Task t, Blackboard b WHERE t.id MEMBER OF b.tasks AND b.id = :blackboardId")})
@@ -76,9 +77,7 @@ public class Blackboard {
 		} else {
 			this.tasks.clear();
 		}
-		for (Task t : tasks) {
-			this.tasks.add(t);
-		}
+		this.tasks.addAll(tasks);
 	}
 
 	public void addTask(Task task) {

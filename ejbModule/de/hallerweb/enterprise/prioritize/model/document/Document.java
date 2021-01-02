@@ -15,21 +15,12 @@
  */
 package de.hallerweb.enterprise.prioritize.model.document;
 
-import java.util.Arrays;
-import java.util.Date;
-
-import javax.persistence.Basic;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Lob;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+
+import javax.persistence.*;
+import java.util.Date;
 
 /**
  * JPA entity to represent a document.

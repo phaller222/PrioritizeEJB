@@ -34,8 +34,6 @@ public class NFCUnitBean implements Serializable {
 
 	@EJB
 	LoggingController log;
-	@EJB
-	NFCUnitController ctl;
 
 	@PostConstruct
 	public void init() {

@@ -187,7 +187,7 @@ public class MQTTService implements MqttCallback {
     }
 
     @Override
-    public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
+    public void messageArrived(String topic, MqttMessage mqttMessage) {
         try {
             if (topic.equalsIgnoreCase("DISCOVERY")) {
                 handleDiscovery(mqttMessage);
@@ -391,7 +391,7 @@ public class MQTTService implements MqttCallback {
         String[] scanDevicesData = data.split(":");
         String deviceUuid = scanDevicesData[1];
         String departmentKey = scanDevicesData[2];
-        StringBuilder scanResult = new StringBuilder("");
+        StringBuilder scanResult = new StringBuilder();
         if (controller.exists(deviceUuid)) {
             Department department = companyController.getDepartmentByToken(departmentKey,
                     AuthorizationController.getSystemUser());

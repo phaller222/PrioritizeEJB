@@ -27,6 +27,7 @@ import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.primefaces.PrimeFaces;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.SelectableDataModel;
@@ -153,10 +154,9 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 
 	public Set<Task> getProjectTasks(Project pr) {
 		Project project = projectController.findProjectById(pr.getId());
-		TreeSet<Task> determinedTasks = new TreeSet<>();
 		Blackboard board = project.getBlackboard();
 
-		determinedTasks.addAll(blackboardController.getBlackboardTasks(board));
+		TreeSet<Task> determinedTasks = new TreeSet<>(blackboardController.getBlackboardTasks(board));
 		if (!determinedTasks.isEmpty()) {
 			return determinedTasks;
 		} else {
@@ -227,7 +227,7 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 
 	@Override
 	public Object getRowData(String arg0) {
-		return taskController.findTaskById(Integer.valueOf(arg0));
+		return taskController.findTaskById(Integer.parseInt(arg0));
 	}
 
 	@Override
@@ -236,7 +236,8 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 	}
 
 	public void showTimeTracker() {
-		RequestContext.getCurrentInstance().openDialog("admin/timetracker");
+		PrimeFaces.current().dialog().openDynamic("admin/timetracker");
+		//Was deprecated:RequestContext.getCurrentInstance().openDialog("admin/timetracker");
 	}
 
 }

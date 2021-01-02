@@ -101,9 +101,8 @@ public class UserPreference {
 		}
 		if (resToRemove != null) {
 			try {
-				// TODO: Klären warum dies 2 mal aufgerufen werden muss!!!
 				this.watchedResources.remove(resToRemove);
-				this.watchedResources.remove(resToRemove);
+				return true;
 			} catch (Exception ex) {
 				Logger.getLogger(getClass()).error(ex.getMessage());
 			}

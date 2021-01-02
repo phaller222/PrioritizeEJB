@@ -15,23 +15,11 @@
  */
 package de.hallerweb.enterprise.prioritize.model;
 
-import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Version;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
+
+import javax.persistence.*;
+import java.util.List;
 
 /**
  * JPA entity to represent a {@link Company}. A Company is the object at the

@@ -15,22 +15,7 @@
  */
 package de.hallerweb.enterprise.prioritize.view.search;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ejb.EJB;
-import javax.enterprise.context.SessionScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.search.SearchController;
-import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
@@ -44,6 +29,18 @@ import de.hallerweb.enterprise.prioritize.view.document.DocumentBean;
 import de.hallerweb.enterprise.prioritize.view.resource.ResourceBean;
 import de.hallerweb.enterprise.prioritize.view.security.RoleBean;
 import de.hallerweb.enterprise.prioritize.view.security.UserBean;
+
+import javax.ejb.EJB;
+import javax.enterprise.context.SessionScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * SearchBean - JSF Backing-Bean to handle searches.
@@ -73,11 +70,7 @@ public class SearchBean implements Serializable {
 	@Inject
 	SessionController sessionController;
 	@EJB
-	AuthorizationController authController;
-	@EJB
 	SearchController searchController;
-	@EJB
-	CompanyController companyController;
 
 	private String searchPhrase;
 

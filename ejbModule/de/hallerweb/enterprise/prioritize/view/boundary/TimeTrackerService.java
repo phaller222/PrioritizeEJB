@@ -15,26 +15,18 @@
  */
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
-import javax.ejb.EJB;
-import javax.enterprise.context.RequestScoped;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import de.hallerweb.enterprise.prioritize.controller.project.task.TaskController;
 import de.hallerweb.enterprise.prioritize.controller.project.task.TimeTrackerController;
 import de.hallerweb.enterprise.prioritize.controller.security.RestAccessController;
-import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.project.task.TimeTracker;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+
+import javax.ejb.EJB;
+import javax.enterprise.context.RequestScoped;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @RequestScoped
 @Path("v1/timetrackers")
@@ -42,8 +34,6 @@ public class TimeTrackerService {
 
 	@EJB
 	RestAccessController accessController;
-	@EJB
-	SessionController sessionController;
 	@EJB
 	TimeTrackerController timeTrackerController;
 	@EJB

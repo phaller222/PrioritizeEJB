@@ -262,19 +262,15 @@ public class BasicTimelineController implements Serializable {
 	public String lookupMimeIcon(String mimeType) {
 		switch (mimeType) {
 		case "application/msword":
-			return "icon_word";
 		case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
 			return "icon_word";
 		case "application/vnd.ms-excel":
-			return "icon_excel";
 		case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
 			return "icon_excel";
 		case " application/vnd.ms-powerpoint":
-			return "icon_powerpoint";
 		case " application/vnd.openxmlformats-officedocument.presentationml.presentation":
 			return "icon_powerpoint";
 		case "image/jpg":
-			return "icon_jpg";
 		case "image/jpeg":
 			return "icon_jpg";
 		case "image/png":

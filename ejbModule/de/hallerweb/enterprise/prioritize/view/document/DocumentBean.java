@@ -15,34 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.view.document;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.enterprise.context.SessionScoped;
-import javax.faces.bean.ManagedBean;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-
-import org.jboss.resteasy.logging.Logger;
-import org.primefaces.event.FileUploadEvent;
-import org.primefaces.event.NodeCollapseEvent;
-import org.primefaces.event.NodeExpandEvent;
-import org.primefaces.model.DefaultStreamedContent;
-import org.primefaces.model.DefaultTreeNode;
-import org.primefaces.model.TreeNode;
-
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
@@ -56,6 +28,27 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.view.BasicTimelineController;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
+import org.jboss.resteasy.logging.Logger;
+import org.primefaces.event.FileUploadEvent;
+import org.primefaces.event.NodeCollapseEvent;
+import org.primefaces.event.NodeExpandEvent;
+import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.DefaultTreeNode;
+import org.primefaces.model.TreeNode;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.enterprise.context.SessionScoped;
+import javax.faces.bean.ManagedBean;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * DocumentBean - JSF Backing-Bean to store information about documents.
@@ -186,12 +179,11 @@ public class DocumentBean implements Serializable {
 		if (controller.createDocumentInfo(document.getName(), Integer.parseInt(selectedDocumentGroup), sessionController.getUser(),
 				tmpMimeType, false, tmpBytes, "") != null) {
 		updateDocumentTree();
-			return NAVIGATION_DOCUMENTS;
 		} else {
 			ViewUtilities.addErrorMessage("name",
 					"A document with the name " + document.getName() + " already exists in this document group!");
-			return NAVIGATION_DOCUMENTS;
 		}
+		return NAVIGATION_DOCUMENTS;
 	}
 
 	@Named
@@ -271,12 +263,11 @@ public class DocumentBean implements Serializable {
 		if (controller.createDocumentGroup(Integer.parseInt(selectedDepartmentId), documentGroupName,
 				sessionController.getUser()) != null) {
 			init();
-			return NAVIGATION_DOCUMENTS;
 		} else {
 			ViewUtilities.addErrorMessage(null,
 					"A document group with the name " + documentGroupName + " already exists in this department!");
-			return NAVIGATION_DOCUMENTS;
 		}
+		return NAVIGATION_DOCUMENTS;
 	}
 
 	public String deleteDocumentGroup() {
@@ -410,7 +401,7 @@ public class DocumentBean implements Serializable {
 				tmpMimeType = "application/unknown";
 			}
 
-			int read = 0;
+			int read;
 			byte[] bytes = new byte[1024];
 
 			while ((read = in.read(bytes)) != -1) {
@@ -529,7 +520,7 @@ public class DocumentBean implements Serializable {
 	private void buildDocumentGroupsWithContent(TreeNode department, Set<DocumentGroup> groups) {
 		for (DocumentGroup g : groups) {
 			if (authController.canRead(g, sessionController.getUser())) {
-				TreeNode group = null;
+				TreeNode group;
 				if (authController.canCreate(g, sessionController.getUser())) {
 					group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null),
 							department);

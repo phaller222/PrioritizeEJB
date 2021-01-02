@@ -15,30 +15,8 @@
  */
 package de.hallerweb.enterprise.prioritize.model.resource;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
 import de.hallerweb.enterprise.prioritize.model.search.PSearchable;
@@ -48,6 +26,9 @@ import de.hallerweb.enterprise.prioritize.model.search.SearchResultType;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
+
+import javax.persistence.*;
+import java.util.*;
 
 /**
  * JPA entity to represent a {@link Resource}. Demo UUID: 69178331-8dd9-4dd1-87f6-368f424006c2
@@ -106,7 +87,7 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 
 	@OneToMany(fetch = FetchType.EAGER)
 	@OrderBy(value = "mqttName")
-	private SortedSet<NameValueEntry> mqttValues; // List with name/value entries for an mqtt Resource
+	private Set<NameValueEntry> mqttValues; // List with name/value entries for an mqtt Resource
 
 	@Lob
 	private byte[] mqttDataReceived; // Buffer for receiving data

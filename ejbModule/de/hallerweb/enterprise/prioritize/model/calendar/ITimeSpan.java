@@ -15,6 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.model.calendar;
 
-interface ITimeSpan {
+public interface ITimeSpan {
 	public TimeSpan getTimeSpan();
 }

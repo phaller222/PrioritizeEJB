@@ -295,6 +295,12 @@ public class AuthorizationController {
 
 	public void addObservedObjectType(String absoluteClassName) {
 		Query query = em.createNamedQuery("findAllObjectTypes");
+		List<ObservedObjectType> types = query.getResultList();
+		for (ObservedObjectType type : types) {
+			if (type.getObjectType().equalsIgnoreCase(absoluteClassName)) {
+				return;
+			}
+		}
 		ObservedObjectType newType = new ObservedObjectType();
 		newType.setObjectType(absoluteClassName);
 		em.persist(newType);

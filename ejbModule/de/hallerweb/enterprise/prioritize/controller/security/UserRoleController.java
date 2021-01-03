@@ -286,7 +286,7 @@ public class UserRoleController extends PEventConsumerProducer {
                     logger.log(LITERAL_SYSTEM, "User", Action.CREATE, newUser.getId(),
                             LITERAL_USER + " " + newUser.getUsername() + LITERAL_CREATED);
                 }
-                return newUser;
+                return userToCreate;
             } else {
                 // Username already exists, return null.
                 return null;

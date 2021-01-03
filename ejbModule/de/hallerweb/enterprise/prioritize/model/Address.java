@@ -49,7 +49,6 @@ public class Address {
 	String fax;
 	String city;
 	String street;
-	String email;
 
 	@Version
 	private int entityVersion; // For optimistic locks
@@ -96,13 +95,5 @@ public class Address {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
 	}
 }

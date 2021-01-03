@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 /**
  * CompanyController.java - Controls the creation, modification and deletion of {@link Company} objects. Also the associated {@link Address}
  * and {@link Department} objects are handled here.
- * 
+ *
  */
 @Stateless
 public class CompanyController extends PEventConsumerProducer {
@@ -99,14 +99,13 @@ public class CompanyController extends PEventConsumerProducer {
 		}
 	}
 
-	public Address createAddress(String street, String zipCode, String city, String phone, String fax, String email) {
+	public Address createAddress(String street, String zipCode, String city, String phone, String fax) {
 		Address adr = new Address();
 		adr.setStreet(street);
 		adr.setZipCode(zipCode);
 		adr.setCity(city);
 		adr.setPhone(phone);
 		adr.setFax(fax);
-		adr.setEmail(email);
 
 		em.persist(adr);
 		em.flush();
@@ -143,14 +142,14 @@ public class CompanyController extends PEventConsumerProducer {
 				address.setZipCode(companyAddress.getZipCode());
 				address.setPhone(companyAddress.getPhone());
 				address.setFax(companyAddress.getFax());
-				address.setEmail(companyAddress.getEmail());
+
 			} else {
 				address.setCity(adr.getCity());
 				address.setStreet(adr.getStreet());
 				address.setZipCode(adr.getZipCode());
 				address.setPhone(adr.getPhone());
 				address.setFax(adr.getFax());
-				address.setEmail(adr.getEmail());
+
 			}
 
 			DocumentGroup defaultDocumentGroup = new DocumentGroup();
@@ -189,7 +188,7 @@ public class CompanyController extends PEventConsumerProducer {
 			deptDocs.setAbsoluteObjectType(DocumentInfo.class.getCanonicalName());
 			deptDocs.setDepartment(dept);
 			records.add(deptDocs);
-			
+
 			PermissionRecord deptDocsDir = new PermissionRecord(true, true, true, true);
 			deptDocsDir.setAbsoluteObjectType(DocumentGroup.class.getCanonicalName());
 			deptDocsDir.setDepartment(dept);
@@ -199,12 +198,12 @@ public class CompanyController extends PEventConsumerProducer {
 			deptResources.setAbsoluteObjectType(Resource.class.getCanonicalName());
 			deptResources.setDepartment(dept);
 			records.add(deptResources);
-			
+
 			PermissionRecord deptResourcesDir = new PermissionRecord(true, true, true, true);
 			deptResourcesDir.setAbsoluteObjectType(ResourceGroup.class.getCanonicalName());
 			deptResourcesDir.setDepartment(dept);
 			records.add(deptResourcesDir);
-			
+
 
 			Role r = userRoleController.createRole(company.getName() + "-" + dept.getName() + "-Admin",
 					company.getName() + " - " + dept.getName() + " - Admin", records, sessionUser);
@@ -320,7 +319,7 @@ public class CompanyController extends PEventConsumerProducer {
 	/**
 	 * Edits the {@link Company} data in the underlying persistence architecture. The new data for the {@link Company} like name, Address
 	 * and so on can be passed here as a detached {@link Company} object. Also changes to the companies departments will be persisted here.
-	 * 
+	 *
 	 * @param company
 	 *            The {@link Company} object with the changed data of the {@link Company}. the primary key must be set.
 	 */
@@ -337,7 +336,7 @@ public class CompanyController extends PEventConsumerProducer {
 			origAddress.setZipCode(changedAddress.getZipCode());
 			origAddress.setPhone(changedAddress.getPhone());
 			origAddress.setFax(changedAddress.getFax());
-			origAddress.setEmail(changedAddress.getEmail());
+
 			em.merge(origAddress);
 
 			orig.setMainAddress(origAddress);
@@ -401,7 +400,6 @@ public class CompanyController extends PEventConsumerProducer {
 				origAddress.setZipCode(changedAddress.getZipCode());
 				origAddress.setPhone(changedAddress.getPhone());
 				origAddress.setFax(changedAddress.getFax());
-				origAddress.setEmail(changedAddress.getEmail());
 				em.flush();
 
 				logger.log(sessionUser.getName(), LITERAL_DEPARTMENT, Action.UPDATE, orig.getId(),
@@ -498,7 +496,7 @@ public class CompanyController extends PEventConsumerProducer {
 
 	/**
 	 * Returns a {@link List} of all adresses.
-	 * 
+	 *
 	 * @return List<Company> the adresses.
 	 * @throws EJBException
 	 */
@@ -510,7 +508,7 @@ public class CompanyController extends PEventConsumerProducer {
 
 	/**
 	 * Deletes the {@link Address} with the given ID.
-	 * 
+	 *
 	 * @param id
 	 *            - The primary key (int) of the {@link Department} to be deleted.
 	 */

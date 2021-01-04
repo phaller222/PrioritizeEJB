@@ -99,7 +99,7 @@ public class DocumentController extends PEventConsumerProducer {
 				document.setEncryptedBy(user);
 			}
 			document.setLastModified(new Date());
-			document.setLastModifiedBy(userRoleController.findUserByUsername(user.getUsername(), AuthorizationController.getSystemUser()));
+			document.setLastModifiedBy(userRoleController.findUserByUsername(user.getUsername(), authController.getSystemUser()));
 
 			// New document, so version is always 1
 			document.setVersion(1);

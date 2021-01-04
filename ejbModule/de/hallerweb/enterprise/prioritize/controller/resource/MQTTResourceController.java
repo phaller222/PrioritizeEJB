@@ -479,7 +479,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
     }
 
     public void fireScanResult(String sourceUuid, String scanResult) {
-        Resource managedResource = getResource(sourceUuid, AuthorizationController.getSystemUser());
+        Resource managedResource = getResource(sourceUuid, authController.getSystemUser());
         mqttService.writeToTopic(managedResource.getMqttDataReceiveTopic(), scanResult.getBytes());
     }
 

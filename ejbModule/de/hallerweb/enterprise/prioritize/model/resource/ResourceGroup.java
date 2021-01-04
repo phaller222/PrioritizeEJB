@@ -66,9 +66,6 @@ public class ResourceGroup implements PAuthorizedObject {
 	@JsonBackReference
 	private Set<Resource> resources;
 
-	@Version
-	private int entityVersion; // For optimistic locks
-
 	public String getName() {
 		return name;
 	}

@@ -48,9 +48,6 @@ public class SkillRecordProperty {
 	int propertyValueNumeric;
 	String propertyValueString;
 
-	@Version
-	private int entityVersion; // For optimistic locks
-
 	public SkillRecordProperty() {
 		super();
 	}

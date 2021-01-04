@@ -46,8 +46,6 @@ public abstract class SkillProperty implements SkillType {
 	@GeneratedValue
 	int id;
 
-	@Version
-	private int entityVersion; // For optimistic locks
 
 	String name;
 	String description;

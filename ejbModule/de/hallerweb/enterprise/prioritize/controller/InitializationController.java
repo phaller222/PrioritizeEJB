@@ -205,7 +205,7 @@ public class InitializationController {
 	}
 
 	public void createAdminAccountIfNotPresent() {
-		if (userRoleController.getAllUsers(AuthorizationController.getSystemUser()).isEmpty()) {
+		if (userRoleController.getAllUsers(authController.getSystemUser()).isEmpty()) {
 			Department d = null;
 			// No user present yet. Create admin user...
 			Logger.getLogger(this.getClass().getName()).log(Level.INFO,
@@ -220,14 +220,14 @@ public class InitializationController {
 				adr.setPhone("00000-00000");
 				adr.setStreet("Street of Admins");
 				adr.setZipCode("00000");
-				Company c = companyController.createCompany("Default Company", adr, AuthorizationController.getSystemUser());
+				Company c = companyController.createCompany("Default Company", adr, authController.getSystemUser());
 				c.setMainAddress(adr);
 
 
 
 				if (Boolean.parseBoolean(config.get(CREATE_DEFAULT_DEPARTMENT))) {
 					d = companyController.createDepartment(c, "default", "Auto generated default department", adr,
-							AuthorizationController.getSystemUser());
+							authController.getSystemUser());
 					defaultDepartmentId = d.getId();
 				}
 			}
@@ -269,7 +269,7 @@ public class InitializationController {
 			records.add(adminTimeTracker);
 			records.add(adminCounter);
 
-			Role r = userRoleController.createRole(LITERAL_ADMIN, "admin Role", records, AuthorizationController.getSystemUser());
+			Role r = userRoleController.createRole(LITERAL_ADMIN, "admin Role", records, authController.getSystemUser());
 			userRoleController.setRoleDepartment(r,d);
 			Set<Role> roles = new HashSet<>();
 			roles.add(r);
@@ -285,7 +285,7 @@ public class InitializationController {
 				Logger.getLogger(this.getClass().getName()).log(Level.INFO,"--- ATTENTION: DEFAULT API-KEY HJAS BEEN CREATED: ABCDEFG. DON'T USE THIS INSTALLATION IN PRODUCTION---");
 			}
 
-			userRoleController.createUser(admin, null, roles, AuthorizationController.getSystemUser());
+			userRoleController.createUser(admin, null, roles, authController.getSystemUser());
 
 		} else {
 			Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Deploymeent OK.");

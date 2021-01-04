@@ -62,6 +62,8 @@ public class ClassicApproach implements Serializable {
 	ProjectController projectController;
 	@EJB
 	TaskController taskController;
+	@EJB
+	AuthorizationController authController;
 	@Inject
 	SessionController sessionController;
 	
@@ -259,7 +261,7 @@ public class ClassicApproach implements Serializable {
 
 	public void addUser() {
 		if (userToAdd != null && userToAdd.length() > 0) {
-			User user = userRoleController.findUserByUsername(userToAdd, AuthorizationController.getSystemUser());
+			User user = userRoleController.findUserByUsername(userToAdd, authController.getSystemUser());
 			if ((user != null)) {
 				this.members.add(user);
 			}
@@ -272,7 +274,7 @@ public class ClassicApproach implements Serializable {
 
 	public void addDocument() {
 		if (documentToAdd != null) {
-			DocumentInfo docInfo = documentController.getAllDocumentInfos(AuthorizationController.getSystemUser()).get(0);
+			DocumentInfo docInfo = documentController.getAllDocumentInfos(authController.getSystemUser()).get(0);
 			if ((docInfo != null)) {
 				this.documents.add(docInfo);
 			}
@@ -286,7 +288,7 @@ public class ClassicApproach implements Serializable {
 	public void addResource() {
 		if (resourceToAdd != null) {
 			// TODO: Make a real selection of resourrces!
-			Resource res = resourceController.getAllResources(AuthorizationController.getSystemUser()).get(0);
+			Resource res = resourceController.getAllResources(authController.getSystemUser()).get(0);
 			if ((res != null)) {
 				this.resources.add(res);
 			}

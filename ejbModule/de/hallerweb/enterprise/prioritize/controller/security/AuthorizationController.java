@@ -60,7 +60,7 @@ public class AuthorizationController {
 	public static final SkillCategory SKILL_CATEGORY = new SkillCategory();
 	public static final Skill SKILL_TYPE = new Skill();
 
-	public static User getSystemUser() {
+	public User getSystemUser() {
 		if (systemUser == null) {
 			systemUser = new User();
 			systemUser.setUsername("system");

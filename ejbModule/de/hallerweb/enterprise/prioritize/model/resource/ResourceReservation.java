@@ -63,9 +63,6 @@ public class ResourceReservation implements ITimeSpan {
 	@OneToOne
 	private User reservedBy;
 
-	@Version
-	private int entityVersion; // For optimistic locks
-
 	@OneToOne(cascade = CascadeType.ALL)
 	private TimeSpan timespan; // TimeSpan indication when the resource has been reserved (from/until).
 

@@ -24,8 +24,10 @@ public class MqttClientPing {
 
 	@EJB
 	MQTTResourceController mqttResourceController;
-
-	@EJB InitializationController initController;
+	@EJB
+	InitializationController initController;
+	@EJB
+	AuthorizationController authController;
 
 	/**
 	 * Default constructor.
@@ -42,7 +44,7 @@ public class MqttClientPing {
 			// Get all online MQTT resources
 			User systemUser = new User();
 			systemUser.setUsername("system");
-			List<Resource> onlineMqttResources = mqttResourceController.getOnlineMqttResources(AuthorizationController.getSystemUser());
+			List<Resource> onlineMqttResources = mqttResourceController.getOnlineMqttResources(authController.getSystemUser());
 			if (onlineMqttResources != null) {
 				for (Resource resource : onlineMqttResources) {
 					if (isResourceTimedOut(resource)) {

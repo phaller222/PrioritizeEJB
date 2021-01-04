@@ -69,7 +69,7 @@ public class CalendarView implements Serializable {
 	@EJB
 	private UserRoleController userRoleController;
 	@EJB
-	private SessionController sessionController;
+	private AuthorizationController authController;
 	@EJB
 	private CalendarController calendarController;
 
@@ -124,7 +124,7 @@ public class CalendarView implements Serializable {
 	}
 
 	private void createReservationsModel(Date from, Date until) {
-		List<ResourceReservation> reservations = null;
+		List<ResourceReservation> reservations;
 
 		TimeSpan requestedTimeSpan = new TimeSpan();
 		requestedTimeSpan.setDateFrom(from);
@@ -156,10 +156,10 @@ public class CalendarView implements Serializable {
 		requestedTimeSpan.setDateUntil(until);
 
 		if (this.selectedDepartment == null) {
-			List<User> users = userRoleController.getAllUsers(AuthorizationController.getSystemUser());
+			List<User> users = userRoleController.getAllUsers(authController.getSystemUser());
 			addUsersIllnessWithinTimeSpan(requestedTimeSpan, users);
 		} else {
-			List<User> users = userRoleController.getUsersForDepartment(selectedDepartment, AuthorizationController.getSystemUser());
+			List<User> users = userRoleController.getUsersForDepartment(selectedDepartment, authController.getSystemUser());
 			addUsersIllnessWithinTimeSpan(requestedTimeSpan, users);
 		}
 	}
@@ -186,10 +186,10 @@ public class CalendarView implements Serializable {
 		requestedTimeSpan.setDateUntil(until);
 
 		if (this.selectedDepartment == null) {
-			List<User> users = userRoleController.getAllUsers(AuthorizationController.getSystemUser());
+			List<User> users = userRoleController.getAllUsers(authController.getSystemUser());
 			addUserVaccationWithinTimeSpan(requestedTimeSpan, users);
 		} else {
-			List<User> users = userRoleController.getUsersForDepartment(selectedDepartment, AuthorizationController.getSystemUser());
+			List<User> users = userRoleController.getUsersForDepartment(selectedDepartment, authController.getSystemUser());
 			addUserVaccationWithinTimeSpan(requestedTimeSpan, users);
 		}
 	}

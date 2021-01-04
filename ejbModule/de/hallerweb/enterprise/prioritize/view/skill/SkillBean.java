@@ -205,13 +205,13 @@ public class SkillBean implements Serializable {
 	 */
 	public void createDummyData() {
 		
-		List<Skill> skills = controller.getAllSkills(AuthorizationController.getSystemUser());
+		List<Skill> skills = controller.getAllSkills(authController.getSystemUser());
 		if (skills == null || skills.size() < 1) {
 		
 		SkillCategory catCoaching = controller.createSkillCategory("Coaching", "Schulungen/Workshops/Coaching", null,
-				AuthorizationController.getSystemUser());
+				authController.getSystemUser());
 		controller.createSkill("Workshops", "Durchführung von Workshops", "coaching,workshops", catCoaching, null,
-				AuthorizationController.getSystemUser());
+				authController.getSystemUser());
 
 		SkillPropertyNumeric prop1 = new SkillPropertyNumeric();
 		prop1.setName("JPA");
@@ -257,13 +257,13 @@ public class SkillBean implements Serializable {
 		props2.add(prop4);
 
 		SkillCategory cat2 = controller.createSkillCategory("Programmierung", "Programmierung/Programmiersprachen", null,
-				AuthorizationController.getSystemUser());
+				authController.getSystemUser());
 		SkillCategory cat22 = controller.createSkillCategory("Java", "Kenntnisse im Bereich Java", cat2,
-				AuthorizationController.getSystemUser());
-		SkillCategory cat23 = controller.createSkillCategory("Apple", "Apple Kenntnisse", cat2, AuthorizationController.getSystemUser());
+				authController.getSystemUser());
+		SkillCategory cat23 = controller.createSkillCategory("Apple", "Apple Kenntnisse", cat2, authController.getSystemUser());
 
-		controller.createSkill("J2EE", "J2EE Kenntnisse", "JPA, JavaMail, EJB", cat22, props, AuthorizationController.getSystemUser());
-		controller.createSkill("iOS", "iOS Kenntnisse", "Swift, objective-c...", cat23, props2, AuthorizationController.getSystemUser());
+		controller.createSkill("J2EE", "J2EE Kenntnisse", "JPA, JavaMail, EJB", cat22, props, authController.getSystemUser());
+		controller.createSkill("iOS", "iOS Kenntnisse", "Swift, objective-c...", cat23, props2, authController.getSystemUser());
 		}
 
 	}
@@ -286,7 +286,7 @@ public class SkillBean implements Serializable {
 	}
 
 	private void traverseSkills(DefaultTreeNode parentNode, SkillCategory category) {
-		List<Skill> skills = controller.getSkillsForCategory(category, AuthorizationController.getSystemUser());
+		List<Skill> skills = controller.getSkillsForCategory(category, authController.getSystemUser());
 		if (skills != null) {
 			for (Skill skill : skills) {
 				DefaultTreeNode skillNode = new DefaultTreeNode(TYPE_SKILL, skill, parentNode);

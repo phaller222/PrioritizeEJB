@@ -74,9 +74,9 @@ public class Project {
 	@OneToMany
 	List<SkillGroup> requiredSkills;					// The skills required to fullfill this project
 
-	@JsonIgnore
-	@OneToMany
-	List<SkillRecord> availableSkills;					// Skills already assigned to the project (=available)
+	//@JsonIgnore
+	//@OneToMany
+	//List<SkillRecord> availableSkills;					// Skills already assigned to the project (=available)
 
 	@JsonIgnore
 	@OneToOne
@@ -214,7 +214,7 @@ public class Project {
 		this.requiredSkills.remove(group);
 	}
 
-	public List<SkillRecord> getAvailableSkills() {
+	/*public List<SkillRecord> getAvailableSkills() {
 		return availableSkills;
 	}
 
@@ -228,7 +228,7 @@ public class Project {
 
 	public void removeAvailableSkill(SkillRecord skill) {
 		this.availableSkills.remove(skill);
-	}
+	}*/
 
 	public Blackboard getBlackboard() {
 		return blackboard;

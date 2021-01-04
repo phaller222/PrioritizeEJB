@@ -150,7 +150,7 @@ public class DocumentController extends PEventConsumerProducer {
 				try {
 					logger.log(sessionController.getUser().getUsername(), "DocumentGroup", Action.CREATE, documentGroup.getId(),
 							" DocumentGroup \"" + documentGroup.getName() + "\" created.");
-				} catch (ContextNotActiveException ex) {
+				} catch (Exception ex) {
 					LogManager.getLogManager().getLogger(getClass().getName()).log(Level.WARNING,ex.getMessage());
 				}
 

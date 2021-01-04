@@ -57,9 +57,6 @@ public class Company implements PAuthorizedObject {
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "company", cascade = CascadeType.ALL)
 	List<Department> departments;
 
-	@Version
-	private int entityVersion; // For optimistic locks
-
 	public int getId() {
 		return id;
 	}

@@ -50,9 +50,6 @@ public class Address {
 	String city;
 	String street;
 
-	@Version
-	private int entityVersion; // For optimistic locks
-
 	public int getId() {
 		return id;
 	}

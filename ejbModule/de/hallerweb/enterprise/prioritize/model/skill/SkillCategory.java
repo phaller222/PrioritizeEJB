@@ -65,9 +65,6 @@ public class SkillCategory implements PAuthorizedObject, SkillType {
 	@JsonBackReference
 	Set<Skill> skills;
 
-	@Version
-	private int entityVersion; // For optimistic locks
-
 	public SkillCategory() {
 		super();
 		this.subCategories = new HashSet<>();

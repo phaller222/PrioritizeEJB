@@ -80,6 +80,8 @@ public class MQTTService implements MqttCallback {
     CompanyController companyController;
     @EJB
     InitializationController initController;
+    @EJB
+    AuthorizationController authController;
 
     private void connect() {
         if (Boolean
@@ -110,7 +112,7 @@ public class MQTTService implements MqttCallback {
                 // subscribe to all registered resources
                 List<String> registeredResources = controller.getAllMqttUuids();
                 for (String uuid : registeredResources) {
-                    Resource resource = controller.getResource(uuid, AuthorizationController.getSystemUser());
+                    Resource resource = controller.getResource(uuid, authController.getSystemUser());
                     String[] subscription = new String[3];
                     subscription[0] = uuid;
                     subscription[1] = resource.getMqttDataSendTopic();
@@ -245,7 +247,7 @@ public class MQTTService implements MqttCallback {
                 tempResource.setDataSendTopic(dataSendTopic);
                 tempResource.setIp("");
                 Resource resource = controller.createMqttResource(tempResource, token, group,
-                        AuthorizationController.getSystemUser());
+                        authController.getSystemUser());
 
                 String[] subscription = new String[3];
                 subscription[0] = uuid;
@@ -268,7 +270,7 @@ public class MQTTService implements MqttCallback {
             byte[] data = message.getPayload();
             // Get Resource with UUID and write received data from device to it.
             try {
-                Resource resource = controller.getResource(uuid, AuthorizationController.getSystemUser());
+                Resource resource = controller.getResource(uuid, authController.getSystemUser());
                 controller.writeMqttDataReceived(resource, data);
             } catch (Exception ex) {
                 Logger.getLogger(this.getClass()).error(ex.getMessage());
@@ -281,7 +283,7 @@ public class MQTTService implements MqttCallback {
     private void handleStatusMessage(String uuid, MqttMessage message) {
         if (controller.exists(uuid)) {
             // Get Resource with UUID
-            Resource resource = controller.getResource(uuid, AuthorizationController.getSystemUser());
+            Resource resource = controller.getResource(uuid, authController.getSystemUser());
             String data = new String(message.getPayload());
             String statusData;
             if (data.contains(":")) {
@@ -297,7 +299,7 @@ public class MQTTService implements MqttCallback {
         switch (statusData) {
             // Remove resource
             case COMMAND_REMOVE:
-                resourceController.deleteResource(resource.getId(), AuthorizationController.getSystemUser());
+                resourceController.deleteResource(resource.getId(), authController.getSystemUser());
                 try {
                     client.publish(resource.getMqttDataReceiveTopic(), new MqttMessage("UNREGISTERED".getBytes()));
                 } catch (MqttException e) {
@@ -352,14 +354,14 @@ public class MQTTService implements MqttCallback {
                 String destParam = commandString[3];
 
                 if (controller.exists(destUuid)) {
-                    Resource targetResource = controller.getResource(destUuid, AuthorizationController.getSystemUser());
+                    Resource targetResource = controller.getResource(destUuid, authController.getSystemUser());
                     controller.sendCommandToResource(targetResource, destCommand, destParam);
                 }
                 break;
             case COMMAND_GET_COMMANDS:
                 if (controller.exists(data)) {
                     // Resource targetResource = controller.getResource(uuidToQuery,
-                    // AuthorizationController.getSystemUser());
+                    // authController.getSystemUser());
                     // TODO: Implement GET_COMMANDS!
                     // String[] targetCommandList = targetResource.getMqttCommands().toArray(new
                     // String[] {});
@@ -394,7 +396,7 @@ public class MQTTService implements MqttCallback {
         StringBuilder scanResult = new StringBuilder();
         if (controller.exists(deviceUuid)) {
             Department department = companyController.getDepartmentByToken(departmentKey,
-                    AuthorizationController.getSystemUser());
+                    authController.getSystemUser());
             Set<ResourceGroup> groups = department.getResourceGroups();
             List<Resource> devicesFound = scanDevices(deviceUuid, groups);
             if (!devicesFound.isEmpty()) {

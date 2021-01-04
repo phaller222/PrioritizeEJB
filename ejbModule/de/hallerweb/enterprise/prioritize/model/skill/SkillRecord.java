@@ -65,9 +65,6 @@ public class SkillRecord {
 
 	int enthusiasm; // How much does the User "love" to perform tasks needing that skill?
 
-	@Version
-	private int entityVersion; // For optimistic locks
-
 	public SkillRecord() {
 		super();
 		this.skillProperties = new HashSet<>();

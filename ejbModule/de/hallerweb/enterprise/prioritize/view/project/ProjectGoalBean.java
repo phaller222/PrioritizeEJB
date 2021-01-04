@@ -49,9 +49,11 @@ import java.util.List;
 public class ProjectGoalBean implements Serializable {
 
 	@EJB
-	ProjectController controller;
+	private ProjectController controller;
 	@Inject
-	SessionController sessionController;
+	private SessionController sessionController;
+	@EJB
+	private AuthorizationController authController;
 
 	transient ProjectGoalCategory selectedProjectGoalCategory;
 	transient Object selectedGoal;
@@ -176,7 +178,7 @@ public class ProjectGoalBean implements Serializable {
 	}
 
 	private void traverseProjectGoals(DefaultTreeNode parentNode, ProjectGoalCategory category) {
-		List<ProjectGoal> goals = controller.getProjectGoalsForCategory(category, AuthorizationController.getSystemUser());
+		List<ProjectGoal> goals = controller.getProjectGoalsForCategory(category, authController.getSystemUser());
 		if (goals != null) {
 			for (ProjectGoal goal : goals) {
 				DefaultTreeNode goalNode = new DefaultTreeNode(TYPE_GOAL, goal, parentNode);

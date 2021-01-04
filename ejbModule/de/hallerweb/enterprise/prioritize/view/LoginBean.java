@@ -54,6 +54,7 @@ public class LoginBean implements Serializable {
 
     @EJB
     UserRoleController userRoleController;
+    @EJB AuthorizationController authController;
     @Inject
     UserPreferenceController preferenceController;
     @Inject
@@ -125,7 +126,7 @@ public class LoginBean implements Serializable {
     }
 
     public String login() {
-        User user = userRoleController.findUserByUsername(username, AuthorizationController.getSystemUser());
+        User user = userRoleController.findUserByUsername(username, authController.getSystemUser());
         if (user == null) {
             loggedIn = false;
             return NAVIGATION_LOGIN;
@@ -152,7 +153,7 @@ public class LoginBean implements Serializable {
     }
 
     private String initializeBasicSession() {
-        User user = userRoleController.findUserByUsername(username, AuthorizationController.getSystemUser());
+        User user = userRoleController.findUserByUsername(username, authController.getSystemUser());
         if (user == null) {
             loggedIn = false;
             return NAVIGATION_LOGIN;
@@ -178,7 +179,7 @@ public class LoginBean implements Serializable {
                 userName = context.getUserPrincipal().getName();
             }
             this.username = userName;
-            User user = userRoleController.findUserByUsername(username, AuthorizationController.getSystemUser());
+            User user = userRoleController.findUserByUsername(username, authController.getSystemUser());
             if (user == null) {
                 loggedIn = false;
             } else {

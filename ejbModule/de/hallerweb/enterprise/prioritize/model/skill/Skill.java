@@ -63,9 +63,6 @@ public class Skill implements PAuthorizedObject, PSearchable {
 
 	String keywords;
 
-	@Version
-	private int entityVersion; // For optimistic locks
-
 	transient List<SearchProperty> searchProperties;
 
 	public Skill() {

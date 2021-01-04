@@ -259,7 +259,7 @@ public class UserRoleController extends PEventConsumerProducer {
 
     public User createUser(User newUser, Department initialDepartment, Set<Role> roles, User sessionUser) {
         if (authController.canCreate(newUser, sessionUser)) {
-            if (findUserByUsername(newUser.getUsername(), AuthorizationController.getSystemUser()) == null) {
+            if (findUserByUsername(newUser.getUsername(), authController.getSystemUser()) == null) {
                 User userToCreate = User.newInstane(newUser);
                 userToCreate.setPassword(String.valueOf(userToCreate.getPassword().hashCode()));
                 userToCreate.setDepartment(initialDepartment);

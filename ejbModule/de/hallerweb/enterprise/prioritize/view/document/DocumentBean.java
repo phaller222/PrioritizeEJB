@@ -532,10 +532,12 @@ public class DocumentBean implements Serializable {
 				sortDocumentList(docList);
 				for (DocumentInfo docInfo : docList) {
 					if (authController.canRead(docInfo, sessionController.getUser())) {
-						if (docInfo.getCurrentDocument().getLastModified().before(timelineBean.getSelectedDate())) {
+						//TODO: Nice option. Can later be used to show only documents
+						// present at a given time.
+						//if (docInfo.getCurrentDocument().getLastModified().before(timelineBean.getSelectedDate())) {
 						new DefaultTreeNode(new DocumentTreeInfo(docInfo.getCurrentDocument().getName(), true, false, null, docInfo),
 								group);
-						}
+						//}
 					}
 				}
 			}

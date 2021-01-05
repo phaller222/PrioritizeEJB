@@ -347,6 +347,7 @@ public class DocumentBean implements Serializable {
 	@Named
 	public String commitEdits() {
 		controller.editDocumentInfo(documentInfo, document, tmpBytes, tmpMimeType, sessionController.getUser(), false);
+		updateDocumentTree();
 		return NAVIGATION_DOCUMENTS;
 	}
 

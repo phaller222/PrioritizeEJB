@@ -279,6 +279,7 @@ public class DocumentBean implements Serializable {
 
 	public String delete(DocumentInfo info) {
 		controller.deleteDocumentInfo(info.getId(), sessionController.getUser());
+		updateDocumentTree();
 		return NAVIGATION_DOCUMENTS;
 	}
 

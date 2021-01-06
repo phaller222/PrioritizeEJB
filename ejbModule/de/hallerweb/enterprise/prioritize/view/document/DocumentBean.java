@@ -166,6 +166,7 @@ public class DocumentBean implements Serializable {
 		if (tag == null || tag.isEmpty()) {
 			doc.setTag(null);
 		}
+		updateDocumentTree();
 		return NAVIGATION_HISTORY;
 	}
 
@@ -285,6 +286,7 @@ public class DocumentBean implements Serializable {
 
 	public String deleteDocumentVersion(Document doc) {
 		this.documentInfo = controller.deleteDocumentFromDocumentInfo(doc, documentInfo, sessionController.getUser());
+		updateDocumentTree();
 		if (documentInfo.getRecentDocuments().isEmpty()) {
 			return NAVIGATION_DOCUMENTS;
 		} else {
@@ -335,6 +337,7 @@ public class DocumentBean implements Serializable {
 	@Named
 	public String setDocumentAsCurrent(Document doc) {
 		controller.setDocumentAsCurrentVersion(doc, documentInfo, sessionController.getUser());
+		updateDocumentTree();
 		return NAVIGATION_DOCUMENTS;
 	}
 

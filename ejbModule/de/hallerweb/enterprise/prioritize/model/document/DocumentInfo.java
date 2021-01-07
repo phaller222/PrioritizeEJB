@@ -142,7 +142,7 @@ public class DocumentInfo extends PObject implements PAuthorizedObject, PSearcha
 		return recentDocuments;
 	}
 
-	public void setRecentDocuments(SortedSet<Document> recent) {
+	public void setRecentDocuments(Set<Document> recent) {
 		this.recentDocuments = recent;
 	}
 

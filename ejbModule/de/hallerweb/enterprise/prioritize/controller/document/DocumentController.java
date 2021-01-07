@@ -415,7 +415,7 @@ public class DocumentController extends PEventConsumerProducer {
 
 			Document newDoc = createDocumentCopy(managedDocument, (managedDocumentInfo.getCurrentDocument().getVersion()) + 1);
 			Document managedNewDoc = em.find(Document.class, newDoc.getId());
-			SortedSet<Document> recentDocuments = (SortedSet<Document>) managedDocumentInfo.getRecentDocuments();
+			Set<Document> recentDocuments = managedDocumentInfo.getRecentDocuments();
 			recentDocuments.add(managedDocumentInfo.getCurrentDocument());
 			managedDocumentInfo.setCurrentDocument(managedNewDoc);
 			managedDocumentInfo.setRecentDocuments(recentDocuments);

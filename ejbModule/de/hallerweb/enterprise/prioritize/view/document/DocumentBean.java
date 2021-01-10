@@ -70,6 +70,7 @@ public class DocumentBean implements Serializable {
 	private static final long serialVersionUID = -9021544577054017322L;
 	private static final String NAVIGATION_HISTORY = "history";
 	private static final String NAVIGATION_DOCUMENTS = "documents";
+	private static final String NAVIGATION_HOME = "../index";
 
 	@Inject
 	SessionController sessionController;

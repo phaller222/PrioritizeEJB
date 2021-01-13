@@ -44,6 +44,7 @@ import de.hallerweb.enterprise.prioritize.model.search.SearchProperty;
 import de.hallerweb.enterprise.prioritize.model.search.SearchProperty.SearchPropertyType;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResultType;
+import de.hallerweb.enterprise.prioritize.model.security.payment.BankingAccount;
 import de.hallerweb.enterprise.prioritize.model.skill.Skill;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
@@ -76,14 +77,15 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	public static final String PROPERTY_DEPARTMENT = "department";
 	public static final String PROPERTY_USERNAME = "username";
 
+	public enum Gender {
+		MALE,
+		FEEMALE,
+		OTHER,
+		TECHNICAL_USER
+	}
+
 	String name;
 	String username;
-
-	@JsonIgnore
-	@OneToMany(fetch = FetchType.LAZY)
-	List<Task> assignedTasks;
-
-
 	@JsonIgnore
 	String email;
 	@JsonIgnore
@@ -94,8 +96,16 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	String apiKey;
 	@JsonIgnore
 	Date lastLogin;
+	@JsonIgnore
+	Date dateOfBirth;
+	Gender gender;
 
-	transient List<SearchProperty> searchProperties;
+	@OneToOne
+	Address address;
+
+	@JsonIgnore
+	@OneToMany(fetch = FetchType.LAZY)
+	List<Task> assignedTasks;
 
 	@JsonIgnore
 	@ManyToMany(fetch = FetchType.EAGER)
@@ -104,7 +114,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	@JsonIgnore
 	@OneToOne
 	TimeSpan illness;
-	
+
 	@ManyToOne
 	@JsonBackReference
 	Department department;
@@ -113,6 +123,8 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	@JsonBackReference
 	Set<Role> roles;
 
+	transient List<SearchProperty> searchProperties;
+
 	@JsonIgnore
 	@OneToMany(fetch = FetchType.EAGER)
 	Set<SkillRecord> skills;
@@ -120,13 +132,45 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	@JsonIgnore
 	@OneToOne(fetch = FetchType.EAGER)
 	UserPreference preference;
-	
-	@OneToOne
-	Address address;
+
+	@OneToMany
+	private Set<BankingAccount> bankingAccounts;
+
+	public Set<BankingAccount> getBankingAccounts() {
+		return bankingAccounts;
+	}
+
+	public void setBankingAccounts(Set<BankingAccount> bankingAccounts) {
+		this.bankingAccounts = bankingAccounts;
+	}
 
 	public User(String username) {
 		this.username = username;
 		this.name = username;
+	}
+
+	public Gender getGender() {
+		return gender;
+	}
+
+	public void setGender(Gender gender) {
+		this.gender = gender;
+	}
+
+	public Date getDateOfBirth() {
+		return dateOfBirth;
+	}
+
+	public void setDateOfBirth(Date dateOfBirth) {
+		this.dateOfBirth = dateOfBirth;
+	}
+
+	public Set<TimeSpan> getVacations() {
+		return vacations;
+	}
+
+	public void setVacations(Set<TimeSpan> vacations) {
+		this.vacations = vacations;
 	}
 
 	public List<Task> getAssignedTasks() {

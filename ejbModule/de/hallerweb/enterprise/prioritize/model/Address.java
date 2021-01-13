@@ -49,6 +49,15 @@ public class Address {
 	String fax;
 	String city;
 	String street;
+	String mobile;
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
 
 	public int getId() {
 		return id;

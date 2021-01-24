@@ -99,13 +99,14 @@ public class CompanyController extends PEventConsumerProducer {
 		}
 	}
 
-	public Address createAddress(String street, String zipCode, String city, String phone, String fax) {
+	public Address createAddress(String street, String zipCode, String city, String phone, String fax, String mobile) {
 		Address adr = new Address();
 		adr.setStreet(street);
 		adr.setZipCode(zipCode);
 		adr.setCity(city);
 		adr.setPhone(phone);
 		adr.setFax(fax);
+		adr.setMobile(mobile);
 
 		em.persist(adr);
 		em.flush();
@@ -118,6 +119,40 @@ public class CompanyController extends PEventConsumerProducer {
 			logger.log(LITERAL_SYSTEM, LITERAL_ADDRESS, Action.CREATE, adr.getId(), " New Address \"" + adr.getId() + LITERAL_CREATED);
 		}
 		return adr;
+	}
+
+	public Company createCompany(Company detachedCompany, User sessionUser) {
+		Company c = new Company();
+		if (authController.canCreate(c, sessionUser)) {
+			c.setName(detachedCompany.getName());
+			c.setDescription(detachedCompany.getDescription());
+			c.setUrl(detachedCompany.getUrl());
+			c.setTaxId(detachedCompany.getTaxId());
+			c.setVatNumber(detachedCompany.getVatNumber());
+
+			Address adr = new Address();
+			Address detachedAddress = detachedCompany.getMainAddress();
+			adr.setStreet(detachedAddress.getStreet());
+			adr.setZipCode(detachedAddress.getZipCode());
+			adr.setCity(detachedAddress.getCity());
+			adr.setPhone(detachedAddress.getPhone());
+			adr.setFax(detachedAddress.getFax());
+			adr.setMobile(detachedAddress.getMobile());
+			em.persist(adr);
+			em.flush();
+			c.setMainAddress(adr);
+
+			try {
+				logger.log(sessionController.getUser().getUsername(), LITERAL_COMPANY, Action.CREATE, c.getId(),
+						" " + LITERAL_COMPANY + " " + c.getName() + LITERAL_CREATED);
+			} catch (Exception ex) {
+				logger.log(LITERAL_SYSTEM, LITERAL_COMPANY, Action.CREATE, c.getId(),
+						" " + LITERAL_COMPANY + " " + c.getName() + LITERAL_CREATED);
+			}
+			return c;
+		} else {
+			return null;
+		}
 	}
 
 	public Department createDepartment(Company company, String name, String description, Address adr, User sessionUser) {
@@ -328,6 +363,8 @@ public class CompanyController extends PEventConsumerProducer {
 		if (orig != null && authController.canUpdate(orig, sessionUser)) {
 			orig.setName(company.getName());
 			orig.setDescription(company.getDescription());
+			orig.setVatNumber(company.getVatNumber());
+			orig.setTaxId(company.getTaxId());
 			// merge edited Address data
 			Address changedAddress = company.getMainAddress();
 			Address origAddress = em.find(Address.class, company.getMainAddress().getId());
@@ -336,7 +373,7 @@ public class CompanyController extends PEventConsumerProducer {
 			origAddress.setZipCode(changedAddress.getZipCode());
 			origAddress.setPhone(changedAddress.getPhone());
 			origAddress.setFax(changedAddress.getFax());
-
+			origAddress.setMobile(changedAddress.getMobile());
 			em.merge(origAddress);
 
 			orig.setMainAddress(origAddress);

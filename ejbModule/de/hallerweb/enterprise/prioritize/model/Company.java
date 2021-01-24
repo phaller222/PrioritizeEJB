@@ -46,12 +46,14 @@ public class Company implements PAuthorizedObject {
 	int id;
 
 	String name;
-
-
 	String description;
 
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	Address mainAddress;
+
+	String url;
+	String vatNumber;
+	String taxId;
 
 	@JsonIgnore
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "company", cascade = CascadeType.ALL)
@@ -106,9 +108,34 @@ public class Company implements PAuthorizedObject {
 		return null;
 	}
 
+	public String getVatNumber() {
+		return vatNumber;
+	}
+
+	public void setVatNumber(String vatNumber) {
+		this.vatNumber = vatNumber;
+	}
+
+	public String getTaxId() {
+		return taxId;
+	}
+
+	public void setTaxId(String taxId) {
+		this.taxId = taxId;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+
 	@Override
 	public String toString() {
 		return this.getName();
 	}
-	
+
 }

@@ -141,6 +141,7 @@ public class CompanyController extends PEventConsumerProducer {
 			em.persist(adr);
 			em.flush();
 			c.setMainAddress(adr);
+			em.persist(c);
 
 			try {
 				logger.log(sessionController.getUser().getUsername(), LITERAL_COMPANY, Action.CREATE, c.getId(),
@@ -365,6 +366,7 @@ public class CompanyController extends PEventConsumerProducer {
 			orig.setDescription(company.getDescription());
 			orig.setVatNumber(company.getVatNumber());
 			orig.setTaxId(company.getTaxId());
+			orig.setUrl(company.getUrl());
 			// merge edited Address data
 			Address changedAddress = company.getMainAddress();
 			Address origAddress = em.find(Address.class, company.getMainAddress().getId());

@@ -120,7 +120,8 @@ public class CompanyBean implements Serializable {
 			Address adr = controller.createAddress(address.getStreet(), address.getZipCode(), address.getCity(), address.getPhone(),
 					address.getFax(), address.getMobile());
 
-			Company createdCompany = controller.createCompany(company.getName(), adr, sessionController.getUser());
+			Company createdCompany = controller.createCompany(company,sessionController.getUser());
+
 			controller.createDepartment(createdCompany, "default", "Auto generated default department", adr, sessionController.getUser());
 
 		} else {

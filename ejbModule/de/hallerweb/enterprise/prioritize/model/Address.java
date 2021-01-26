@@ -50,6 +50,7 @@ public class Address {
 	String city;
 	String street;
 	String mobile;
+	String country;
 
 	public String getMobile() {
 		return mobile;
@@ -101,5 +102,12 @@ public class Address {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
 	}
 }

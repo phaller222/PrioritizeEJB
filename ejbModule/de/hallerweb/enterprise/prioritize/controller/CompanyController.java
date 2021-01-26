@@ -99,8 +99,9 @@ public class CompanyController extends PEventConsumerProducer {
 		}
 	}
 
-	public Address createAddress(String street, String zipCode, String city, String phone, String fax, String mobile) {
+	public Address createAddress(String country, String street, String zipCode, String city, String phone, String fax, String mobile) {
 		Address adr = new Address();
+		adr.setCountry(country);
 		adr.setStreet(street);
 		adr.setZipCode(zipCode);
 		adr.setCity(city);
@@ -138,6 +139,8 @@ public class CompanyController extends PEventConsumerProducer {
 			adr.setPhone(detachedAddress.getPhone());
 			adr.setFax(detachedAddress.getFax());
 			adr.setMobile(detachedAddress.getMobile());
+			adr.setCountry(detachedAddress.getCountry());
+
 			em.persist(adr);
 			em.flush();
 			c.setMainAddress(adr);
@@ -376,6 +379,8 @@ public class CompanyController extends PEventConsumerProducer {
 			origAddress.setPhone(changedAddress.getPhone());
 			origAddress.setFax(changedAddress.getFax());
 			origAddress.setMobile(changedAddress.getMobile());
+			origAddress.setCountry(changedAddress.getCountry());
+
 			em.merge(origAddress);
 
 			orig.setMainAddress(origAddress);

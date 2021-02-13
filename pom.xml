@@ -65,7 +65,20 @@
 			<artifactId>jackson-annotations</artifactId>
 			<version>2.2.3</version>
 		</dependency>
+
+
+		<!-- https://mvnrepository.com/artifact/jakarta.platform/jakarta.jakartaee-api -->
 		<dependency>
+			<groupId>jakarta.platform</groupId>
+			<artifactId>jakarta.jakartaee-api</artifactId>
+			<version>8.0.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+
+
+		<!-- *********************  OLD javax packages ****************************** -->
+		<!-- <dependency>
 			<groupId>javax.activation</groupId>
 			<artifactId>activation</artifactId>
 			<version>1.1.1</version>
@@ -83,16 +96,6 @@
 			<version>2.0.1.Final</version>
 			<scope>provided</scope>
 		</dependency>
-		<!--<dependency> <groupId>org.jboss.spec.javax.ws.rs</groupId> <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
-			<version>1.0.1.Final</version> <scope>provided</scope> </dependency> <dependency> 
-			<groupId>org.jboss.spec.javax.ws.rs</groupId> <artifactId>jboss-jaxrs-api_2.1_spec</artifactId> 
-			<version>1.0.0.Final</version> <scope>provided</scope> </dependency> -->
-
-		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-server -->
-		 <!-- https://mvnrepository.com/artifact/org.jboss.resteasy/jaxrs-api -->
-
-
-
 		<dependency>
 			<groupId>javax.ejb</groupId>
 			<artifactId>javax.ejb-api</artifactId>
@@ -105,20 +108,6 @@
 			<version>2.0</version>
 			<scope>provided</scope>
 		</dependency>
-
-		<!--<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-client-20</artifactId>
-			<version>3.5.1.Final</version>
-		</dependency> -->
-		<!-- https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-jaxrs -->
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-			<version>3.5.1.Final</version>
-			<scope>provided</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>javax.faces</groupId>
 			<artifactId>javax.faces-api</artifactId>
@@ -129,6 +118,17 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency> -->
+
+
+<!-- *************************************************************** -->
+
+
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxrs</artifactId>
+			<version>3.5.1.Final</version>
 			<scope>provided</scope>
 		</dependency>
 

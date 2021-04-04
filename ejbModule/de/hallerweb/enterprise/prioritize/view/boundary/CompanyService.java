@@ -15,6 +15,8 @@
  */
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -96,7 +98,7 @@ public class CompanyService {
 	 * @apiError NotAuthorized APIKey incorrect.
 	 */
 	@GET
-	@Path("{id}")
+	@Path("id/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Company getCompany(@PathParam(value = "id") int id, @QueryParam(value = "apiKey") String apiKey) {
 		if (accessController.checkApiKey(apiKey) != null) {
@@ -105,6 +107,33 @@ public class CompanyService {
 			throw new NotAuthorizedException(Response.serverError());
 		}
 	}
+
+	@GET
+	@Path("name/{name}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Company getCompany(@PathParam(value = "name") String name, @QueryParam(value = "apiKey") String apiKey)
+			throws UnsupportedEncodingException {
+		if (accessController.checkApiKey(apiKey) != null) {
+			name = URLDecoder.decode(name,"UTF-8");
+			return companyController.findCompanyByName(name);
+		} else {
+			throw new NotAuthorizedException(Response.serverError());
+		}
+	}
+
+	@GET
+	@Path("list/")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Company> getAllCompanies(@QueryParam(value = "apiKey") String apiKey) {
+		User user = accessController.checkApiKey(apiKey);
+		if (user != null) {
+			return companyController.getAllCompanies(user);
+		} else {
+			throw new NotAuthorizedException(Response.serverError());
+		}
+	}
+
+
 
 	/**
 	 * Returns all the departments matching the seach phrase.

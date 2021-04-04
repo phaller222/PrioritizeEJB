@@ -67,7 +67,7 @@ public class ResourceController extends PEventConsumerProducer {
 	private static final String LITERAL_RESOURCE = "Resource";
 	private static final String LITERAL_RESOURCE_SPACE = " Resource \"";
 	private static final String LITERAL_RESOURCE_CREATED = "\" created.";
-	
+
 	
 	public Resource createResource(Resource resourceToCreate, int groupId, User sessionUser) {
 		ResourceGroup managedGroup = em.find(ResourceGroup.class, groupId);
@@ -81,7 +81,7 @@ public class ResourceController extends PEventConsumerProducer {
 
 		if (findResourceByResourceGroupAndName(managedGroup.getId(), name, sessionUser) == null) {
 			Resource resource = new Resource();
-			if (authController.canCreate(resource, sessionUser)) {
+			if (authController.canCreate(managedGroup.getDepartment().getId(),resource, sessionUser)) {
 				resource.setName(name);
 				resource.setResourceGroup(managedGroup);
 				resource.setDescription(description);

@@ -133,7 +133,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	@OneToOne(fetch = FetchType.EAGER)
 	UserPreference preference;
 
-	@OneToMany
+	@OneToMany(fetch = FetchType.EAGER)
 	private Set<BankingAccount> bankingAccounts;
 
 	public Set<BankingAccount> getBankingAccounts() {

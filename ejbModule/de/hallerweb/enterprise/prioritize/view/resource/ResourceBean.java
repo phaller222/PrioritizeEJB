@@ -282,8 +282,8 @@ public class ResourceBean implements Serializable {
 		if (resourceController.createResource(resource, resourceGroupId, sessionController.getUser()) != null) {
 			updateResourceTree();
 		} else {
-			ViewUtilities.addErrorMessage("name", "A resource with the name " + resource.getName()
-					+ " already exists in this resource group. Please change name or select a different Resource Group!");
+			ViewUtilities.addErrorMessage("name", "Problems creating resource with the name " + resource.getName()
+					+ "!");
 		}
 		return NAVIGATION_RESOURCES;
 	}

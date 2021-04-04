@@ -32,6 +32,9 @@ import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationContr
 import de.hallerweb.enterprise.prioritize.controller.security.RestAccessController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Department;
+import de.hallerweb.enterprise.prioritize.model.security.User;
+
+import java.util.List;
 
 /**
  * 
@@ -85,4 +88,19 @@ public class DepartmentService {
 			throw new NotAuthorizedException(Response.serverError());
 		}
 	}
+
+	@GET
+	@Path("list/")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Department> getAllDepartmentsForCompany(@QueryParam(value = "companyName") String companyName,
+														@QueryParam(value = "apiKey") String apiKey) {
+		User user = accessController.checkApiKey(apiKey);
+		if (user != null) {
+			return companyController.findDepartmentsByCompany(
+					companyController.findCompanyByName(companyName).getId(), user);
+		} else {
+			throw new NotAuthorizedException(Response.serverError());
+		}
+	}
+
 }

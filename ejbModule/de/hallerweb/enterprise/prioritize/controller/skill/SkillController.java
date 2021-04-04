@@ -19,7 +19,6 @@ import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.*;
 
@@ -51,6 +50,7 @@ public class SkillController {
     AuthorizationController authController;
 
     public static final String LITERAL_SKILLCATEGORY = "SkillCategory";
+
     /**
      * Creates a new SkillCategory with the given data
      *

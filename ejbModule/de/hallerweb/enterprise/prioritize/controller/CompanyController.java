@@ -464,7 +464,7 @@ public class CompanyController extends PEventConsumerProducer {
 
 	public Company getCompanyByName(String name, User sessionUser) {
 		Query query = em.createNamedQuery("findCompanyByName");
-		query.setParameter(1, name);
+		query.setParameter("name", name);
 		try {
 			Company company = (Company) query.getSingleResult();
 			if (company != null && authController.canRead(company, sessionUser)) {
@@ -565,6 +565,17 @@ public class CompanyController extends PEventConsumerProducer {
 
 	public Company findCompanyById(int id) {
 		return em.find(Company.class, id);
+	}
+
+	public Company findCompanyByName(String name) {
+		Query query = em.createNamedQuery("findCompanyByName");
+		query.setParameter("name", name);
+		try {
+			Company c = (Company) query.getSingleResult();
+			return c;
+		} catch (NoResultException ex) {
+			return null;
+		}
 	}
 
 	public Address findAddressById(int id) {

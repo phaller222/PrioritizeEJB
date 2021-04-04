@@ -37,7 +37,7 @@ import java.util.List;
  */
 @Entity
 @NamedQueries({ @NamedQuery(name = "findAllCompanies", query = "SELECT c FROM Company c ORDER BY c.name"),
-		@NamedQuery(name = "findCompanyByName", query = "SELECT c FROM Company c WHERE c.name= ?1 ORDER BY c.name"),
+		@NamedQuery(name = "findCompanyByName", query = "SELECT c FROM Company c WHERE c.name = :name ORDER BY c.name"),
 		@NamedQuery(name = "findCompanyById", query = "SELECT c FROM Company c WHERE c.id = ?1 ORDER BY c.name")})
 public class Company implements PAuthorizedObject {
 

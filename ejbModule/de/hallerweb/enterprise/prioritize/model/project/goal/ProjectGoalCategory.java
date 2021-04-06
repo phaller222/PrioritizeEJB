@@ -59,7 +59,7 @@ public class ProjectGoalCategory  {
 	ProjectGoalCategory parentCategory;
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JsonBackReference
+	@JsonBackReference(value="projectGoalsBackRef")
 	Set<ProjectGoal> projectGoals;
 
 	private static final String TYPE_CATEGORY = "CATEGORY";

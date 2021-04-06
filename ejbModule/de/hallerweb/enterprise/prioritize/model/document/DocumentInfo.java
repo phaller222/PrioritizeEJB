@@ -70,7 +70,7 @@ public class DocumentInfo extends PObject implements PAuthorizedObject, PSearcha
 	private Document currentDocument;
 
 	@OneToOne
-	@JsonBackReference
+	@JsonBackReference(value="documentGroupBackRef")
 	private DocumentGroup documentGroup;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)

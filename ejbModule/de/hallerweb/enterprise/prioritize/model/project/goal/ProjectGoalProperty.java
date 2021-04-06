@@ -42,7 +42,7 @@ public class ProjectGoalProperty {
 	String description;
 
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JsonBackReference
+	@JsonBackReference(value="projectGoalBackRef")
 	ProjectGoal projectGoal;
 
 	public ProjectGoal getProjectGoal() {

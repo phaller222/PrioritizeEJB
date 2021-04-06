@@ -62,7 +62,7 @@ public class SkillCategory implements PAuthorizedObject, SkillType {
 	SkillCategory parentCategory;
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JsonBackReference
+	@JsonBackReference(value="skillsBackRef")
 	Set<Skill> skills;
 
 	public SkillCategory() {

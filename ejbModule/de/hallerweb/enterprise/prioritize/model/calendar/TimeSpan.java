@@ -58,11 +58,11 @@ public class TimeSpan implements PAuthorizedObject {
 	private String description;
 
 	@ManyToMany(fetch = FetchType.EAGER)
-	@JsonBackReference
+	@JsonBackReference(value="involvedResourcesBackRef")
 	private Set<Resource> involvedResources;
 
 	@ManyToMany(fetch = FetchType.EAGER)
-	@JsonBackReference
+	@JsonBackReference(value="involvedUsersBackRef")
 	private Set<User> involvedUsers;
 
 	private Date dateFrom;

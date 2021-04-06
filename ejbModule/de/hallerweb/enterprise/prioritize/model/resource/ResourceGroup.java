@@ -58,12 +58,12 @@ public class ResourceGroup implements PAuthorizedObject {
 	private String name;
 
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JsonBackReference
+	@JsonBackReference(value="resourceGroupBackRef")
 	private Department department;
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@OrderBy(value = "id")
-	@JsonBackReference
+	@JsonBackReference(value="resourcesBackRef")
 	private Set<Resource> resources;
 
 	public String getName() {

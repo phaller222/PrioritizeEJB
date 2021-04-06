@@ -48,7 +48,7 @@ public class ProjectGoalRecord {
 	@OneToOne
 	Task task;	// null if describing target goal, Link to task if concrete progress.
 
-	@JsonBackReference
+	@JsonBackReference(value="projectBackRef")
 	@OneToOne
 	Project project; // Project this ProjectGoalRecord belongs to.
 

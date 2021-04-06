@@ -47,11 +47,11 @@ public class DocumentGroup implements PAuthorizedObject {
 	private String name;
 
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JsonBackReference
+	@JsonBackReference(value="departmentBackRef")
 	private Department department;
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JsonBackReference
+	@JsonBackReference(value="documentsBackRef")
 	private Set<DocumentInfo> documents;
 
 	public String getName() {

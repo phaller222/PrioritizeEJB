@@ -61,7 +61,7 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 	Address address;
 
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JsonBackReference
+	@JsonBackReference(value="companyBackRef")
 	Company company;
 	
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -232,7 +232,7 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 	}
 
 	@Override
-	@JsonBackReference
+	@JsonBackReference(value="departmentBackRef")
 	public Department getDepartment() {
 		return this;
 	}

@@ -52,7 +52,7 @@ public abstract class SkillProperty implements SkillType {
 	boolean numericProperty; // Is the property numeric? If set to false then it is a String property.
 
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JsonBackReference
+	@JsonBackReference(value="skillBackRef")
 	Skill skill;
 
 	public boolean getNumericProperty() {

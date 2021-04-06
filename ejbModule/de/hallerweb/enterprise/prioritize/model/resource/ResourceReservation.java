@@ -57,7 +57,7 @@ public class ResourceReservation implements ITimeSpan {
 	private int id;
 
 	@OneToOne
-	@JsonBackReference
+	@JsonBackReference(value="resourcesBackRef")
 	private Resource resource;
 
 	@OneToOne

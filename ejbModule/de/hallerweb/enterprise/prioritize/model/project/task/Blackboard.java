@@ -47,7 +47,7 @@ public class Blackboard {
 	@OneToMany(fetch = FetchType.LAZY)
 	List<Task> tasks;
 
-	@JsonBackReference
+	@JsonBackReference(value="projectBackRef")
 	@OneToOne
 	Project project;
 

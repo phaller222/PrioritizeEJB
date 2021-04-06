@@ -95,18 +95,18 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 	private byte[] mqttDataToSend; // Buffer to send data to the device.
 
 	@OneToOne
-	@JsonBackReference
+	@JsonBackReference(value="departmentBackRef")
 	private Department department; // To which department dowa the resource belong?
 
 	@OneToOne
 	private User busyBy; // Who is blocking the resource at the moment?
 
 	@OneToOne(fetch = FetchType.EAGER)
-	@JsonBackReference
+	@JsonBackReference(value="resourceGroupBackRef")
 	private ResourceGroup resourceGroup; // To which ResourceGroup does this resource belong?
 
 	@OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
-	@JsonBackReference
+	@JsonBackReference(value="reservationsBackRef")
 	private Set<ResourceReservation> reservations; // ResourceReservatios that exist for this resource.
 
 	@JsonIgnore

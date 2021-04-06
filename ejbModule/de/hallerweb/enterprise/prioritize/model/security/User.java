@@ -116,11 +116,11 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	TimeSpan illness;
 
 	@ManyToOne
-	@JsonBackReference
+	@JsonBackReference(value="departmentBackRef")
 	Department department;
 
 	@ManyToMany(fetch = FetchType.EAGER)
-	@JsonBackReference
+	@JsonBackReference(value="rolesBackRef")
 	Set<Role> roles;
 
 	transient List<SearchProperty> searchProperties;

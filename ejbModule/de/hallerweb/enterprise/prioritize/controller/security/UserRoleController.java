@@ -305,6 +305,7 @@ public class UserRoleController extends PEventConsumerProducer {
         if (authController.canUpdate(user, sessionUser)) {
             user.setUsername(newUserData.getUsername());
             user.setName(newUserData.getName());
+            user.setFirstname(newUserData.getFirstname());
             user.setEmail(newUserData.getEmail());
             if ((newUserData.getPassword() != null) && (newUserData.getPassword().length() > 0)) {
                 user.setPassword(String.valueOf(newUserData.getPassword().hashCode()));
@@ -331,6 +332,10 @@ public class UserRoleController extends PEventConsumerProducer {
     private void fireEditUserEvents(User newUserData, User user) {
         if (!user.getName().equals(newUserData.getName())) {
             this.raiseEvent(user, User.PROPERTY_NAME, user.getName(), newUserData.getName(),
+                    initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
+        }
+        if (!user.getFirstname().equals(newUserData.getFirstname())) {
+            this.raiseEvent(user, User.PROPERTY_FIRSTNAME, user.getFirstname(), newUserData.getFirstname(),
                     initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
         }
         if (!user.getUsername().equals(newUserData.getUsername())) {

@@ -72,6 +72,7 @@ import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
 public class User extends PActor implements PAuthorizedObject, PSearchable {
 
 	public static final String PROPERTY_NAME = "name";
+	public static final String PROPERTY_FIRSTNAME = "firstname";
 	public static final String PROPERTY_EMAIL = "email";
 	public static final String PROPERTY_OCCUPATION = "occupation";
 	public static final String PROPERTY_DEPARTMENT = "department";
@@ -85,9 +86,11 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	}
 
 	String name;
+	String firstname;
 	String username;
 	@JsonIgnore
 	String email;
+
 	@JsonIgnore
 	String occupation;
 	@JsonIgnore
@@ -201,6 +204,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		clonedUser.setIllness(userToCopy.illness);
 		clonedUser.setLastLogin(userToCopy.lastLogin);
 		clonedUser.setName(userToCopy.name);
+		clonedUser.setFirstname(userToCopy.getFirstname());
 		clonedUser.setOccupation(userToCopy.occupation);
 		clonedUser.setPassword(userToCopy.password);
 		clonedUser.setUsername(userToCopy.username);
@@ -304,6 +308,14 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		this.name = name;
 	}
 
+	public String getFirstname() {
+		return firstname;
+	}
+
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
+	}
+
 	public String getUsername() {
 		return username;
 	}
@@ -401,6 +413,14 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 			results.add(result);
 			return results;
 		}
+
+		if (this.firstname.toLowerCase().contains(phrase)) {
+			// Match found
+			result = generateResult(this.getUsername() + " - " + this.getOccupation() + " - " + this.getEmail());
+			results.add(result);
+			return results;
+		}
+
 
 		if (this.email.contains(phrase)) {
 			// Match found

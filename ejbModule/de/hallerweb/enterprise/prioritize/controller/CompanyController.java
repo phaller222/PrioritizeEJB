@@ -99,10 +99,11 @@ public class CompanyController extends PEventConsumerProducer {
 		}
 	}
 
-	public Address createAddress(String country, String street, String zipCode, String city, String phone, String fax, String mobile) {
+	public Address createAddress(String country, String street, String housenumber, String zipCode, String city, String phone, String fax, String mobile) {
 		Address adr = new Address();
 		adr.setCountry(country);
 		adr.setStreet(street);
+		adr.setHousenumber(housenumber);
 		adr.setZipCode(zipCode);
 		adr.setCity(city);
 		adr.setPhone(phone);
@@ -122,6 +123,31 @@ public class CompanyController extends PEventConsumerProducer {
 		return adr;
 	}
 
+	/**
+	 * Returns a {@link List} of all adresses.
+	 *
+	 * @return List<Company> the adresses.
+	 * @throws EJBException
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Address> getAllAddresses() {
+		Query query = em.createNamedQuery("findAllAddresses");
+		return query.getResultList();
+	}
+
+	/**
+	 * Deletes the {@link Address} with the given ID.
+	 *
+	 * @param id
+	 *            - The primary key (int) of the {@link Department} to be deleted.
+	 */
+	public void deleteAddress(int id) {
+		Address managedAddress = findAddressById(id);
+		em.remove(managedAddress);
+		logger.log(sessionController.getUser().getUsername(), LITERAL_ADDRESS, Action.DELETE, managedAddress.getId(),
+				" Address \"" + managedAddress.getId() + "\" deleted.");
+	}
+
 	public Company createCompany(Company detachedCompany, User sessionUser) {
 		Company c = new Company();
 		if (authController.canCreate(c, sessionUser)) {
@@ -134,6 +160,7 @@ public class CompanyController extends PEventConsumerProducer {
 			Address adr = new Address();
 			Address detachedAddress = detachedCompany.getMainAddress();
 			adr.setStreet(detachedAddress.getStreet());
+			adr.setHousenumber(detachedAddress.getHousenumber());
 			adr.setZipCode(detachedAddress.getZipCode());
 			adr.setCity(detachedAddress.getCity());
 			adr.setPhone(detachedAddress.getPhone());
@@ -175,9 +202,9 @@ public class CompanyController extends PEventConsumerProducer {
 			if (adr == null) {
 				// Set Company Address as Address of Department.
 				Address companyAddress = company.getMainAddress();
-
 				address.setCity(companyAddress.getCity());
 				address.setStreet(companyAddress.getStreet());
+				address.setHousenumber(companyAddress.getHousenumber());
 				address.setZipCode(companyAddress.getZipCode());
 				address.setPhone(companyAddress.getPhone());
 				address.setFax(companyAddress.getFax());
@@ -185,6 +212,7 @@ public class CompanyController extends PEventConsumerProducer {
 			} else {
 				address.setCity(adr.getCity());
 				address.setStreet(adr.getStreet());
+				address.setHousenumber(adr.getHousenumber());
 				address.setZipCode(adr.getZipCode());
 				address.setPhone(adr.getPhone());
 				address.setFax(adr.getFax());
@@ -375,6 +403,7 @@ public class CompanyController extends PEventConsumerProducer {
 			Address origAddress = em.find(Address.class, company.getMainAddress().getId());
 			origAddress.setCity(changedAddress.getCity());
 			origAddress.setStreet(changedAddress.getStreet());
+			origAddress.setHousenumber(changedAddress.getHousenumber());
 			origAddress.setZipCode(changedAddress.getZipCode());
 			origAddress.setPhone(changedAddress.getPhone());
 			origAddress.setFax(changedAddress.getFax());
@@ -441,6 +470,7 @@ public class CompanyController extends PEventConsumerProducer {
 
 				origAddress.setCity(changedAddress.getCity());
 				origAddress.setStreet(changedAddress.getStreet());
+				origAddress.setHousenumber(changedAddress.getHousenumber());
 				origAddress.setZipCode(changedAddress.getZipCode());
 				origAddress.setPhone(changedAddress.getPhone());
 				origAddress.setFax(changedAddress.getFax());
@@ -538,31 +568,6 @@ public class CompanyController extends PEventConsumerProducer {
 
 	}
 
-	/**
-	 * Returns a {@link List} of all adresses.
-	 *
-	 * @return List<Company> the adresses.
-	 * @throws EJBException
-	 */
-	@SuppressWarnings("unchecked")
-	public List<Address> getAllAddresses() {
-		Query query = em.createNamedQuery("findAllAddresses");
-		return query.getResultList();
-	}
-
-	/**
-	 * Deletes the {@link Address} with the given ID.
-	 *
-	 * @param id
-	 *            - The primary key (int) of the {@link Department} to be deleted.
-	 */
-	public void deleteAddress(int id) {
-		Address managedAddress = findAddressById(id);
-		em.remove(managedAddress);
-		logger.log(sessionController.getUser().getUsername(), LITERAL_ADDRESS, Action.DELETE, managedAddress.getId(),
-				" Address \"" + managedAddress.getId() + "\" deleted.");
-	}
-
 	public Company findCompanyById(int id) {
 		return em.find(Company.class, id);
 	}
@@ -571,8 +576,7 @@ public class CompanyController extends PEventConsumerProducer {
 		Query query = em.createNamedQuery("findCompanyByName");
 		query.setParameter("name", name);
 		try {
-			Company c = (Company) query.getSingleResult();
-			return c;
+			return (Company) query.getSingleResult();
 		} catch (NoResultException ex) {
 			return null;
 		}
@@ -615,5 +619,4 @@ public class CompanyController extends PEventConsumerProducer {
 				+ " with new Value: " + evt.getNewValue() + "--- Dept listening: " + destination.getClass());
 
 	}
-
 }

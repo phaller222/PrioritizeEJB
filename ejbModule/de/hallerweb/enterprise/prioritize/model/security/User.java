@@ -88,10 +88,8 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	String name;
 	String firstname;
 	String username;
-	@JsonIgnore
 	String email;
 
-	@JsonIgnore
 	String occupation;
 	@JsonIgnore
 	String password;
@@ -99,7 +97,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	String apiKey;
 	@JsonIgnore
 	Date lastLogin;
-	@JsonIgnore
+
 	Date dateOfBirth;
 	Gender gender;
 

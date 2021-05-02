@@ -49,6 +49,7 @@ public class Address {
 	String fax;
 	String city;
 	String street;
+	String housenumber;
 	String mobile;
 	String country;
 
@@ -70,6 +71,14 @@ public class Address {
 
 	public void setStreet(String street) {
 		this.street = street;
+	}
+
+	public String getHousenumber() {
+		return housenumber;
+	}
+
+	public void setHousenumber(String housenumber) {
+		this.housenumber = housenumber;
 	}
 
 	public String getZipCode() {

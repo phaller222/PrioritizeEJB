@@ -465,7 +465,9 @@ public class UserRoleController extends PEventConsumerProducer {
             // Delete UserPreferences of user
             UserPreference p = u.getPreference();
             u.setPreference(null);
-            em.remove(p);
+            if (p != null) {
+                em.remove(p);
+            }
 
             // Delete all user item collections
             List<ItemCollection> collection = itemCollectionController.getItemCollections(u);

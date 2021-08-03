@@ -287,6 +287,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
      * @param value
      */
     public void addMqttValueForResource(Resource res, String name, String value) {
+        //TODO: Umstellen auf Apache IOT-DB
         String valueCopy = "" + System.currentTimeMillis() + "," + value;
         Resource managedResource = em.find(Resource.class, res.getId());
         if (!managedResource.isMqttOnline()) {
@@ -303,6 +304,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
     }
 
     private void insertValue(String value, StringBuilder builder, NameValueEntry entry) {
+        //TODO: Umstellen auf Apache IOT-DB
         String values = entry.getValues();
         if ((values == null)
                 || (values.length() <= Integer.parseInt(initController.getConfig().get(InitializationController.MQTT_MAX_VALUES_BYTES)))) {
@@ -322,6 +324,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
      * @param name
      */
     public void clearMqttValueForResource(Resource res, String name) {
+        //TODO: Umstellen auf Apache IOT-DB
         if (res.isMqttOnline()) {
             Resource managedResource = em.find(Resource.class, res.getId());
             if (!managedResource.getMqttValues().isEmpty()) {
@@ -338,6 +341,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
     }
 
     private void createMqttNameValuePair(String name, String value, Resource managedResource) {
+        //TODO: Umstellen auf Apache IOT-DB
         NameValueEntry newEntry = new NameValueEntry();
         newEntry.setName(name);
         newEntry.setValues(value);
@@ -355,11 +359,13 @@ public class MQTTResourceController extends PEventConsumerProducer {
      * @return
      */
     public Set<NameValueEntry> getNameValueEntries(Resource res) {
+        //TODO: Umstellen auf Apache IOT-DB
         Resource managedResource = em.find(Resource.class, res.getId());
         return managedResource.getMqttValues();
     }
 
     public String getLastMqttValueForResource(Resource res, String name) {
+        //TODO: Umstellen auf Apache IOT-DB
         Resource managedResource = em.find(Resource.class, res.getId());
         if (managedResource != null) {
             for (NameValueEntry entry : managedResource.getMqttValues()) {
@@ -374,6 +380,26 @@ public class MQTTResourceController extends PEventConsumerProducer {
             }
         }
         return "";
+    }
+
+    private void updateValueIfEntryAlreadyExists(String name, String value, Resource managedResource, int valuesSize) {
+        //TODO: Umstellen auf Apache IOT-DB
+        List<NameValueEntry> valuesCopy = new ArrayList<>(valuesSize);
+        valuesCopy.addAll(managedResource.getMqttValues());
+
+        Iterator<NameValueEntry> it = valuesCopy.iterator();
+        StringBuilder buff = new StringBuilder();
+        boolean found = false;
+        while (it.hasNext()) {
+            NameValueEntry entry = it.next();
+            if (entry.getName().equals(name)) {
+                insertValue(value, buff, entry);
+                found = true;
+            }
+        }
+        if (!found && valuesSize <= Integer.parseInt(initController.getConfig().get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
+            createMqttNameValuePair(name, value, managedResource);
+        }
     }
 
     public void addCommand(Resource res, String command) {
@@ -420,24 +446,6 @@ public class MQTTResourceController extends PEventConsumerProducer {
 
     }
 
-    private void updateValueIfEntryAlreadyExists(String name, String value, Resource managedResource, int valuesSize) {
-        List<NameValueEntry> valuesCopy = new ArrayList<>(valuesSize);
-        valuesCopy.addAll(managedResource.getMqttValues());
-
-        Iterator<NameValueEntry> it = valuesCopy.iterator();
-        StringBuilder buff = new StringBuilder();
-        boolean found = false;
-        while (it.hasNext()) {
-            NameValueEntry entry = it.next();
-            if (entry.getName().equals(name)) {
-                insertValue(value, buff, entry);
-                found = true;
-            }
-        }
-        if (!found && valuesSize <= Integer.parseInt(initController.getConfig().get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
-            createMqttNameValuePair(name, value, managedResource);
-        }
-    }
 
     /**
      * Set the current geographic coordinates of a resource (Latitude and

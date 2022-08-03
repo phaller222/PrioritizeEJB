@@ -85,8 +85,8 @@ public class MQTTService implements MqttCallback {
 
     private void connect() {
         if (Boolean
-                .parseBoolean(initController.getConfig().get(InitializationController.ENABLE_MQTT_SERVICE))) {
-            Map<String, String> config = initController.getConfig();
+                .parseBoolean(initController.config.get(InitializationController.ENABLE_MQTT_SERVICE))) {
+            Map<String, String> config = initController.config;
             String mqttHost = "tcp://" + config.get(InitializationController.MQTT_HOST) + ":"
                     + config.get(InitializationController.MQTT_PORT);
             try {
@@ -133,7 +133,7 @@ public class MQTTService implements MqttCallback {
     @PreDestroy
     public void shutdown() {
         if (Boolean
-                .parseBoolean(initController.getConfig().get(InitializationController.ENABLE_MQTT_SERVICE))) {
+                .parseBoolean(initController.config.get(InitializationController.ENABLE_MQTT_SERVICE))) {
             try {
                 client.disconnect();
                 client.close();
@@ -150,7 +150,7 @@ public class MQTTService implements MqttCallback {
     @Schedule(second = "*/30", hour = "*", minute = "*", persistent = false)
     @PostConstruct
     public void checkConnection() {
-        if (Boolean.parseBoolean(initController.getConfig().get(InitializationController.ENABLE_MQTT_SERVICE))
+        if (Boolean.parseBoolean(initController.config.get(InitializationController.ENABLE_MQTT_SERVICE))
                 && (client == null || !client.isConnected())) {
             connect();
         }
@@ -169,7 +169,7 @@ public class MQTTService implements MqttCallback {
 
     private void reconnect() {
         if (Boolean
-                .parseBoolean(initController.getConfig().get(InitializationController.ENABLE_MQTT_SERVICE))) {
+                .parseBoolean(initController.config.get(InitializationController.ENABLE_MQTT_SERVICE))) {
             try {
                 Thread.sleep(100);
                 if (!client.isConnected()) {
@@ -219,7 +219,7 @@ public class MQTTService implements MqttCallback {
 
             String uuid = data[0];
             String token = data[1];
-            if ((token == null) || (token.length() < 1) && Boolean.parseBoolean(initController.getConfig()
+            if ((token == null) || (token.length() < 1) && Boolean.parseBoolean(initController.config
                     .get(InitializationController.DISCOVERY_ALLOW_DEFAULT_DEPARTMENT))) {
                 token = InitializationController.DEFAULT_DEPARTMENT_TOKEN;
             }

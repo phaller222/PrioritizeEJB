@@ -24,7 +24,7 @@ import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.EventListener;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.security.User;
-import org.jboss.resteasy.logging.Logger;
+import org.jboss.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.*;
@@ -71,7 +71,7 @@ public class EventRegistry {
 
 		// Override Event Strategy value with config
 		try {
-			if (initController.getConfig().get(InitializationController.EVENT_DEFAULT_STRATEGY).equals("IMMEDIATE")) {
+			if (initController.config.get(InitializationController.EVENT_DEFAULT_STRATEGY).equals("IMMEDIATE")) {
 				eventStrategie = EventStrategy.IMMEDIATE;
 			} else {
 				eventStrategie = EventStrategy.DELAYED;

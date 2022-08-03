@@ -103,11 +103,7 @@ public class InitializationController {
 	// Keycloak logout URL
 	public static final String KEYCLOAK_LOGOUT_URL = "KEYCLOAK_LOGOUT_URL";
 
-	private final static Map<String, String> config = new HashMap<>();
-
-	public  Map<String, String> getConfig() {
-		return config;
-	}
+	public final static Map<String, String> config = new HashMap<>();
 
 	public int getDefaultDepartmentId() {
 		return defaultDepartmentId;
@@ -205,11 +201,14 @@ public class InitializationController {
 	}
 
 	public void createAdminAccountIfNotPresent() {
+		Logger.getLogger(this.getClass().getName()).log(Level.INFO,
+				"Checking if admin user exists...");
 		if (userRoleController.getAllUsers(authController.getSystemUser()).isEmpty()) {
 			Department d = null;
 			// No user present yet. Create admin user...
 			Logger.getLogger(this.getClass().getName()).log(Level.INFO,
 					"No users present. Assuming clean deployment. recreating admin user...");
+
 
 			// Create default company and default department
 			boolean createDefaultCompany = Boolean.parseBoolean(config.get(CREATE_DEFAULT_COMPANY));
@@ -288,7 +287,7 @@ public class InitializationController {
 			userRoleController.createUser(admin, null, roles, authController.getSystemUser());
 
 		} else {
-			Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Deploymeent OK.");
+			Logger.getLogger(this.getClass().getName()).log(Level.INFO, "--------->  Admin-User present.Deployment OK.");
 		}
 	}
 }

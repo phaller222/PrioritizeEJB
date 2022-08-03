@@ -39,7 +39,7 @@ public class MqttClientPing {
 	// TODO: Set persistence of timer for releases to "true"
 	@Schedule(minute = "*/1", hour = "*", persistent = false)
 	public void checkMqttClientPings() {
-		if (Boolean.parseBoolean(initController.getConfig().get(InitializationController.ENABLE_MQTT_SERVICE))) {
+		if (Boolean.parseBoolean(initController.config.get(InitializationController.ENABLE_MQTT_SERVICE))) {
 
 			// Get all online MQTT resources
 			User systemUser = new User();
@@ -59,6 +59,6 @@ public class MqttClientPing {
 	private boolean isResourceTimedOut(Resource resource) {
 		Date lastPing = resource.getMqttLastPing();
 		return (System.currentTimeMillis() - lastPing.getTime() > Long
-				.parseLong(initController.getConfig().get(InitializationController.MQTT_PING_TIMEOUT)));
+				.parseLong(initController.config.get(InitializationController.MQTT_PING_TIMEOUT)));
 	}
 }

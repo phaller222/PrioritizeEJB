@@ -15,25 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.document;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.enterprise.context.ContextNotActiveException;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
@@ -49,6 +30,19 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.context.ContextNotActiveException;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  * DocumentController.java - Handles the creation, modification and deletion of {@link DocumentInfo}, {@link DocumentGroup} and
@@ -76,7 +70,7 @@ public class DocumentController extends PEventConsumerProducer {
 	static final String DOCUMENT_LITERAL = "Document";
 
 	public DocumentInfo createDocumentInfo(String name, int groupId, User user, String mimeType, boolean encrypt, byte[] data, String changes) {
-		int maxsize = Integer.parseInt(initController.getConfig().get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
+		int maxsize = Integer.parseInt(initController.config.get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
 		if (data.length > maxsize) {
 			return null;
 		}
@@ -308,7 +302,7 @@ public class DocumentController extends PEventConsumerProducer {
 
 	public DocumentInfo editDocumentInfo(DocumentInfo info, Document newDocumentData, byte[] data, String mimeType, User user,
 			boolean encrypt) {
-		int maxsize = Integer.parseInt(initController.getConfig().get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
+		int maxsize = Integer.parseInt(initController.config.get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
 		if (data.length > maxsize) {
 			return null;
 		}

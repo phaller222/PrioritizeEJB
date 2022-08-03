@@ -295,7 +295,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
         }
         int valuesSize = managedResource.getMqttValues().size();
         if (managedResource.getMqttValues().isEmpty()) {
-            if (valuesSize <= Integer.parseInt(initController.getConfig().get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
+            if (valuesSize <= Integer.parseInt(initController.config.get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
                 createMqttNameValuePair(name, valueCopy, managedResource);
             }
         } else {
@@ -307,7 +307,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
         //TODO: Umstellen auf Apache IOT-DB
         String values = entry.getValues();
         if ((values == null)
-                || (values.length() <= Integer.parseInt(initController.getConfig().get(InitializationController.MQTT_MAX_VALUES_BYTES)))) {
+                || (values.length() <= Integer.parseInt(initController.config.get(InitializationController.MQTT_MAX_VALUES_BYTES)))) {
                     entry.setValues(entry.getValues() + ";" + value);
                 } else {
             int firstEntryEnd = values.indexOf(';');
@@ -397,7 +397,7 @@ public class MQTTResourceController extends PEventConsumerProducer {
                 found = true;
             }
         }
-        if (!found && valuesSize <= Integer.parseInt(initController.getConfig().get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
+        if (!found && valuesSize <= Integer.parseInt(initController.config.get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
             createMqttNameValuePair(name, value, managedResource);
         }
     }

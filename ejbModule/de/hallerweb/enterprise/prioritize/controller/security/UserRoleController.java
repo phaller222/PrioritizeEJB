@@ -22,6 +22,7 @@ import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.project.ActionBoardController;
 import de.hallerweb.enterprise.prioritize.controller.project.task.TaskController;
 import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionController;
+import de.hallerweb.enterprise.prioritize.model.Address;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
@@ -267,6 +268,9 @@ public class UserRoleController extends PEventConsumerProducer {
                 em.persist(preference);
                 userToCreate.setPreference(preference);
                 em.persist(userToCreate);
+                Address adr = newUser.getAddress();
+                em.persist(adr);
+                userToCreate.setAddress(adr);
 
                 ActionBoard actionBoard = actionBoardController.createActionBoard(userToCreate.getName(), userToCreate.getName() + "'s board",
                         userToCreate);

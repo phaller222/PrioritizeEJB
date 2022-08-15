@@ -206,6 +206,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		clonedUser.setOccupation(userToCopy.occupation);
 		clonedUser.setPassword(userToCopy.password);
 		clonedUser.setUsername(userToCopy.username);
+		clonedUser.setAddress(userToCopy.getAddress());
 		return clonedUser;
 	}
 

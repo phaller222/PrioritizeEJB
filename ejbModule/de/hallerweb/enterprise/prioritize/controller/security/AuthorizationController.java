@@ -25,6 +25,7 @@ import de.hallerweb.enterprise.prioritize.model.security.*;
 import de.hallerweb.enterprise.prioritize.model.skill.Skill;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillCategory;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -42,6 +43,9 @@ public class AuthorizationController {
 
 	@PersistenceContext
 	EntityManager em;
+
+	@EJB
+	UserRoleController userRoleController;
 
 	static User systemUser;
 	static final String SYSTEM_USER_API_KEY = "e685567d-38d3-49be-8ab9-2adf80eef508";
@@ -174,6 +178,7 @@ public class AuthorizationController {
 		}
 
 		String absoluteObjectType = targetObject.getClass().getCanonicalName();
+		user = userRoleController.findUserByUsername(user.getUsername(),getSystemUser());
 		for (Role role : user.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
 				if (perm.isReadPermission()
@@ -226,6 +231,7 @@ public class AuthorizationController {
 		}
 
 		String absoluteObjectType = targetObject.getClass().getCanonicalName();
+		user = userRoleController.findUserByUsername(user.getUsername(),getSystemUser());
 		for (Role role : user.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
 				if (perm.isUpdatePermission()
@@ -274,6 +280,7 @@ public class AuthorizationController {
 		}
 
 		String absoluteObjectType = targetObject.getClass().getCanonicalName();
+		user = userRoleController.findUserByUsername(user.getUsername(),getSystemUser());
 		for (Role role : user.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
 				if (perm.isDeletePermission()

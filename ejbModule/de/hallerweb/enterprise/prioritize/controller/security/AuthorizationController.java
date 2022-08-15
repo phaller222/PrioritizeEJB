@@ -178,8 +178,8 @@ public class AuthorizationController {
 		}
 
 		String absoluteObjectType = targetObject.getClass().getCanonicalName();
-		user = userRoleController.findUserByUsername(user.getUsername(),getSystemUser());
-		for (Role role : user.getRoles()) {
+		User realUser = userRoleController.findUserByUsername(user.getUsername(),getSystemUser());
+		for (Role role : realUser.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
 				if (perm.isReadPermission()
 						&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
@@ -231,8 +231,8 @@ public class AuthorizationController {
 		}
 
 		String absoluteObjectType = targetObject.getClass().getCanonicalName();
-		user = userRoleController.findUserByUsername(user.getUsername(),getSystemUser());
-		for (Role role : user.getRoles()) {
+		User realUser = userRoleController.findUserByUsername(user.getUsername(),getSystemUser());
+		for (Role role : realUser.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
 				if (perm.isUpdatePermission()
 						&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
@@ -280,8 +280,8 @@ public class AuthorizationController {
 		}
 
 		String absoluteObjectType = targetObject.getClass().getCanonicalName();
-		user = userRoleController.findUserByUsername(user.getUsername(),getSystemUser());
-		for (Role role : user.getRoles()) {
+		User realUser = userRoleController.findUserByUsername(user.getUsername(),getSystemUser());
+		for (Role role : realUser.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
 				if (perm.isDeletePermission()
 						&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {

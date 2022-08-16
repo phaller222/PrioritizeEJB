@@ -40,10 +40,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -203,11 +200,12 @@ public class InitializationController {
 	public void createAdminAccountIfNotPresent() {
 		Logger.getLogger(this.getClass().getName()).log(Level.INFO,
 				"Checking if admin user exists...");
-		if (userRoleController.getAllUsers(authController.getSystemUser()).isEmpty()) {
+		User adminUser = userRoleController.findUserByUsername("admin",authController.getSystemUser());
+		if (Objects.isNull(adminUser)) {
 			Department d = null;
 			// No user present yet. Create admin user...
 			Logger.getLogger(this.getClass().getName()).log(Level.INFO,
-					"No users present. Assuming clean deployment. recreating admin user...");
+					"No admin user present. recreating admin user...");
 
 
 			// Create default company and default department
@@ -279,6 +277,18 @@ public class InitializationController {
 			admin.setEmail("nobody@localhost");
 			admin.setPassword("admin");
 			admin.setOccupation("Systemadministrator");
+
+			Address adr = new Address();
+			adr.setCity("default");
+			adr.setZipCode("00000");
+			adr.setStreet("default street");
+			adr.setFax("0");
+			adr.setPhone("0");
+			adr.setHousenumber("0");
+			adr.setCountry("DE");
+			adr.setMobile("0");
+
+			admin.setAddress(adr);
 			if (Boolean.parseBoolean(config.get(CREATE_DEFAULT_APIKEY))) {
 				admin.setApiKey("ABCDEFG");
 				Logger.getLogger(this.getClass().getName()).log(Level.INFO,"--- ATTENTION: DEFAULT API-KEY HJAS BEEN CREATED: ABCDEFG. DON'T USE THIS INSTALLATION IN PRODUCTION---");

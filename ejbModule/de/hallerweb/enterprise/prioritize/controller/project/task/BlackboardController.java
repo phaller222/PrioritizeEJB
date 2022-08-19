@@ -15,23 +15,17 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.project.task;
 
-import java.util.List;
-
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
-import de.hallerweb.enterprise.prioritize.model.PObject;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
 import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
+
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.util.List;
 
 /**
  * BlackboardController - Manages blackboards and tasks on blackboards.
@@ -39,7 +33,7 @@ import de.hallerweb.enterprise.prioritize.model.project.task.Task;
  *
  */
 @Stateless
-public class BlackboardController extends PEventConsumerProducer {
+public class BlackboardController {
 
 	@PersistenceContext
 	EntityManager em;
@@ -48,8 +42,6 @@ public class BlackboardController extends PEventConsumerProducer {
 	TaskController taskController;
 	@EJB
 	InitializationController initController;
-	@Inject
-	EventRegistry eventRegistry;
 
 	public Blackboard findBlackboardById(int id) {
 		Query q = em.createNamedQuery("findBlackboardById");
@@ -78,7 +70,6 @@ public class BlackboardController extends PEventConsumerProducer {
 		if (!bb.isFrozen()) {
 			Task task = taskController.findTaskById(taskId);
 			bb.addTask(task);
-			raiseEvent(task, "blackboard", "", String.valueOf(bb.getId()), -1);
 		}
 	}
 
@@ -107,18 +98,4 @@ public class BlackboardController extends PEventConsumerProducer {
 		bb.setFrozen(false);
 	}
 
-	@Override
-	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (initController.getAsBoolean(InitializationController.FIRE_TASK_EVENTS)) {
-			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
-					.setPropertyName(name).setLifetime(lifetime).getEvent();
-			eventRegistry.addEvent(evt);
-		}
-	}
-
-	@Override
-	public void consumeEvent(PObject destination, Event evt) {
-		// Auto-generated method stub
-
-	}
 }

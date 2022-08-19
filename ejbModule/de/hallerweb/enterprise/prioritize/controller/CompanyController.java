@@ -16,18 +16,14 @@
 package de.hallerweb.enterprise.prioritize.controller;
 
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Address;
 import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
@@ -54,7 +50,7 @@ import java.util.stream.Collectors;
  *
  */
 @Stateless
-public class CompanyController extends PEventConsumerProducer {
+public class CompanyController {
 
 	@PersistenceContext
 	EntityManager em;
@@ -68,8 +64,6 @@ public class CompanyController extends PEventConsumerProducer {
 	InitializationController initController;
 	@Inject
 	SessionController sessionController;
-	@Inject
-	EventRegistry eventRegistry;
 
 	public static final String LITERAL_COMPANY = "Company";
 	public static final String LITERAL_DEPARTMENT = "Department";
@@ -447,21 +441,6 @@ public class CompanyController extends PEventConsumerProducer {
 		Department orig = getDepartmentById(department.getId(), sessionUser);
 		if (orig != null && authController.canUpdate(orig, sessionUser)) {
 			try {
-				// Fire events if configured
-				if (initController.getAsBoolean(InitializationController.FIRE_DEPARTMENT_EVENTS)) {
-					if (!orig.getName().equals(department.getName())) {
-						this.raiseEvent(orig, Department.PROPERTY_NAME, orig.getName(), department.getName(),
-								initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-					}
-					if (!orig.getAddress().equals(department.getAddress())) {
-						this.raiseEvent(orig, Department.PROPERTY_ADDRESS, orig.getAddress().toString(), department.getAddress().toString(),
-								initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-					}
-					if (!orig.getDescription().equals(department.getDescription())) {
-						this.raiseEvent(orig, Department.PROPERTY_DESCRIPTION, orig.getDescription(), department.getDescription(),
-								initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-					}
-				}
 
 				orig.setName(department.getName());
 				orig.setDescription(department.getDescription());
@@ -603,20 +582,5 @@ public class CompanyController extends PEventConsumerProducer {
 		} else {
 			return new ArrayList<>();
 		}
-	}
-
-	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (initController.getAsBoolean(InitializationController.FIRE_DEPARTMENT_EVENTS)) {
-			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
-					.setPropertyName(name).setLifetime(lifetime).getEvent();
-			eventRegistry.addEvent(evt);
-		}
-	}
-
-	@Override
-	public void consumeEvent(PObject destination, Event evt) {
-		Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Object " + evt.getSource() + " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue() + "--- Dept listening: " + destination.getClass());
-
 	}
 }

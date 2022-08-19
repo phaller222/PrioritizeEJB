@@ -15,19 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.view.security;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.project.ActionBoardController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
@@ -37,7 +24,6 @@ import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionC
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan.TimeSpanType;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.project.ActionBoard;
 import de.hallerweb.enterprise.prioritize.model.project.ActionBoardEntry;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
@@ -45,6 +31,18 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * UserBean - JSF Backing-Bean to store client state information about Users.
@@ -74,12 +72,12 @@ public class UserBean implements Serializable {
 	@EJB
 	ActionBoardController actionboardController;
 
-	transient User user; 														// Stores the user
-	String selectedDepartmentId; 									// Selected Department
-	transient List<String> selectedRolesId; 									// Selected Roles
-	String roleToAddId; 											// Role to add
-	transient List<User> users; 												// List of Users in the system.
-	transient User currentUser; 												// The user who is logged in into the admin pages.
+	transient User user;                                                        // Stores the user
+	String selectedDepartmentId;                                    // Selected Department
+	transient List<String> selectedRolesId;                                    // Selected Roles
+	String roleToAddId;                                            // Role to add
+	transient List<User> users;                                                // List of Users in the system.
+	transient User currentUser;                                                // The user who is logged in into the admin pages.
 	transient Set<SkillRecord> skillRecords;
 
 	Date vacationFrom;
@@ -94,7 +92,7 @@ public class UserBean implements Serializable {
 
 	private static final String NAVIGATION_USERS = "users";
 	private static final String NAVIGATION_EDITUSER = "edituser";
-	
+
 	public List<TimeSpan> getVacations() {
 		return vacations;
 	}
@@ -217,7 +215,7 @@ public class UserBean implements Serializable {
 					if (roleId instanceof String) {
 						role = controller.findRoleById(Integer.parseInt((String) roleId));
 					} else {
-						role = controller.findRoleById((Integer)roleId);
+						role = controller.findRoleById((Integer) roleId);
 					}
 					user.addRole(role);
 				}
@@ -406,11 +404,4 @@ public class UserBean implements Serializable {
 		ActionBoard board = actionboardController.findActionBoardByOwner(sessionController.getUser().getId());
 		return board.getEntries();
 	}
-
-
-	public void raiseTestEvent() {
-		actionboardController.post(actionboardController.findActionBoardByName("admin").getId(), "Testeintrag", "Dies ist ein Test!",
-				new Event());
-	}
-
 }

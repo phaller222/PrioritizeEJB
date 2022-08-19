@@ -18,17 +18,12 @@ package de.hallerweb.enterprise.prioritize.controller.resource;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan.TimeSpanType;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.model.security.User;
-import org.jboss.resteasy.logging.Logger;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -46,7 +41,7 @@ import java.util.Set;
  * {@link ResourceReservation} objects.  * 
  */
 @Stateless
-public class ResourceReservationController extends PEventConsumerProducer {
+public class ResourceReservationController  {
 	@PersistenceContext
 	EntityManager em;
 	@Inject
@@ -55,22 +50,6 @@ public class ResourceReservationController extends PEventConsumerProducer {
 	LoggingController logger;
 	@EJB
 	InitializationController initController;
-	@Inject
-	EventRegistry eventRegistry;
-	
-	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (initController.getAsBoolean(InitializationController.FIRE_RESOURCE_EVENTS)) {
-			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
-					.setPropertyName(name).setLifetime(lifetime).getEvent();
-			eventRegistry.addEvent(evt);
-		}
-	}
-
-	@Override
-	public void consumeEvent(PObject destination, Event evt) {
-		Logger.getLogger(this.getClass()).info("Object " + evt.getSource() + " raised event: " + evt.getPropertyName() + " with new Value: "
-				+ evt.getNewValue() + "--- Resource listening: " + (destination).getId());
-	}
 
 	public boolean isResourceActiveForUser(User user, Set<ResourceReservation> reservations) {
 		Date now = new Date();

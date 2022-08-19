@@ -19,20 +19,15 @@ import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.model.PObject;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.resource.NameValueEntry;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.service.mqtt.MQTTService;
-import org.jboss.resteasy.logging.Logger;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -52,7 +47,7 @@ import java.util.logging.LogManager;
  * discovered and created by the system.
  */
 @Stateless
-public class MQTTResourceController extends PEventConsumerProducer {
+public class MQTTResourceController  {
 
     private static final String LITERAL_RESOURCE = "Resource";
     private static final String LITERAL_RESOURCE_SPACE = " Resource \"";
@@ -76,8 +71,6 @@ public class MQTTResourceController extends PEventConsumerProducer {
     InitializationController initController;
     @Inject
     MQTTService mqttService;
-    @Inject
-    EventRegistry eventRegistry;
 
     public Resource createMqttResource(Resource resourceToCreate, String departmentToken, String resourceGroupName, User sessionUser) {
 
@@ -259,15 +252,11 @@ public class MQTTResourceController extends PEventConsumerProducer {
 
     public void setMqttResourceOnline(Resource res) {
         Resource managed = em.find(Resource.class, res.getId());
-        raiseEvent(managed, Resource.PROPERTY_MQTTONLINE, String.valueOf(managed.isMqttOnline()), "true",
-                initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
         managed.setMqttOnline(true);
     }
 
     public void setMqttResourceOffline(Resource res) {
         Resource managed = em.find(Resource.class, res.getId());
-        raiseEvent(managed, Resource.PROPERTY_MQTTONLINE, String.valueOf(managed.isMqttOnline()), "false",
-                initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
         managed.setMqttOnline(false);
     }
 
@@ -346,8 +335,6 @@ public class MQTTResourceController extends PEventConsumerProducer {
         newEntry.setName(name);
         newEntry.setValues(value);
         em.persist(newEntry);
-        raiseEvent(managedResource, name, "", newEntry.getValues(),
-                initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
         managedResource.getMqttValues().add(newEntry);
     }
 
@@ -457,8 +444,6 @@ public class MQTTResourceController extends PEventConsumerProducer {
      */
     public void setCoordinates(Resource resource, String latitude, String longitude) {
         Resource res = em.find(Resource.class, resource.getId());
-        raiseEvent(res, "geo", resource.getLatitude() + ":" + resource.getLongitude(), latitude + ":" + longitude,
-                initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
         res.setLongitude(longitude);
         res.setLatitude(latitude);
     }
@@ -470,20 +455,6 @@ public class MQTTResourceController extends PEventConsumerProducer {
         } else {
             return resource.getLatitude();
         }
-    }
-
-    public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-        if (initController.getAsBoolean(InitializationController.FIRE_RESOURCE_EVENTS)) {
-            Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
-                    .setPropertyName(name).setLifetime(lifetime).getEvent();
-            eventRegistry.addEvent(evt);
-        }
-    }
-
-    @Override
-    public void consumeEvent(PObject destination, Event evt) {
-        Logger.getLogger(this.getClass()).info("Object " + evt.getSource() + " raised event: " + evt.getPropertyName() + " with new Value: "
-                + evt.getNewValue() + "--- Resource listening: " + (destination).getId());
     }
 
     public void fireScanResult(String sourceUuid, String scanResult) {

@@ -15,19 +15,11 @@
  */
 package de.hallerweb.enterprise.prioritize.model.project;
 
-import java.util.List;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-
 import de.hallerweb.enterprise.prioritize.model.document.Document;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
+
+import javax.persistence.*;
+import java.util.List;
 
 /**
  * ActionBoardEntry.java - Stores inforamtion about an ActionBoardEntry and keeps
@@ -50,9 +42,6 @@ public class ActionBoardEntry {
 
 	@OneToOne
 	private ActionBoard actionBoard;
-
-	@OneToOne
-	private Event source;
 
 	@OneToMany
 	private List<Document> attachedDocuments;
@@ -82,14 +71,6 @@ public class ActionBoardEntry {
 
 	public void setMessage(String message) {
 		this.message = message;
-	}
-
-	public Event getSource() {
-		return source;
-	}
-
-	public void setSource(Event source) {
-		this.source = source;
 	}
 
 	public List<Document> getAttachedDocuments() {

@@ -18,17 +18,13 @@ package de.hallerweb.enterprise.prioritize.controller.document;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
 import javax.ejb.EJB;
@@ -42,7 +38,6 @@ import javax.persistence.Query;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
 /**
  * DocumentController.java - Handles the creation, modification and deletion of {@link DocumentInfo}, {@link DocumentGroup} and
@@ -50,7 +45,7 @@ import java.util.logging.Logger;
  * 
  */
 @Stateless
-public class DocumentController extends PEventConsumerProducer {
+public class DocumentController  {
 
 	@PersistenceContext
 	EntityManager em;
@@ -64,9 +59,7 @@ public class DocumentController extends PEventConsumerProducer {
 	LoggingController logger;
 	@Inject
 	SessionController sessionController;
-	@Inject
-	EventRegistry eventRegistry;
-	
+
 	static final String DOCUMENT_LITERAL = "Document";
 
 	public DocumentInfo createDocumentInfo(String name, int groupId, User user, String mimeType, boolean encrypt, byte[] data, String changes) {
@@ -327,11 +320,6 @@ public class DocumentController extends PEventConsumerProducer {
 			document.setVersion(info.getCurrentDocument().getVersion() + 1);
 			document.setData(data);
 
-			// Fire events for changed properties if configured.
-			if (initController.getAsBoolean(InitializationController.FIRE_DOCUMENT_EVENTS)) {
-				checkEventsToFire(newDocumentData, managedInfo);
-			}
-
 			// Then edit the DocumentInfo information
 			if (managedInfo.getRecentDocuments() == null) {
 				managedInfo.setRecentDocuments(new TreeSet<>());
@@ -355,26 +343,6 @@ public class DocumentController extends PEventConsumerProducer {
 		}
 	}
 
-	private void checkEventsToFire(Document newDocumentData, DocumentInfo managedInfo) {
-		Document current = managedInfo.getCurrentDocument();
-		if (!current.getName().equals(newDocumentData.getName())) {
-			this.raiseEvent(managedInfo, Document.PROPERTY_NAME, current.getName(), newDocumentData.getName(),
-					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-		}
-		if (!current.getMimeType().equals(newDocumentData.getMimeType())) {
-			this.raiseEvent(managedInfo, Document.PROPERTY_MIMETYPE, current.getMimeType(), newDocumentData.getMimeType(),
-					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-		}
-		if (!current.getChanges().equals(newDocumentData.getChanges())) {
-			this.raiseEvent(managedInfo, Document.PROPERTY_CHANGES, current.getChanges(), newDocumentData.getChanges(),
-					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-		}
-		if (!current.isEncrypted() == newDocumentData.isEncrypted()) {
-			this.raiseEvent(managedInfo, Document.PROPERTY_ENCRYPTED, String.valueOf(current.isEncrypted()),
-					String.valueOf(newDocumentData.isEncrypted()),
-					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-		}
-	}
 
 	public Document setDocumentTag(Document document, String tag) {
 		Document managedDocument = em.find(Document.class, document.getId());
@@ -386,11 +354,7 @@ public class DocumentController extends PEventConsumerProducer {
 			logger.log(sessionController.getUser().getUsername(), DOCUMENT_LITERAL, Action.UPDATE, document.getId(),
 					" Document \"" + document.getName() + "\" has been tagged: " + tag + ".");
 		}
-
-		this.raiseEvent(managedDocument, Document.PROPERTY_TAG, "", managedDocument.getTag(),
-				initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-
-		return managedDocument;
+	return managedDocument;
 	}
 
 	/**
@@ -480,20 +444,4 @@ public class DocumentController extends PEventConsumerProducer {
 			return null;
 		}
 	}
-
-	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (initController.getAsBoolean(InitializationController.FIRE_DOCUMENT_EVENTS)) {
-			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
-					.setPropertyName(name).setLifetime(lifetime).getEvent();
-			eventRegistry.addEvent(evt);
-		}
-	}
-
-	@Override
-	public void consumeEvent(PObject destination, Event evt) {
-		Logger.getLogger(this.getClass().toString()).log(Level.INFO, "Object " + evt.getSource() + " raised event: " + evt.getPropertyName()
-				+ " with new Value: " + evt.getNewValue() + "--- Document listening: " + destination.getClass());
-
-	}
-
 }

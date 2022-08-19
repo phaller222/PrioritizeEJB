@@ -19,15 +19,11 @@ import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.project.task.TaskController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.project.Project;
 import de.hallerweb.enterprise.prioritize.model.project.ProjectProgress;
 import de.hallerweb.enterprise.prioritize.model.project.goal.*;
@@ -54,7 +50,7 @@ import java.util.Set;
  *
  */
 @Stateless
-public class ProjectController extends PEventConsumerProducer {
+public class ProjectController  {
 
 	private static final String QUERY_FIND_PROJECT_BY_ID = "findProjectById";
 	private static final String QUERY_FIND_PROJECTS_BY_MANAGER = "findProjectsByManager";
@@ -76,8 +72,6 @@ public class ProjectController extends PEventConsumerProducer {
 	@PersistenceContext
 	EntityManager em;
 
-	@Inject
-	EventRegistry eventRegistry;
 
 	@EJB
 	DocumentController documentController;
@@ -596,20 +590,5 @@ public class ProjectController extends PEventConsumerProducer {
 		}
 		managedProject.setProgress(null);
 		em.remove(progress);
-	}
-
-	@Override
-	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (initController.getAsBoolean(InitializationController.FIRE_TASK_EVENTS)) {
-			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
-					.setPropertyName(name).setLifetime(lifetime).getEvent();
-			eventRegistry.addEvent(evt);
-		}
-	}
-
-	@Override
-	public void consumeEvent(PObject destination, Event evt) {
-		// Auto-generated method stub
-
 	}
 }

@@ -619,23 +619,15 @@ public class ResourceService {
 		if (mqttOnline != null) {
 			processedCopy = true;
 			boolean online = Boolean.parseBoolean(mqttOnline);
-
-			resourceController.raiseEvent(resource, "mqttOnline", String.valueOf(resource.isMqttOnline()), mqttOnline,
-					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-
 			mqttResourceController.setMqttResourceStatus(resource, online);
 		}
 
 		if (name != null) {
 			processedCopy = true;
-			resourceController.raiseEvent(resource, "name", resource.getName(), name,
-					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 			resourceController.setResourceName(resource, name, sessionController.getUser());
 		}
 		if (description != null) {
 			processedCopy = true;
-			resourceController.raiseEvent(resource, "description", resource.getDescription(), description,
-					initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 			resourceController.setResourceDescription(resource, description, sessionController.getUser());
 		}
 		if (commands != null) {
@@ -657,8 +649,6 @@ public class ResourceService {
 		String[] commandString = commands.split(":");
 		HashSet<String> commandsForResource = new HashSet<>();
 		Collections.addAll(commandsForResource, commandString);
-		resourceController.raiseEvent(resource, "commands", resource.getMqttCommands().toString(), commands,
-				initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		mqttResourceController.setCommands(resource, commandsForResource);
 		return true;
 	}
@@ -674,8 +664,6 @@ public class ResourceService {
 				oldValue = entry.getValues();
 			}
 		}
-		resourceController.raiseEvent(resource, nameValuePair[0], oldValue, nameValuePair[1],
-				initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
 		// ------------------------------------------------------
 
 		mqttResourceController.addMqttValueForResource(resource, nameValuePair[0], nameValuePair[1]);

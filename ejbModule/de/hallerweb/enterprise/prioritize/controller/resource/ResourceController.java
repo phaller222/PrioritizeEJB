@@ -18,13 +18,9 @@ package de.hallerweb.enterprise.prioritize.controller.resource;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.model.PObject;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.resource.NameValueEntry;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
@@ -49,7 +45,7 @@ import java.util.*;
  * 
  */
 @Stateless
-public class ResourceController extends PEventConsumerProducer {
+public class ResourceController {
 	@PersistenceContext
 	EntityManager em;
 	@Inject
@@ -60,8 +56,7 @@ public class ResourceController extends PEventConsumerProducer {
 	LoggingController logger;
 	@EJB
 	InitializationController initController;
-	@Inject
-	EventRegistry eventRegistry;
+
 
 	private static final String PARAM_DEPARTMENT_ID = "deptId";
 	private static final String LITERAL_RESOURCE = "Resource";
@@ -297,22 +292,6 @@ public class ResourceController extends PEventConsumerProducer {
 
 		if (authController.canUpdate(managedResource, user) && managedDepartment != null) {
 
-			if (!newName.equals(managedResource.getName())) {
-				this.raiseEvent(managedResource, Resource.PROPERTY_NAME, managedResource.getName(), newName, 60000);
-			}
-			if (!newDescription.equals(managedResource.getDescription())) {
-				this.raiseEvent(managedResource, Resource.PROPERTY_DESCRIPTION, managedResource.getDescription(), newDescription, 60000);
-			}
-			if (managedResource.getDepartment().getId() != managedDepartment.getId()) {
-				this.raiseEvent(managedResource, Resource.PROPERTY_DEPARTMENT, String.valueOf(managedResource.getDepartment().getId()),
-						String.valueOf(newDept.getId()), 60000);
-			}
-			if (managedResource.getResourceGroup().getId() != managedGroup.getId()) {
-				this.raiseEvent(managedResource, Resource.PROPERTY_RESOURCEGROUP,
-						String.valueOf(managedResource.getResourceGroup().getId()), String.valueOf(newGroup.getId()),
-						initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-			}
-
 			managedResource.setName(newName);
 			managedResource.setDescription(newDescription);
 			managedResource.setIp(newIp);
@@ -433,19 +412,5 @@ public class ResourceController extends PEventConsumerProducer {
 		} catch (NoResultException ex) {
 			return null;
 		}
-	}
-
-	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (initController.getAsBoolean(InitializationController.FIRE_RESOURCE_EVENTS)) {
-			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
-					.setPropertyName(name).setLifetime(lifetime).getEvent();
-			eventRegistry.addEvent(evt);
-		}
-	}
-
-	@Override
-	public void consumeEvent(PObject destination, Event evt) {
-		Logger.getLogger(this.getClass()).info("Object " + evt.getSource() + " raised event: " + evt.getPropertyName() + " with new Value: "
-				+ evt.getNewValue() + "--- Resource listening: " + (destination).getId());
 	}
 }

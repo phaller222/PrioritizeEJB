@@ -16,13 +16,9 @@
 package de.hallerweb.enterprise.prioritize.controller.project.task;
 
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.project.ProjectController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
-import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.project.Project;
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
 import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
@@ -33,7 +29,6 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -46,13 +41,10 @@ import java.util.List;
  *
  */
 @Stateless
-public class TaskController extends PEventConsumerProducer {
+public class TaskController  {
 
 	@PersistenceContext
 	EntityManager em;
-
-	@Inject
-	EventRegistry eventRegistry;
 
 	@EJB
 	UserRoleController userRoleController;
@@ -182,20 +174,5 @@ public class TaskController extends PEventConsumerProducer {
 			updateTaskStatus(managedTask.getId(), TaskStatus.STOPPED);
 		}
 		projectController.updateProjectProgress(task.getProjectGoalRecord().getProject().getId());
-	}
-
-	@Override
-	public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-		if (initController.getAsBoolean(InitializationController.FIRE_TASK_EVENTS)) {
-			Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
-					.setPropertyName(name).setLifetime(lifetime).getEvent();
-			eventRegistry.addEvent(evt);
-		}
-	}
-
-	@Override
-	public void consumeEvent(PObject destination, Event evt) {
-		// Auto-generated method stub
-
 	}
 }

@@ -18,16 +18,12 @@ package de.hallerweb.enterprise.prioritize.controller.security;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
-import de.hallerweb.enterprise.prioritize.controller.event.EventRegistry;
 import de.hallerweb.enterprise.prioritize.controller.project.ActionBoardController;
 import de.hallerweb.enterprise.prioritize.controller.project.task.TaskController;
 import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionController;
 import de.hallerweb.enterprise.prioritize.model.Address;
 import de.hallerweb.enterprise.prioritize.model.Department;
-import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
-import de.hallerweb.enterprise.prioritize.model.event.Event;
-import de.hallerweb.enterprise.prioritize.model.event.PEventConsumerProducer;
 import de.hallerweb.enterprise.prioritize.model.project.ActionBoard;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
@@ -45,15 +41,13 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * UserRoleController.java - Controls the creation, modification and deletion of
  * {@link Role} and {@link User} objects.
  */
 @Stateless
-public class UserRoleController extends PEventConsumerProducer {
+public class UserRoleController {
 
     @PersistenceContext
     EntityManager em;
@@ -72,8 +66,6 @@ public class UserRoleController extends PEventConsumerProducer {
     InitializationController initController;
     @Inject
     SessionController sessionController;
-    @Inject
-    EventRegistry eventRegistry;
 
     public static final String LITERAL_CREATED = "\" created.";
     public static final String LITERAL_SYSTEM = "SYSTEM";
@@ -274,7 +266,6 @@ public class UserRoleController extends PEventConsumerProducer {
 
                 ActionBoard actionBoard = actionBoardController.createActionBoard(userToCreate.getName(), userToCreate.getName() + "'s board",
                         userToCreate);
-                actionBoardController.addSubscriber(actionBoard.getId(), userToCreate);
 
                 for (Role role : roles) {
                     Role managedRole = em.find(Role.class, role.getId());
@@ -323,41 +314,8 @@ public class UserRoleController extends PEventConsumerProducer {
 
             em.flush();
 
-            // Raise events if configured
-            if (initController.getAsBoolean(InitializationController.FIRE_USER_EVENTS)) {
-                fireEditUserEvents(newUserData, user);
-            }
-
             logger.log(sessionUser.getUsername(), "User", Action.UPDATE, user.getId(),
                     LITERAL_USER + " " + user.getUsername() + "\" updated.");
-        }
-    }
-
-    private void fireEditUserEvents(User newUserData, User user) {
-        if (!user.getName().equals(newUserData.getName())) {
-            this.raiseEvent(user, User.PROPERTY_NAME, user.getName(), newUserData.getName(),
-                    initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-        }
-        if (!user.getFirstname().equals(newUserData.getFirstname())) {
-            this.raiseEvent(user, User.PROPERTY_FIRSTNAME, user.getFirstname(), newUserData.getFirstname(),
-                    initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-        }
-        if (!user.getUsername().equals(newUserData.getUsername())) {
-            this.raiseEvent(user, User.PROPERTY_USERNAME, user.getUsername(), newUserData.getUsername(),
-                    initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-        }
-        if (!user.getEmail().equals(newUserData.getEmail())) {
-            this.raiseEvent(user, User.PROPERTY_EMAIL, user.getEmail(), newUserData.getEmail(),
-                    initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-        }
-        if (!user.getOccupation().equals(newUserData.getOccupation())) {
-            this.raiseEvent(user, User.PROPERTY_OCCUPATION, user.getOccupation(), newUserData.getOccupation(),
-                    initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
-        }
-        if (user.getDepartment() != null && user.getDepartment().getId() != newUserData.getDepartment().getId()) {
-            this.raiseEvent(user, User.PROPERTY_DEPARTMENT, String.valueOf(user.getDepartment().getId()),
-                    String.valueOf(newUserData.getDepartment().getId()),
-                    initController.getAsInt(InitializationController.EVENT_DEFAULT_TIMEOUT));
         }
     }
 
@@ -662,27 +620,6 @@ public class UserRoleController extends PEventConsumerProducer {
 
     }
 
-    public void raiseEvent(PObject source, String name, String oldValue, String newValue, long lifetime) {
-        if (initController.getAsBoolean(InitializationController.FIRE_USER_EVENTS)) {
-            Event evt = eventRegistry.getEventBuilder().newEvent().setSource(source).setOldValue(oldValue).setNewValue(newValue)
-                    .setPropertyName(name).setLifetime(lifetime).getEvent();
-            eventRegistry.addEvent(evt);
-        }
-    }
-
-    @Override
-    public void consumeEvent(PObject obj, Event evt) {
-        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Object " + obj.toString() + " raised event: " + evt.getPropertyName()
-                + " with new Value: " + evt.getNewValue() + "--- User listening: " + ((User) obj).getUsername());
-        User destination = (User) obj;
-        if (evt.getSource() instanceof ActionBoard) {
-            ActionBoard board = (ActionBoard) evt.getSource();
-            if (!board.getOwner().equals(destination)) {
-                actionBoardController.post(actionBoardController.findActionBoardByOwner(destination.getId()).getId(), evt.getPropertyName(),
-                        evt.getPropertyName() + " set to " + evt.getNewValue(), evt);
-            }
-        }
-    }
 
     // -----------------------------------------------
     // TODO: Task assignment not checked at the moment, add PermissionRecord type if necessary in the future.

@@ -48,14 +48,13 @@ import java.util.Set;
 @Entity(name = "Department")
 @NamedQueries({ @NamedQuery(name = "findAllDepartments", query = "SELECT d FROM Department d ORDER BY d.company.name"),
 		@NamedQuery(name = "findDepartmentById", query = "SELECT d FROM Department d WHERE d.id = ?1 ORDER BY d.name"),
+		@NamedQuery(name = "findDepartmentByName", query = "SELECT d FROM Department d WHERE d.name = ?1 ORDER BY d.name"),
+		@NamedQuery(name = "findDepartmentByPhrase", query =  "SELECT d FROM Department d WHERE d.name LIKE :phrase " +
+				"OR d.description LIKE :phrase"),
 		@NamedQuery(name = "findDepartmentByToken", query = "SELECT d FROM Department d WHERE d.token = ?1 ORDER BY d.name"),
 		@NamedQuery(name = "findDepartmentsByCompany", query = "SELECT d FROM Department d WHERE d.company.id = ?1 ORDER BY d.name"),
 		@NamedQuery(name = "findResourceGroupInDepartment", query = "SELECT g FROM ResourceGroup g WHERE g.department.id= :deptId AND g.name=:groupName") })
 public class Department extends PObject implements PAuthorizedObject, PSearchable {
-
-	public static final String PROPERTY_NAME = "name";
-	public static final String PROPERTY_DESCRIPTION = "description";
-	public static final String PROPERTY_ADDRESS = "address";
 
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	Address address;
@@ -145,10 +144,6 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 		return documentGroups;
 	}
 
-	public void setDocumentGroups(Set<DocumentGroup> documentGroups) {
-		this.documentGroups = documentGroups;
-	}
-
 	public void addDocumentGroup(DocumentGroup documentGroup) {
 		if (this.documentGroups.isEmpty()) documentGroups.add(documentGroup);
 		else {
@@ -164,10 +159,6 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
 
 	public Set<ResourceGroup> getResourceGroups() {
 		return resourceGroups;
-	}
-
-	public void setResourceGroups(Set<ResourceGroup> resourceGroups) {
-		this.resourceGroups = resourceGroups;
 	}
 
 	public void addResourceGroup(ResourceGroup resourceGroup) {

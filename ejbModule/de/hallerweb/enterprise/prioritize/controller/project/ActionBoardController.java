@@ -39,8 +39,6 @@ public class ActionBoardController  {
 	private static final String PARAM_ACTION_BOARD_ID = "actionBoardId";
 	private static final String PARAM_ACTION_BOARD_NAME = "actionBoardName";
 
-	private static final String EVENT_ENTRY_ADDED = "entry";
-
 	@PersistenceContext
 	EntityManager em;
 

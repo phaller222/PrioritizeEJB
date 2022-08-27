@@ -36,7 +36,9 @@ import java.util.UUID;
 public class NFCUnitController implements Serializable {
 
 	@PersistenceContext
-	EntityManager em;
+	transient EntityManager em;
+
+	private static final String LITERAL_COUNTER = "Counter";
 
 	@EJB
 	ResourceController resourceController;
@@ -125,24 +127,16 @@ public class NFCUnitController implements Serializable {
 
 	public NFCCounter createNFCCounter() {
 		NFCCounter counter = new NFCCounter();
-		counter.setNfcUnit(createNFCUnit("Counter", "NFC Counter", NFCUnitType.COUNTER, null, ""));
+		counter.setNfcUnit(createNFCUnit(LITERAL_COUNTER, "NFC Counter", NFCUnitType.COUNTER, null, ""));
 		em.persist(counter);
 		return counter;
 	}
 
 	public NFCCounter createNFCCounterWithUUID(String uuid) {
 		NFCCounter counter = new NFCCounter();
-		NFCUnit unit = createNFCUnit("Counter", "NFC counter", NFCUnitType.COUNTER, null, "0", uuid);
+		NFCUnit unit = createNFCUnit(LITERAL_COUNTER, "NFC counter", NFCUnitType.COUNTER, null, "0", uuid);
 		counter.setNfcUnit(unit);
 		em.persist(counter);
 		return counter;
 	}
-
-	public NFCCounter createNFCCounter(String uuid) {
-		NFCCounter counter = new NFCCounter();
-		counter.setNfcUnit(createNFCUnit("Counter", "NFC Counter", NFCUnitType.COUNTER, null, "0"));
-		em.persist(counter);
-		return counter;
-	}
-
 }

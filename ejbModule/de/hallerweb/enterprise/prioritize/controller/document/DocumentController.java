@@ -63,7 +63,7 @@ public class DocumentController  {
 	static final String DOCUMENT_LITERAL = "Document";
 
 	public DocumentInfo createDocumentInfo(String name, int groupId, User user, String mimeType, boolean encrypt, byte[] data, String changes) {
-		int maxsize = Integer.parseInt(initController.config.get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
+		int maxsize = Integer.parseInt(InitializationController.config.get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
 		if (data.length > maxsize) {
 			return null;
 		}
@@ -295,7 +295,7 @@ public class DocumentController  {
 
 	public DocumentInfo editDocumentInfo(DocumentInfo info, Document newDocumentData, byte[] data, String mimeType, User user,
 			boolean encrypt) {
-		int maxsize = Integer.parseInt(initController.config.get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
+		int maxsize = Integer.parseInt(InitializationController.config.get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
 		if (data.length > maxsize) {
 			return null;
 		}

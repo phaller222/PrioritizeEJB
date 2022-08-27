@@ -23,6 +23,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -45,7 +46,7 @@ public class CalendarController {
 		query.setParameter("user", user);
 		List<TimeSpan> timespans = query.getResultList();
 		if (timespans.isEmpty()) {
-			return null;
+			return Collections.emptyList();
 		} else {
 			return timespans;
 		}
@@ -57,7 +58,7 @@ public class CalendarController {
 		query.setParameter("type", type);
 		List<TimeSpan> timespans = query.getResultList();
 		if (timespans.isEmpty()) {
-			return null;
+			return Collections.emptyList();
 		} else {
 			return timespans;
 		}

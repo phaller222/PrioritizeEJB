@@ -91,8 +91,7 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 	public void loadProjects() {
 		if (currentUser != null) {
 			// TODO: Project admin must also be project member!
-			this.projects = projectController.findProjectsByUser(currentUser.getId(), currentUser);
-			// Collections.sort(projects, (projectA, projectB) -> projectA.getName().compareTo(projectB.getName()));
+			this.projects = projectController.findProjectsByUser(currentUser);
 		} else {
 			this.projects = new ArrayList<>();
 		}
@@ -187,7 +186,7 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 		Task managedTask = taskController.findTaskById(task.getId());
 		User user = sessionController.getUser();
 		taskController.updateTaskStatus(managedTask.getId(), TaskStatus.OPEN);
-		taskController.removeTaskAssignee(managedTask.getId(), user, user);
+		taskController.removeTaskAssignee(managedTask.getId());
 		userRoleController.removeAssignedTask(user, managedTask, user);
 		loadForeignTasks();
 		return NAVIGATION_BLACKBOARD;

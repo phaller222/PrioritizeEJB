@@ -149,7 +149,7 @@ public class IndustrieCounterService {
 			@FormParam(value = "initialValue") long initialValue) {
 		User sessionUser = accessController.checkApiKey(apiKey);
 		if (sessionUser != null) {
-			return counterController.createCounter(initialValue, CounterType.NFC, uuid, name, desc,
+			return counterController.createCounter(initialValue, uuid, name, desc,
 					sessionUser);
 			
 		} else {

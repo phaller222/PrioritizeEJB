@@ -85,7 +85,7 @@ public class BlackboardController {
 	public List<Task> getBlackboardTasks(Blackboard bb) {
 		Query q = em.createNamedQuery("findBlackboardTasks");
 		q.setParameter("blackboardId", bb.getId());
-		return (List) q.getResultList();
+		return q.getResultList();
 	}
 
 	public void freezeBlackboard(int blackboardId) {

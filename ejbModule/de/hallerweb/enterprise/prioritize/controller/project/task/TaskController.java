@@ -55,6 +55,8 @@ public class TaskController  {
 	@EJB
 	InitializationController initController;
 
+	private static final String LITERAL_ASSIGNEE = "assignee";
+
 	public Task findTaskById(int id) {
 		Query q = em.createNamedQuery("findTaskById");
 		q.setParameter("taskId", id);
@@ -63,8 +65,8 @@ public class TaskController  {
 
 	public List<Task> findTasksByAssignee(PActor assignee) {
 		Query q = em.createNamedQuery("findTasksByAssignee");
-		q.setParameter("assignee", assignee);
-		List<Task> tasks = (List<Task>) q.getResultList();
+		q.setParameter(LITERAL_ASSIGNEE, assignee);
+		List<Task> tasks = q.getResultList();
 		if (tasks.isEmpty()) {
 			return new ArrayList<>();
 		} else {
@@ -74,9 +76,9 @@ public class TaskController  {
 	
 	public List<Task> findTasksAssignedToUser(PActor assignee, Project p) {
 		Query q = em.createNamedQuery("findTasksInProjectAssignedToUser");
-		q.setParameter("assignee", assignee);
+		q.setParameter(LITERAL_ASSIGNEE, assignee);
 		q.setParameter("project", p);
-		List<Task> tasks = (List<Task>) q.getResultList();
+		List<Task> tasks = q.getResultList();
 		if (tasks.isEmpty()) {
 			return new ArrayList<>();
 		} else {
@@ -87,9 +89,9 @@ public class TaskController  {
 
 	public List<Task> findTasksNotAssignedToUser(PActor assignee,Project p) {
 		Query q = em.createNamedQuery("findTasksInProjectNotAssignedToUser");
-		q.setParameter("assignee", assignee);
+		q.setParameter(LITERAL_ASSIGNEE, assignee);
 		q.setParameter("project", p);
-		List<Task> tasks = (List<Task>) q.getResultList();
+		List<Task> tasks = q.getResultList();
 		if (tasks.isEmpty()) {
 			return new ArrayList<>();
 		} else {
@@ -122,7 +124,7 @@ public class TaskController  {
 		findTaskById(task.getId()).setAssignee(assignee);
 	}
 
-	public void removeTaskAssignee(int taskId, PActor assignee, User sessionUser) {
+	public void removeTaskAssignee(int taskId) {
 		Task task = findTaskById(taskId);
 		task.removeAssignee();
 	}
@@ -151,7 +153,7 @@ public class TaskController  {
 		ProjectGoalRecord rec = managedTask.getProjectGoalRecord();
 		rec.setPercentage(100);
 
-		removeTaskAssignee(managedTask.getId(), user, user);
+		removeTaskAssignee(managedTask.getId());
 		userRoleController.removeAssignedTask(user, managedTask, user);
 		updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
 		projectController.updateProjectProgress(task.getProjectGoalRecord().getProject().getId());
@@ -165,7 +167,7 @@ public class TaskController  {
 		ProjectGoalRecord rec = managedTask.getProjectGoalRecord();
 		rec.setPercentage(percentage);
 		if (percentage == 100) {
-			removeTaskAssignee(managedTask.getId(), user, user);
+			removeTaskAssignee(managedTask.getId());
 			userRoleController.removeAssignedTask(user, managedTask, user);
 			updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
 		} else if (percentage > 0) {

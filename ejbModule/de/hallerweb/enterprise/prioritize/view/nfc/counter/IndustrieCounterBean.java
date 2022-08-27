@@ -47,11 +47,11 @@ public class IndustrieCounterBean implements Serializable {
 	}
 
 	public void createDummyCounter() {
-		industrieCounterController.createCounter(0, CounterType.NFC);
+		industrieCounterController.createCounter(0);
 	}
 
 	public void createCounter(String uuid) {
-		industrieCounterController.createCounter(0, CounterType.NFC, uuid, sessionController.getUser());
+		industrieCounterController.createCounter(uuid, sessionController.getUser());
 	}
 
 	public String incCounter(String uuid) {

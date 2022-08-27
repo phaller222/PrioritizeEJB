@@ -92,21 +92,21 @@ public class MessageController {
 	public List<Message> getReceivedMessages(User user) {
 		Query query = em.createNamedQuery("findReceivedMessagesForUser");
 		query.setParameter(PARAMETER_USER_ID, user.getId());
-		return (List<Message>) query.getResultList();
+		return query.getResultList();
 	}
 	
 	@SuppressWarnings("unchecked")
 	public List<Message> getUnreadMessages(User user) {
 		Query query = em.createNamedQuery("findUnreadMessagesForUser");
 		query.setParameter(PARAMETER_USER_ID, user.getId());
-		return (List<Message>) query.getResultList();
+		return query.getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Message> getSentMessages(User user) {
 		Query query = em.createNamedQuery("findSentMessagesForUser");
 		query.setParameter(PARAMETER_USER_ID, user.getId());
-		return (List<Message>) query.getResultList();
+		return query.getResultList();
 	}
 
 	public void setMessageRead(Message msg, boolean msgRead) {

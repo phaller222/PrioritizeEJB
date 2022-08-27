@@ -178,7 +178,7 @@ public class ProjectGoalBean implements Serializable {
 	}
 
 	private void traverseProjectGoals(DefaultTreeNode parentNode, ProjectGoalCategory category) {
-		List<ProjectGoal> goals = controller.getProjectGoalsForCategory(category, authController.getSystemUser());
+		List<ProjectGoal> goals = controller.getProjectGoalsForCategory(category);
 		if (goals != null) {
 			for (ProjectGoal goal : goals) {
 				DefaultTreeNode goalNode = new DefaultTreeNode(TYPE_GOAL, goal, parentNode);

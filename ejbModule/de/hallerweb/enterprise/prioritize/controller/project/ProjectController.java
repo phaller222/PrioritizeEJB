@@ -96,7 +96,7 @@ public class ProjectController  {
 		User user = em.find(User.class,managerId);
 		Query q = em.createNamedQuery(QUERY_FIND_PROJECTS_BY_MANAGER);
 		q.setParameter(PARAM_MANAGER_ID, user);
-		List<Project> projects = (List<Project>) q.getResultList();
+		List<Project> projects = q.getResultList();
 		if (projects.isEmpty()) {
 			return new ArrayList<>();
 		} else {
@@ -104,11 +104,10 @@ public class ProjectController  {
 		}
 	}
 
-	public List<Project> findProjectsByUser(int userId, User sessionUser) {
+	public List<Project> findProjectsByUser(User sessionUser) {
 		Query q = em.createNamedQuery(QUERY_FIND_PROJECTS_BY_MEMBER);
-		//User user = userRoleController.findUserById(userId, sessionUser);
 		q.setParameter(PARAM_USER, sessionUser);
-		List<Project> projects = (List<Project>) q.getResultList();
+		List<Project> projects = q.getResultList();
 		if (projects.isEmpty()) {
 			return new ArrayList<>();
 		} else {
@@ -129,7 +128,7 @@ public class ProjectController  {
 
 	private List<ProjectGoalRecord> getProjectGoalRecords(int projectId, Query query) {
 		query.setParameter(PARAM_PROJECT_ID, projectId);
-		List<ProjectGoalRecord> projectGoalRecords = (List<ProjectGoalRecord>) query.getResultList();
+		List<ProjectGoalRecord> projectGoalRecords = query.getResultList();
 		if (projectGoalRecords.isEmpty()) {
 			return new ArrayList<>();
 		} else {
@@ -173,7 +172,7 @@ public class ProjectController  {
 				// Find task in db to edit original vvalues in db!
 				Task task = taskController.findTaskById(t.getId());
 
-				ProjectGoal goal = createProjectGoal(task.getName(), task.getDescription(), null, props, sessionController.getUser());
+				ProjectGoal goal = createProjectGoal(task.getName(), task.getDescription(), null, props);
 
 				goal.setName(task.getName());
 				goal.setDescription(task.getDescription());
@@ -323,7 +322,7 @@ public class ProjectController  {
 	}
 
 	public void deleteProjectGoalsInCategory(ProjectGoalCategory category, User sessionUser) {
-		List<ProjectGoal> goals = getProjectGoalsForCategory(category, sessionUser);
+		List<ProjectGoal> goals = getProjectGoalsForCategory(category);
 		if (goals != null) {
 			for (ProjectGoal goal : goals) {
 				deleteProjectGoal(goal.getId(), sessionUser);
@@ -331,7 +330,7 @@ public class ProjectController  {
 		}
 	}
 
-	public List<ProjectGoal> getProjectGoalsForCategory(ProjectGoalCategory cat, User sessionUser) {
+	public List<ProjectGoal> getProjectGoalsForCategory(ProjectGoalCategory cat) {
 		Query query = em.createNamedQuery("findProjectGoalsForCategory");
 		query.setParameter("catId", cat.getId());
 
@@ -389,7 +388,7 @@ public class ProjectController  {
 	public List<ProjectGoalRecord> getProjectGoalRecordsForProjectGoal(ProjectGoal goal) {
 		Query query = em.createNamedQuery("findProjectGoalRecordsForProjectGoal");
 		query.setParameter("goalId", goal.getId());
-		return (List<ProjectGoalRecord>) query.getResultList();
+		return query.getResultList();
 	}
 
 	public void deleteProjectGoal(int projectGoalId, User sessionUser) {
@@ -426,7 +425,7 @@ public class ProjectController  {
 	}
 
 	public ProjectGoal createProjectGoal(String name, String description, ProjectGoalCategory category,
-			List<ProjectGoalProperty> properties, User sessionUser) {
+			List<ProjectGoalProperty> properties) {
 		ProjectGoal goal = new ProjectGoal();
 		goal.setName(name);
 		goal.setDescription(description);
@@ -463,9 +462,9 @@ public class ProjectController  {
 		return property;
 	}
 
-	public ProjectGoalPropertyRecord createProjectGoalPropertyRecord(ProjectGoalPropertyRecord record) {
-		em.persist(record);
-		return record;
+	public ProjectGoalPropertyRecord createProjectGoalPropertyRecord(ProjectGoalPropertyRecord propertyRecord) {
+		em.persist(propertyRecord);
+		return propertyRecord;
 	}
 
 	public ProjectProgress createProjectProgress(int projectId, List<ProjectGoalRecord> targetGoals, int percentFinished) {

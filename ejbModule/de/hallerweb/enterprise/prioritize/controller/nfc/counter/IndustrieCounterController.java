@@ -35,7 +35,7 @@ import java.util.List;
 public class IndustrieCounterController implements Serializable {
 
 	@PersistenceContext
-	EntityManager em;
+	transient EntityManager em;
 
 	@EJB
 	AuthorizationController authController;
@@ -47,10 +47,10 @@ public class IndustrieCounterController implements Serializable {
 	@EJB
 	NFCUnitController nfcUnitController;
 
-	public IndustrieCounter createCounter(long initialValue, CounterType type, String uuid, String name, String description,
+	public IndustrieCounter createCounter(long initialValue, String uuid, String name, String description,
 			User sessionUser) {
 		if (authController.canCreate(new IndustrieCounter(), sessionUser)) {
-			IndustrieCounter counter = createCounter(initialValue, type, uuid, sessionUser);
+			IndustrieCounter counter = createCounter( uuid, sessionUser);
 			editCounter(counter.getCounter().getUuid(), name, description, initialValue);
 			return counter;
 		} else {
@@ -58,7 +58,7 @@ public class IndustrieCounterController implements Serializable {
 		}
 	}
 
-	public IndustrieCounter createCounter(long initialValue, CounterType type, String uuid, User sessionUser) {
+	public IndustrieCounter createCounter(String uuid, User sessionUser) {
 		if (authController.canCreate(new IndustrieCounter(), sessionUser)) {
 			PCounter embeddedCounter;
 			IndustrieCounter existingCounter = getIndustrieCounter(uuid);
@@ -77,16 +77,11 @@ public class IndustrieCounterController implements Serializable {
 		}
 	}
 
-	public IndustrieCounter createCounter(long initialValue, CounterType type) {
+	public IndustrieCounter createCounter(long initialValue) {
 		PCounter embeddedCounter;
+		embeddedCounter = nfcUnitController.createNFCCounter();
+		embeddedCounter.setValue(initialValue);
 
-		if (type == CounterType.NFC) {
-			embeddedCounter = nfcUnitController.createNFCCounter();
-			embeddedCounter.setValue(initialValue);
-		} else {
-			embeddedCounter = nfcUnitController.createNFCCounter();
-			embeddedCounter.setValue(initialValue);
-		}
 
 		IndustrieCounter counter = new IndustrieCounter();
 		counter.setCounter(embeddedCounter);

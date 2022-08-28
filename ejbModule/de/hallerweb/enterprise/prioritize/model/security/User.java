@@ -91,8 +91,8 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 	String email;
 
 	String occupation;
-	@JsonIgnore
 	String password;
+
 	@JsonIgnore
 	String apiKey;
 	@JsonIgnore
@@ -363,6 +363,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 		this.roles = roles;
 	}
 
+	@Override
 	public int getId() {
 		return id;
 	}
@@ -384,6 +385,21 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 			roles.remove(r);
 		}
 	}
+
+	public void removeBankingAccount(BankingAccount account) {
+		List<BankingAccount> accountsToRemove = new ArrayList<>();
+		for (BankingAccount ac : bankingAccounts) {
+			if (ac.getId() == account.getId()) {
+				accountsToRemove.add(ac);
+				break;
+			}
+		}
+
+		for (BankingAccount accountToRemove : accountsToRemove) {
+			bankingAccounts.remove(accountToRemove);
+		}
+	}
+
 
 	private SearchResult generateResult(String excerpt) {
 		SearchResult result = new SearchResult();
@@ -435,8 +451,8 @@ public class User extends PActor implements PAuthorizedObject, PSearchable {
 			return results;
 		}
 
-		for (SkillRecord record : this.skills) {
-			Skill skill = record.getSkill();
+		for (SkillRecord skillRecord : this.skills) {
+			Skill skill = skillRecord.getSkill();
 			if ((skill.getName().indexOf(phrase) != 0) || (skill.getDescription().indexOf(phrase) != 0)) {
 				result = generateResult(this.getUsername() + " - " + skill.getName() + " - " + skill.getDescription());
 				results.add(result);

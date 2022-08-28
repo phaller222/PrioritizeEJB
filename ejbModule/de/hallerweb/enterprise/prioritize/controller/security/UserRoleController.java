@@ -29,6 +29,7 @@ import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+import de.hallerweb.enterprise.prioritize.model.security.payment.BankingAccount;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
@@ -264,7 +265,7 @@ public class UserRoleController {
                 em.persist(adr);
                 userToCreate.setAddress(adr);
 
-                ActionBoard actionBoard = actionBoardController.createActionBoard(userToCreate.getName(), userToCreate.getName() + "'s board",
+                actionBoardController.createActionBoard(userToCreate.getName(), userToCreate.getName() + "'s board",
                         userToCreate);
 
                 for (Role role : roles) {
@@ -439,6 +440,14 @@ public class UserRoleController {
                     em.remove(c);
                 }
             }
+
+            Set<BankingAccount> accounts = u.getBankingAccounts();
+            for (BankingAccount account : accounts) {
+                u.removeBankingAccount(account);
+                em.remove(account);
+            }
+
+
             em.flush();
             em.remove(u);
             em.flush();
@@ -480,10 +489,10 @@ public class UserRoleController {
         }
     }
 
-    public void removeSkillFromUser(SkillRecord record, User user, User sessionUser) {
+    public void removeSkillFromUser(SkillRecord skillRecord1, User user, User sessionUser) {
         User u = em.find(User.class, user.getId());
         if (authController.canUpdate(u, sessionUser)) {
-            SkillRecord skillRecord = em.find(SkillRecord.class, record.getId());
+            SkillRecord skillRecord = em.find(SkillRecord.class, skillRecord1.getId());
             skillRecord.setUser(null);
             u.removeSkill(skillRecord);
             em.remove(skillRecord);

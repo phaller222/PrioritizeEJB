@@ -442,15 +442,13 @@ public class UserRoleController {
             }
 
             Set<BankingAccount> accounts = u.getBankingAccounts();
-            for (BankingAccount account : accounts) {
-                u.removeBankingAccount(account);
-                em.remove(account);
-            }
-
-
             em.flush();
             em.remove(u);
             em.flush();
+
+            for (BankingAccount account : accounts) {
+                em.remove(account);
+            }
 
             int userId = u.getId();
             String userName = u.getUsername();
@@ -489,10 +487,10 @@ public class UserRoleController {
         }
     }
 
-    public void removeSkillFromUser(SkillRecord skillRecord1, User user, User sessionUser) {
+    public void removeSkillFromUser(SkillRecord record, User user, User sessionUser) {
         User u = em.find(User.class, user.getId());
         if (authController.canUpdate(u, sessionUser)) {
-            SkillRecord skillRecord = em.find(SkillRecord.class, skillRecord1.getId());
+            SkillRecord skillRecord = em.find(SkillRecord.class, record.getId());
             skillRecord.setUser(null);
             u.removeSkill(skillRecord);
             em.remove(skillRecord);

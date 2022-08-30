@@ -64,6 +64,8 @@ public class AuthorizationController {
 	public static final SkillCategory SKILL_CATEGORY = new SkillCategory();
 	public static final Skill SKILL_TYPE = new Skill();
 
+	public static final String LITERAL_ADMIN ="admin";
+
 	public User getSystemUser() {
 		if (systemUser == null) {
 			systemUser = new User();
@@ -111,7 +113,7 @@ public class AuthorizationController {
 
 		if (targetObject instanceof User) {
 			User u = (User) targetObject;
-			if (u.getUsername() != null && u.getUsername().equals("admin") && !user.getUsername().equalsIgnoreCase("admin")) {
+			if (u.getUsername() != null && u.getUsername().equals(LITERAL_ADMIN) && !user.getUsername().equalsIgnoreCase(LITERAL_ADMIN)) {
 				return false;
 			}
 		}
@@ -167,7 +169,7 @@ public class AuthorizationController {
 		
 		if (targetObject instanceof User) {
 			User u = (User) targetObject;
-			if (u.getUsername() != null && u.getUsername().equals("admin") && !user.getUsername().equalsIgnoreCase("admin")) {
+			if (u.getUsername().equals(LITERAL_ADMIN) && !user.getUsername().equalsIgnoreCase(LITERAL_ADMIN)) {
 				return false;
 			}
 		}
@@ -181,22 +183,27 @@ public class AuthorizationController {
 		User realUser = userRoleController.findUserByUsername(user.getUsername(),getSystemUser());
 		for (Role role : realUser.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
-				if (perm.isReadPermission()
-						&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
-					// Object with this ID is explicitly readable by this role.
-					if (perm.getObjectId() == targetObject.getId()) {
-						return true;
-					}
-					boolean canRead;
-					if (targetObject.getDepartment() != null) {
-						canRead = perm.getDepartment() == null || (perm.getDepartment().getId() == targetObject.getDepartment().getId());
-					} else {
-						return true;
-					}
-					if (canRead) {
-						return true;
-					}
-				}
+				if (checkReadPermission(targetObject, absoluteObjectType, perm)) return true;
+			}
+		}
+		return false;
+	}
+
+	private  boolean checkReadPermission(PAuthorizedObject targetObject, String absoluteObjectType, PermissionRecord perm) {
+		if (perm.isReadPermission()
+				&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
+			// Object with this ID is explicitly readable by this role.
+			if (perm.getObjectId() == targetObject.getId()) {
+				return true;
+			}
+			boolean canRead;
+			if (targetObject.getDepartment() != null) {
+				canRead = perm.getDepartment() == null || (perm.getDepartment().getId() == targetObject.getDepartment().getId());
+			} else {
+				return true;
+			}
+			if (canRead) {
+				return true;
 			}
 		}
 		return false;
@@ -220,7 +227,7 @@ public class AuthorizationController {
 		
 		if (targetObject instanceof User) {
 			User u = (User) targetObject;
-			if (u.getUsername() != null && u.getUsername().equals("admin") && !user.getUsername().equalsIgnoreCase("admin")) {
+			if (u.getUsername() != null && u.getUsername().equals(LITERAL_ADMIN) && !user.getUsername().equalsIgnoreCase(LITERAL_ADMIN)) {
 				return false;
 			}
 		}
@@ -234,18 +241,23 @@ public class AuthorizationController {
 		User realUser = userRoleController.findUserByUsername(user.getUsername(),getSystemUser());
 		for (Role role : realUser.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
-				if (perm.isUpdatePermission()
-						&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
-					// Object with this ID is explicitly updatable by this role.
-					if (perm.getObjectId() == targetObject.getId()) {
-						return true;
-					}
-					boolean canUpdate = perm.getDepartment() == null || targetObject.getDepartment() == null
-							|| (perm.getDepartment().getId() == targetObject.getDepartment().getId());
-					if (canUpdate) {
-						return true;
-					}
-				}
+				if (checkUpdatePermission(targetObject, absoluteObjectType, perm)) return true;
+			}
+		}
+		return false;
+	}
+
+	private  boolean checkUpdatePermission(PAuthorizedObject targetObject, String absoluteObjectType, PermissionRecord perm) {
+		if (perm.isUpdatePermission()
+				&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
+			// Object with this ID is explicitly updatable by this role.
+			if (perm.getObjectId() == targetObject.getId()) {
+				return true;
+			}
+			boolean canUpdate = perm.getDepartment() == null || targetObject.getDepartment() == null
+					|| (perm.getDepartment().getId() == targetObject.getDepartment().getId());
+			if (canUpdate) {
+				return true;
 			}
 		}
 		return false;
@@ -269,7 +281,7 @@ public class AuthorizationController {
 		
 		if (targetObject instanceof User) {
 			User u = (User) targetObject;
-			if (u.getUsername() != null && u.getUsername().equals("admin") && !user.getUsername().equalsIgnoreCase("admin")) {
+			if (u.getUsername() != null && u.getUsername().equals(LITERAL_ADMIN) && !user.getUsername().equalsIgnoreCase(LITERAL_ADMIN)) {
 				return false;
 			}
 		}
@@ -283,18 +295,23 @@ public class AuthorizationController {
 		User realUser = userRoleController.findUserByUsername(user.getUsername(),getSystemUser());
 		for (Role role : realUser.getRoles()) {
 			for (PermissionRecord perm : role.getPermissions()) {
-				if (perm.isDeletePermission()
-						&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
-					// Object with this ID is explicitly deletable by this role.
-					if (perm.getObjectId() == targetObject.getId()) {
-						return true;
-					}
-					boolean canDelete = perm.getDepartment() == null || targetObject.getDepartment() == null ||
-							 (perm.getDepartment().getId() == targetObject.getDepartment().getId());
-					if (canDelete) {
-						return true;
-					}
-				}
+				if (checkDeletePermission(targetObject, absoluteObjectType, perm)) return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean checkDeletePermission(PAuthorizedObject targetObject, String absoluteObjectType, PermissionRecord perm) {
+		if (perm.isDeletePermission()
+				&& (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
+			// Object with this ID is explicitly deletable by this role.
+			if (perm.getObjectId() == targetObject.getId()) {
+				return true;
+			}
+			boolean canDelete = perm.getDepartment() == null || targetObject.getDepartment() == null ||
+					 (perm.getDepartment().getId() == targetObject.getDepartment().getId());
+			if (canDelete) {
+				return true;
 			}
 		}
 		return false;

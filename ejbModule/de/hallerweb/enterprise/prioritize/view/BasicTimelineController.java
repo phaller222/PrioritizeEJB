@@ -16,6 +16,7 @@
 package de.hallerweb.enterprise.prioritize.view;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +29,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import de.hallerweb.enterprise.prioritize.view.calendar.DateTimeUtil;
 import org.primefaces.event.timeline.TimelineModificationEvent;
 import org.primefaces.event.timeline.TimelineRangeEvent;
 import org.primefaces.model.timeline.TimelineEvent;
@@ -105,34 +107,34 @@ public class BasicTimelineController implements Serializable {
 			model = new TimelineModel();
 
 			Calendar cal = Calendar.getInstance();
-			// cal.set(2013, Calendar.MAY, 4, 0, 0, 0);
 			if (selectedDate == null) {
 				selectedDate = cal.getTime();
 			}
-			selectedTime = new TimelineEvent(TIMETRAVEL_DRAG, selectedDate,true);
+			selectedTime = new TimelineEvent(TIMETRAVEL_DRAG, DateTimeUtil.toLocalDateTime(selectedDate),true);
 			model.add(selectedTime);
 
 			// Add the current Users vacation to the Timeline
 			Set<TimeSpan> vacation = userController.getVacation(sessionController.getUser(), sessionController.getUser());
 			if (vacation != null) {
 				for (TimeSpan span : vacation) {
-					model.add(new TimelineEvent("Vacation", span.getDateFrom(), span.getDateUntil(), false, "", "vacation"));
+					model.add(new TimelineEvent("Vacation", DateTimeUtil.toLocalDateTime(span.getDateFrom()),
+							DateTimeUtil.toLocalDateTime(span.getDateUntil()), false, "", "vacation"));
 				}
 			}
 
 			// Add the current Users illness to the Timeline
 			TimeSpan illness = userController.getIllness(sessionController.getUser(), sessionController.getUser());
 			if (illness != null) {
-				model.add(new TimelineEvent("Illness", illness.getDateFrom(), illness.getDateUntil(), false, "", "illness"));
+				model.add(new TimelineEvent("Illness", DateTimeUtil.toLocalDateTime(illness.getDateFrom()),
+						DateTimeUtil.toLocalDateTime(illness.getDateUntil()),
+						false, "", "illness"));
 			}
 		}
 	}
 
 	public void displayResourcesTimeline() {
 		model = new TimelineModel();
-
-		Calendar cal = Calendar.getInstance();
-		selectedTime = new TimelineEvent("TimeMachine(Beta)", selectedDate, true);
+		selectedTime = new TimelineEvent("TimeMachine(Beta)", DateTimeUtil.toLocalDateTime(selectedDate), true);
 		model.add(selectedTime);
 
 		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
@@ -160,10 +162,12 @@ public class BasicTimelineController implements Serializable {
 			if (!resource.isAgent() && authController.canRead(resource, sessionController.getUser())) {
 				for (ResourceReservation res : resource.getReservations()) {
 					if (resource.isMqttResource() && resource.isMqttOnline()) {
-						model.add(new TimelineEvent(resource.getName(), res.getTimeSpan().getDateFrom(), res.getTimeSpan().getDateUntil(),
+						model.add(new TimelineEvent(resource.getName(), DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateFrom()),
+								DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateUntil()),
 								false, "", "resourcereservationonline"));
 					} else {
-						model.add(new TimelineEvent(resource.getName(), res.getTimeSpan().getDateFrom(), res.getTimeSpan().getDateUntil(),
+						model.add(new TimelineEvent(resource.getName(), DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateFrom()),
+								DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateUntil()),
 								false, "", "resourcereservationoffline"));
 					}
 
@@ -173,22 +177,21 @@ public class BasicTimelineController implements Serializable {
 		}
 	}
 
-	public Date getMin() {
+	public LocalDateTime getMin() {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.MONTH, -3);
-		return cal.getTime();
+		return DateTimeUtil.toLocalDateTime(cal.getTime());
 	}
 
-	public Date getMax() {
+	public LocalDateTime getMax() {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.MONTH, 3);
-		return cal.getTime();
+		return DateTimeUtil.toLocalDateTime(cal.getTime());
 	}
-
 	public void displayAgentsTimeline() {
 		model = new TimelineModel();
-		Calendar cal = Calendar.getInstance();
-		selectedTime = new TimelineEvent("TimeMachine(Beta)", selectedDate, true);
+		selectedTime = new TimelineEvent("TimeMachine(Beta)", DateTimeUtil.toLocalDateTime(selectedDate)
+				, true);
 		model.add(selectedTime);
 
 		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
@@ -212,7 +215,8 @@ public class BasicTimelineController implements Serializable {
 	private void addAgentsToTimeline(Set<Resource> resources) {
 		for (Resource resource : resources) {
 			if (resource.isAgent() && authController.canRead(resource, sessionController.getUser()) && resource.getMqttLastPing() != null) {
-				model.add(new TimelineEvent(resource.getName(), resource.getMqttLastPing(), false, "", "resourcereservation"));
+				model.add(new TimelineEvent(resource.getName(), DateTimeUtil.toLocalDateTime(resource.getMqttLastPing()),
+						false, "", "resourcereservation"));
 			}
 
 		}
@@ -220,9 +224,7 @@ public class BasicTimelineController implements Serializable {
 
 	public void displayDocumentsTimeline() {
 		model = new TimelineModel();
-
-		Calendar cal = Calendar.getInstance();
-		selectedTime = new TimelineEvent(TIMETRAVEL_DRAG, selectedDate,true);
+		selectedTime = new TimelineEvent(TIMETRAVEL_DRAG, DateTimeUtil.toLocalDateTime(selectedDate),true);
 		model.add(selectedTime);
 
 		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
@@ -248,7 +250,7 @@ public class BasicTimelineController implements Serializable {
 					model.add(new TimelineEvent(
 							"<div>" + docInfo.getCurrentDocument().getName() + "</div><img src='" + contextPath + "/images/"
 									+ iconName + ".png' style='width:26px;height:26px;'>",
-							docInfo.getCurrentDocument().getLastModified()));
+							DateTimeUtil.toLocalDateTime(docInfo.getCurrentDocument().getLastModified())));
 					}
 					documentBean.updateDocumentTree();
 				}
@@ -284,8 +286,8 @@ public class BasicTimelineController implements Serializable {
 
 
 	public void onChanged(TimelineModificationEvent event) {
-	  this.selectedDate = event.getTimelineEvent().getStartDate();
-	  selectedTime = new TimelineEvent(TIMETRAVEL_DRAG, selectedDate, true);
+	  this.selectedDate = DateTimeUtil.toDate(event.getTimelineEvent().getStartDate());
+	  selectedTime = new TimelineEvent(TIMETRAVEL_DRAG, DateTimeUtil.toLocalDateTime(selectedDate), true);
 	}
 
 	public TimelineModel getModel() {

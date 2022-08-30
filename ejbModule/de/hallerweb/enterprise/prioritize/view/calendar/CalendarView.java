@@ -16,6 +16,7 @@
 package de.hallerweb.enterprise.prioritize.view.calendar;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -90,11 +91,12 @@ public class CalendarView implements Serializable {
 	private void updateLazyModel() {
 		if (lazyEventModel == null) {
 			lazyEventModel = new LazyScheduleModel() {
+
 				@Override
-				public void loadEvents(Date start, Date end) {
-					createReservationsModel(start, end);
-					createVacationsModel(start, end);
-					createIllnessModel(start, end);
+				public void loadEvents(LocalDateTime start, LocalDateTime end) {
+					createReservationsModel(DateTimeUtil.toDate(start), DateTimeUtil.toDate(end));
+					createVacationsModel(DateTimeUtil.toDate(start), DateTimeUtil.toDate(end));
+					createIllnessModel(DateTimeUtil.toDate(start), DateTimeUtil.toDate(end));
 				}
 			};
 		}
@@ -104,8 +106,8 @@ public class CalendarView implements Serializable {
 		if (lazyEventModelVacations == null) {
 			lazyEventModelVacations = new LazyScheduleModel() {
 				@Override
-				public void loadEvents(Date start, Date end) {
-					createVacationsModel(start, end);
+				public void loadEvents(LocalDateTime start, LocalDateTime end) {
+					createVacationsModel(DateTimeUtil.toDate(start), DateTimeUtil.toDate(end));
 				}
 			};
 		}
@@ -116,8 +118,8 @@ public class CalendarView implements Serializable {
 			lazyEventModelIllness = new LazyScheduleModel() {
 
 				@Override
-				public void loadEvents(Date start, Date end) {
-					createIllnessModel(start, end);
+				public void loadEvents(LocalDateTime start, LocalDateTime end) {
+					createIllnessModel(DateTimeUtil.toDate(start), DateTimeUtil.toDate(end));
 				}
 			};
 		}
@@ -142,7 +144,8 @@ public class CalendarView implements Serializable {
 
 				if (reservationTimeSpan.intersects(requestedTimeSpan)) {
 					DefaultScheduleEvent scheduleEvent = new DefaultScheduleEvent(reservationTimeSpan.getDescription(),
-							reservationTimeSpan.getDateFrom(), reservationTimeSpan.getDateUntil(), reservationTimeSpan);
+							DateTimeUtil.toLocalDateTime(reservationTimeSpan.getDateFrom()),
+							DateTimeUtil.toLocalDateTime(reservationTimeSpan.getDateUntil()), reservationTimeSpan);
 					scheduleEvent.setStyleClass("resourcereservation");
 					lazyEventModel.addEvent(scheduleEvent);
 				}
@@ -166,12 +169,15 @@ public class CalendarView implements Serializable {
 
 	private void addUsersIllnessWithinTimeSpan(TimeSpan requestedTimeSpan, List<User> users) {
 		updateLazyModel();
+		updateLazyIllnessModel();
 		for (User user : users) {
 			if (user.getIllness() != null) {
 				TimeSpan illnessTimeSpan = user.getIllness();
 				if (illnessTimeSpan.intersects(requestedTimeSpan)) {
 					DefaultScheduleEvent scheduleEvent = new DefaultScheduleEvent(illnessTimeSpan.getDescription(),
-							illnessTimeSpan.getDateFrom(), illnessTimeSpan.getDateUntil(), illnessTimeSpan);
+							DateTimeUtil.toLocalDateTime(illnessTimeSpan.getDateFrom()),
+							DateTimeUtil.toLocalDateTime(illnessTimeSpan.getDateUntil())
+							, illnessTimeSpan);
 					scheduleEvent.setStyleClass("illness");
 					lazyEventModel.addEvent(scheduleEvent);
 					lazyEventModelIllness.addEvent(scheduleEvent);
@@ -196,11 +202,14 @@ public class CalendarView implements Serializable {
 
 	private void addUserVaccationWithinTimeSpan(TimeSpan requestedTimeSpan, List<User> users) {
 		updateLazyModel();
+		updateLazyVacationsModel();
 		for (User user : users) {
 			for (TimeSpan vacationTimespan : user.getVacation()) {
 				if (vacationTimespan.intersects(requestedTimeSpan)) {
 					DefaultScheduleEvent scheduleEvent = new DefaultScheduleEvent(vacationTimespan.getDescription(),
-							vacationTimespan.getDateFrom(), vacationTimespan.getDateUntil(), vacationTimespan);
+							DateTimeUtil.toLocalDateTime(vacationTimespan.getDateFrom()),
+							DateTimeUtil.toLocalDateTime(vacationTimespan.getDateUntil()),
+							vacationTimespan);
 					scheduleEvent.setStyleClass("vacations");
 					lazyEventModel.addEvent(scheduleEvent);
 					lazyEventModelVacations.addEvent(scheduleEvent);
@@ -239,7 +248,7 @@ public class CalendarView implements Serializable {
 	public void onEventMove(ScheduleEntryMoveEvent event) {
 		ScheduleEvent evt = event.getScheduleEvent();
 		TimeSpan ts = (TimeSpan) evt.getData();
-		ts.setDateFrom(evt.getStartDate());
+		ts.setDateFrom(DateTimeUtil.toDate(evt.getStartDate()));
 		ts.setDateUntil(ts.getDateUntil());
 		calendarController.mergeTimeSpan(ts);
 	}
@@ -247,7 +256,7 @@ public class CalendarView implements Serializable {
 	public void onEventResize(ScheduleEntryResizeEvent event) {
 		ScheduleEvent evt = event.getScheduleEvent();
 		TimeSpan ts = (TimeSpan) evt.getData();
-		ts.setDateFrom(evt.getStartDate());
+		ts.setDateFrom(DateTimeUtil.toDate(evt.getStartDate()));
 		ts.setDateUntil(ts.getDateUntil());
 		calendarController.mergeTimeSpan(ts);
 	}

@@ -400,7 +400,7 @@ public class DocumentBean implements Serializable {
 
 			// write the inputStream to data attribute
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			InputStream in = event.getFile().getInputstream();
+			InputStream in = event.getFile().getInputStream();
 
 			tmpMimeType = event.getFile().getContentType();
 			if (tmpMimeType == null) {

@@ -28,7 +28,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.primefaces.PrimeFaces;
-import org.primefaces.context.RequestContext;
+
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.SelectableDataModel;
 

@@ -169,7 +169,7 @@ public class AuthorizationController {
 		
 		if (targetObject instanceof User) {
 			User u = (User) targetObject;
-			if (u.getUsername().equals(LITERAL_ADMIN) && !user.getUsername().equalsIgnoreCase(LITERAL_ADMIN)) {
+			if (u.getUsername() != null && u.getUsername().equals(LITERAL_ADMIN) && !user.getUsername().equalsIgnoreCase(LITERAL_ADMIN)) {
 				return false;
 			}
 		}

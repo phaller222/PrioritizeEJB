@@ -15,26 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.view;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.enterprise.context.SessionScoped;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import de.hallerweb.enterprise.prioritize.view.calendar.DateTimeUtil;
-import org.primefaces.event.timeline.TimelineModificationEvent;
-import org.primefaces.event.timeline.TimelineRangeEvent;
-import org.primefaces.model.timeline.TimelineEvent;
-import org.primefaces.model.timeline.TimelineModel;
-
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
@@ -47,317 +27,359 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
+import de.hallerweb.enterprise.prioritize.view.calendar.DateTimeUtil;
 import de.hallerweb.enterprise.prioritize.view.document.DocumentBean;
+import org.primefaces.event.timeline.TimelineModificationEvent;
+import org.primefaces.model.timeline.TimelineEvent;
+import org.primefaces.model.timeline.TimelineModel;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.enterprise.context.SessionScoped;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @Named
 @SessionScoped
 public class BasicTimelineController implements Serializable {
 
-	private TimelineModel model;
+    private TimelineModel model;
 
-	private boolean selectable = true;
-	private boolean zoomable = true;
-	private boolean moveable = true;
-	private boolean stackEvents = true;
-	private String eventStyle = "box";
-	private boolean axisOnTop;
-	private boolean showCurrentTime = true;
+    private boolean selectable = true;
+    private boolean zoomable = true;
+    private boolean moveable = true;
+    private boolean stackEvents = true;
+    private String eventStyle = "box";
+    private boolean axisOnTop;
+    private boolean showCurrentTime = true;
 
-	private boolean showNavigation = false;
+    private boolean showNavigation = false;
 
-	private TimelineEvent selectedTime;
+    private TimelineEvent selectedTime;
 
-	@EJB
-	private UserRoleController userController;
-	@EJB
-	private CompanyController companyController;
-	@Inject
-	private DocumentBean documentBean;
-	@Inject
-	private AuthorizationController authController;
+    @EJB
+    private UserRoleController userController;
+    @EJB
+    private CompanyController companyController;
+    @Inject
+    private DocumentBean documentBean;
+    @Inject
+    private AuthorizationController authController;
 
-	@Inject
-	private SessionController sessionController;
-	String contextPath;
+    @Inject
+    private SessionController sessionController;
+    String contextPath;
 
-	private Date selectedDate;
+    private Date selectedDate;
 
-	private static final String TIMETRAVEL_DRAG = "-Drag to travel in time-";
+    private static final String TIMETRAVEL_DRAG = "-Drag to travel in time-";
 
-	public Date getSelectedDate() {
-		return selectedDate;
-	}
+    public Date getSelectedDate() {
+        return selectedDate;
+    }
 
-	public void setSelectedDate(Date selectedDate) {
-		this.selectedDate = selectedDate;
-	}
+    public void setSelectedDate(Date selectedDate) {
+        this.selectedDate = selectedDate;
+    }
 
-	@PostConstruct
-	protected void initialize() {
+    @PostConstruct
+    protected void initialize() {
 
-		contextPath = FacesContext.getCurrentInstance().getExternalContext().getRequestContextPath();
-		updateTimeline();
-		Calendar calSelected = Calendar.getInstance();
-		this.selectedDate = calSelected.getTime();
-	}
+        contextPath = FacesContext.getCurrentInstance().getExternalContext().getRequestContextPath();
+        updateTimeline();
+        Calendar calSelected = Calendar.getInstance();
+        this.selectedDate = calSelected.getTime();
+    }
 
-	public void updateTimeline() {
-		
-		if (sessionController.getUser() != null) {
-			model = new TimelineModel();
+    public void updateTimeline() {
 
-			Calendar cal = Calendar.getInstance();
-			if (selectedDate == null) {
-				selectedDate = cal.getTime();
-			}
-			selectedTime = new TimelineEvent(TIMETRAVEL_DRAG, DateTimeUtil.toLocalDateTime(selectedDate),true);
-			model.add(selectedTime);
+        if (sessionController.getUser() != null) {
+            model = new TimelineModel();
 
-			// Add the current Users vacation to the Timeline
-			Set<TimeSpan> vacation = userController.getVacation(sessionController.getUser(), sessionController.getUser());
-			if (vacation != null) {
-				for (TimeSpan span : vacation) {
-					model.add(new TimelineEvent("Vacation", DateTimeUtil.toLocalDateTime(span.getDateFrom()),
-							DateTimeUtil.toLocalDateTime(span.getDateUntil()), false, "", "vacation"));
-				}
-			}
+            Calendar cal = Calendar.getInstance();
+            if (selectedDate == null) {
+                selectedDate = cal.getTime();
+            }
+            selectedTime = TimelineEvent.builder()
+                    .title(TIMETRAVEL_DRAG)
+                    .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
+                    .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
+                    .editable(true).build();
+            model.add(selectedTime);
 
-			// Add the current Users illness to the Timeline
-			TimeSpan illness = userController.getIllness(sessionController.getUser(), sessionController.getUser());
-			if (illness != null) {
-				model.add(new TimelineEvent("Illness", DateTimeUtil.toLocalDateTime(illness.getDateFrom()),
-						DateTimeUtil.toLocalDateTime(illness.getDateUntil()),
-						false, "", "illness"));
-			}
-		}
-	}
+            // Add the current Users vacation to the Timeline
+            Set<TimeSpan> vacation = userController.getVacation(sessionController.getUser(), sessionController.getUser());
+            if (vacation != null) {
+                for (TimeSpan span : vacation) {
+                    TimelineEvent ev = TimelineEvent.builder()
+                            .title("Vacation")
+                            .startDate(DateTimeUtil.toLocalDateTime(span.getDateFrom()))
+                            .endDate(DateTimeUtil.toLocalDateTime(span.getDateUntil()))
+                            .editable(false).build();
+                    model.add(ev);
+                }
+            }
 
-	public void displayResourcesTimeline() {
-		model = new TimelineModel();
-		selectedTime = new TimelineEvent("TimeMachine(Beta)", DateTimeUtil.toLocalDateTime(selectedDate), true);
-		model.add(selectedTime);
+            // Add the current Users illness to the Timeline
+            TimeSpan illness = userController.getIllness(sessionController.getUser(), sessionController.getUser());
+            if (illness != null) {
+                TimelineEvent ev = TimelineEvent.builder()
+                        .title("Illness")
+                        .startDate(DateTimeUtil.toLocalDateTime(illness.getDateFrom()))
+                        .endDate(DateTimeUtil.toLocalDateTime(illness.getDateUntil()))
+                        .editable(false).build();
+                model.add(ev);
+            }
+        }
+    }
 
-		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
-		for (Company c : companies) {
-			List<Department> departments = c.getDepartments();
-			for (Department d : departments) {
-				if (authController.canRead(d, sessionController.getUser())) {
-					Set<ResourceGroup> groups = d.getResourceGroups();
-					for (ResourceGroup g : groups) {
-						Set<Resource> resources = g.getResources();
-						addResoucesToTimeline(resources);
+    public void displayResourcesTimeline() {
+        model = new TimelineModel();
+        selectedTime = TimelineEvent.builder().title("TimeMachine(Beta)")
+                .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
+                .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
+                .editable(true).build();
+        model.add(selectedTime);
 
-					}
-				}
+        List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
+        for (Company c : companies) {
+            List<Department> departments = c.getDepartments();
+            for (Department d : departments) {
+                if (authController.canRead(d, sessionController.getUser())) {
+                    Set<ResourceGroup> groups = d.getResourceGroups();
+                    for (ResourceGroup g : groups) {
+                        Set<Resource> resources = g.getResources();
+                        addResoucesToTimeline(resources);
 
-			}
+                    }
+                }
 
-		}
+            }
 
-	}
+        }
 
-	private void addResoucesToTimeline(Set<Resource> resources) {
-		for (Resource resource : resources) {
+    }
 
-			if (!resource.isAgent() && authController.canRead(resource, sessionController.getUser())) {
-				for (ResourceReservation res : resource.getReservations()) {
-					if (resource.isMqttResource() && resource.isMqttOnline()) {
-						model.add(new TimelineEvent(resource.getName(), DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateFrom()),
-								DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateUntil()),
-								false, "", "resourcereservationonline"));
-					} else {
-						model.add(new TimelineEvent(resource.getName(), DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateFrom()),
-								DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateUntil()),
-								false, "", "resourcereservationoffline"));
-					}
+    private void addResoucesToTimeline(Set<Resource> resources) {
+        for (Resource resource : resources) {
 
-				}
-			}
+            if (!resource.isAgent() && authController.canRead(resource, sessionController.getUser())) {
+                for (ResourceReservation res : resource.getReservations()) {
+                    if (resource.isMqttResource() && resource.isMqttOnline()) {
+                        model.add(TimelineEvent.builder().title(resource.getName())
+                                .startDate(DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateFrom()))
+                                .endDate(DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateUntil()))
+                                .editable(false).styleClass("resourcereservationonline").build());
+                    } else {
+                        model.add(TimelineEvent.builder().title(resource.getName())
+                                .startDate(DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateFrom()))
+                                .endDate(DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateUntil()))
+                                .editable(false).styleClass("resourcereservationoffline").build());
+                    }
 
-		}
-	}
+                }
+            }
 
-	public LocalDateTime getMin() {
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.MONTH, -3);
-		return DateTimeUtil.toLocalDateTime(cal.getTime());
-	}
+        }
+    }
 
-	public LocalDateTime getMax() {
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.MONTH, 3);
-		return DateTimeUtil.toLocalDateTime(cal.getTime());
-	}
-	public void displayAgentsTimeline() {
-		model = new TimelineModel();
-		selectedTime = new TimelineEvent("TimeMachine(Beta)", DateTimeUtil.toLocalDateTime(selectedDate)
-				, true);
-		model.add(selectedTime);
+    public LocalDateTime getMin() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MONTH, -3);
+        return DateTimeUtil.toLocalDateTime(cal.getTime());
+    }
 
-		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
-		for (Company c : companies) {
-			List<Department> departments = c.getDepartments();
-			for (Department d : departments) {
-				if (authController.canRead(d, sessionController.getUser())) {
-					Set<ResourceGroup> groups = d.getResourceGroups();
-					for (ResourceGroup g : groups) {
-						Set<Resource> resources = g.getResources();
-						addAgentsToTimeline(resources);
-					}
-				}
+    public LocalDateTime getMax() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MONTH, 3);
+        return DateTimeUtil.toLocalDateTime(cal.getTime());
+    }
 
-			}
+    public void displayAgentsTimeline() {
+        model = new TimelineModel();
+        selectedTime = TimelineEvent.builder().title("TimeMachine(Beta)")
+                .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
+                .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
+                .editable(true).build();
+        model.add(selectedTime);
 
-		}
+        List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
+        for (Company c : companies) {
+            List<Department> departments = c.getDepartments();
+            for (Department d : departments) {
+                if (authController.canRead(d, sessionController.getUser())) {
+                    Set<ResourceGroup> groups = d.getResourceGroups();
+                    for (ResourceGroup g : groups) {
+                        Set<Resource> resources = g.getResources();
+                        addAgentsToTimeline(resources);
+                    }
+                }
 
-	}
+            }
 
-	private void addAgentsToTimeline(Set<Resource> resources) {
-		for (Resource resource : resources) {
-			if (resource.isAgent() && authController.canRead(resource, sessionController.getUser()) && resource.getMqttLastPing() != null) {
-				model.add(new TimelineEvent(resource.getName(), DateTimeUtil.toLocalDateTime(resource.getMqttLastPing()),
-						false, "", "resourcereservation"));
-			}
+        }
 
-		}
-	}
+    }
 
-	public void displayDocumentsTimeline() {
-		model = new TimelineModel();
-		selectedTime = new TimelineEvent(TIMETRAVEL_DRAG, DateTimeUtil.toLocalDateTime(selectedDate),true);
-		model.add(selectedTime);
+    private void addAgentsToTimeline(Set<Resource> resources) {
+        for (Resource resource : resources) {
+            if (resource.isAgent() && authController.canRead(resource, sessionController.getUser()) && resource.getMqttLastPing() != null) {
+                model.add(TimelineEvent.builder().title(resource.getName())
+                                .startDate(DateTimeUtil.toLocalDateTime(resource.getMqttLastPing()))
+                        .endDate(DateTimeUtil.toLocalDateTime(resource.getMqttLastPing()))
+                        .editable(false).styleClass("resourcereservation").build());
+            }
 
-		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
-		for (Company c : companies) {
-			List<Department> departments = c.getDepartments();
-			for (Department d : departments) {
-				handleDocumentsForTimeline(d);
+        }
+    }
 
-			}
+    public void displayDocumentsTimeline() {
+        model = new TimelineModel();
+        selectedTime = TimelineEvent.builder().title(TIMETRAVEL_DRAG).startDate(DateTimeUtil.toLocalDateTime(selectedDate))
+                .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
+                .editable(true).build();
+        model.add(selectedTime);
 
-		}
+        List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
+        for (Company c : companies) {
+            List<Department> departments = c.getDepartments();
+            for (Department d : departments) {
+                handleDocumentsForTimeline(d);
 
-	}
+            }
 
-	private void handleDocumentsForTimeline(Department d) {
-		Set<DocumentGroup> groups = d.getDocumentGroups();
-		for (DocumentGroup g : groups) {
-			Set<DocumentInfo> documents = g.getDocuments();
-			for (DocumentInfo docInfo : documents) {
-				if (authController.canRead(docInfo, sessionController.getUser())) {
-					if(docInfo.getCurrentDocument().getLastModified().before(selectedDate)) {
-					String iconName = lookupMimeIcon(docInfo.getCurrentDocument().getMimeType());
-					model.add(new TimelineEvent(
-							"<div>" + docInfo.getCurrentDocument().getName() + "</div><img src='" + contextPath + "/images/"
-									+ iconName + ".png' style='width:26px;height:26px;'>",
-							DateTimeUtil.toLocalDateTime(docInfo.getCurrentDocument().getLastModified())));
-					}
-					documentBean.updateDocumentTree();
-				}
-			}
+        }
 
-		}
-	}
+    }
 
-	public String lookupMimeIcon(String mimeType) {
-		switch (mimeType) {
-		case "application/msword":
-		case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-			return "icon_word";
-		case "application/vnd.ms-excel":
-		case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-			return "icon_excel";
-		case " application/vnd.ms-powerpoint":
-		case " application/vnd.openxmlformats-officedocument.presentationml.presentation":
-			return "icon_powerpoint";
-		case "image/jpg":
-		case "image/jpeg":
-			return "icon_jpg";
-		case "image/png":
-			return "icon_png";
-		case "image/gif":
-			return "icon_gif";
-		case "application/pdf":
-			return "icon_pdf";
-		default:
-			return "documentsbig";
-		}
-	}
+    private void handleDocumentsForTimeline(Department d) {
+        Set<DocumentGroup> groups = d.getDocumentGroups();
+        for (DocumentGroup g : groups) {
+            Set<DocumentInfo> documents = g.getDocuments();
+            for (DocumentInfo docInfo : documents) {
+                if (authController.canRead(docInfo, sessionController.getUser())) {
+                    if (docInfo.getCurrentDocument().getLastModified().before(selectedDate)) {
+                        String iconName = lookupMimeIcon(docInfo.getCurrentDocument().getMimeType());
+                        model.add(TimelineEvent.builder().title("<div>" + docInfo.getCurrentDocument().getName() + "</div><img src='" + contextPath + "/images/"
+                                        + iconName + ".png' style='width:26px;height:26px;'>")
+                                        .startDate(DateTimeUtil.toLocalDateTime(docInfo.getCurrentDocument().getLastModified()))
+                                .endDate(DateTimeUtil.toLocalDateTime(docInfo.getCurrentDocument().getLastModified()))
+                                .build());
+                    }
+                    documentBean.updateDocumentTree();
+                }
+            }
+
+        }
+    }
+
+    public String lookupMimeIcon(String mimeType) {
+        switch (mimeType) {
+            case "application/msword":
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                return "icon_word";
+            case "application/vnd.ms-excel":
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                return "icon_excel";
+            case " application/vnd.ms-powerpoint":
+            case " application/vnd.openxmlformats-officedocument.presentationml.presentation":
+                return "icon_powerpoint";
+            case "image/jpg":
+            case "image/jpeg":
+                return "icon_jpg";
+            case "image/png":
+                return "icon_png";
+            case "image/gif":
+                return "icon_gif";
+            case "application/pdf":
+                return "icon_pdf";
+            default:
+                return "documentsbig";
+        }
+    }
 
 
-	public void onChanged(TimelineModificationEvent event) {
-	  this.selectedDate = DateTimeUtil.toDate(event.getTimelineEvent().getStartDate());
-	  selectedTime = new TimelineEvent(TIMETRAVEL_DRAG, DateTimeUtil.toLocalDateTime(selectedDate), true);
-	}
+    public void onChanged(TimelineModificationEvent event) {
+        this.selectedDate = DateTimeUtil.toDate(event.getTimelineEvent().getStartDate());
+        selectedTime = TimelineEvent.builder().title(TIMETRAVEL_DRAG)
+                .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
+                .endDate(DateTimeUtil.toLocalDateTime(selectedDate)).editable(true).build();
+    }
 
-	public TimelineModel getModel() {
-		return model;
-	}
+    public TimelineModel getModel() {
+        return model;
+    }
 
-	public boolean isSelectable() {
-		return selectable;
-	}
+    public boolean isSelectable() {
+        return selectable;
+    }
 
-	public void setSelectable(boolean selectable) {
-		this.selectable = selectable;
-	}
+    public void setSelectable(boolean selectable) {
+        this.selectable = selectable;
+    }
 
-	public boolean isZoomable() {
-		return zoomable;
-	}
+    public boolean isZoomable() {
+        return zoomable;
+    }
 
-	public void setZoomable(boolean zoomable) {
-		this.zoomable = zoomable;
-	}
+    public void setZoomable(boolean zoomable) {
+        this.zoomable = zoomable;
+    }
 
-	public boolean isMoveable() {
-		return moveable;
-	}
+    public boolean isMoveable() {
+        return moveable;
+    }
 
-	public void setMoveable(boolean moveable) {
-		this.moveable = moveable;
-	}
+    public void setMoveable(boolean moveable) {
+        this.moveable = moveable;
+    }
 
-	public boolean isStackEvents() {
-		return stackEvents;
-	}
+    public boolean isStackEvents() {
+        return stackEvents;
+    }
 
-	public void setStackEvents(boolean stackEvents) {
-		this.stackEvents = stackEvents;
-	}
+    public void setStackEvents(boolean stackEvents) {
+        this.stackEvents = stackEvents;
+    }
 
-	public String getEventStyle() {
-		return eventStyle;
-	}
+    public String getEventStyle() {
+        return eventStyle;
+    }
 
-	public void setEventStyle(String eventStyle) {
-		this.eventStyle = eventStyle;
-	}
+    public void setEventStyle(String eventStyle) {
+        this.eventStyle = eventStyle;
+    }
 
-	public boolean isAxisOnTop() {
-		return axisOnTop;
-	}
+    public boolean isAxisOnTop() {
+        return axisOnTop;
+    }
 
-	public void setAxisOnTop(boolean axisOnTop) {
-		this.axisOnTop = axisOnTop;
-	}
+    public void setAxisOnTop(boolean axisOnTop) {
+        this.axisOnTop = axisOnTop;
+    }
 
-	public boolean isShowCurrentTime() {
-		return showCurrentTime;
-	}
+    public boolean isShowCurrentTime() {
+        return showCurrentTime;
+    }
 
-	public void setShowCurrentTime(boolean showCurrentTime) {
-		this.showCurrentTime = showCurrentTime;
-	}
+    public void setShowCurrentTime(boolean showCurrentTime) {
+        this.showCurrentTime = showCurrentTime;
+    }
 
-	public boolean isShowNavigation() {
-		return showNavigation;
-	}
+    public boolean isShowNavigation() {
+        return showNavigation;
+    }
 
-	public void setShowNavigation(boolean showNavigation) {
-		this.showNavigation = showNavigation;
-	}
-	
-	
-	
+    public void setShowNavigation(boolean showNavigation) {
+        this.showNavigation = showNavigation;
+    }
+
+
 }

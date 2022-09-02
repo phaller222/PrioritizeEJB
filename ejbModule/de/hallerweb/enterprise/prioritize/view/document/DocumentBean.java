@@ -35,6 +35,7 @@ import org.primefaces.event.NodeExpandEvent;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.TreeNode;
+import org.primefaces.util.SerializableSupplier;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -377,7 +378,9 @@ public class DocumentBean implements Serializable {
 
 		ByteArrayInputStream in = new ByteArrayInputStream(currentDocument.getData(), 0, currentDocument.getData().length);
 
-		setDownload(new DefaultStreamedContent(in, currentDocument.getMimeType(), currentDocument.getName()));
+		setDownload(new DefaultStreamedContent().builder().
+				contentType(currentDocument.getMimeType())
+				.name(currentDocument.getName()).stream((SerializableSupplier<InputStream>) in).build());
 	}
 
 	/**
@@ -388,10 +391,10 @@ public class DocumentBean implements Serializable {
 	 */
 	public void prepDownloadHistory(int id) {
 		Document docToDownload = controller.getDocument(id);
-
 		ByteArrayInputStream in = new ByteArrayInputStream(docToDownload.getData(), 0, docToDownload.getData().length);
-
-		setDownload(new DefaultStreamedContent(in, docToDownload.getMimeType(), docToDownload.getName()));
+		setDownload(new DefaultStreamedContent().builder().
+				contentType(docToDownload.getMimeType())
+				.name(docToDownload.getName()).stream((SerializableSupplier<InputStream>) in).build());
 	}
 
 	public void handleFileUpload(FileUploadEvent event) {

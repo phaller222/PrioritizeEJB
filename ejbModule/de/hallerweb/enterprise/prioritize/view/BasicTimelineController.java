@@ -192,13 +192,13 @@ public class BasicTimelineController implements Serializable {
 
     public LocalDateTime getMin() {
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, -3);
+        cal.add(Calendar.MONTH, -12);
         return DateTimeUtil.toLocalDateTime(cal.getTime());
     }
 
     public LocalDateTime getMax() {
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, 3);
+        cal.add(Calendar.MONTH, 12);
         return DateTimeUtil.toLocalDateTime(cal.getTime());
     }
 

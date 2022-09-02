@@ -230,7 +230,7 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 	}
 
 	@Override
-	public Object getRowKey(Object arg0) {
+	public String getRowKey(Object arg0) {
 		return String.valueOf(((Task) arg0).getId());
 	}
 

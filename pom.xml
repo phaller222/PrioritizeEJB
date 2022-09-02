@@ -47,18 +47,13 @@
 			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
 			<version>1.2.5</version>
 		</dependency>
-		<dependency>
-			<groupId>org.primefaces.extensions</groupId>
-			<artifactId>primefaces-extensions</artifactId>
-			<version>6.0.0</version>
-		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.primefaces/primefaces -->
 
 		<dependency>
 			<groupId>org.primefaces</groupId>
 			<artifactId>primefaces</artifactId>
-			<version>11.0.0</version>
+			<version>8.0</version>
 		</dependency>
 
 

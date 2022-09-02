@@ -2,14 +2,9 @@
 
 ![Prioritize logo](http://www.prioritize-iot.de/logo.png)
 
-![code qualitiy](https://www.code-inspector.com/project/7651/score/svg) 
-
-![code grade](https://www.code-inspector.com/project/7651/status/svg) 
 
 **NEW: REST API docs now available (First version):**
 [Prioritize REST apiDocs](http://www.prioritize-iot.de/apiDoc) - Prioritize REST apiDocs
-
-**Binaries can be found here: http://www.prioritize-iot.de/download**
 
 **IMPORTANT: This project consists of two projects:**
 
@@ -167,9 +162,7 @@ The last project, **Prioritize**, just uses the other two projects and generates
 
 ### Files for deployment
 
-The only file which is needed for deplyment is the .ear-file built by the main project "**Prioritize**":
 
-"Prioritize-0.0.1-SNAPSHOT.ear" for version 0.0.1 at the writing of theese lines. Just take the file from the target folder and deploy it on a suitable application server. You should then be able to star and use prioritize.
 
 ### Configurtation
 At the moment there is one custom configuration file called **"config.ini**" located here:

@@ -52,16 +52,12 @@
 			<artifactId>primefaces-extensions</artifactId>
 			<version>6.0.0</version>
 		</dependency>
-	<!--	<dependency>
-			<groupId>org.primefaces</groupId>
-			<artifactId>primefaces</artifactId>
-			<version>6.2</version>
-		</dependency>-->
+
 		<!-- https://mvnrepository.com/artifact/org.primefaces/primefaces -->
 		<dependency>
 			<groupId>org.primefaces</groupId>
 			<artifactId>primefaces</artifactId>
-			<version>10.0.0</version>
+			<version>11.0.0</version>
 		</dependency>
 
 

@@ -40,6 +40,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -137,6 +138,12 @@ public class BasicTimelineController implements Serializable {
                         .editable(false).build();
                 model.add(ev);
             }
+
+            // Set zoomlevel
+            model.add(TimelineEvent.<String>builder().data("START").startDate(LocalDate.of(2022, 1, 1)).build());
+            model.add(TimelineEvent.<String>builder().data("ENDE").startDate(LocalDate.of(2022, 12, 31)).build());
+
+
         }
     }
 

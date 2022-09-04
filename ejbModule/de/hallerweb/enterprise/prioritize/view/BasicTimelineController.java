@@ -51,7 +51,7 @@ import java.util.Set;
 @SessionScoped
 public class BasicTimelineController implements Serializable {
 
-    private TimelineModel model;
+    private TimelineModel<Object,Object> model;
 
     private boolean selectable = true;
     private boolean zoomable = true;
@@ -63,7 +63,7 @@ public class BasicTimelineController implements Serializable {
 
     private boolean showNavigation = false;
 
-    private TimelineEvent selectedTime;
+    private TimelineEvent<Object> selectedTime;
 
     @EJB
     private UserRoleController userController;
@@ -102,7 +102,7 @@ public class BasicTimelineController implements Serializable {
     public void updateTimeline() {
 
         if (sessionController.getUser() != null) {
-            model = new TimelineModel();
+            model = new TimelineModel<>();
 
             Calendar cal = Calendar.getInstance();
             if (selectedDate == null) {
@@ -119,7 +119,7 @@ public class BasicTimelineController implements Serializable {
             Set<TimeSpan> vacation = userController.getVacation(sessionController.getUser(), sessionController.getUser());
             if (vacation != null) {
                 for (TimeSpan span : vacation) {
-                    TimelineEvent ev = TimelineEvent.builder()
+                    TimelineEvent<Object> ev = TimelineEvent.builder()
                             .title("Vacation")
                             .startDate(DateTimeUtil.toLocalDateTime(span.getDateFrom()))
                             .endDate(DateTimeUtil.toLocalDateTime(span.getDateUntil()))
@@ -131,7 +131,7 @@ public class BasicTimelineController implements Serializable {
             // Add the current Users illness to the Timeline
             TimeSpan illness = userController.getIllness(sessionController.getUser(), sessionController.getUser());
             if (illness != null) {
-                TimelineEvent ev = TimelineEvent.builder()
+                TimelineEvent<Object> ev = TimelineEvent.builder()
                         .title("Illness")
                         .startDate(DateTimeUtil.toLocalDateTime(illness.getDateFrom()))
                         .endDate(DateTimeUtil.toLocalDateTime(illness.getDateUntil()))
@@ -140,15 +140,15 @@ public class BasicTimelineController implements Serializable {
             }
 
             // Set zoomlevel
-            model.add(TimelineEvent.<String>builder().data("START").startDate(LocalDate.of(2022, 1, 1)).build());
-            model.add(TimelineEvent.<String>builder().data("ENDE").startDate(LocalDate.of(2022, 12, 31)).build());
+            model.add(TimelineEvent.builder().data("START").startDate(LocalDate.of(2022, 1, 1)).build());
+            model.add(TimelineEvent.builder().data("ENDE").startDate(LocalDate.of(2022, 12, 31)).build());
 
 
         }
     }
 
     public void displayResourcesTimeline() {
-        model = new TimelineModel();
+        model = new TimelineModel<>();
         selectedTime = TimelineEvent.builder().title("TimeMachine(Beta)")
                 .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
                 .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
@@ -210,7 +210,7 @@ public class BasicTimelineController implements Serializable {
     }
 
     public void displayAgentsTimeline() {
-        model = new TimelineModel();
+        model = new TimelineModel<>();
         selectedTime = TimelineEvent.builder().title("TimeMachine(Beta)")
                 .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
                 .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
@@ -248,7 +248,7 @@ public class BasicTimelineController implements Serializable {
     }
 
     public void displayDocumentsTimeline() {
-        model = new TimelineModel();
+        model = new TimelineModel<>();
         selectedTime = TimelineEvent.builder().title(TIMETRAVEL_DRAG).startDate(DateTimeUtil.toLocalDateTime(selectedDate))
                 .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
                 .editable(true).build();
@@ -313,14 +313,14 @@ public class BasicTimelineController implements Serializable {
     }
 
 
-    public void onChanged(TimelineModificationEvent event) {
+    public void onChanged(TimelineModificationEvent<Object> event) {
         this.selectedDate = DateTimeUtil.toDate(event.getTimelineEvent().getStartDate());
         selectedTime = TimelineEvent.builder().title(TIMETRAVEL_DRAG)
                 .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
                 .endDate(DateTimeUtil.toLocalDateTime(selectedDate)).editable(true).build();
     }
 
-    public TimelineModel getModel() {
+    public TimelineModel<Object,Object> getModel() {
         return model;
     }
 

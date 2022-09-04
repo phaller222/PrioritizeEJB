@@ -41,7 +41,6 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
-@ManagedBean
 @Named(value = "calendarView")
 @SessionScoped
 public class CalendarView implements Serializable {
@@ -54,7 +53,7 @@ public class CalendarView implements Serializable {
     private transient ScheduleModel lazyEventModel;
     private transient ScheduleModel lazyEventModelVacations;
     private transient ScheduleModel lazyEventModelIllness;
-    private transient ScheduleEvent event = new DefaultScheduleEvent();
+    private transient ScheduleEvent<Object> event = new DefaultScheduleEvent<>();
 
     transient List<Department> departments; // List of departments
     String selectedDepartmentId; // Currently selected Department
@@ -140,7 +139,7 @@ public class CalendarView implements Serializable {
                 TimeSpan reservationTimeSpan = res.getTimeSpan();
 
                 if (reservationTimeSpan.intersects(requestedTimeSpan)) {
-                    DefaultScheduleEvent scheduleEvent = DefaultScheduleEvent.builder()
+                    DefaultScheduleEvent<Object> scheduleEvent = DefaultScheduleEvent.builder()
                             .description(reservationTimeSpan.getDescription())
                             .startDate(DateTimeUtil.toLocalDateTime(reservationTimeSpan.getDateFrom()))
                             .endDate(DateTimeUtil.toLocalDateTime(reservationTimeSpan.getDateUntil()))
@@ -173,7 +172,7 @@ public class CalendarView implements Serializable {
             if (user.getIllness() != null) {
                 TimeSpan illnessTimeSpan = user.getIllness();
                 if (illnessTimeSpan.intersects(requestedTimeSpan)) {
-                    DefaultScheduleEvent scheduleEvent = DefaultScheduleEvent.builder()
+                    DefaultScheduleEvent<Object> scheduleEvent = DefaultScheduleEvent.builder()
                             .description(illnessTimeSpan.getDescription())
                             .startDate(DateTimeUtil.toLocalDateTime(illnessTimeSpan.getDateFrom()))
                             .endDate(DateTimeUtil.toLocalDateTime(illnessTimeSpan.getDateUntil()))
@@ -206,7 +205,7 @@ public class CalendarView implements Serializable {
         for (User user : users) {
             for (TimeSpan vacationTimespan : user.getVacation()) {
                 if (vacationTimespan.intersects(requestedTimeSpan)) {
-                    DefaultScheduleEvent scheduleEvent = DefaultScheduleEvent.builder()
+                    DefaultScheduleEvent<Object> scheduleEvent = DefaultScheduleEvent.builder()
                             .description(vacationTimespan.getDescription())
                             .startDate(DateTimeUtil.toLocalDateTime(vacationTimespan.getDateFrom()))
                             .endDate(DateTimeUtil.toLocalDateTime(vacationTimespan.getDateUntil()))
@@ -234,20 +233,20 @@ public class CalendarView implements Serializable {
         return lazyEventModelIllness;
     }
 
-    public ScheduleEvent getEvent() {
+    public ScheduleEvent<Object> getEvent() {
         return this.event;
     }
 
-    public void setEvent(ScheduleEvent event) {
+    public void setEvent(ScheduleEvent<Object> event) {
         this.event = event;
     }
 
-    public void onEventSelect(SelectEvent selectEvent) {
+    public void onEventSelect(SelectEvent<Object> selectEvent) {
         event = (ScheduleEvent) selectEvent.getObject();
     }
 
     public void onEventMove(ScheduleEntryMoveEvent event) {
-        ScheduleEvent evt = event.getScheduleEvent();
+        ScheduleEvent<Object> evt = event.getScheduleEvent();
         TimeSpan ts = (TimeSpan) evt.getData();
         ts.setDateFrom(DateTimeUtil.toDate(evt.getStartDate()));
         ts.setDateUntil(ts.getDateUntil());
@@ -255,7 +254,7 @@ public class CalendarView implements Serializable {
     }
 
     public void onEventResize(ScheduleEntryResizeEvent event) {
-        ScheduleEvent evt = event.getScheduleEvent();
+        ScheduleEvent<Object> evt = event.getScheduleEvent();
         TimeSpan ts = (TimeSpan) evt.getData();
         ts.setDateFrom(DateTimeUtil.toDate(evt.getStartDate()));
         ts.setDateUntil(ts.getDateUntil());

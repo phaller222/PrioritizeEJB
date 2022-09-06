@@ -29,6 +29,8 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -36,6 +38,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -75,6 +78,52 @@ public class DocumentService {
 
     @EJB
     AuthorizationController authController;
+
+    /**
+     * @return
+     * @apiParam departmentToken
+     * @apiParam group
+     * @apiParam apiKey
+     */
+    @POST
+    @Path("create/{departmentToken}/{group}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response createDocument(@PathParam(value = "departmentToken") String departmentToken,
+                                   @PathParam(value = "group") String group,
+                                   @QueryParam(value = "apiKey") String apiKey,
+                                   @FormDataParam("file") InputStream uploadedInputStream,
+                                   @FormDataParam("file") FormDataContentDisposition fileDetails,
+                                   @FormDataParam("path") String path) {
+
+        System.out.println(fileDetails.getFileName());
+        String uploadedFileLocation = "/tmp/" + fileDetails.getFileName();
+
+        // save it
+        try {
+            writeToFile(uploadedInputStream, uploadedFileLocation);
+            String output = "File uploaded to : " + uploadedFileLocation;
+        } catch (IOException ex) {
+            return createNegativeResponse("Fehler beim hochladen des Dokuments!");
+        }
+        return createPositiveResponse("OK. Datei " + fileDetails.getFileName() + " gespeichert.");
+    }
+
+    // save uploaded file to new location
+    private void writeToFile(InputStream uploadedInputStream,
+                             String uploadedFileLocation) throws IOException {
+        int read = 0;
+        byte[] bytes = new byte[1024];
+
+        FileOutputStream out = new FileOutputStream(
+                new File(uploadedFileLocation));
+        while ((read = uploadedInputStream.read(bytes)) != -1) {
+            out.write(bytes, 0, read);
+        }
+        out.flush();
+        out.close();
+    }
+
 
     /**
      * @api {get} /documents/{departmentToken}/{group}/?apiKey={apiKey} getDocuments
@@ -345,7 +394,7 @@ public class DocumentService {
             if (dept == null) {
                 throw new NotAuthorizedException(Response.serverError());
             } else {
-                DocumentInfo docInfo ;
+                DocumentInfo docInfo;
                 try {
                     docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
                 } catch (Exception ex) {

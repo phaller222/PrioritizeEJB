@@ -380,7 +380,12 @@ public class DocumentBean implements Serializable {
 
 		setDownload(new DefaultStreamedContent().builder().
 				contentType(currentDocument.getMimeType())
-				.name(currentDocument.getName()).stream((SerializableSupplier<InputStream>) in).build());
+				.name(currentDocument.getName()).stream(new SerializableSupplier<InputStream>() {
+					@Override
+					public InputStream get() {
+						return in;
+					}
+				}).build());
 	}
 
 	/**
@@ -506,6 +511,7 @@ public class DocumentBean implements Serializable {
 	// --------------------------------- Client view ---------------------------------
 
 	public TreeNode getDocumentTree() {
+		updateDocumentTree();
 		return this.documentTreeRoot;
 	}
 

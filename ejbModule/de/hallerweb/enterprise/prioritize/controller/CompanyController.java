@@ -527,7 +527,13 @@ public class CompanyController {
 	}
 
 	public Department getDefaultDepartmentInDefaultCompany() {
-		return findDepartmentById(initController.getDefaultDepartmentId());
+		Company company = findCompanyByName("Default Company");
+		for (Department d : company.getDepartments()) {
+			if (d.getName().equalsIgnoreCase("default")) {
+				return d;
+			}
+		}
+		return null;
 	}
 
 	public Department getDepartmentByToken(String token, User sessionUser) {

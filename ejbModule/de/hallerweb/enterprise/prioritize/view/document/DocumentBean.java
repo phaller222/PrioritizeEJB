@@ -399,7 +399,12 @@ public class DocumentBean implements Serializable {
 		ByteArrayInputStream in = new ByteArrayInputStream(docToDownload.getData(), 0, docToDownload.getData().length);
 		setDownload(new DefaultStreamedContent().builder().
 				contentType(docToDownload.getMimeType())
-				.name(docToDownload.getName()).stream((SerializableSupplier<InputStream>) in).build());
+				.name(docToDownload.getName()).stream(new SerializableSupplier<InputStream>() {
+					@Override
+					public InputStream get() {
+						return in;
+					}
+				}).build());
 	}
 
 	public void handleFileUpload(FileUploadEvent event) {

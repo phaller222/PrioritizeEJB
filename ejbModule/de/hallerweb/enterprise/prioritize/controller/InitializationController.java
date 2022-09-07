@@ -60,8 +60,6 @@ public class InitializationController {
 	@EJB
 	AuthorizationController authController;
 
-	private static int defaultDepartmentId;
-
 	public static final String LITERAL_ADMIN = "admin";
 
 	// Deployment configuration keys
@@ -101,10 +99,6 @@ public class InitializationController {
 	public static final String KEYCLOAK_LOGOUT_URL = "KEYCLOAK_LOGOUT_URL";
 
 	public final static Map<String, String> config = new HashMap<>();
-
-	public int getDefaultDepartmentId() {
-		return defaultDepartmentId;
-	}
 
 	@PostConstruct
 	public void initialize() {
@@ -225,8 +219,7 @@ public class InitializationController {
 				if (Boolean.parseBoolean(config.get(CREATE_DEFAULT_DEPARTMENT))) {
 					d = companyController.createDepartment(c, "default", "Auto generated default department", adr,
 							authController.getSystemUser());
-					defaultDepartmentId = d.getId();
-				}
+					}
 			}
 
 			// Admin will get all permissions on all objects!

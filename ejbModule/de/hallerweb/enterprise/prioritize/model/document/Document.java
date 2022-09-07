@@ -58,7 +58,6 @@ public class Document extends PObject implements Comparable {
 	@OneToOne
 	private User encryptedBy; // Who encrypted this document
 	@Lob
-	@JsonIgnore
 	@Basic(fetch = FetchType.LAZY)
 	private byte[] data; // the data of the document (e.G. binary MS-word data).
 

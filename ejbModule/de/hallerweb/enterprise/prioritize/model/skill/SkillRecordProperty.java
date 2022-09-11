@@ -19,7 +19,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
-import javax.persistence.Version;
 
 /**
  * JPA entity to represent a {@link SkillRecordProperty}. A SkillRecordProperty is a concrete manifestation of a SkillProperty for a User.

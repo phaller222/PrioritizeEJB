@@ -487,10 +487,10 @@ public class UserRoleController {
         }
     }
 
-    public void removeSkillFromUser(SkillRecord record, User user, User sessionUser) {
+    public void removeSkillFromUser(SkillRecord sRecord, User user, User sessionUser) {
         User u = em.find(User.class, user.getId());
         if (authController.canUpdate(u, sessionUser)) {
-            SkillRecord skillRecord = em.find(SkillRecord.class, record.getId());
+            SkillRecord skillRecord = em.find(SkillRecord.class, sRecord.getId());
             skillRecord.setUser(null);
             u.removeSkill(skillRecord);
             em.remove(skillRecord);

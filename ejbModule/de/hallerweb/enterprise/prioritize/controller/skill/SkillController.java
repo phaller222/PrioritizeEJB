@@ -30,6 +30,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -49,7 +50,12 @@ public class SkillController {
     @EJB
     AuthorizationController authController;
 
-    public static final String LITERAL_SKILLCATEGORY = "SkillCategory";
+    private static final String LITERAL_SKILLCATEGORY = "SkillCategory";
+    private static final String LITERAL_CREATED = "\" created.";
+    private static final String LITERAL_SYSTEM_USER = "SYSTEM";
+    private static final String LITERAL_SKILL = "Skill";
+    private static final String LITERAL_SKILL_2 = " Skill \"";
+    private static final String LITERAL_DELETED = "\" deleted.";
 
     /**
      * Creates a new SkillCategory with the given data
@@ -81,10 +87,10 @@ public class SkillController {
                 em.flush();
                 try {
                     logger.log(sessionController.getUser().getUsername(), LITERAL_SKILLCATEGORY, Action.CREATE, category.getId(),
-                            " " + LITERAL_SKILLCATEGORY + " " + category.getName() + "\" created.");
+                            " " + LITERAL_SKILLCATEGORY + " " + category.getName() + LITERAL_CREATED);
                 } catch (ContextNotActiveException ex) {
-                    logger.log("SYSTEM", LITERAL_SKILLCATEGORY, Action.CREATE, category.getId(),
-                            " " + LITERAL_SKILLCATEGORY + " " + category.getName() + "\" created.");
+                    logger.log(LITERAL_SYSTEM_USER, LITERAL_SKILLCATEGORY, Action.CREATE, category.getId(),
+                            " " + LITERAL_SKILLCATEGORY + " " + category.getName() + LITERAL_CREATED);
                 }
                 return category;
             }
@@ -134,10 +140,10 @@ public class SkillController {
 
             em.flush();
             try {
-                logger.log(sessionController.getUser().getUsername(), "Skill", Action.CREATE, skill.getId(),
-                        " Skill \"" + skill.getName() + "\" created.");
+                logger.log(sessionController.getUser().getUsername(), LITERAL_SKILL, Action.CREATE, skill.getId(),
+                        LITERAL_SKILL_2 + skill.getName() + LITERAL_CREATED);
             } catch (ContextNotActiveException ex) {
-                logger.log("SYSTEM", "Skill", Action.CREATE, skill.getId(), " Skill \"" + skill.getName() + "\" created.");
+                logger.log(LITERAL_SYSTEM_USER, LITERAL_SKILL, Action.CREATE, skill.getId(), LITERAL_SKILL_2 + skill.getName() + LITERAL_CREATED);
             }
             return skill;
         } else {
@@ -171,7 +177,7 @@ public class SkillController {
 
         List<SkillCategory> result = query.getResultList();
         if (result.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         } else {
             return result;
         }
@@ -184,7 +190,7 @@ public class SkillController {
         if (!result.isEmpty()) {
             return result;
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -192,13 +198,13 @@ public class SkillController {
         Query query = em.createNamedQuery("findAllSkills");
         List<Skill> result = query.getResultList();
         if (result.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         } else {
             Skill s = result.get(0);
             if (authController.canRead(s, sessionUser)) {
                 return result;
             } else {
-                return null;
+                return Collections.emptyList();
             }
         }
     }
@@ -232,10 +238,10 @@ public class SkillController {
             if (authController.canRead(s, sessionUser)) {
                 return result;
             } else {
-                return null;
+                return Collections.emptyList();
             }
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -246,7 +252,7 @@ public class SkillController {
         @SuppressWarnings("unchecked")
         List<SkillProperty> result = query.getResultList();
         if (result.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         } else {
             return result;
         }
@@ -256,7 +262,7 @@ public class SkillController {
     public List<SkillRecord> getSkillRecordsForSkill(Skill skill) {
         Query query = em.createNamedQuery("findSkillRecordsForSkill");
         query.setParameter("skillId", skill.getId());
-        return (List<SkillRecord>) query.getResultList();
+        return query.getResultList();
     }
 
     public void deleteSkill(int skillId, User sessionUser) {
@@ -266,20 +272,20 @@ public class SkillController {
             // Remove all SkillRecords for that skill from Users and delete them.
             List<SkillRecord> skillRecords = getSkillRecordsForSkill(skill);
             if (!skillRecords.isEmpty()) {
-                for (SkillRecord record : skillRecords) {
-                    if (record.getUser() != null) {
-                        record.getUser().removeSkill(record);
+                for (SkillRecord sRecord : skillRecords) {
+                    if (sRecord.getUser() != null) {
+                        sRecord.getUser().removeSkill(sRecord);
                     }
-                    em.remove(record);
+                    em.remove(sRecord);
                 }
             }
             em.remove(skill);
             em.flush();
             try {
-                logger.log(sessionController.getUser().getUsername(), "Skill", Action.DELETE, skill.getId(),
-                        " Skill \"" + skill.getName() + "\" deleted.");
+                logger.log(sessionController.getUser().getUsername(), LITERAL_SKILL, Action.DELETE, skill.getId(),
+                        LITERAL_SKILL_2 + skill.getName() + LITERAL_DELETED);
             } catch (ContextNotActiveException ex) {
-                logger.log("SYSTEM", "Skill", Action.DELETE, skill.getId(), " Skill \"" + skill.getName() + "\" deleted.");
+                logger.log(LITERAL_SYSTEM_USER, LITERAL_SKILL, Action.DELETE, skill.getId(), LITERAL_SKILL_2 + skill.getName() + LITERAL_DELETED);
             }
         }
     }
@@ -314,11 +320,11 @@ public class SkillController {
         em.flush();
 
         try {
-            logger.log(sessionController.getUser().getUsername(), "SkillCategory", Action.DELETE, category.getId(),
-                    " SkillCategory \"" + category.getName() + "\" deleted.");
+            logger.log(sessionController.getUser().getUsername(), LITERAL_SKILLCATEGORY, Action.DELETE, category.getId(),
+                    " SkillCategory \"" + category.getName() + LITERAL_DELETED);
         } catch (ContextNotActiveException ex) {
-            logger.log("SYSTEM", "SkillCategory", Action.DELETE, category.getId(),
-                    " SkillCategory \"" + category.getName() + "\" deleted.");
+            logger.log(LITERAL_SYSTEM_USER, LITERAL_SKILLCATEGORY, Action.DELETE, category.getId(),
+                    " SkillCategory \"" + category.getName() + LITERAL_DELETED);
         }
     }
 
@@ -329,11 +335,11 @@ public class SkillController {
                 if (authController.canDelete(skill, sessionUser)) {
                     // first find all instances (skillRecords) of this skill and remove them.
                     List<SkillRecord> records = getSkillRecordsForSkill(skill);
-                    for (SkillRecord record : records) {
-                        if (record.getUser() != null) {
-                            record.getUser().removeSkill(record);
+                    for (SkillRecord sRecord : records) {
+                        if (sRecord.getUser() != null) {
+                            sRecord.getUser().removeSkill(sRecord);
                         }
-                        em.remove(record);
+                        em.remove(sRecord);
                         em.flush();
                     }
 
@@ -350,7 +356,7 @@ public class SkillController {
 
         List<SkillCategory> result = query.getResultList();
         if (result.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         } else {
             return result;
         }

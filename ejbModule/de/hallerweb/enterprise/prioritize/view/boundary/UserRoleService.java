@@ -306,10 +306,6 @@ public class UserRoleService {
 		}
 	}
 
-	private Response createPositiveResponse(String responseText) {
-		return Response.status(200).entity("{\"response\" : \"" + responseText + "\"}").build();
-	}
-
 	private Response createNegativeResponse(String responseText) {
 		return Response.status(405).entity("{\"response\" : \"" + responseText + "\"}").build();
 	}

@@ -37,7 +37,7 @@ import java.util.Set;
 	@NamedQuery(name = "findTasksInProjectAssignedToUser", query =  "select pgr.task AS t FROM ProjectGoalRecord pgr " +  
 																	"WHERE "+ 
 																	":assignee = pgr.task.assignee AND pgr.project = :project") })
-public class Task extends PObject implements Comparable {
+public class Task extends PObject implements Comparable<Object> {
 
 	private int priority;
 	private String name;

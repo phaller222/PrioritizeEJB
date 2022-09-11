@@ -209,17 +209,7 @@ public class UserBean implements Serializable {
 				user.setDepartment(department);
 			}
 
-			if (selectedRolesId != null && !selectedRolesId.isEmpty()) {
-				Role role;
-				for (Object roleId : selectedRolesId) {
-					if (roleId instanceof String) {
-						role = controller.findRoleById(Integer.parseInt((String) roleId));
-					} else {
-						role = controller.findRoleById((Integer) roleId);
-					}
-					user.addRole(role);
-				}
-			}
+			addUserRole();
 
 			controller.createUser(user, department, user.getRoles(), sessionController.getUser());
 
@@ -228,6 +218,20 @@ public class UserBean implements Serializable {
 			ViewUtilities.addErrorMessage("username", "The username " + user.getUsername() + " already exists. User has not been created!");
 		}
 		return NAVIGATION_USERS;
+	}
+
+	private void addUserRole() {
+		if (selectedRolesId != null && !selectedRolesId.isEmpty()) {
+			Role role;
+			for (Object roleId : selectedRolesId) {
+				if (roleId instanceof String) {
+					role = controller.findRoleById(Integer.parseInt((String) roleId));
+				} else {
+					role = controller.findRoleById((Integer) roleId);
+				}
+				user.addRole(role);
+			}
+		}
 	}
 
 	@Named

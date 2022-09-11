@@ -15,16 +15,9 @@
  */
 package de.hallerweb.enterprise.prioritize.model.skill;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Version;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import javax.persistence.*;
 
 /**
  * JPA entity to represent a basic {@link SkillProperty}. Skills can have properties. A property can be numeric or a String.

@@ -66,7 +66,7 @@ public class SkillBean implements Serializable {
 	transient SkillCategory selectedSkillCategory;
 	transient Skill selectedSkill;
 	transient List<SkillCategory> skillCategories;
-	private DefaultTreeNode root;
+	private DefaultTreeNode<Object> root;
 	private transient Object selectedSkillItem = null;
 	private transient SkillCategory newSkillCategory = new SkillCategory();
 	private String currentTreeOrientation = "horizontal";
@@ -134,7 +134,7 @@ public class SkillBean implements Serializable {
 	 * 
 	 * @return
 	 */
-	public DefaultTreeNode getRoot() {
+	public DefaultTreeNode<Object> getRoot() {
 		Skill sk = new Skill();
 		if (authController.canRead(sk, sessionController.getUser())) {
 			return root;
@@ -167,7 +167,7 @@ public class SkillBean implements Serializable {
 	}
 
 	public void deleteSelectedSkillItem() {
-		DefaultTreeNode selectedNode = (DefaultTreeNode) this.selectedSkillItem;
+		DefaultTreeNode<Object> selectedNode = (DefaultTreeNode) this.selectedSkillItem;
 		if (!(selectedNode.getData() instanceof DefaultTreeNode)) {
 			deleteSkillItem(selectedNode.getData());
 		}
@@ -177,7 +177,7 @@ public class SkillBean implements Serializable {
 	}
 
 	public void addSubcategoryToSelectedItem() {
-		DefaultTreeNode selectedNode = (DefaultTreeNode) this.selectedSkillItem;
+		DefaultTreeNode<Object> selectedNode = (DefaultTreeNode) this.selectedSkillItem;
 		if (selectedNode.getData() instanceof SkillCategory) {
 			SkillCategory category = (SkillCategory) selectedNode.getData();
 			controller.createSkillCategory(newSkillCategory.getName(), newSkillCategory.getDescription(), category,
@@ -268,10 +268,10 @@ public class SkillBean implements Serializable {
 
 	}
 
-	private void traverseSkillCategories(DefaultTreeNode parentNode, SkillCategory currentCategory) {
+	private void traverseSkillCategories(DefaultTreeNode<Object> parentNode, SkillCategory currentCategory) {
 
 		// Create new Category node (root) and traverse direct children (Skills)
-		DefaultTreeNode newNode = new DefaultTreeNode(TYPE_CATEGORY, currentCategory, parentNode);
+		DefaultTreeNode<Object> newNode = new DefaultTreeNode<>(TYPE_CATEGORY, currentCategory, parentNode);
 
 		// check if Category has subcategories and recursively traverse through
 		// them
@@ -285,15 +285,15 @@ public class SkillBean implements Serializable {
 		traverseSkills(newNode, currentCategory);
 	}
 
-	private void traverseSkills(DefaultTreeNode parentNode, SkillCategory category) {
+	private void traverseSkills(DefaultTreeNode<Object> parentNode, SkillCategory category) {
 		List<Skill> skills = controller.getSkillsForCategory(category, authController.getSystemUser());
 		if (skills != null) {
 			for (Skill skill : skills) {
-				DefaultTreeNode skillNode = new DefaultTreeNode(TYPE_SKILL, skill, parentNode);
+				DefaultTreeNode<Object> skillNode = new DefaultTreeNode<>(TYPE_SKILL, skill, parentNode);
 				List<SkillProperty> skillProperties = controller.getSkillPropertiesForSkill(skill);
 				if (skillProperties != null) {
 					for (SkillProperty prop : skillProperties) {
-						new DefaultTreeNode(TYPE_SKILL_PROPERTY, prop, skillNode);
+						new DefaultTreeNode<Object>(TYPE_SKILL_PROPERTY, prop, skillNode);
 					}
 				}
 			}
@@ -318,7 +318,7 @@ public class SkillBean implements Serializable {
 	@Named
 	public void buildSkillTree() {
 		List<SkillCategory> categories = controller.getRootCategories();
-		root = new DefaultTreeNode(TYPE_ROOT, categories, null);
+		root = new DefaultTreeNode<>(TYPE_ROOT, categories, null);
 		root.setData("Skills");
 
 		if (categories != null) {
@@ -330,7 +330,7 @@ public class SkillBean implements Serializable {
 
 	public void assignSkillToUser(String userid) {
 
-		DefaultTreeNode node = (DefaultTreeNode) getSelectedSkillItem();
+		DefaultTreeNode<Object> node = (DefaultTreeNode) getSelectedSkillItem();
 		Skill selectedSkillInTree = (Skill) node.getData();
 		HashSet<SkillRecordProperty> propertyRecords = new HashSet<>();
 		Set<SkillProperty> skillProperties = selectedSkillInTree.getSkillProperties();
@@ -357,7 +357,7 @@ public class SkillBean implements Serializable {
 
 	public void assignSkillToResource(String resourceId) {
 
-		DefaultTreeNode node = (DefaultTreeNode) getSelectedSkillItem();
+		DefaultTreeNode<Object> node = (DefaultTreeNode) getSelectedSkillItem();
 		Skill selectedSkillInTree = (Skill) node.getData();
 		Set<SkillRecordProperty> propertyRecords = new HashSet<>();
 		Set<SkillProperty> skillProperties = selectedSkillInTree.getSkillProperties();

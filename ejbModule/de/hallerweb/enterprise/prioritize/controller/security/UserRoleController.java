@@ -24,7 +24,6 @@ import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionC
 import de.hallerweb.enterprise.prioritize.model.Address;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
-import de.hallerweb.enterprise.prioritize.model.project.ActionBoard;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.security.PermissionRecord;
 import de.hallerweb.enterprise.prioritize.model.security.Role;

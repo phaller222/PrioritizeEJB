@@ -51,6 +51,8 @@ public class ResourceReservationController  {
 	@EJB
 	InitializationController initController;
 
+	private static final String LITERAL_RESOURCE_RESERVATION = "ResourceReservation";
+
 	public boolean isResourceActiveForUser(User user, Set<ResourceReservation> reservations) {
 		Date now = new Date();
 		Date now2 = new Date(System.currentTimeMillis() + 10000);
@@ -124,7 +126,7 @@ public class ResourceReservationController  {
 		query.setParameter("resourceGroupId", resourceGroupId);
 
 		@SuppressWarnings("unchecked")
-		List<ResourceReservation> reservations = (List<ResourceReservation>) query.getResultList();
+		List<ResourceReservation> reservations = query.getResultList();
 		return reservations;
 	}
 
@@ -133,14 +135,14 @@ public class ResourceReservationController  {
 		query.setParameter("departmentId", departmentId);
 
 		@SuppressWarnings("unchecked")
-		List<ResourceReservation> reservations = (List<ResourceReservation>) query.getResultList();
+		List<ResourceReservation> reservations = (query.getResultList());
 		return reservations;
 	}
 
 	public List<ResourceReservation> getAllResourceReservations() {
 		Query query = em.createNamedQuery("findAllResourceReservations");
 		@SuppressWarnings("unchecked")
-		List<ResourceReservation> reservations = (List<ResourceReservation>) query.getResultList();
+		List<ResourceReservation> reservations =  query.getResultList();
 		return reservations;
 	}
 
@@ -188,7 +190,7 @@ public class ResourceReservationController  {
 			res.addReservation(reservation);
 			em.flush();
 
-			logger.log(user.getUsername(), "ResourceReservation", Action.CREATE, reservation.getId(),
+			logger.log(user.getUsername(), LITERAL_RESOURCE_RESERVATION, Action.CREATE, reservation.getId(),
 					" ResourceReservation created.");
 			return reservation;
 		}
@@ -216,7 +218,7 @@ public class ResourceReservationController  {
 		reservation.getResource().getReservations().remove(reservation);
 		em.remove(reservation);
 		em.flush();
-		logger.log(sessionController.getUser().getUsername(), "ResourceReservation", Action.DELETE, reservation.getId(),
+		logger.log(sessionController.getUser().getUsername(), LITERAL_RESOURCE_RESERVATION, Action.DELETE, reservation.getId(),
 				" ResourceReservation deleted.");
 
 		return reservation;
@@ -248,7 +250,7 @@ public class ResourceReservationController  {
 			for (ResourceReservation reservation : reservations) {
 				reservation.getResource().getReservations().remove(reservation);
 				em.remove(reservation);
-				logger.log("SYSTEM", "ResourceReservation", Action.DELETE, reservation.getId(),
+				logger.log("SYSTEM", LITERAL_RESOURCE_RESERVATION, Action.DELETE, reservation.getId(),
 						"ResourceReservation no longer valid, so i deleted it.");
 			}
 		}

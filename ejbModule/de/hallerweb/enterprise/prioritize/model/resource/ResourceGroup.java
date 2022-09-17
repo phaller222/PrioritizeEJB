@@ -15,25 +15,13 @@
  */
 package de.hallerweb.enterprise.prioritize.model.resource;
 
-import java.util.Set;
-import java.util.SortedSet;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OrderBy;
-import javax.persistence.Version;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
+
+import javax.persistence.*;
+import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * JPA entity to represent a {@link ResourceGroup}. A ResourceGroup groups Resources like a DocumentGroup or Directory can group documents.
@@ -49,7 +37,7 @@ import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
  * @author peter
  */
 @Entity
-@NamedQueries({ @NamedQuery(name = "findResourceGroupsForDepartment", query = "select rg FROM ResourceGroup rg WHERE rg.department.id = :deptId") })
+@NamedQuery(name = "findResourceGroupsForDepartment", query = "select rg FROM ResourceGroup rg WHERE rg.department.id = :deptId")
 public class ResourceGroup implements PAuthorizedObject {
 
 	@Id

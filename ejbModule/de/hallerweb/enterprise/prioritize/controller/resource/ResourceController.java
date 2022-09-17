@@ -362,10 +362,10 @@ public class ResourceController {
 
 	}
 
-	public void removeSkillFromResource(SkillRecord record, Resource resource, User sessionUser) {
+	public void removeSkillFromResource(SkillRecord sRecord, Resource resource, User sessionUser) {
 		Resource res = em.find(Resource.class, resource.getId());
 		if (authController.canUpdate(res, sessionUser)) {
-			SkillRecord skillRecord = em.find(SkillRecord.class, record.getId());
+			SkillRecord skillRecord = em.find(SkillRecord.class, sRecord.getId());
 			skillRecord.setResource(null);
 			res.removeSkill(skillRecord);
 			em.remove(skillRecord);

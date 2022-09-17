@@ -596,7 +596,7 @@ public class ResourceService {
 	}
 
 	private Response setResourceAttributes(Resource resource, String mqttOnline, String name, String description, String commands,
-										   String geo, String apiKey, String set) {
+										   String geo, String set, String apiKey) {
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			boolean processed = false;
@@ -658,7 +658,7 @@ public class ResourceService {
 
 		// ----------------- Raise event for value change
 		Set<NameValueEntry> valuesOld = mqttResourceController.getNameValueEntries(resource);
-		String oldValue = "";
+		String oldValue;
 		for (NameValueEntry entry : valuesOld) {
 			if (entry.getName().equals(nameValuePair[0])) {
 				oldValue = entry.getValues();

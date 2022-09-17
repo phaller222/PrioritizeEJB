@@ -15,45 +15,6 @@
  */
 package de.hallerweb.enterprise.prioritize.view.resource;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.enterprise.context.SessionScoped;
-import javax.faces.bean.ManagedBean;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-
-import org.primefaces.event.NodeCollapseEvent;
-import org.primefaces.event.NodeExpandEvent;
-import org.primefaces.event.SelectEvent;
-import org.primefaces.model.DefaultTreeNode;
-import org.primefaces.model.TreeNode;
-import org.primefaces.model.chart.Axis;
-import org.primefaces.model.chart.AxisType;
-import org.primefaces.model.chart.CategoryAxis;
-import org.primefaces.model.chart.LineChartModel;
-import org.primefaces.model.chart.LineChartSeries;
-import org.primefaces.model.map.DefaultMapModel;
-import org.primefaces.model.map.LatLng;
-import org.primefaces.model.map.MapModel;
-import org.primefaces.model.map.Marker;
-import org.primefaces.model.mindmap.DefaultMindmapNode;
-import org.primefaces.model.mindmap.MindmapNode;
-
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.resource.MQTTResourceController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
@@ -72,6 +33,32 @@ import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
+import org.primefaces.event.NodeCollapseEvent;
+import org.primefaces.event.NodeExpandEvent;
+import org.primefaces.event.SelectEvent;
+import org.primefaces.model.DefaultTreeNode;
+import org.primefaces.model.TreeNode;
+import org.primefaces.model.chart.*;
+import org.primefaces.model.map.DefaultMapModel;
+import org.primefaces.model.map.LatLng;
+import org.primefaces.model.map.MapModel;
+import org.primefaces.model.map.Marker;
+import org.primefaces.model.mindmap.DefaultMindmapNode;
+import org.primefaces.model.mindmap.MindmapNode;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.enterprise.context.SessionScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * ResourceBean - JSF Backing-Bean to store information about resources.
@@ -86,7 +73,6 @@ import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
  */
 @Named
 @SessionScoped
-@ManagedBean
 public class ResourceBean implements Serializable {
 
 	private static final long serialVersionUID = -9021544577054017322L;
@@ -133,8 +119,8 @@ public class ResourceBean implements Serializable {
 
 	String selectedItemCollectionName;								// Selected ItemCollection to add a resource to
 
-	transient TreeNode resourceTreeRoot;							// Tree for resources
-	transient TreeNode agentTreeRoot;								// Tree for agent resources
+	transient TreeNode<Object> resourceTreeRoot;							// Tree for resources
+	transient TreeNode<Object> agentTreeRoot;								// Tree for agent resources
 
 	transient Resource currentAgent;								// If in agent view the currently select agent for viewing its data
 
@@ -594,7 +580,7 @@ public class ResourceBean implements Serializable {
 			if (fValue < min) {
 				min = fValue;
 			}
-			Calendar calendar = GregorianCalendar.getInstance();
+			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(d);
 			String hourString = calendar.get(Calendar.HOUR) < 10 ? "0" + calendar.get(Calendar.HOUR) : "" + calendar.get(Calendar.HOUR);
 			String minuteString = calendar.get(Calendar.MINUTE) < 10 ? "0" + calendar.get(Calendar.MINUTE)
@@ -674,7 +660,7 @@ public class ResourceBean implements Serializable {
 		this.selectedNode = selectedNode;
 	}
 
-	public void onNodeDblselect(SelectEvent event) {
+	public void onNodeDblselect(SelectEvent<Object> event) {
 		this.selectedNode = (MindmapNode) event.getObject();
 	}
 
@@ -707,24 +693,24 @@ public class ResourceBean implements Serializable {
 
 	// --------------------------------- Client view ---------------------------------
 
-	public TreeNode getResourceTree() {
+	public TreeNode<Object> getResourceTree() {
 		return this.resourceTreeRoot;
 	}
 
-	public TreeNode getAgentTree() {
+	public TreeNode<Object> getAgentTree() {
 		return this.agentTreeRoot;
 	}
 
 	// Create Tree for resources view
-	public TreeNode createResourceTree() {
-		TreeNode root = new DefaultTreeNode("My Devices", null);
+	public TreeNode<Object> createResourceTree() {
+		TreeNode<Object> root = new DefaultTreeNode<>("My Devices", null);
 
 		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
 		for (Company company : companies) {
-			TreeNode companyTreeNode = new DefaultTreeNode(new ResourceTreeInfo(company.getName(), false, false, null, null), root);
+			TreeNode<Object> companyTreeNode = new DefaultTreeNode<>(new ResourceTreeInfo(company.getName(), false, false, null, null), root);
 			List<Department> companyDepartments = company.getDepartments();
 			for (Department d : companyDepartments) {
-				TreeNode department = new DefaultTreeNode(new ResourceTreeInfo(d.getName(), false, false, null, null), companyTreeNode);
+				TreeNode<Object> department = new DefaultTreeNode<>(new ResourceTreeInfo(d.getName(), false, false, null, null), companyTreeNode);
 				Set<ResourceGroup> groups = d.getResourceGroups();
 				for (ResourceGroup g : groups) {
 					buildGroupResourceSubtree(department, g);
@@ -734,35 +720,35 @@ public class ResourceBean implements Serializable {
 		return root;
 	}
 
-	private void buildGroupResourceSubtree(TreeNode department, ResourceGroup resourceGroup) {
+	private void buildGroupResourceSubtree(TreeNode<Object> department, ResourceGroup resourceGroup) {
 		if (authController.canRead(resourceGroup, sessionController.getUser())) {
-			TreeNode groupTreeNode;
+			TreeNode<Object> groupTreeNode;
 			if (authController.canCreate(resourceGroup, sessionController.getUser())) {
-				groupTreeNode = new DefaultTreeNode(
+				groupTreeNode = new DefaultTreeNode<>(
 						new ResourceTreeInfo(resourceGroup.getName(), false, true, String.valueOf(resourceGroup.getId()), null),
 						department);
 			} else {
-				groupTreeNode = new DefaultTreeNode(new ResourceTreeInfo(resourceGroup.getName(), false, false, null, null), department);
+				groupTreeNode = new DefaultTreeNode<>(new ResourceTreeInfo(resourceGroup.getName(), false, false, null, null), department);
 			}
 			Set<Resource> resourcesInGroup = resourceGroup.getResources();
 			for (Resource res : resourcesInGroup) {
 				if (!res.isAgent() && authController.canRead(res, sessionController.getUser())) {
-					new DefaultTreeNode(new ResourceTreeInfo(res.getName(), true, false, null, res), groupTreeNode);
+					new DefaultTreeNode<>(new ResourceTreeInfo(res.getName(), true, false, null, res), groupTreeNode);
 				}
 			}
 		}
 	}
 
 	// Create Tree for resources view
-	public TreeNode createAgentTree() {
-		TreeNode root = new DefaultTreeNode("My Agents", null);
+	public TreeNode<Object> createAgentTree() {
+		TreeNode<Object> root = new DefaultTreeNode<>("My Agents", null);
 
 		List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
 		for (Company c : companies) {
-			TreeNode company = new DefaultTreeNode(new ResourceTreeInfo(c.getName(), false, false, null, null), root);
+			TreeNode<Object> company = new DefaultTreeNode<>(new ResourceTreeInfo(c.getName(), false, false, null, null), root);
 			List<Department> companyDepartments = c.getDepartments();
 			for (Department d : companyDepartments) {
-				TreeNode department = new DefaultTreeNode(new ResourceTreeInfo(d.getName(), false, false, null, null), company);
+				TreeNode<Object> department = new DefaultTreeNode<>(new ResourceTreeInfo(d.getName(), false, false, null, null), company);
 				Set<ResourceGroup> groups = d.getResourceGroups();
 				for (ResourceGroup g : groups) {
 					buildGroupAgentSubtree(department, g);
@@ -773,20 +759,20 @@ public class ResourceBean implements Serializable {
 		return root;
 	}
 
-	private void buildGroupAgentSubtree(TreeNode department, ResourceGroup resourceGroup) {
+	private void buildGroupAgentSubtree(TreeNode<Object> department, ResourceGroup resourceGroup) {
 		if (authController.canRead(resourceGroup, sessionController.getUser())) {
-			TreeNode groupTreeNode;
+			TreeNode<Object> groupTreeNode;
 			if (authController.canCreate(resourceGroup, sessionController.getUser())) {
-				groupTreeNode = new DefaultTreeNode(
+				groupTreeNode = new DefaultTreeNode<>(
 						new ResourceTreeInfo(resourceGroup.getName(), false, true, String.valueOf(resourceGroup.getId()), null),
 						department);
 			} else {
-				groupTreeNode = new DefaultTreeNode(new ResourceTreeInfo(resourceGroup.getName(), false, false, null, null), department);
+				groupTreeNode = new DefaultTreeNode<>(new ResourceTreeInfo(resourceGroup.getName(), false, false, null, null), department);
 			}
 			Set<Resource> groupResources = resourceGroup.getResources();
 			for (Resource res : groupResources) {
 				if (res.isAgent() && authController.canRead(res, sessionController.getUser())) {
-					new DefaultTreeNode(new ResourceTreeInfo(res.getName(), true, false, null, res), groupTreeNode);
+					new DefaultTreeNode<Object>(new ResourceTreeInfo(res.getName(), true, false, null, res), groupTreeNode);
 				}
 			}
 

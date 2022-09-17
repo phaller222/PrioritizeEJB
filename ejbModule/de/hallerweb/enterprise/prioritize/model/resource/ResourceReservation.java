@@ -15,20 +15,12 @@
  */
 package de.hallerweb.enterprise.prioritize.model.resource;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
-import javax.persistence.Version;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import de.hallerweb.enterprise.prioritize.model.calendar.ITimeSpan;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+
+import javax.persistence.*;
 
 /**
  * JPA entity to represent a {@link ResourceReservation}. Users can reserve Resources for a given timeframe. This entity holds information
@@ -44,12 +36,11 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
  * @author peter
  */
 @Entity
-@NamedQueries({
-		@NamedQuery(name = "findPastResoureReservations", query = "select rr FROM ResourceReservation rr WHERE rr.timespan.dateUntil < :now"),
-		@NamedQuery(name = "findAllResourceReservations", query = "select rr FROM ResourceReservation rr"),
-		@NamedQuery(name = "findResourceReservationsForResourceGroup", query = "select rr FROM ResourceReservation rr WHERE rr.resource.resourceGroup.id = :resourceGroupId"),
-		@NamedQuery(name = "findResourceReservationsForDepartment", query = "select rr FROM ResourceReservation rr WHERE rr.resource.department.id = :departmentId"),
-		@NamedQuery(name = "findResourceReservationsForUser", query = "select rr FROM ResourceReservation rr WHERE rr.reservedBy.id = :userId") })
+@NamedQuery(name = "findPastResoureReservations", query = "select rr FROM ResourceReservation rr WHERE rr.timespan.dateUntil < :now")
+@NamedQuery(name = "findAllResourceReservations", query = "select rr FROM ResourceReservation rr")
+@NamedQuery(name = "findResourceReservationsForResourceGroup", query = "select rr FROM ResourceReservation rr WHERE rr.resource.resourceGroup.id = :resourceGroupId")
+@NamedQuery(name = "findResourceReservationsForDepartment", query = "select rr FROM ResourceReservation rr WHERE rr.resource.department.id = :departmentId")
+@NamedQuery(name = "findResourceReservationsForUser", query = "select rr FROM ResourceReservation rr WHERE rr.reservedBy.id = :userId")
 public class ResourceReservation implements ITimeSpan {
 
 	@Id

@@ -43,16 +43,16 @@ import java.util.*;
  * 
  */
 
-@NamedQueries({ @NamedQuery(name = "findResourcesByResourceGroup", query = "select r FROM Resource r WHERE r.resourceGroup.id = :dgid"),
-		@NamedQuery(name = "findResourcesByResourceGroupAndName", query = "select r FROM Resource r WHERE r.resourceGroup.id = :dgid AND r.name = :name"),
-		@NamedQuery(name = "findResourceGroupById", query = "select rg FROM ResourceGroup rg WHERE rg.id = :resourceGroupId"),
-		@NamedQuery(name = "findResourceGroupByNameAndDepartment", query = "select rg FROM ResourceGroup rg WHERE rg.name = :name AND rg.department.id = :deptId"),
-		@NamedQuery(name = "findResourceById", query = "select r FROM Resource r WHERE r.id = :resId"),
-		@NamedQuery(name = "findResourceByUUId", query = "select r FROM Resource r WHERE r.mqttUUID = :uuid"),
-		@NamedQuery(name = "findResourceBySendTopic", query = "select r FROM Resource r WHERE r.mqttDataToSend = :sendTopic"),
-		@NamedQuery(name = "findAllMqttResourceUuids", query = "select r.mqttUUID FROM Resource r WHERE r.mqttUUID IS NOT NULL"),
-		@NamedQuery(name = "findAllOnlineMqttResources", query = "select r FROM Resource r WHERE r.mqttUUID IS NOT NULL AND r.mqttOnline = TRUE"),
-		@NamedQuery(name = "findAllResources", query = "select r FROM Resource r") })
+@NamedQuery(name = "findResourcesByResourceGroup", query = "select r FROM Resource r WHERE r.resourceGroup.id = :dgid")
+		@NamedQuery(name = "findResourcesByResourceGroupAndName", query = "select r FROM Resource r WHERE r.resourceGroup.id = :dgid AND r.name = :name")
+		@NamedQuery(name = "findResourceGroupById", query = "select rg FROM ResourceGroup rg WHERE rg.id = :resourceGroupId")
+		@NamedQuery(name = "findResourceGroupByNameAndDepartment", query = "select rg FROM ResourceGroup rg WHERE rg.name = :name AND rg.department.id = :deptId")
+		@NamedQuery(name = "findResourceById", query = "select r FROM Resource r WHERE r.id = :resId")
+		@NamedQuery(name = "findResourceByUUId", query = "select r FROM Resource r WHERE r.mqttUUID = :uuid")
+		@NamedQuery(name = "findResourceBySendTopic", query = "select r FROM Resource r WHERE r.mqttDataToSend = :sendTopic")
+		@NamedQuery(name = "findAllMqttResourceUuids", query = "select r.mqttUUID FROM Resource r WHERE r.mqttUUID IS NOT NULL")
+		@NamedQuery(name = "findAllOnlineMqttResources", query = "select r FROM Resource r WHERE r.mqttUUID IS NOT NULL AND r.mqttOnline = TRUE")
+		@NamedQuery(name = "findAllResources", query = "select r FROM Resource r")
 @Entity
 public class Resource extends PActor implements PAuthorizedObject, PSearchable, Comparable<Object> {
 
@@ -64,14 +64,14 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 	public static final String PROPERTY_MQTTONLINE = "mqttOnline";
 
 	private String name; // Name of the resource.
-	private String description; // Human readable description of the resource.
+	private String description; // Human-readable description of the resource.
 	private boolean isStationary; // Is the resource bound to a specific location?
 	private boolean isRemote; // Can the resource be accessed remotely (e.G. IP Address?)
 	private String ip; // IP Adress of the resource (if isRemote)
 	private boolean isBusy; // Is the resource busy at the moment?
 	private int maxSlots = 1; // How many slots are available for this resource (usually 1 in case of a unique resource)
-	private String latitude; // latitude of geo location for IoT devices
-	private String longitude; // longitude of geo location for IoT devices
+	private String latitude; // latitude of geolocation for IoT devices
+	private String longitude; // longitude of geolocation for IoT devices
 	private boolean isMqttResource; // is this resource a MQTT resource?
 	private String mqttUUID; // If MQTT Resource: UUID for the resource
 	private String mqttDataSendTopic; // If MQTT Resource: Topic the resource is sending data to
@@ -309,6 +309,7 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 		this.description = description;
 	}
 
+	@Override
 	public int getId() {
 		return id;
 	}

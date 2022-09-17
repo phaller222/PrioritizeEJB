@@ -15,6 +15,7 @@
  */
 package de.hallerweb.enterprise.prioritize.model.security;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -69,7 +70,7 @@ import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
 		@NamedQuery(name = "findUserByUsername", query = "SELECT u FROM User u WHERE u.username=?1 ORDER BY u.name"),
 		@NamedQuery(name = "findUserByApiKey", query = "select u FROM User u WHERE u.apiKey = :apiKey") })
 @JsonIgnoreProperties(value = { "vacation", "searchProperties", })
-public class User extends PActor implements PAuthorizedObject, PSearchable {
+public class User extends PActor implements PAuthorizedObject, PSearchable, Serializable {
 
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_FIRSTNAME = "firstname";

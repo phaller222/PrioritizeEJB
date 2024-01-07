@@ -19,14 +19,13 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Named;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Named;
 
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
-import de.hallerweb.enterprise.prioritize.controller.nfc.NFCUnitController;
 
 @Named
 @SessionScoped

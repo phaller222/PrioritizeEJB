@@ -17,9 +17,9 @@ package de.hallerweb.enterprise.prioritize.controller.security;
 
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 /**
  * RestAccessController.java - Authorizes REST users and assigns the session

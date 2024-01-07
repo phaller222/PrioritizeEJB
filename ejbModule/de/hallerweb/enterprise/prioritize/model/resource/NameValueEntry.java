@@ -15,10 +15,9 @@
  */
 package de.hallerweb.enterprise.prioritize.model.resource;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 
 /**
  * JPA entity to represent a {@link NameValueEntry} pair. This entity is used to represent data variables sent from MQTT IoT devices (e.g.

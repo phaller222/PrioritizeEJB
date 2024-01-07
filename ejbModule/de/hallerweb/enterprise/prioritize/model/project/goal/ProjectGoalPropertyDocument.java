@@ -15,9 +15,9 @@
  */
 package de.hallerweb.enterprise.prioritize.model.project.goal;
 
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 

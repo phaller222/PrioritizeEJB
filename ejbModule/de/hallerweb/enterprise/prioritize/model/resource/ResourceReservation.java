@@ -20,7 +20,7 @@ import de.hallerweb.enterprise.prioritize.model.calendar.ITimeSpan;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * JPA entity to represent a {@link ResourceReservation}. Users can reserve Resources for a given timeframe. This entity holds information

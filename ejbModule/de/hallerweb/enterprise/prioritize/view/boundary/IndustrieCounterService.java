@@ -16,17 +16,16 @@
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import de.hallerweb.enterprise.prioritize.controller.nfc.counter.IndustrieCounterController;
-import de.hallerweb.enterprise.prioritize.controller.nfc.counter.IndustrieCounterController.CounterType;
 import de.hallerweb.enterprise.prioritize.controller.security.RestAccessController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.model.nfc.counter.IndustrieCounter;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
-import javax.ejb.EJB;
-import javax.enterprise.context.RequestScoped;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @RequestScoped
 @Path("v1/counters")

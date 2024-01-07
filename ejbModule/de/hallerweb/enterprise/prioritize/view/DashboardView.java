@@ -17,12 +17,12 @@ package de.hallerweb.enterprise.prioritize.view;
 
 import java.io.Serializable;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.SessionScoped;
-import javax.faces.application.FacesMessage;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.faces.application.FacesMessage;
 
-import javax.faces.context.FacesContext;
+import jakarta.faces.context.FacesContext;
 
+import jakarta.annotation.PostConstruct;
 import org.primefaces.event.CloseEvent;
 import org.primefaces.event.DashboardReorderEvent;
 import org.primefaces.event.ToggleEvent;
@@ -67,13 +67,13 @@ public class DashboardView implements Serializable {
     }
      
     public void handleClose(CloseEvent event) {
-        FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Panel Closed", "Closed panel id:'" + event.getComponent().getId() + "'");
+        FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Panel Closed", "Closed panel id:'" +  "'");
          
         addMessage(message);
     }
      
     public void handleToggle(ToggleEvent event) {
-        FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, event.getComponent().getId() + " toggled", "Status:" + event.getVisibility().name());
+        FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO,  " toggled", "Status:" + event.getVisibility().name());
          
         addMessage(message);
     }

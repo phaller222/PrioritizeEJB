@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 

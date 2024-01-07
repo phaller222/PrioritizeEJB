@@ -20,11 +20,11 @@ import de.hallerweb.enterprise.prioritize.model.project.task.Blackboard;
 import de.hallerweb.enterprise.prioritize.model.project.task.PActor;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import java.util.List;
 
 /**

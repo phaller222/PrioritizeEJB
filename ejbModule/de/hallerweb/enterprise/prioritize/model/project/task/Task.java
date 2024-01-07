@@ -23,7 +23,7 @@ import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 import java.util.Set;
 

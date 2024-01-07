@@ -15,7 +15,7 @@
  */
 package de.hallerweb.enterprise.prioritize.model.project.goal;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 

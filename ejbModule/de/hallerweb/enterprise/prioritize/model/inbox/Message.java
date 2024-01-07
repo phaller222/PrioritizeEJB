@@ -17,7 +17,7 @@ package de.hallerweb.enterprise.prioritize.model.inbox;
 
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.util.Date;
 
 /**

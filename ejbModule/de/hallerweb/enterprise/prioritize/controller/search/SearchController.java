@@ -32,9 +32,9 @@ import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.Skill;
 
-import jakarta.ejb.EJB;
-import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 

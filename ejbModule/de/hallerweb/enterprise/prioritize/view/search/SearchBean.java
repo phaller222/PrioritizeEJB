@@ -30,12 +30,12 @@ import de.hallerweb.enterprise.prioritize.view.resource.ResourceBean;
 import de.hallerweb.enterprise.prioritize.view.security.RoleBean;
 import de.hallerweb.enterprise.prioritize.view.security.UserBean;
 
-import jakarta.ejb.EJB;
-import jakarta.enterprise.context.SessionScoped;
-import jakarta.faces.context.ExternalContext;
-import jakarta.faces.context.FacesContext;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
+import javax.ejb.EJB;
+import javax.enterprise.context.SessionScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;

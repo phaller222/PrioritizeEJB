@@ -18,11 +18,11 @@ package de.hallerweb.enterprise.prioritize.controller;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.ejb.LocalBean;
-import jakarta.ejb.Singleton;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import javax.ejb.LocalBean;
+import javax.ejb.Singleton;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import de.hallerweb.enterprise.prioritize.model.security.LogEntry;
 import de.hallerweb.enterprise.prioritize.model.security.User;

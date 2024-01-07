@@ -15,8 +15,8 @@
  */
 package de.hallerweb.enterprise.prioritize.model.nfc;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
+import javax.persistence.Entity;
+import javax.persistence.OneToOne;
 
 import org.apache.commons.lang3.StringUtils;
 

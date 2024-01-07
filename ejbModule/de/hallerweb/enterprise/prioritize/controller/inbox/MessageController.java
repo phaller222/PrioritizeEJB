@@ -18,13 +18,13 @@ package de.hallerweb.enterprise.prioritize.controller.inbox;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.ejb.EJB;
-import jakarta.ejb.Stateless;
-import jakarta.enterprise.context.ContextNotActiveException;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.enterprise.context.ContextNotActiveException;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;

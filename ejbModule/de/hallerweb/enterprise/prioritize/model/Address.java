@@ -15,12 +15,13 @@
  */
 package de.hallerweb.enterprise.prioritize.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
-import jakarta.validation.constraints.Size;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Version;
+import javax.validation.constraints.Size;
 
 /**
  * Address.java - JPA class to represent an {@link Address}.

@@ -20,12 +20,12 @@ import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.project.ActionBoard;
 import de.hallerweb.enterprise.prioritize.model.project.ActionBoardEntry;
 
-import jakarta.ejb.EJB;
-import jakarta.ejb.Stateless;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 /**
  * ActionBoardController - Manages ActionBoard's, ActionBoardEntries and subscribers to ActionBoard's.

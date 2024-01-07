@@ -19,8 +19,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.enterprise.context.SessionScoped;
-import jakarta.inject.Named;
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Named;
 
 import org.primefaces.PrimeFaces;
 

@@ -3,10 +3,10 @@ package de.hallerweb.enterprise.prioritize.controller.jobs;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.ejb.EJB;
-import jakarta.ejb.LocalBean;
-import jakarta.ejb.Schedule;
-import jakarta.ejb.Singleton;
+import javax.ejb.EJB;
+import javax.ejb.LocalBean;
+import javax.ejb.Schedule;
+import javax.ejb.Singleton;
 
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.resource.MQTTResourceController;

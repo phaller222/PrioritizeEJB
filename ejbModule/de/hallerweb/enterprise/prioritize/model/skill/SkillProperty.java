@@ -17,7 +17,7 @@ package de.hallerweb.enterprise.prioritize.model.skill;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 
 /**
  * JPA entity to represent a basic {@link SkillProperty}. Skills can have properties. A property can be numeric or a String.

@@ -18,7 +18,7 @@ package de.hallerweb.enterprise.prioritize.model.project;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.util.List;
 
 /**

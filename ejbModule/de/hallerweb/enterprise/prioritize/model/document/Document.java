@@ -15,10 +15,11 @@
  */
 package de.hallerweb.enterprise.prioritize.model.document;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.util.Date;
 
 /**

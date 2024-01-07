@@ -27,7 +27,7 @@ import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.util.*;
 
 /**

@@ -22,11 +22,11 @@ import de.hallerweb.enterprise.prioritize.model.nfc.NFCUnit;
 import de.hallerweb.enterprise.prioritize.model.nfc.NFCUnit.NFCUnitType;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 
-import jakarta.ejb.EJB;
-import jakarta.ejb.Stateless;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;

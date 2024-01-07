@@ -18,15 +18,12 @@ package de.hallerweb.enterprise.prioritize.view.nfc.counter;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.ejb.EJB;
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
-import de.hallerweb.enterprise.prioritize.controller.LoggingController;
-import de.hallerweb.enterprise.prioritize.controller.nfc.NFCUnitController;
 import de.hallerweb.enterprise.prioritize.controller.nfc.counter.IndustrieCounterController;
-import de.hallerweb.enterprise.prioritize.controller.nfc.counter.IndustrieCounterController.CounterType;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.model.nfc.NFCCounter;
 import de.hallerweb.enterprise.prioritize.model.nfc.counter.IndustrieCounter;

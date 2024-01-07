@@ -15,10 +15,10 @@
  */
 package de.hallerweb.enterprise.prioritize.model.skill;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 
 /**
  * SkillGroup - A collection of SkillRecords indicating required skills

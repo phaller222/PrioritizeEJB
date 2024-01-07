@@ -20,11 +20,11 @@ import de.hallerweb.enterprise.prioritize.controller.skill.SkillController;
 import de.hallerweb.enterprise.prioritize.model.skill.*;
 import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 
-import javax.annotation.ManagedBean;
-import javax.ejb.EJB;
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.annotation.ManagedBean;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;

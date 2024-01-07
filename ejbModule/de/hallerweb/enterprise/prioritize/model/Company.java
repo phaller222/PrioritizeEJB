@@ -18,7 +18,7 @@ package de.hallerweb.enterprise.prioritize.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 
 /**

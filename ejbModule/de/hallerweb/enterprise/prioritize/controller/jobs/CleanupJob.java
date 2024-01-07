@@ -15,10 +15,10 @@
  */
 package de.hallerweb.enterprise.prioritize.controller.jobs;
 
-import javax.ejb.EJB;
-import javax.ejb.LocalBean;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
+import jakarta.ejb.EJB;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Schedule;
+import jakarta.ejb.Singleton;
 
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceReservationController;
 

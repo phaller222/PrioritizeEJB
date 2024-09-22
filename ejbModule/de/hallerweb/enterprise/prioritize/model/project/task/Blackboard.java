@@ -34,7 +34,7 @@ import de.hallerweb.enterprise.prioritize.model.project.Project;
 @SuppressWarnings("ALL")
 @Entity
 @NamedQueries({ @NamedQuery(name = "findBlackboardById", query = "select bb FROM Blackboard bb WHERE bb.id = :blackboardId"),
-				@NamedQuery(name = "findBlackboardTasks", query = "select t FROM Task t, Blackboard b WHERE t.id MEMBER OF b.tasks AND b.id = :blackboardId")})
+				@NamedQuery(name = "findBlackboardTasks", query = "select t FROM Task t, Blackboard b WHERE t MEMBER OF b.tasks AND b.id = :blackboardId")})
 public class Blackboard {
 	@Id
 	@GeneratedValue

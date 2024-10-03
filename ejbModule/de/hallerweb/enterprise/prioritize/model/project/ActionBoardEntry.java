@@ -17,87 +17,87 @@ package de.hallerweb.enterprise.prioritize.model.project;
 
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
-
 import jakarta.persistence.*;
+
 import java.util.List;
 
 /**
  * ActionBoardEntry.java - Stores inforamtion about an ActionBoardEntry and keeps
  * references to attached Documents and Resources. An Event is used as the source
  * of this ActionBoardEntry so all kinds of events can be posted.
- * @author peter
  *
+ * @author peter
  */
-@NamedQueries({ @NamedQuery(name = "findActionBoardEntryById", query = "select abe FROM ActionBoardEntry abe WHERE abe.id = :id") })
+@NamedQuery(name = "findActionBoardEntryById", query = "select abe FROM ActionBoardEntry abe WHERE abe.id = :id")
 @Entity
 public class ActionBoardEntry {
 
-	@Id
-	@GeneratedValue
-	private int id;
+    @Id
+    @GeneratedValue
+    private int id;
 
-	private String title;
+    private String title;
 
-	private String message;
+    private String message;
 
-	@OneToOne
-	private ActionBoard actionBoard;
+    @OneToOne
+    private ActionBoard actionBoard;
 
-	@OneToMany
-	private List<Document> attachedDocuments;
+    @OneToMany
+    private List<Document> attachedDocuments;
 
-	@OneToMany
-	private List<Resource> attachedResources;
+    @OneToMany
+    private List<Resource> attachedResources;
 
-	public ActionBoard getActionBoard() {
-		return actionBoard;
-	}
+    public ActionBoard getActionBoard() {
+        return actionBoard;
+    }
 
-	public void setActionBoard(ActionBoard actionBoard) {
-		this.actionBoard = actionBoard;
-	}
+    public void setActionBoard(ActionBoard actionBoard) {
+        this.actionBoard = actionBoard;
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	public String getMessage() {
-		return message;
-	}
+    public String getMessage() {
+        return message;
+    }
 
-	public void setMessage(String message) {
-		this.message = message;
-	}
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-	public List<Document> getAttachedDocuments() {
-		return attachedDocuments;
-	}
+    public List<Document> getAttachedDocuments() {
+        return attachedDocuments;
+    }
 
-	public void setAttachedDocuments(List<Document> attachedDocuments) {
-		this.attachedDocuments = attachedDocuments;
-	}
+    public void setAttachedDocuments(List<Document> attachedDocuments) {
+        this.attachedDocuments = attachedDocuments;
+    }
 
-	public void addAttachedDocument(Document doc) {
-		this.attachedDocuments.add(doc);
-	}
+    public void addAttachedDocument(Document doc) {
+        this.attachedDocuments.add(doc);
+    }
 
-	public List<Resource> getAttachedResources() {
-		return attachedResources;
-	}
+    public List<Resource> getAttachedResources() {
+        return attachedResources;
+    }
 
-	public void setAttachedResources(List<Resource> attachedResources) {
-		this.attachedResources = attachedResources;
-	}
+    public void setAttachedResources(List<Resource> attachedResources) {
+        this.attachedResources = attachedResources;
+    }
 
-	public void addAttachedResource(Resource res) {
-		this.attachedResources.add(res);
-	}
+    public void addAttachedResource(Resource res) {
+        this.attachedResources.add(res);
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 }

@@ -15,84 +15,78 @@
  */
 package de.hallerweb.enterprise.prioritize.model.project;
 
-import java.util.List;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-
 import de.hallerweb.enterprise.prioritize.model.PObject;
+import jakarta.persistence.*;
+
+import java.util.List;
 
 /**
  * ActionBoard.java - Holds ActionBoardEntry's. It is assigned either to a department, a user or a project
  * and other objects can "subscribe" themselves to receive changes.
- * @author peter
  *
+ * @author peter
  */
 @Entity
-@NamedQueries({ @NamedQuery(name = "findActionBoardById", query = "select ab FROM ActionBoard ab WHERE ab.id = :actionBoardId"),
-		@NamedQuery(name = "findActionBoardByName", query = "select ab FROM ActionBoard ab WHERE ab.name = :actionBoardName"),
-		@NamedQuery(name = "findActionBoardByOwner", query = "select ab FROM ActionBoard ab WHERE ab.owner.id = :ownerId") })
+@NamedQuery(name = "findActionBoardById", query = "select ab FROM ActionBoard ab WHERE ab.id = :actionBoardId")
+@NamedQuery(name = "findActionBoardByName", query = "select ab FROM ActionBoard ab WHERE ab.name = :actionBoardName")
+@NamedQuery(name = "findActionBoardByOwner", query = "select ab FROM ActionBoard ab WHERE ab.owner.id = :ownerId")
 public class ActionBoard extends PObject {
 
-	private String name;
-	private String description;
+    private String name;
+    private String description;
 
-	@OneToOne
-	private PObject owner;
+    @OneToOne
+    private PObject owner;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	private List<ActionBoardEntry> entries;
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<ActionBoardEntry> entries;
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public PObject getOwner() {
-		return owner;
-	}
+    public PObject getOwner() {
+        return owner;
+    }
 
-	public void setOwner(PObject owner) {
-		this.owner = owner;
-	}
+    public void setOwner(PObject owner) {
+        this.owner = owner;
+    }
 
-	public List<ActionBoardEntry> getEntries() {
-		return entries;
-	}
+    public List<ActionBoardEntry> getEntries() {
+        return entries;
+    }
 
-	public void setEntries(List<ActionBoardEntry> entries) {
-		this.entries = entries;
-	}
+    public void setEntries(List<ActionBoardEntry> entries) {
+        this.entries = entries;
+    }
 
-	public void addEntry(ActionBoardEntry entry) {
-		entries.add(entry);
-	}
+    public void addEntry(ActionBoardEntry entry) {
+        entries.add(entry);
+    }
 
-	public void removeEntry(ActionBoardEntry entry) {
-		entries.remove(entry);
-	}
+    public void removeEntry(ActionBoardEntry entry) {
+        entries.remove(entry);
+    }
 
- 	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setDescriprion(String desc) {
-		this.description = desc;
-	}
+    public void setDescriprion(String desc) {
+        this.description = desc;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	@Override
-	public int getId() {
-		return id;
-	}
+    @Override
+    public int getId() {
+        return id;
+    }
 }

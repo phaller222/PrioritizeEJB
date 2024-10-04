@@ -7,6 +7,10 @@ import java.util.Date;
 
 public class DateTimeUtil {
 
+    private DateTimeUtil() {
+        super();
+    }
+
     public static final LocalDateTime toLocalDateTime(Date d) {
         return d.toInstant()
                 .atZone(ZoneId.systemDefault())

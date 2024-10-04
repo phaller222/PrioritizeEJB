@@ -32,14 +32,14 @@ import de.hallerweb.enterprise.prioritize.model.security.Role;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.view.project.ListProjectsBean;
 import jakarta.annotation.PostConstruct;
-import org.primefaces.event.FlowEvent;
-
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.primefaces.event.FlowEvent;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -52,335 +52,339 @@ import java.util.logging.Logger;
 @SessionScoped
 public class ClassicApproach implements Serializable {
 
-	@EJB
-	UserRoleController userRoleController;
-	@EJB
-	DocumentController documentController;
-	@EJB
-	ResourceController resourceController;
-	@EJB
-	ProjectController projectController;
-	@EJB
-	TaskController taskController;
-	@EJB
-	AuthorizationController authController;
-	@Inject
-	SessionController sessionController;
-	
-	@Inject
-	ListProjectsBean listProjectsBean;
+    @EJB
+    transient UserRoleController userRoleController;
+    @EJB
+    transient DocumentController documentController;
+    @EJB
+    transient ResourceController resourceController;
+    @EJB
+    transient ProjectController projectController;
+    @EJB
+    transient TaskController taskController;
+    @EJB
+    transient AuthorizationController authController;
+    @Inject
+    SessionController sessionController;
 
-	private transient Project project;					// Holds the current project instance to be created
-	private transient List<Task> tasks;					// Holds current Tasks to be created
-	private transient List<User> members;					// A list of all Members (Users) for the project to be created.
-	private transient List<DocumentInfo> documents;		// A list of all documents relevant to the project
-	private transient  List<Resource> resources;			// A list of all documents relevant to the project
-	private transient  String managerUserName;				// The name of the User which will act as project lead.
+    @Inject
+    ListProjectsBean listProjectsBean;
 
-	private String userToAdd;					// Current username to add to the project (selected by autocomplete)
-	private String documentToAdd;				// Current DocumentInfo-Object to add to the project.
-	private String resourceToAdd;				// Current Resource-Object to add to the project.
-	private String taskNameToAdd;				// Name of the task to add
+    private transient Project project;                    // Holds the current project instance to be created
+    private transient List<Task> tasks;                    // Holds current Tasks to be created
+    private transient List<User> members;                    // A list of all Members (Users) for the project to be created.
+    private transient List<DocumentInfo> documents;        // A list of all documents relevant to the project
+    private transient List<Resource> resources;            // A list of all documents relevant to the project
+    private transient String managerUserName;                // The name of the User which will act as project lead.
 
-	private String projectName;					// Project Name
-	private String projectDescription;			// Project description
-	private Date projectDueDate;				// Project due date
+    private String userToAdd;                    // Current username to add to the project (selected by autocomplete)
+    private String documentToAdd;                // Current DocumentInfo-Object to add to the project.
+    private String resourceToAdd;                // Current Resource-Object to add to the project.
+    private String taskNameToAdd;                // Name of the task to add
 
-	public List<Resource> getResources() {
-		return resources;
-	}
+    private String projectName;                    // Project Name
+    private String projectDescription;            // Project description
+    private Date projectDueDate;                // Project due date
 
-	public void setResources(List<Resource> resources) {
-		this.resources = resources;
-	}
+    public List<Resource> getResources() {
+        return resources;
+    }
 
-	@PostConstruct
-	public void initialize() {
-		project = new Project();
-		tasks = new ArrayList<>();
-		members = new ArrayList<>();
-		documents = new ArrayList<>();
-		resources = new ArrayList<>();
-	}
+    public void setResources(List<Resource> resources) {
+        this.resources = resources;
+    }
 
-	public String getProjectName() {
-		return projectName;
-	}
+    @PostConstruct
+    public void initialize() {
+        project = new Project();
+        tasks = new ArrayList<>();
+        members = new ArrayList<>();
+        documents = new ArrayList<>();
+        resources = new ArrayList<>();
+    }
 
-	public void setProjectName(String projectName) {
-		this.projectName = projectName;
-	}
+    public String getProjectName() {
+        return projectName;
+    }
 
-	public String getProjectDescription() {
-		return projectDescription;
-	}
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
 
-	public void setProjectDescription(String projectDescription) {
-		this.projectDescription = projectDescription;
-	}
+    public String getProjectDescription() {
+        return projectDescription;
+    }
+
+    public void setProjectDescription(String projectDescription) {
+        this.projectDescription = projectDescription;
+    }
 
 
-	public Date getProjectDueDate() {
-		return projectDueDate;
-	}
+    public Date getProjectDueDate() {
+        return projectDueDate;
+    }
 
-	public void setProjectDueDate(Date projectDueDate) {
-		this.projectDueDate = projectDueDate;
-	}
+    public void setProjectDueDate(Date projectDueDate) {
+        this.projectDueDate = projectDueDate;
+    }
 
-	public String getTaskNameToAdd() {
-		return taskNameToAdd;
-	}
+    public String getTaskNameToAdd() {
+        return taskNameToAdd;
+    }
 
-	public String getTaskDescriptionToAdd() {
-		return taskDescriptionToAdd;
-	}
+    public String getTaskDescriptionToAdd() {
+        return taskDescriptionToAdd;
+    }
 
-	private String taskDescriptionToAdd;		// Descriptin off the task to add.
+    private String taskDescriptionToAdd;        // Descriptin off the task to add.
 
-	public void setTaskNameToAdd(String taskNameToAdd) {
-		this.taskNameToAdd = taskNameToAdd;
-	}
+    public void setTaskNameToAdd(String taskNameToAdd) {
+        this.taskNameToAdd = taskNameToAdd;
+    }
 
-	public void setTaskDescriptionToAdd(String taskDescriptionToAdd) {
-		this.taskDescriptionToAdd = taskDescriptionToAdd;
-	}
+    public void setTaskDescriptionToAdd(String taskDescriptionToAdd) {
+        this.taskDescriptionToAdd = taskDescriptionToAdd;
+    }
 
-	public String getResourceToAdd() {
-		return resourceToAdd;
-	}
+    public String getResourceToAdd() {
+        return resourceToAdd;
+    }
 
-	public void setResourceToAdd(String resourceToAdd) {
-		this.resourceToAdd = resourceToAdd;
-	}
+    public void setResourceToAdd(String resourceToAdd) {
+        this.resourceToAdd = resourceToAdd;
+    }
 
-	public List<DocumentInfo> getDocuments() {
-		return documents;
-	}
+    public List<DocumentInfo> getDocuments() {
+        return documents;
+    }
 
-	public void setDocuments(List<DocumentInfo> documents) {
-		this.documents = documents;
-	}
+    public void setDocuments(List<DocumentInfo> documents) {
+        this.documents = documents;
+    }
 
-	public String getDocumentToAdd() {
-		return documentToAdd;
-	}
+    public String getDocumentToAdd() {
+        return documentToAdd;
+    }
 
-	public void setDocumentToAdd(String documentToAdd) {
-		this.documentToAdd = documentToAdd;
-	}
+    public void setDocumentToAdd(String documentToAdd) {
+        this.documentToAdd = documentToAdd;
+    }
 
-	public String getManagerUserName() {
-		return managerUserName;
-	}
+    public String getManagerUserName() {
+        return managerUserName;
+    }
 
-	public void setManagerUserName(String managerName) {
-		this.managerUserName = managerName;
-	}
+    public void setManagerUserName(String managerName) {
+        this.managerUserName = managerName;
+    }
 
-	public Project getProject() {
-		return project;
-	}
+    public Project getProject() {
+        return project;
+    }
 
-	public void setProject(Project project) {
-		this.project = project;
-	}
+    public void setProject(Project project) {
+        this.project = project;
+    }
 
-	public List<Task> getTasks() {
-		return tasks;
-	}
+    public List<Task> getTasks() {
+        return tasks;
+    }
 
-	public void setTasks(List<Task> tasks) {
-		this.tasks = tasks;
-	}
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
+    }
 
-	public List<User> getMembers() {
-		return members;
-	}
+    public List<User> getMembers() {
+        return members;
+    }
 
-	public void setMembers(List<User> members) {
-		this.members = members;
-	}
+    public void setMembers(List<User> members) {
+        this.members = members;
+    }
 
-	public String getUserToAdd() {
-		return userToAdd;
-	}
+    public String getUserToAdd() {
+        return userToAdd;
+    }
 
-	public void setUserToAdd(String userToAdd) {
-		this.userToAdd = userToAdd;
-	}
+    public void setUserToAdd(String userToAdd) {
+        this.userToAdd = userToAdd;
+    }
 
-	public void save() {
+    public void save() {
 
-		// Create project object with mandatory data.
-		this.project = new Project();
-		project.setName(projectName);
-		project.setDescription(projectDescription);
-		project.setDocuments(this.documents);
-		project.setResources(this.resources);
-		User projectLead = userRoleController.findUserByUsername(managerUserName, sessionController.getUser());
-		project.setManager(projectLead);
-		members.add(projectLead);
-		project.setDueDate(this.projectDueDate);
-		project.setBeginDate(new Date());
-		project.setUsers(members);
+        // Create project object with mandatory data.
+        this.project = new Project();
+        project.setName(projectName);
+        project.setDescription(projectDescription);
+        project.setDocuments(this.documents);
+        project.setResources(this.resources);
+        User projectLead = userRoleController.findUserByUsername(managerUserName, sessionController.getUser());
+        project.setManager(projectLead);
+        members.add(projectLead);
+        project.setDueDate(this.projectDueDate);
+        project.setBeginDate(new Date());
+        project.setUsers(members);
 
-		// Create blackboard for project
-		Blackboard blackBoard = new Blackboard();
-		blackBoard.setTitle(project.getName());
-		blackBoard.setDescription(project.getDescription());
-		blackBoard.setFrozen(false);
-		blackBoard.setTasks(tasks);
+        // Create blackboard for project
+        Blackboard blackBoard = new Blackboard();
+        blackBoard.setTitle(project.getName());
+        blackBoard.setDescription(project.getDescription());
+        blackBoard.setFrozen(false);
+        blackBoard.setTasks(tasks);
 
-		// Create all subdata (ProjectGoal etc..) and persist project
-		projectController.createProject(project, blackBoard);
+        // Create all subdata (ProjectGoal etc..) and persist project
+        projectController.createProject(project, blackBoard);
 
-		clearInputData();
+        clearInputData();
 
-		listProjectsBean.loadProjects();
-		
-		ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
-		try {
-			context.redirect(context.getApplicationContextPath() + "/client/projects/projects.xhtml");
-		} catch (IOException e) {
-			Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, e.getMessage());
-		}
-	}
+        listProjectsBean.loadProjects();
 
-	private void clearInputData() {
-		this.projectDescription = "";
-		this.projectName = "";
-		this.projectDueDate = new Date();
-		this.managerUserName = "";
-		this.userToAdd = "";
-		this.documents = new ArrayList<>();
-		this.resources = new ArrayList<>();
-		this.members = new ArrayList<>();
-		this.tasks = new ArrayList<>();
-	}
+        ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+        try {
+            context.redirect(context.getApplicationContextPath() + "/client/projects/projects.xhtml");
+        } catch (IOException e) {
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, e.getMessage());
+        }
+    }
 
-	public void addUser() {
-		if (userToAdd != null && userToAdd.length() > 0) {
-			User user = userRoleController.findUserByUsername(userToAdd, authController.getSystemUser());
-			if ((user != null)) {
-				this.members.add(user);
-			}
-		}
-	}
+    private void clearInputData() {
+        this.projectDescription = "";
+        this.projectName = "";
+        this.projectDueDate = new Date();
+        this.managerUserName = "";
+        this.userToAdd = "";
+        this.documents = new ArrayList<>();
+        this.resources = new ArrayList<>();
+        this.members = new ArrayList<>();
+        this.tasks = new ArrayList<>();
+    }
 
-	public void removeUser(User user) {
-		this.members.remove(user);
-	}
+    public void addUser() {
+        if (userToAdd != null && userToAdd.length() > 0) {
+            User user = userRoleController.findUserByUsername(userToAdd, authController.getSystemUser());
+            if ((user != null)) {
+                this.members.add(user);
+            }
+        }
+    }
 
-	public void addDocument() {
-		if (documentToAdd != null) {
-			DocumentInfo docInfo = documentController.getAllDocumentInfos(authController.getSystemUser()).get(0);
-			if ((docInfo != null)) {
-				this.documents.add(docInfo);
-			}
-		}
-	}
+    public void removeUser(User user) {
+        this.members.remove(user);
+    }
 
-	public void removeResource(Resource res) {
-		this.resources.remove(res);
-	}
+    public void addDocument() {
+        if (documentToAdd != null) {
+            DocumentInfo docInfo = documentController.getAllDocumentInfos(authController.getSystemUser()).get(0);
+            if ((docInfo != null)) {
+                this.documents.add(docInfo);
+            }
+        }
+    }
 
-	public void addResource() {
-		if (resourceToAdd != null) {
-			// TODO: Make a real selection of resourrces!
-			Resource res = resourceController.getAllResources(authController.getSystemUser()).get(0);
-			if ((res != null)) {
-				this.resources.add(res);
-			}
-		}
-	}
+    public void removeResource(Resource res) {
+        this.resources.remove(res);
+    }
 
-	public void addTask() {
-		Task t = new Task();
-		t.setName(taskNameToAdd);
-		t.setDescription(taskDescriptionToAdd);
-		t.setTaskStatus(TaskStatus.CREATED);
-		t.setPriority(1);
+    public void addResource() {
+        if (resourceToAdd != null) {
+            // TODO: Make a real selection of resourrces!
+            Resource res = resourceController.getAllResources(authController.getSystemUser()).get(0);
+            if ((res != null)) {
+                this.resources.add(res);
+            }
+        }
+    }
 
-		Task managedTask = taskController.createTask(t);
-		this.tasks.add(managedTask);
+    public void addTask() {
+        Task t = new Task();
+        t.setName(taskNameToAdd);
+        t.setDescription(taskDescriptionToAdd);
+        t.setTaskStatus(TaskStatus.CREATED);
+        t.setPriority(1);
 
-	}
+        Task managedTask = taskController.createTask(t);
+        this.tasks.add(managedTask);
 
-	public void removeDocument(DocumentInfo docInfo) {
-		this.documents.remove(docInfo);
-	}
+    }
 
-	public void removeTask(Task task) {
-		this.tasks.remove(task);
-	}
+    public void removeDocument(DocumentInfo docInfo) {
+        this.documents.remove(docInfo);
+    }
 
-	public String onFlowProcess(FlowEvent event) {
-		return event.getNewStep();
-	}
+    public void removeTask(Task task) {
+        this.tasks.remove(task);
+    }
 
-	/**
-	 * AutoComplete method for Users
-	 * @param query
-	 * @return
-	 */
-	public List<String> completeUserList(String query) {
-		List<String> users = userRoleController.getAllUserNames(sessionController.getUser());
-		List<String> result = new ArrayList<>();
-		for (String username : users) {
-			if (username.startsWith(query)) {
-				result.add(username);
-			}
-		}
-		return result;
-	}
+    public String onFlowProcess(FlowEvent event) {
+        return event.getNewStep();
+    }
 
-	/**
-	 * AutoComplete method for Role
-	 * @param query
-	 * @return
-	 */
-	public List<String> completeRolesList(String query) {
-		List<Role> availableRoles = userRoleController.getAllRoles(sessionController.getUser());
-		List<String> roles = new ArrayList<>();
-		for (Role r : availableRoles) {
-			if (r.getName().startsWith(query)) {
-				roles.add(r.getName());
-			}
-		}
-		return roles;
-	}
+    /**
+     * AutoComplete method for Users
+     *
+     * @param query
+     * @return
+     */
+    public List<String> completeUserList(String query) {
+        List<String> users = userRoleController.getAllUserNames(sessionController.getUser());
+        List<String> result = new ArrayList<>();
+        for (String username : users) {
+            if (username.startsWith(query)) {
+                result.add(username);
+            }
+        }
+        return result;
+    }
 
-	/**
-	 * Autocomplete method for documents.
-	 * @param query
-	 * @return
-	 */
-	public List<String> completeDocumentList(String query) {
-		List<DocumentInfo> docInfos = documentController.getAllDocumentInfos(sessionController.getUser());
-		List<String> result = new ArrayList<>();
-		for (DocumentInfo docInfo : docInfos) {
-			if (docInfo.getCurrentDocument().getName().startsWith(query)) {
-				result.add(docInfo.getCurrentDocument().getName());
-			}
-		}
-		return result;
-	}
+    /**
+     * AutoComplete method for Role
+     *
+     * @param query
+     * @return
+     */
+    public List<String> completeRolesList(String query) {
+        List<Role> availableRoles = userRoleController.getAllRoles(sessionController.getUser());
+        List<String> roles = new ArrayList<>();
+        for (Role r : availableRoles) {
+            if (r.getName().startsWith(query)) {
+                roles.add(r.getName());
+            }
+        }
+        return roles;
+    }
 
-	/**
-	 * Autocomplete method for resources.
-	 * @param query
-	 * @return
-	 */
-	public List<String> completeResourcesList(String query) {
-		List<Resource> allResources = resourceController.getAllResources(sessionController.getUser());
-		List<String> result = new ArrayList<>();
-		for (Resource res : allResources) {
-			if (res.getName().startsWith(query)) {
-				result.add(res.getName());
-			}
-		}
-		return result;
-	}
+    /**
+     * Autocomplete method for documents.
+     *
+     * @param query
+     * @return
+     */
+    public List<String> completeDocumentList(String query) {
+        List<DocumentInfo> docInfos = documentController.getAllDocumentInfos(sessionController.getUser());
+        List<String> result = new ArrayList<>();
+        for (DocumentInfo docInfo : docInfos) {
+            if (docInfo.getCurrentDocument().getName().startsWith(query)) {
+                result.add(docInfo.getCurrentDocument().getName());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Autocomplete method for resources.
+     *
+     * @param query
+     * @return
+     */
+    public List<String> completeResourcesList(String query) {
+        List<Resource> allResources = resourceController.getAllResources(sessionController.getUser());
+        List<String> result = new ArrayList<>();
+        for (Resource res : allResources) {
+            if (res.getName().startsWith(query)) {
+                result.add(res.getName());
+            }
+        }
+        return result;
+    }
 
 }

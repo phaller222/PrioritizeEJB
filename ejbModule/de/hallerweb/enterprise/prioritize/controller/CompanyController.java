@@ -235,7 +235,7 @@ public class CompanyController {
 				dept.setToken(InitializationController.DEFAULT_DEPARTMENT_TOKEN);
 			} else {
 				UUID token = UUID.randomUUID();
-				dept.setToken(token.toString().replaceAll("-", ""));
+				dept.setToken(token.toString().replace("-", ""));
 			}
 
 			em.persist(dept);
@@ -529,7 +529,7 @@ public class CompanyController {
 	public Department getDefaultDepartmentInDefaultCompany() {
 		Company company = findCompanyByName("Default Company");
 		for (Department d : company.getDepartments()) {
-			if (d.getName().equalsIgnoreCase("default")) {
+			if (d.getName().equalsIgnoreCase(LITERAL_DEFAULT)) {
 				return d;
 			}
 		}

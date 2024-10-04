@@ -54,11 +54,11 @@ import de.hallerweb.enterprise.prioritize.model.Department;
 public class CompanyBean implements Serializable {
 
 	@EJB
-	CompanyController controller;
+	transient CompanyController controller;
 	@Inject
 	SessionController sessionController;
 	@EJB
-	AuthorizationController authController;
+	transient AuthorizationController authController;
 
 	transient Company company;				// Current company
 	transient Department department;		// current department

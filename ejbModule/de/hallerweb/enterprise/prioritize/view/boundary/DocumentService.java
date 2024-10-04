@@ -29,16 +29,19 @@ import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.search.SearchResult;
 import de.hallerweb.enterprise.prioritize.model.security.User;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.io.*;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -96,13 +99,11 @@ public class DocumentService {
                                    @FormDataParam("file") FormDataContentDisposition fileDetails,
                                    @FormDataParam("path") String path) {
 
-        System.out.println(fileDetails.getFileName());
         String uploadedFileLocation = "/tmp/" + fileDetails.getFileName();
 
         // save it
         try {
             writeToFile(uploadedInputStream, uploadedFileLocation);
-            String output = "File uploaded to : " + uploadedFileLocation;
         } catch (IOException ex) {
             return createNegativeResponse("Fehler beim hochladen des Dokuments!");
         }
@@ -115,13 +116,14 @@ public class DocumentService {
         int read = 0;
         byte[] bytes = new byte[1024];
 
-        FileOutputStream out = new FileOutputStream(
-                new File(uploadedFileLocation));
-        while ((read = uploadedInputStream.read(bytes)) != -1) {
-            out.write(bytes, 0, read);
+        try (FileOutputStream out = new FileOutputStream(
+                new File(uploadedFileLocation));) {
+            while ((read = uploadedInputStream.read(bytes)) != -1) {
+                out.write(bytes, 0, read);
+            }
+            out.flush();
         }
-        out.flush();
-        out.close();
+
     }
 
 

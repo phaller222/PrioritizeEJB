@@ -59,15 +59,15 @@ public class CalendarView implements Serializable {
     transient Department selectedDepartment = null;
 
     @EJB
-    private ResourceReservationController resourceReservationController;
+    private transient ResourceReservationController resourceReservationController;
     @EJB
-    private CompanyController companyController;
+    private transient CompanyController companyController;
     @EJB
-    private UserRoleController userRoleController;
+    private transient UserRoleController userRoleController;
     @EJB
-    private AuthorizationController authController;
+    private transient AuthorizationController authController;
     @EJB
-    private CalendarController calendarController;
+    private transient CalendarController calendarController;
 
     @Named
     public String getSelectedDepartmentId() {

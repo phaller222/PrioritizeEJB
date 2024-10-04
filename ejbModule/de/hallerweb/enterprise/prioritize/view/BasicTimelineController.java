@@ -29,17 +29,16 @@ import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.view.calendar.DateTimeUtil;
 import de.hallerweb.enterprise.prioritize.view.document.DocumentBean;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.primefaces.event.timeline.TimelineModificationEvent;
 import org.primefaces.model.timeline.TimelineEvent;
 import org.primefaces.model.timeline.TimelineModel;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.ejb.EJB;
-import jakarta.enterprise.context.SessionScoped;
-import jakarta.faces.context.FacesContext;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Calendar;
@@ -48,10 +47,10 @@ import java.util.List;
 import java.util.Set;
 
 @Named
-@SessionScoped
-public class BasicTimelineController implements Serializable {
+@RequestScoped
+public class BasicTimelineController {
 
-    private TimelineModel<Object,Object> model;
+    private TimelineModel<Object, Object> model;
 
     private boolean selectable = true;
     private boolean zoomable = true;
@@ -239,7 +238,7 @@ public class BasicTimelineController implements Serializable {
         for (Resource resource : resources) {
             if (resource.isAgent() && authController.canRead(resource, sessionController.getUser()) && resource.getMqttLastPing() != null) {
                 model.add(TimelineEvent.builder().title(resource.getName())
-                                .startDate(DateTimeUtil.toLocalDateTime(resource.getMqttLastPing()))
+                        .startDate(DateTimeUtil.toLocalDateTime(resource.getMqttLastPing()))
                         .endDate(DateTimeUtil.toLocalDateTime(resource.getMqttLastPing()))
                         .editable(false).styleClass("resourcereservation").build());
             }
@@ -276,7 +275,7 @@ public class BasicTimelineController implements Serializable {
                         String iconName = lookupMimeIcon(docInfo.getCurrentDocument().getMimeType());
                         model.add(TimelineEvent.builder().title("<div>" + docInfo.getCurrentDocument().getName() + "</div><img src='" + contextPath + "/images/"
                                         + iconName + ".png' style='width:26px;height:26px;'>")
-                                        .startDate(DateTimeUtil.toLocalDateTime(docInfo.getCurrentDocument().getLastModified()))
+                                .startDate(DateTimeUtil.toLocalDateTime(docInfo.getCurrentDocument().getLastModified()))
                                 .endDate(DateTimeUtil.toLocalDateTime(docInfo.getCurrentDocument().getLastModified()))
                                 .build());
                     }
@@ -320,7 +319,7 @@ public class BasicTimelineController implements Serializable {
                 .endDate(DateTimeUtil.toLocalDateTime(selectedDate)).editable(true).build();
     }
 
-    public TimelineModel<Object,Object> getModel() {
+    public TimelineModel<Object, Object> getModel() {
         return model;
     }
 

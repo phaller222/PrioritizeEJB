@@ -15,99 +15,90 @@
  */
 package de.hallerweb.enterprise.prioritize.model.project.task;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import de.hallerweb.enterprise.prioritize.model.project.Project;
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
-import de.hallerweb.enterprise.prioritize.model.project.Project;
-
 @SuppressWarnings("ALL")
 @Entity
-@NamedQueries({ @NamedQuery(name = "findBlackboardById", query = "select bb FROM Blackboard bb WHERE bb.id = :blackboardId"),
-				@NamedQuery(name = "findBlackboardTasks", query = "select t FROM Task t, Blackboard b WHERE t MEMBER OF b.tasks AND b.id = :blackboardId")})
+@NamedQuery(name = "findBlackboardById", query = "select bb FROM Blackboard bb WHERE bb.id = :blackboardId")
+@NamedQuery(name = "findBlackboardTasks", query = "select t FROM Task t, Blackboard b WHERE t MEMBER OF b.tasks AND b.id = :blackboardId")
 public class Blackboard {
-	@Id
-	@GeneratedValue
-	int id;
+    @Id
+    @GeneratedValue
+    int id;
 
-	private String title;
-	private String description;
-	boolean frozen;
+    private String title;
+    private String description;
+    boolean frozen;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	List<Task> tasks;
+    @OneToMany(fetch = FetchType.LAZY)
+    List<Task> tasks;
 
-	@JsonBackReference(value="projectBackRef")
-	@OneToOne
-	Project project;
+    @JsonBackReference(value = "projectBackRef")
+    @OneToOne
+    Project project;
 
-	public Project getProject() {
-		return project;
-	}
+    public Project getProject() {
+        return project;
+    }
 
-	public void setProject(Project project) {
-		this.project = project;
-	}
+    public void setProject(Project project) {
+        this.project = project;
+    }
 
-	public boolean isFrozen() {
-		return frozen;
-	}
+    public boolean isFrozen() {
+        return frozen;
+    }
 
-	public void setFrozen(boolean frozen) {
-		this.frozen = frozen;
-	}
+    public void setFrozen(boolean frozen) {
+        this.frozen = frozen;
+    }
 
-	public List<Task> getTasks() {
-		return tasks;
-	}
+    public List<Task> getTasks() {
+        return tasks;
+    }
 
-	public void setTasks(List<Task> tasks) {
-		if (this.tasks == null) {
-			this.tasks = new ArrayList<>();
-		} else {
-			this.tasks.clear();
-		}
-		this.tasks.addAll(tasks);
-	}
+    public void setTasks(List<Task> tasks) {
+        if (this.tasks == null) {
+            this.tasks = new ArrayList<>();
+        } else {
+            this.tasks.clear();
+        }
+        this.tasks.addAll(tasks);
+    }
 
-	public void addTask(Task task) {
-		if (tasks == null) {
-			tasks = new ArrayList<>();
-		}
-		this.tasks.add(task);
-	}
+    public void addTask(Task task) {
+        if (tasks == null) {
+            tasks = new ArrayList<>();
+        }
+        this.tasks.add(task);
+    }
 
-	public void removeTask(Task task) {
-		this.tasks.remove(task);
-	}
+    public void removeTask(Task task) {
+        this.tasks.remove(task);
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 }

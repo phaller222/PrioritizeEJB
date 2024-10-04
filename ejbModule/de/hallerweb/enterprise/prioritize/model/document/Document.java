@@ -17,141 +17,146 @@ package de.hallerweb.enterprise.prioritize.model.document;
 
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import de.hallerweb.enterprise.prioritize.model.security.User;
-
 import jakarta.persistence.*;
+
 import java.util.Date;
 
 /**
  * JPA entity to represent a document.
- * 
+ *
  * <p>
  * Copyright: (c) 2014
  * </p>
  * <p>
  * Peter Haller
  * </p>
- * 
+ *
  * @author peter
  */
 @Entity
-@NamedQueries({ @NamedQuery(name = "findDocumentById", query = "select d FROM Document d WHERE d.id = :docId"),
-		@NamedQuery(name = "findDocumentByTag", query = "select d FROM Document d WHERE d.tag = :docTag") })
+@NamedQuery(name = "findDocumentById", query = "select d FROM Document d WHERE d.id = :docId")
+@NamedQuery(name = "findDocumentByTag", query = "select d FROM Document d WHERE d.tag = :docTag")
 public class Document extends PObject implements Comparable {
 
-	public static final String PROPERTY_NAME = "name";
-	public static final String PROPERTY_MIMETYPE = "mimeType";
-	public static final String PROPERTY_TAG = "tag";
-	public static final String PROPERTY_ENCRYPTED = "encrypted";
-	public static final String PROPERTY_CHANGES = "changes";
+    public static final String PROPERTY_NAME = "name";
+    public static final String PROPERTY_MIMETYPE = "mimeType";
+    public static final String PROPERTY_TAG = "tag";
+    public static final String PROPERTY_ENCRYPTED = "encrypted";
+    public static final String PROPERTY_CHANGES = "changes";
 
-	private String name; // Name of the document.
-	private int version; // Version of the document
-	private String mimeType; // mimeType
-	private String tag; // Tag for this document (if it has been tagged)
-	private Date lastModified; // Date of last modification
-	private boolean encrypted; // Is the document encrpted?
-	private String changes; // Description of the last changes made.
+    private String name; // Name of the document.
+    private int version; // Version of the document
+    private String mimeType; // mimeType
+    private String tag; // Tag for this document (if it has been tagged)
+    private Date lastModified; // Date of last modification
+    private boolean encrypted; // Is the document encrpted?
+    private String changes; // Description of the last changes made.
 
-	@OneToOne
-	private User lastModifiedBy; // Who last modified this document
-	@OneToOne
-	private User encryptedBy; // Who encrypted this document
-	@Lob
-	@Basic(fetch = FetchType.LAZY)
-	private byte[] data; // the data of the document (e.G. binary MS-word data).
+    @OneToOne
+    private User lastModifiedBy; // Who last modified this document
+    @OneToOne
+    private User encryptedBy; // Who encrypted this document
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] data; // the data of the document (e.G. binary MS-word data).
 
-	public String getChanges() {
-		return changes;
-	}
+    public String getChanges() {
+        return changes;
+    }
 
-	public void setChanges(String changes) {
-		this.changes = changes;
-	}
+    public void setChanges(String changes) {
+        this.changes = changes;
+    }
 
-	public byte[] getData() {
-		return data;
-	}
+    public byte[] getData() {
+        return data;
+    }
 
-	public void setData(byte[] data) {
-		this.data = data;
-	}
+    public void setData(byte[] data) {
+        this.data = data;
+    }
 
-	public int getVersion() {
-		return version;
-	}
+    public int getVersion() {
+        return version;
+    }
 
-	public void setVersion(int version) {
-		this.version = version;
-	}
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
-	public Date getLastModified() {
-		return lastModified;
-	}
+    public Date getLastModified() {
+        return lastModified;
+    }
 
-	public void setLastModified(Date lastModified) {
-		this.lastModified = lastModified;
-	}
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
+    }
 
-	public User getLastModifiedBy() {
-		return lastModifiedBy;
-	}
+    public User getLastModifiedBy() {
+        return lastModifiedBy;
+    }
 
-	public void setLastModifiedBy(User lastModifiedBy) {
-		this.lastModifiedBy = lastModifiedBy;
-	}
+    public void setLastModifiedBy(User lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
 
-	public String getMimeType() {
-		return mimeType;
-	}
+    public String getMimeType() {
+        return mimeType;
+    }
 
-	public void setMimeType(String mimeType) {
-		this.mimeType = mimeType;
-	}
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
 
-	public boolean isEncrypted() {
-		return encrypted;
-	}
+    public boolean isEncrypted() {
+        return encrypted;
+    }
 
-	public void setEncrypted(boolean encrypted) {
-		this.encrypted = encrypted;
-	}
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
+    }
 
-	public User getEncryptedBy() {
-		return encryptedBy;
-	}
+    public User getEncryptedBy() {
+        return encryptedBy;
+    }
 
-	public void setEncryptedBy(User encryptedBy) {
-		this.encryptedBy = encryptedBy;
-	}
+    public void setEncryptedBy(User encryptedBy) {
+        this.encryptedBy = encryptedBy;
+    }
 
-	@Override
-	public int getId() {
-		return id;
-	}
+    @Override
+    public int getId() {
+        return id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getTag() {
-		return tag;
-	}
+    public String getTag() {
+        return tag;
+    }
 
-	public void setTag(String tag) {
-		this.tag = tag;
-	}
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
 
-	@Override
-	public int compareTo(Object obj) {
-		Document doc = (Document) obj;
-		return Integer.compare(version, doc.getVersion());
-	}
+    @Override
+    public int compareTo(Object obj) {
+        Document doc = (Document) obj;
+        return Integer.compare(version, doc.getVersion());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
 }

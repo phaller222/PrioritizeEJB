@@ -26,8 +26,8 @@ import de.hallerweb.enterprise.prioritize.model.search.SearchResultType;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
-
 import jakarta.persistence.*;
+
 import java.util.*;
 
 /**
@@ -420,6 +420,11 @@ public class Resource extends PActor implements PAuthorizedObject, PSearchable, 
 	public int compareTo(Object obj) {
 		Resource res = (Resource) obj;
 		return Integer.compare(id, res.getId());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
 	}
 
 	@Override

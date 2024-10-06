@@ -15,77 +15,81 @@
  */
 package de.hallerweb.enterprise.prioritize.model.search;
 
-import java.util.Set;
-
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
+
+import java.util.Set;
 
 /**
  * JPA entity to represent a {@link SearchResult}. A SearchResult holds information about the outcome of an executed search.
- * 
+ *
  * <p>
  * Copyright: (c) 2014
  * </p>
  * <p>
  * Peter Haller
  * </p>
- * 
+ *
  * @author peter
  */
 
-public class SearchResult implements Comparable {
+public class SearchResult implements Comparable<Object> {
 
-	PAuthorizedObject result;
-	String resultType;
-	String excerpt;
-	boolean providesExcerpt;
+    PAuthorizedObject result;
+    String resultType;
+    String excerpt;
+    boolean providesExcerpt;
 
-	Set<SearchResult> subresults;
+    Set<SearchResult> subresults;
 
-	public PAuthorizedObject getResult() {
-		return result;
-	}
+    public PAuthorizedObject getResult() {
+        return result;
+    }
 
-	public void setResult(PAuthorizedObject result) {
-		this.result = result;
-	}
+    public void setResult(PAuthorizedObject result) {
+        this.result = result;
+    }
 
-	public String getResultType() {
-		return resultType;
-	}
+    public String getResultType() {
+        return resultType;
+    }
 
-	public void setResultType(String resultType) {
-		this.resultType = resultType;
-	}
+    public void setResultType(String resultType) {
+        this.resultType = resultType;
+    }
 
-	public String getExcerpt() {
-		return excerpt;
-	}
+    public String getExcerpt() {
+        return excerpt;
+    }
 
-	public void setExcerpt(String excerpt) {
-		this.excerpt = excerpt;
-	}
+    public void setExcerpt(String excerpt) {
+        this.excerpt = excerpt;
+    }
 
-	public boolean isProvidesExcerpt() {
-		return providesExcerpt;
-	}
+    public boolean isProvidesExcerpt() {
+        return providesExcerpt;
+    }
 
-	public void setProvidesExcerpt(boolean providesExcerpt) {
-		this.providesExcerpt = providesExcerpt;
-	}
+    public void setProvidesExcerpt(boolean providesExcerpt) {
+        this.providesExcerpt = providesExcerpt;
+    }
 
-	public Set<SearchResult> getSubresults() {
-		return subresults;
-	}
+    public Set<SearchResult> getSubresults() {
+        return subresults;
+    }
 
-	public void setSubresults(Set<SearchResult> subresults) {
-		this.subresults = subresults;
-	}
+    public void setSubresults(Set<SearchResult> subresults) {
+        this.subresults = subresults;
+    }
 
 
-	@Override
-	public int compareTo(Object obj) {
-		SearchResult sr = (SearchResult) obj;
-		return this.getExcerpt().compareTo(sr.getExcerpt());
-	}
+    @Override
+    public int compareTo(Object obj) {
+        SearchResult sr = (SearchResult) obj;
+        return this.getExcerpt().compareTo(sr.getExcerpt());
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
 }

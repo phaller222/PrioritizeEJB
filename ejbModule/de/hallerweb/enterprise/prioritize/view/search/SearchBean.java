@@ -70,7 +70,7 @@ public class SearchBean implements Serializable {
 	@Inject
 	SessionController sessionController;
 	@EJB
-	SearchController searchController;
+	transient SearchController searchController;
 
 	private String searchPhrase;
 

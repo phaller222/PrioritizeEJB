@@ -48,25 +48,6 @@
                 <h:outputText value="#{val.counter.value}"></h:outputText>
             </p:column>
         </p:dataTable>
-
-
-        <!-- <p:panel>
-            <p:commandButton
-                action="#{industrieCounterBean.decCounter('86553c0e-f8ad-41b9-abaa-d92999d1db36')}"
-                value="Decrease counter" ajax="false"></p:commandButton>
-            <p:commandButton
-                action="#{industrieCounterBean.createCounter('86553c0e-f8ad-41b9-abaa-d92999d1db36')}"
-                value="Create counter"></p:commandButton>
-            <p:commandButton
-                action="#{industrieCounterBean.incCounter('86553c0e-f8ad-41b9-abaa-d92999d1db36')}"
-                value="Increase counter" ajax="false"></p:commandButton>
-        </p:panel>
-
-        <p:panel>
-            <h:outputText
-                value="#{industrieCounterBean.getCounterValue('86553c0e-f8ad-41b9-abaa-d92999d1db36')}" />
-        </p:panel> -->
-
             <p:poll interval="3" update="counterlist" autoStart="true" listener="#{industrieCounterBean.getCounters()}"></p:poll>
     </h:form>
 </p:panel>

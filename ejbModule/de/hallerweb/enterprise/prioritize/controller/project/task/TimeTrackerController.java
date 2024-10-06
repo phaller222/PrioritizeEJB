@@ -43,7 +43,7 @@ public class TimeTrackerController implements Serializable {
     transient EntityManager em;
 
     @EJB
-    AuthorizationController authController;
+    transient AuthorizationController authController;
 
     @EJB
     NFCUnitController nfcUnitController;

@@ -15,71 +15,64 @@
  */
 package de.hallerweb.enterprise.prioritize.model.nfc.counter;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToOne;
-
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.nfc.PCounter;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
+import jakarta.persistence.*;
 
 @Entity
-@NamedQueries({ @NamedQuery(name = "findAllIndustrieCounters", query = "select ic FROM IndustrieCounter ic")})
+@NamedQuery(name = "findAllIndustrieCounters", query = "select ic FROM IndustrieCounter ic")
 public class IndustrieCounter implements PAuthorizedObject {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    int id;
 
-	@OneToOne
-	PCounter counter;
+    @OneToOne
+    PCounter counter;
 
-	String name;
-	String description;
+    String name;
+    String description;
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public PCounter getCounter() {
-		return counter;
-	}
+    public PCounter getCounter() {
+        return counter;
+    }
 
-	public void setCounter(PCounter counter) {
-		this.counter = counter;
-	}
+    public void setCounter(PCounter counter) {
+        this.counter = counter;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void incCounter() {
-		counter.incCounter();
-	}
+    public void incCounter() {
+        counter.incCounter();
+    }
 
-	public void decCounter() {
-		counter.decCounter();
-	}
+    public void decCounter() {
+        counter.decCounter();
+    }
 
-	@Override
-	public Department getDepartment() {
-		return null;
-	}
+    @Override
+    public Department getDepartment() {
+        return null;
+    }
 
 }

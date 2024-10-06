@@ -48,13 +48,13 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 public class ListProjectsBean implements Serializable, SelectableDataModel {
 
 	@EJB
-	ProjectController projectController;
+	transient ProjectController projectController;
 	@EJB
-	TaskController taskController;
+	transient TaskController taskController;
 	@EJB
-	BlackboardController blackboardController;
+	transient BlackboardController blackboardController;
 	@EJB
-	UserRoleController userRoleController;
+	transient UserRoleController userRoleController;
 	@Inject
 	SessionController sessionController;
 
@@ -220,7 +220,7 @@ public class ListProjectsBean implements Serializable, SelectableDataModel {
 		this.selectedTask = task;
 	}
 
-	public void onTaskSelected(SelectEvent event) {
+	public void onTaskSelected(SelectEvent<Object> event) {
 		setSelectedTask((Task) event.getObject());
 	}
 

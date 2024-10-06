@@ -60,7 +60,10 @@ public class InitializationController {
 	@EJB
 	AuthorizationController authController;
 
-	public static final String LITERAL_ADMIN = "admin";
+	static final String LITERAL_ADMIN = "admin";
+	static final String LITERAL_LOCALHOST = "localhost";
+	static final String LITERAL_FALSE = "false";
+	static final String LITERAL_TRUE = "true";
 
 	// Deployment configuration keys
 	public static final String CREATE_DEFAULT_COMPANY = "CREATE_DEFAULT_COMPANY"; // Create a default company on deployment?
@@ -98,7 +101,7 @@ public class InitializationController {
 	// Keycloak logout URL
 	public static final String KEYCLOAK_LOGOUT_URL = "KEYCLOAK_LOGOUT_URL";
 
-	public final static Map<String, String> config = new HashMap<>();
+	public static final Map<String, String> config = new HashMap<>();
 
 	@PostConstruct
 	public void initialize() {
@@ -112,13 +115,13 @@ public class InitializationController {
 		config.clear();
 		config.put(CREATE_DEFAULT_COMPANY, "true");
 		config.put(CREATE_DEFAULT_DEPARTMENT, "true");
-		config.put(CREATE_DEFAULT_APIKEY, "false");
+		config.put(CREATE_DEFAULT_APIKEY, LITERAL_FALSE);
 		config.put(MAXIMUM_FILE_UPLOAD_SIZE, "50000000");
 
-		config.put(ENABLE_MQTT_SERVICE, "false");
-		config.put(MQTT_HOST, "localhost");
+		config.put(ENABLE_MQTT_SERVICE, LITERAL_FALSE);
+		config.put(MQTT_HOST, LITERAL_LOCALHOST);
 		config.put(MQTT_PORT, "1883");
-		config.put(MQTT_HOST_WRITE, "localhost");
+		config.put(MQTT_HOST_WRITE, LITERAL_LOCALHOST);
 		config.put(MQTT_PORT_WRITE, "1883");
 
 		config.put(MQTT_MAX_COMMUNICATION_BYTES, "5000");
@@ -126,7 +129,7 @@ public class InitializationController {
 		config.put(MQTT_MAX_DEVICE_VALUES, "1");
 		config.put(MQTT_PING_TIMEOUT, "60000");
 
-		config.put(MQTT_USERNAME, "localhost");
+		config.put(MQTT_USERNAME, LITERAL_LOCALHOST);
 		config.put(MQTT_PASSWORD, "");
 
 		config.put(DISCOVERY_ALLOW_DEFAULT_DEPARTMENT, "true");
@@ -134,14 +137,14 @@ public class InitializationController {
 		config.put(EVENT_DEFAULT_TIMEOUT, "120000"); // Default is 2 minutes
 		config.put(EVENT_DEFAULT_STRATEGY, "IMMEDIATE"); // Default is IMMEDIATE
 		config.put(LISTENER_DEFAULT_TIMEOUT, "120000"); // Default is 2 minutes
-		config.put(FIRE_RESOURCE_EVENTS, "true");
-		config.put(FIRE_DOCUMENT_EVENTS, "true");
-		config.put(FIRE_USER_EVENTS, "true");
-		config.put(FIRE_DEPARTMENT_EVENTS, "true");
-		config.put(FIRE_ACTIONBOARD_EVENTS, "true");
-		config.put(FIRE_TASK_EVENTS, "true");
+		config.put(FIRE_RESOURCE_EVENTS, LITERAL_TRUE);
+		config.put(FIRE_DOCUMENT_EVENTS, LITERAL_TRUE);
+		config.put(FIRE_USER_EVENTS, LITERAL_TRUE);
+		config.put(FIRE_DEPARTMENT_EVENTS, LITERAL_TRUE);
+		config.put(FIRE_ACTIONBOARD_EVENTS, LITERAL_TRUE);
+		config.put(FIRE_TASK_EVENTS, LITERAL_TRUE);
 
-		config.put(USE_KEYCLOAK_AUTH, "false");
+		config.put(USE_KEYCLOAK_AUTH, LITERAL_FALSE);
 		config.put(KEYCLOAK_LOGOUT_URL,
 				"https://localhost:8443/auth/realms/master/protocol/openid-connect/logout?" +
 				"redirect_uri=https://localhost/PrioritizeWeb/client/dashboard/dashboard.xhtml");
@@ -194,7 +197,7 @@ public class InitializationController {
 	public void createAdminAccountIfNotPresent() {
 		Logger.getLogger(this.getClass().getName()).log(Level.INFO,
 				"Checking if admin user exists...");
-		User adminUser = userRoleController.findUserByUsername("admin",authController.getSystemUser());
+		User adminUser = userRoleController.findUserByUsername(LITERAL_ADMIN,authController.getSystemUser());
 		if (Objects.isNull(adminUser)) {
 			Department d = null;
 			// No user present yet. Create admin user...

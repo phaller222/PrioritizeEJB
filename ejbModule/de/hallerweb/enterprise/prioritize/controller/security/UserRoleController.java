@@ -32,7 +32,6 @@ import de.hallerweb.enterprise.prioritize.model.security.payment.BankingAccount;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
 import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
-
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -40,6 +39,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+
 import java.util.*;
 
 /**
@@ -457,9 +457,6 @@ public class UserRoleController {
     }
 
     public void removeRoleFromUser(int userId, int roleId, User sessionUser) {
-        // TODO: Sometimes either the role or the user is not beeing updated!
-        // ISSUE:
-        // http://mantis.hallerweb.de/view.php?id=67
         User u = em.find(User.class, userId);
         if (authController.canUpdate(u, sessionUser)) {
             Role r = em.find(Role.class, roleId);

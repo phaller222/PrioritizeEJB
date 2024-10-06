@@ -40,7 +40,7 @@ public class TimeTrackerBean implements Serializable {
 	@EJB
 	TimeTrackerController timeTrackerController;
 	@EJB
-	TaskController taskController;
+	transient TaskController taskController;
 
 	@Named
 	public List<TimeTracker> getTrackers() {

@@ -244,7 +244,7 @@ public class ProjectService {
 	public Task assignTask(@PathParam(value = "taskId") String taskId, @QueryParam(value = "apiKey") String apiKey,
 			@FormParam(value = "assignee") String assigneeId, @FormParam(value = "percentage") String percentage,
 			@FormParam(value = "status") String status) {
-		Logger.getLogger(this.getClass().getName()).log(Level.INFO, "-------------- ASIGNEE: --- " + assigneeId);
+		Logger.getLogger(this.getClass().getName()).log(Level.INFO, "-------------- ASIGNEE: --- {0}",assigneeId);
 		User user = accessController.checkApiKey(apiKey);
 		if (user != null) {
 			Task task = taskController.findTaskById(Integer.parseInt(taskId));

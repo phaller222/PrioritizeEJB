@@ -38,7 +38,7 @@ public class SessionController implements Serializable {
     @PersistenceContext
     transient EntityManager em;
     @EJB
-    UserRoleController controller;
+    transient UserRoleController controller;
 
     public void setUser(User user) {
         this.user = user;

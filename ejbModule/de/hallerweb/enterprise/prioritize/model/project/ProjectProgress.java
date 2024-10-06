@@ -16,56 +16,54 @@
 package de.hallerweb.enterprise.prioritize.model.project;
 
 import de.hallerweb.enterprise.prioritize.model.project.goal.ProjectGoalRecord;
-
 import jakarta.persistence.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 
  * @author peter
  * ProjectProgress - Indicates the progress of the project. It holds information about the
- * ProjectGoals and calculates the project progress by observing how project goals aree comingg forward. 
+ * ProjectGoals and calculates the project progress by observing how project goals aree comingg forward.
  */
 @Entity
-@NamedQueries({
-	@NamedQuery(name = "findProjectProgressById", query = "select pgr FROM ProjectProgress pgr WHERE pgr.id = :projectProgressId")})
+@NamedQuery(name = "findProjectProgressById", query = "select pgr FROM ProjectProgress pgr WHERE pgr.id = :projectProgressId")
 public class ProjectProgress {
 
-	@Id
-	@GeneratedValue
-	int id;
+    @Id
+    @GeneratedValue
+    int id;
 
-	@OneToMany(fetch = FetchType.EAGER)
-	Set<ProjectGoalRecord> targetGoals;		// Goals for this project. If concrete tasks are build for this goal,
-												// a copy of this goal is created and assigned to a task.
+    @OneToMany(fetch = FetchType.EAGER)
+    Set<ProjectGoalRecord> targetGoals;        // Goals for this project. If concrete tasks are build for this goal,
+    // a copy of this goal is created and assigned to a task.
 
-	int progress;											// Project progress in percent (0-100)
+    int progress;                                            // Project progress in percent (0-100)
 
-	public Set<ProjectGoalRecord> getTargetGoals() {
-		return targetGoals;
-	}
+    public Set<ProjectGoalRecord> getTargetGoals() {
+        return targetGoals;
+    }
 
-	public void setTargetGoals(Set<ProjectGoalRecord> targetGoals) {
-		this.targetGoals = targetGoals;
-	}
+    public void setTargetGoals(Set<ProjectGoalRecord> targetGoals) {
+        this.targetGoals = targetGoals;
+    }
 
-	public void addTargetGoal(ProjectGoalRecord targetGoal) {
-		if (this.targetGoals == null) {
-			this.targetGoals = new HashSet<>();
-		}
-		this.targetGoals.add(targetGoal);
-	}
+    public void addTargetGoal(ProjectGoalRecord targetGoal) {
+        if (this.targetGoals == null) {
+            this.targetGoals = new HashSet<>();
+        }
+        this.targetGoals.add(targetGoal);
+    }
 
-	public int getProgress() {
-		return progress;
-	}
+    public int getProgress() {
+        return progress;
+    }
 
-	public void setProgress(int progress) {
-		this.progress = progress;
-	}
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 }

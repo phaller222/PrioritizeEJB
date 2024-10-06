@@ -15,78 +15,71 @@
  */
 package de.hallerweb.enterprise.prioritize.model.project.task;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToOne;
-
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.nfc.NFCUnit;
 import de.hallerweb.enterprise.prioritize.model.security.PAuthorizedObject;
+import jakarta.persistence.*;
 
 @Entity(name = "TimeTracker")
-@NamedQueries({ @NamedQuery(name = "findAllTimeTrackers", query = "select tc FROM TimeTracker tc"),
-		@NamedQuery(name = "findTimeTrackerByUUID", query = "select tc FROM TimeTracker tc WHERE tc.nfcUnit.uuid = :uuid") })
+@NamedQuery(name = "findAllTimeTrackers", query = "select tc FROM TimeTracker tc")
+@NamedQuery(name = "findTimeTrackerByUUID", query = "select tc FROM TimeTracker tc WHERE tc.nfcUnit.uuid = :uuid")
 public class TimeTracker implements PAuthorizedObject {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    int id;
 
-	@OneToOne
-	Task task;
+    @OneToOne
+    Task task;
 
-	@OneToOne
-	NFCUnit nfcUnit;
+    @OneToOne
+    NFCUnit nfcUnit;
 
-	boolean active;
+    boolean active;
 
-	@OneToOne
-	TimeSpan activeTimeSpan;
+    @OneToOne
+    TimeSpan activeTimeSpan;
 
-	public TimeSpan getActiveTimeSpan() {
-		return activeTimeSpan;
-	}
+    public TimeSpan getActiveTimeSpan() {
+        return activeTimeSpan;
+    }
 
-	public void setActiveTimeSpan(TimeSpan activeTimeSpan) {
-		this.activeTimeSpan = activeTimeSpan;
-	}
+    public void setActiveTimeSpan(TimeSpan activeTimeSpan) {
+        this.activeTimeSpan = activeTimeSpan;
+    }
 
-	public Task getTask() {
-		return task;
-	}
+    public Task getTask() {
+        return task;
+    }
 
-	public void setTask(Task task) {
-		this.task = task;
-	}
+    public void setTask(Task task) {
+        this.task = task;
+    }
 
-	public NFCUnit getNfcUnit() {
-		return nfcUnit;
-	}
+    public NFCUnit getNfcUnit() {
+        return nfcUnit;
+    }
 
-	public void setNfcUnit(NFCUnit nfcUnit) {
-		this.nfcUnit = nfcUnit;
-	}
+    public void setNfcUnit(NFCUnit nfcUnit) {
+        this.nfcUnit = nfcUnit;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	@Override
-	public Department getDepartment() {
-		return null;
-	}
+    @Override
+    public Department getDepartment() {
+        return null;
+    }
 
-	public boolean isActive() {
-		return active;
-	}
+    public boolean isActive() {
+        return active;
+    }
 
-	public void setActive(boolean active) {
-		this.active = active;
-	}
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
 }

@@ -56,11 +56,11 @@ public class RoleBean implements Serializable {
 	@Inject
 	SessionController sessionController;
 	@EJB
-	UserRoleController controller;
+	transient UserRoleController controller;
 	@EJB
-	CompanyController companyController;
+	transient CompanyController companyController;
 	@EJB
-	AuthorizationController authController;
+	transient AuthorizationController authController;
 
 	transient Role role; 										// Current role
 	transient List<Department> departments;						// Departments

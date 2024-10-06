@@ -28,7 +28,6 @@ import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.service.mqtt.MQTTService;
-
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.enterprise.context.ContextNotActiveException;
@@ -37,6 +36,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -47,7 +47,7 @@ import java.util.logging.LogManager;
  * discovered and created by the system.
  */
 @Stateless
-public class MQTTResourceController  {
+public class MQTTResourceController {
 
     private static final String LITERAL_RESOURCE = "Resource";
     private static final String LITERAL_RESOURCE_SPACE = " Resource \"";
@@ -94,7 +94,7 @@ public class MQTTResourceController  {
             if (authController.canCreate(resource, sessionUser)) {
 
                 resource.setName(name);
-                resource.setDescription(description.replaceAll(":", "").replaceAll(";", ""));
+                resource.setDescription(description.replace(":", "").replace(";", ""));
                 resource.setIp(ip);
                 resource.setMaxSlots(maxSlots);
                 resource.setStationary(stationary);
@@ -189,7 +189,7 @@ public class MQTTResourceController  {
     @SuppressWarnings("unchecked")
     public List<String> getAllMqttUuids() {
         Query query = em.createNamedQuery("findAllMqttResourceUuids");
-        return (List<String>) query.getResultList();
+        return query.getResultList();
     }
 
     /**
@@ -284,7 +284,7 @@ public class MQTTResourceController  {
         }
         int valuesSize = managedResource.getMqttValues().size();
         if (managedResource.getMqttValues().isEmpty()) {
-            if (valuesSize <= Integer.parseInt(initController.config.get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
+            if (valuesSize <= Integer.parseInt(InitializationController.config.get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
                 createMqttNameValuePair(name, valueCopy, managedResource);
             }
         } else {
@@ -296,9 +296,9 @@ public class MQTTResourceController  {
         //TODO: Umstellen auf Apache IOT-DB
         String values = entry.getValues();
         if ((values == null)
-                || (values.length() <= Integer.parseInt(initController.config.get(InitializationController.MQTT_MAX_VALUES_BYTES)))) {
-                    entry.setValues(entry.getValues() + ";" + value);
-                } else {
+                || (values.length() <= Integer.parseInt(InitializationController.config.get(InitializationController.MQTT_MAX_VALUES_BYTES)))) {
+            entry.setValues(entry.getValues() + ";" + value);
+        } else {
             int firstEntryEnd = values.indexOf(';');
             builder.append(values.substring(firstEntryEnd + 1));
             entry.setValues(builder.toString() + ";" + value);
@@ -384,7 +384,7 @@ public class MQTTResourceController  {
                 found = true;
             }
         }
-        if (!found && valuesSize <= Integer.parseInt(initController.config.get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
+        if (!found && valuesSize <= Integer.parseInt(InitializationController.config.get(InitializationController.MQTT_MAX_DEVICE_VALUES))) {
             createMqttNameValuePair(name, value, managedResource);
         }
     }

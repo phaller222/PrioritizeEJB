@@ -48,7 +48,7 @@ import java.util.Set;
 public class NewSkillBean implements Serializable {
 
 	@EJB
-	SkillController skillController;
+	transient SkillController skillController;
 	@Inject
 	SessionController sessionController;
 

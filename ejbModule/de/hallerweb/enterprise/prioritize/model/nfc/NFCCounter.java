@@ -17,66 +17,69 @@ package de.hallerweb.enterprise.prioritize.model.nfc;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
-
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Entity
 public class NFCCounter extends PCounter {
-	
-	@OneToOne
-	NFCUnit nfcUnit;
-	
-	String uuid;
-	
-	public NFCUnit getNfcUnit() {
-		return nfcUnit;
-	}
 
-	public void setNfcUnit(NFCUnit nfcUnit) {
-		this.nfcUnit = nfcUnit;
-	}
+    @OneToOne
+    NFCUnit nfcUnit;
 
-	public int getId() {
-		return id;
-	}
+    String uuid;
 
-	@Override
-	public long getValue() {
-		String payload = nfcUnit.getPayload();
-		if (StringUtils.isNumeric(payload)) {
-			return Long.parseLong(payload);
-		} else {
-			return -1;
-		}
-	}
+    public NFCUnit getNfcUnit() {
+        return nfcUnit;
+    }
 
-	@Override
-	public void setValue(long value) {
-		nfcUnit.setPayload(String.valueOf(value));
-	}
+    public void setNfcUnit(NFCUnit nfcUnit) {
+        this.nfcUnit = nfcUnit;
+    }
 
-	@Override
-	public void incCounter() {
-		String payload = nfcUnit.getPayload();
-		if (StringUtils.isNumeric(payload)) {
-			long newValue = Long.parseLong(payload) + 1;
-			System.out.println("SET: " + newValue);
-			nfcUnit.setPayload(String.valueOf(newValue));
-		}
-	}
+    @Override
+    public int getId() {
+        return id;
+    }
 
-	@Override
-	public void decCounter() {
-		String payload = nfcUnit.getPayload();
-		if (StringUtils.isNumeric(payload)) {
-			long newValue = Long.parseLong(payload) - 1;
-			nfcUnit.setPayload(String.valueOf(newValue));
-		}
-	}
-	
-	@Override
-	public String getUuid() {
-		return nfcUnit.getUuid();
-	}
+    @Override
+    public long getValue() {
+        String payload = nfcUnit.getPayload();
+        if (StringUtils.isNumeric(payload)) {
+            return Long.parseLong(payload);
+        } else {
+            return -1;
+        }
+    }
+
+    @Override
+    public void setValue(long value) {
+        nfcUnit.setPayload(String.valueOf(value));
+    }
+
+    @Override
+    public void incCounter() {
+        String payload = nfcUnit.getPayload();
+        if (StringUtils.isNumeric(payload)) {
+            long newValue = Long.parseLong(payload) + 1;
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "SET: " + newValue);
+            nfcUnit.setPayload(String.valueOf(newValue));
+        }
+    }
+
+    @Override
+    public void decCounter() {
+        String payload = nfcUnit.getPayload();
+        if (StringUtils.isNumeric(payload)) {
+            long newValue = Long.parseLong(payload) - 1;
+            nfcUnit.setPayload(String.valueOf(newValue));
+        }
+    }
+
+    @Override
+    public String getUuid() {
+        return nfcUnit.getUuid();
+    }
 
 }

@@ -36,7 +36,7 @@ import java.util.Date;
 @Entity
 @NamedQuery(name = "findDocumentById", query = "select d FROM Document d WHERE d.id = :docId")
 @NamedQuery(name = "findDocumentByTag", query = "select d FROM Document d WHERE d.tag = :docTag")
-public class Document extends PObject implements Comparable {
+public class Document extends PObject implements Comparable<Object> {
 
     public static final String PROPERTY_NAME = "name";
     public static final String PROPERTY_MIMETYPE = "mimeType";
@@ -158,5 +158,10 @@ public class Document extends PObject implements Comparable {
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

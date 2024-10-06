@@ -82,6 +82,9 @@ public class DocumentService {
     @EJB
     AuthorizationController authController;
 
+    static final String LITERAL_NOT_FOUND = "Document not found!";
+
+
     /**
      * @return
      * @apiParam departmentToken
@@ -269,7 +272,7 @@ public class DocumentService {
             try {
                 docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
             } catch (Exception ex) {
-                return createNegativeResponse("Document not found!");
+                return createNegativeResponse(LITERAL_NOT_FOUND);
             }
             if (authController.canRead(docInfo, user)) {
                 return Response.ok(docInfo, MediaType.APPLICATION_JSON).build();
@@ -303,7 +306,7 @@ public class DocumentService {
             try {
                 docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
             } catch (Exception ex) {
-                return createNegativeResponse("Document not found!");
+                return createNegativeResponse(LITERAL_NOT_FOUND);
             }
             Document document = docInfo.getCurrentDocument();
             if (authController.canRead(docInfo, user)) {
@@ -400,7 +403,7 @@ public class DocumentService {
                 try {
                     docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
                 } catch (Exception ex) {
-                    return createNegativeResponse("Document not found!");
+                    return createNegativeResponse(LITERAL_NOT_FOUND);
                 }
                 if (docInfo != null) {
                     if (authController.canDelete(docInfo, user)) {

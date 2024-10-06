@@ -82,7 +82,7 @@ public class AuthorizationController {
      * @return
      */
     public boolean canCreate(PAuthorizedObject targetObject, User user) {
-        Boolean x = canCreatePreCheck(targetObject, user);
+        boolean x = canCreatePreCheck(targetObject, user);
         if (!x) return x;
 
         String absoluteObjectType = targetObject.getClass().getCanonicalName();

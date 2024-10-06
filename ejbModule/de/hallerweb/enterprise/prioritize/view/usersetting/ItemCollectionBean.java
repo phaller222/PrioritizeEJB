@@ -48,7 +48,7 @@ import de.hallerweb.enterprise.prioritize.model.usersetting.ItemCollection;
 public class ItemCollectionBean implements Serializable {
 
 	@EJB
-	ItemCollectionController itemCollectionController;
+	transient ItemCollectionController itemCollectionController;
 
 	@Inject
 	SessionController sessionController;

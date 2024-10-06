@@ -520,14 +520,14 @@ public class DocumentBean implements Serializable {
 
     // Create Tree for documents view
     public TreeNode<Object> createDocumentTree() {
-        TreeNode<Object> root = new DefaultTreeNode("My Documents", null);
+        TreeNode<Object> root = new DefaultTreeNode<>("My Documents", null);
 
         List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
         for (Company c : companies) {
-            TreeNode<Object> company = new DefaultTreeNode(new DocumentTreeInfo(c.getName(), false, false, null, null), root);
+            TreeNode<Object> company = new DefaultTreeNode<>(new DocumentTreeInfo(c.getName(), false, false, null, null), root);
             List<Department> companyDepartments = c.getDepartments();
             for (Department d : companyDepartments) {
-                TreeNode<Object> department = new DefaultTreeNode(new DocumentTreeInfo(d.getName(), false, false, null, null), company);
+                TreeNode<Object> department = new DefaultTreeNode<>(new DocumentTreeInfo(d.getName(), false, false, null, null), company);
                 Set<DocumentGroup> groups = d.getDocumentGroups();
                 buildDocumentGroupsWithContent(department, groups);
             }
@@ -535,15 +535,15 @@ public class DocumentBean implements Serializable {
         return root;
     }
 
-    private void buildDocumentGroupsWithContent(TreeNode department, Set<DocumentGroup> groups) {
+    private void buildDocumentGroupsWithContent(TreeNode<Object> department, Set<DocumentGroup> groups) {
         for (DocumentGroup g : groups) {
             if (authController.canRead(g, sessionController.getUser())) {
                 TreeNode<Object> group;
                 if (authController.canCreate(g, sessionController.getUser())) {
-                    group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null),
+                    group = new DefaultTreeNode<>(new DocumentTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null),
                             department);
                 } else {
-                    group = new DefaultTreeNode(new DocumentTreeInfo(g.getName(), false, false, null, null), department);
+                    group = new DefaultTreeNode<>(new DocumentTreeInfo(g.getName(), false, false, null, null), department);
                 }
                 Set<DocumentInfo> documents = g.getDocuments();
                 List<DocumentInfo> docList = new ArrayList<>(documents);

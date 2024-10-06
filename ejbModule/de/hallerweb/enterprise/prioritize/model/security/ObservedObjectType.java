@@ -15,15 +15,10 @@
  */
 package de.hallerweb.enterprise.prioritize.model.security;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
+import jakarta.persistence.*;
 
 @Entity
-@NamedQueries({ @NamedQuery(name = "findAllObjectTypes", query = "select ot FROM ObservedObjectType ot") })
+@NamedQuery(name = "findAllObjectTypes", query = "select ot FROM ObservedObjectType ot")
 /**
  * Holds all canonical (absolute) packages names of objects which can be secured by Prioritize PermissionRecord entrys.
  * By adding a new object type (e.g. my.absolute.package.MyEntity) this entity will appear in the administration GUI as
@@ -33,27 +28,27 @@ import jakarta.persistence.NamedQuery;
  */
 public class ObservedObjectType {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    int id;
 
-	String objectType;
+    String objectType;
 
-	public String getObjectType() {
-		return objectType;
-	}
+    public String getObjectType() {
+        return objectType;
+    }
 
-	public void setObjectType(String objectType) {
-		this.objectType = objectType;
-	}
+    public void setObjectType(String objectType) {
+        this.objectType = objectType;
+    }
 
-	public int getId() {
-		return id;
-	}
-	
-	@Override
-	public String toString() {
-		return objectType.substring(objectType.lastIndexOf('.') + 1);
-	}
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return objectType.substring(objectType.lastIndexOf('.') + 1);
+    }
 
 }

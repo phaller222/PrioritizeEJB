@@ -23,13 +23,13 @@ import de.hallerweb.enterprise.prioritize.controller.usersetting.UserPreferenceC
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
-
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
@@ -53,13 +53,13 @@ import java.util.logging.Logger;
 public class LoginBean implements Serializable {
 
     @EJB
-    UserRoleController userRoleController;
-    @EJB AuthorizationController authController;
+    transient UserRoleController userRoleController;
+    transient @EJB AuthorizationController authController;
     @Inject
     UserPreferenceController preferenceController;
     @Inject
     SessionController sessionController;
-    @EJB InitializationController initController;
+    transient @EJB InitializationController initController;
 
     private String username;
     private String password;
@@ -172,7 +172,7 @@ public class LoginBean implements Serializable {
     }
 
     public void initializeNoParamKeycloakSession() {
-        if (Boolean.parseBoolean(initController.config.get(InitializationController.USE_KEYCLOAK_AUTH))) {
+        if (Boolean.parseBoolean(InitializationController.config.get(InitializationController.USE_KEYCLOAK_AUTH))) {
             String userName = username;
             ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
             if (context.getUserPrincipal() != null) {
@@ -193,16 +193,15 @@ public class LoginBean implements Serializable {
     public String logout() {
         sessionController.setUser(null);
         loggedIn = false;
-        if (Boolean.parseBoolean(initController.config.get(InitializationController.USE_KEYCLOAK_AUTH))) {
+        if (Boolean.parseBoolean(InitializationController.config.get(InitializationController.USE_KEYCLOAK_AUTH))) {
             ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
             try {
                 context.redirect("https://localhost:8443/auth/realms/master/protocol/openid-connect/logout?"
                         + "redirect_uri=https://localhost/PrioritizeWeb/client/dashboard/dashboard.xhtml");
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
             }
-            return initController.config.get(InitializationController.KEYCLOAK_LOGOUT_URL);
+            return InitializationController.config.get(InitializationController.KEYCLOAK_LOGOUT_URL);
         } else {
             return NAVIGATION_LOGIN;
         }

@@ -36,7 +36,7 @@ public class MqttClientPing {
 		// Auto-generated constructor stub
 	}
 
-	// TODO: Set persistence of timer for releases to "true"
+	// Set persistence of timer for releases to "true"
 	@Schedule(minute = "*/1", hour = "*", persistent = false)
 	public void checkMqttClientPings() {
 		if (Boolean.parseBoolean(InitializationController.config.get(InitializationController.ENABLE_MQTT_SERVICE))) {

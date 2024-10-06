@@ -41,7 +41,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "log")
-@NamedQueries({ @NamedQuery(name = "findLogEntryByUser", query = "select en FROM LogEntry en WHERE en.user = :username") })
+@NamedQuery(name = "findLogEntryByUser", query = "select en FROM LogEntry en WHERE en.user = :username")
 public class LogEntry {
 
 	@Id

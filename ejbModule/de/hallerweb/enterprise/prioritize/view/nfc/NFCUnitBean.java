@@ -15,29 +15,28 @@
  */
 package de.hallerweb.enterprise.prioritize.view.nfc;
 
-import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import de.hallerweb.enterprise.prioritize.controller.LoggingController;
+import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Named;
 
-import de.hallerweb.enterprise.prioritize.controller.LoggingController;
-import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
+import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Named
 @SessionScoped
 public class NFCUnitBean implements Serializable {
 
-	@EJB
-	LoggingController log;
+    @EJB
+    transient LoggingController log;
 
-	@PostConstruct
-	public void init() {
-		Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Init...NFCUnit ::::::::::         ::::::::: .......");
-		log.log("TEST", "TEST", Action.CREATE, 0);
+    @PostConstruct
+    public void init() {
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Init...NFCUnit ::::::::::         ::::::::: .......");
+        log.log("TEST", "TEST", Action.CREATE, 0);
 
-	}
+    }
 }

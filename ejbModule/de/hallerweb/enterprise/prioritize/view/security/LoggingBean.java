@@ -40,7 +40,7 @@ import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 public class LoggingBean implements Serializable {
 
 	@EJB
-	LoggingController controller;
+	transient LoggingController controller;
 
 	boolean loggingEnabled;
 

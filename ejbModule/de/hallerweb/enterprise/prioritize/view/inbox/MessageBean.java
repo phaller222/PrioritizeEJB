@@ -55,9 +55,9 @@ public class MessageBean implements Serializable {
 	@Inject
 	SessionController sessionController;
 	@EJB
-	MessageController controller;
+	transient MessageController controller;
 	@EJB
-	UserRoleController userRoleController;
+	transient UserRoleController userRoleController;
 
 	transient List<Message> messages; // List of messages
 	String message; // Stores the newly composed Message

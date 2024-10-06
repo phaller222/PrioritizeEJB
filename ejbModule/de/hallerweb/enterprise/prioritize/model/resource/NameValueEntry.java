@@ -67,7 +67,12 @@ public class NameValueEntry implements Comparable<Object> {
 		NameValueEntry e = (NameValueEntry) obj;
 		return mqttName.compareTo(e.getName());
 	}
-	
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
+
 	@Override
 	public String toString() {
 		return this.mqttName;

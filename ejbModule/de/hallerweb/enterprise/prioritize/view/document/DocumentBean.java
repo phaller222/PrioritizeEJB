@@ -46,10 +46,7 @@ import org.primefaces.model.TreeNode;
 import org.primefaces.util.SerializableSupplier;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * DocumentBean - JSF Backing-Bean to store information about documents.
@@ -369,10 +366,15 @@ public class DocumentBean implements Serializable {
     /**
      * Prepare a download of current document (DocumentInfo)
      *
-     * @param id
      * @throws Exception
      */
-    public void prepDownload(int id) {
+    public void prepDownload() {
+
+        FacesContext fc = FacesContext.getCurrentInstance();
+        Map<String,String> params =
+                fc.getExternalContext().getRequestParameterMap();
+        int id =  Integer.valueOf(params.get("docinfoid"));
+
         DocumentInfo docToDownload = controller.getDocumentInfo(id, sessionController.getUser());
         Document currentDocument = docToDownload.getCurrentDocument();
 

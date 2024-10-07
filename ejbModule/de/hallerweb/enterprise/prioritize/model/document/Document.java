@@ -36,6 +36,7 @@ import java.util.Date;
 @Entity
 @NamedQuery(name = "findDocumentById", query = "select d FROM Document d WHERE d.id = :docId")
 @NamedQuery(name = "findDocumentByTag", query = "select d FROM Document d WHERE d.tag = :docTag")
+@NamedQuery(name = "findDocumentsByMimeType", query = "select d FROM Document d WHERE d.mimeType = :docMimeType")
 public class Document extends PObject implements Comparable<Object> {
 
     public static final String PROPERTY_NAME = "name";

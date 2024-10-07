@@ -179,8 +179,10 @@ public class DocumentBean implements Serializable {
 
     @Named
     public String createDocument() {
-        if (controller.createDocumentInfo(document.getName(), Integer.parseInt(selectedDocumentGroup), sessionController.getUser(),
-                tmpMimeType, false, tmpBytes, "") != null) {
+        document.setMimeType(tmpMimeType);
+        document.setData(tmpBytes);
+        document.setEncrypted(false);
+        if (controller.createDocumentInfo(document, sessionController.getUser(), Integer.parseInt(selectedDocumentGroup)) != null) {
             updateDocumentTree();
         } else {
             ViewUtilities.addErrorMessage("name",

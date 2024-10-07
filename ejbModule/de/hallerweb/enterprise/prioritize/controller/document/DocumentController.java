@@ -61,9 +61,10 @@ public class DocumentController {
 
     static final String DOCUMENT_LITERAL = "Document";
 
-    public DocumentInfo createDocumentInfo(String name, int groupId, User user, String mimeType, boolean encrypt, byte[] data, String changes) {
+    public DocumentInfo createDocumentInfo(Document doc, User user, int groupId) {
+
         int maxsize = Integer.parseInt(InitializationController.config.get(InitializationController.MAXIMUM_FILE_UPLOAD_SIZE));
-        if (data.length > maxsize) {
+        if (doc.getData().length > maxsize) {
             return null;
         }
 
@@ -74,14 +75,14 @@ public class DocumentController {
         if (managedDocumentGroup == null) {
             return null;
         }
-        if (findDocumentInfoByGroupAndName(managedDocumentGroup.getId(), name, user) == null) {
+        if (findDocumentInfoByGroupAndName(managedDocumentGroup.getId(), doc.getName(), user) == null) {
             // Then create the Document
             Document document = new Document();
-            document.setName(name);
-            document.setMimeType(mimeType);
-            document.setEncrypted(encrypt);
-            document.setChanges(changes);
-            if (encrypt) {
+            document.setName(doc.getName());
+            document.setMimeType(doc.getMimeType());
+            document.setEncrypted(doc.isEncrypted());
+            document.setChanges(doc.getChanges());
+            if (doc.isEncrypted()) {
                 document.setEncryptedBy(user);
             }
             document.setLastModified(new Date());
@@ -89,7 +90,7 @@ public class DocumentController {
 
             // New document, so version is always 1
             document.setVersion(1);
-            document.setData(data);
+            document.setData(doc.getData());
 
             // Then create the DocumentInfo
             DocumentInfo documentInfo = new DocumentInfo();

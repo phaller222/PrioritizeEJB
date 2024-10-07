@@ -1,14 +1,14 @@
 # Prioritize
 
-![Prioritize logo](http://www.prioritize-iot.de/logo.png)
+image::http://www.prioritize-iot.de/logo.png[]
 
 
 **NEW: REST API docs now available (First version):**
-[Prioritize REST apiDocs](http://www.prioritize-iot.de/apiDoc) - Prioritize REST apiDocs1
+http://www.prioritize-iot.de/apiDoc
 
 If you have contributed code which has already been merged/accepted you can watch the build state here:
 <p></p>
-<a href="http://jenkins.prioauth.com:8080/">http://jenkins.prioauth.com:8080/</a>
+http://jenkins.prioauth.com:8080/
  
 
 

@@ -24,17 +24,17 @@ import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Named;
+import org.primefaces.event.SelectEvent;
 import org.primefaces.event.schedule.ScheduleEntryMoveEvent;
 import org.primefaces.event.schedule.ScheduleEntryResizeEvent;
-import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.LazyScheduleModel;
 import org.primefaces.model.ScheduleEvent;
 import org.primefaces.model.ScheduleModel;
 
-import jakarta.ejb.EJB;
-import jakarta.enterprise.context.SessionScoped;
-import jakarta.inject.Named;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -57,6 +57,25 @@ public class CalendarView implements Serializable {
     transient List<Department> departments; // List of departments
     String selectedDepartmentId; // Currently selected Department
     transient Department selectedDepartment = null;
+
+    public Date getCheckDate() {
+        return checkDate;
+    }
+
+    public void setCheckDate(Date checkDate) {
+        this.checkDate = checkDate;
+    }
+
+    private Date checkDate;
+    private String currentResult = "--";
+
+    public String getCurrentResult() {
+        return currentResult;
+    }
+
+    public void setCurrentResult(String currentResult) {
+        this.currentResult = currentResult;
+    }
 
     @EJB
     private transient ResourceReservationController resourceReservationController;
@@ -217,6 +236,15 @@ public class CalendarView implements Serializable {
         }
     }
 
+    public TimeSpan getFirstTimeSpanForDate(Date d) {
+        List<TimeSpan> spans = calendarController.getTimeSpansForDate(d);
+        if (!spans.isEmpty()) {
+            return spans.get(0);
+        } else {
+            return null;
+        }
+    }
+
     public ScheduleModel getLazyEventModel() {
         updateLazyModel();
         return lazyEventModel;
@@ -249,7 +277,7 @@ public class CalendarView implements Serializable {
         TimeSpan ts = (TimeSpan) evt.getData();
         ts.setDateFrom(DateTimeUtil.toDate(evt.getStartDate()));
         ts.setDateUntil(ts.getDateUntil());
-        calendarController.mergeTimeSpan(ts);
+        calendarController.updateTimeSpan(ts);
     }
 
     public void onEventResize(ScheduleEntryResizeEvent event) {
@@ -257,7 +285,7 @@ public class CalendarView implements Serializable {
         TimeSpan ts = (TimeSpan) evt.getData();
         ts.setDateFrom(DateTimeUtil.toDate(evt.getStartDate()));
         ts.setDateUntil(ts.getDateUntil());
-        calendarController.mergeTimeSpan(ts);
+        calendarController.updateTimeSpan(ts);
     }
 
 }

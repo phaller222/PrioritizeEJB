@@ -1,6 +1,6 @@
 # Prioritize
 
-image::http://www.prioritize-iot.de/logo.png[]
+![Logo](http://www.prioritize-iot.de/logo.png)
 
 
 **NEW: REST API docs now available (First version):**

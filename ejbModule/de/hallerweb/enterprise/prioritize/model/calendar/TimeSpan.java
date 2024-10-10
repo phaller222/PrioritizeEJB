@@ -42,6 +42,7 @@ import java.util.Set;
 @Entity
 @NamedQuery(name = "findTimeSpansByUser", query = "select ts FROM TimeSpan ts WHERE :user MEMBER OF ts.involvedUsers")
 @NamedQuery(name = "findTimeSpansByUserAndType", query = "select ts FROM TimeSpan ts WHERE :user MEMBER OF ts.involvedUsers AND ts.type = :type")
+@NamedQuery(name = "findTimeSpansByDate", query="select ts FROM TimeSpan ts WHERE :date between ts.dateFrom and ts.dateUntil ")
 public class TimeSpan implements PAuthorizedObject {
 
     public enum TimeSpanType {
@@ -53,8 +54,6 @@ public class TimeSpan implements PAuthorizedObject {
     int id;
 
     private String title;
-
-
     private String description;
 
     @ManyToMany(fetch = FetchType.EAGER)

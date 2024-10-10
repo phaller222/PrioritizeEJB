@@ -18,12 +18,14 @@ package de.hallerweb.enterprise.prioritize.controller.calendar;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan.TimeSpanType;
 import de.hallerweb.enterprise.prioritize.model.security.User;
-
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.TemporalType;
+
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,7 +37,7 @@ public class CalendarController {
 	@PersistenceContext
 	EntityManager em;
 
-	public void mergeTimeSpan(TimeSpan newTimeSpan) {
+	public void updateTimeSpan(TimeSpan newTimeSpan) {
 		TimeSpan managedTimeSpan = em.find(TimeSpan.class, newTimeSpan.getId());
 		managedTimeSpan.setDateFrom(newTimeSpan.getDateFrom());
 		managedTimeSpan.setDateUntil(newTimeSpan.getDateUntil());
@@ -56,6 +58,17 @@ public class CalendarController {
 		Query query = em.createNamedQuery("findTimeSpansByUserAndType");
 		query.setParameter("user", user);
 		query.setParameter("type", type);
+		List<TimeSpan> timespans = query.getResultList();
+		if (timespans.isEmpty()) {
+			return Collections.emptyList();
+		} else {
+			return timespans;
+		}
+	}
+
+	public List<TimeSpan> getTimeSpansForDate(Date d) {
+		Query query = em.createNamedQuery("findTimeSpansByDate");
+		query.setParameter("date", d, TemporalType.DATE);
 		List<TimeSpan> timespans = query.getResultList();
 		if (timespans.isEmpty()) {
 			return Collections.emptyList();

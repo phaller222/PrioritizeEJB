@@ -54,28 +54,8 @@ public class CalendarView implements Serializable {
     private transient ScheduleModel lazyEventModelIllness;
     private transient ScheduleEvent<Object> event = new DefaultScheduleEvent<>();
 
-    transient List<Department> departments; // List of departments
     String selectedDepartmentId; // Currently selected Department
     transient Department selectedDepartment = null;
-
-    public Date getCheckDate() {
-        return checkDate;
-    }
-
-    public void setCheckDate(Date checkDate) {
-        this.checkDate = checkDate;
-    }
-
-    private Date checkDate;
-    private String currentResult = "--";
-
-    public String getCurrentResult() {
-        return currentResult;
-    }
-
-    public void setCurrentResult(String currentResult) {
-        this.currentResult = currentResult;
-    }
 
     @EJB
     private transient ResourceReservationController resourceReservationController;

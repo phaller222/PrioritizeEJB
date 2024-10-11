@@ -28,12 +28,13 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.jboss.resteasy.logging.Logger;
+
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * MessageBean - JSF Backing-Bean to store information about Messages.
@@ -182,7 +183,7 @@ public class MessageBean implements Serializable {
         try {
             context.redirect(context.getApplicationContextPath() + "/client/messages/inbox.xhtml");
         } catch (IOException e) {
-            Logger.getLogger(getClass()).error(e.getMessage());
+            Logger.getLogger(getClass().getName()).severe(e.getMessage());
         }
     }
 

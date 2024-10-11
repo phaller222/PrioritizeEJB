@@ -16,6 +16,7 @@
 package de.hallerweb.enterprise.prioritize.model.usersetting;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -24,7 +25,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 
-import org.jboss.resteasy.logging.Logger;
+
 
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
@@ -104,7 +105,7 @@ public class UserPreference {
 				this.watchedResources.remove(resToRemove);
 				return true;
 			} catch (Exception ex) {
-				Logger.getLogger(getClass()).error(ex.getMessage());
+				Logger.getLogger(getClass().getName()).severe(ex.getMessage());
 			}
 			return true;
 		} else {

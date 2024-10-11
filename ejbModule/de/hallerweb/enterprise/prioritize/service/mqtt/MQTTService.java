@@ -25,13 +25,14 @@ import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.jboss.resteasy.logging.Logger;
+
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.ejb.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * MQTTservice.java - Implements a Service to connect to a MQTT broker and
@@ -95,9 +96,9 @@ public class MQTTService implements MqttCallback {
                     options.setKeepAliveInterval(60);
                     options.setCleanSession(true);
 
-                    Logger.getLogger(this.getClass())
+                    Logger.getLogger(this.getClass().getName())
                             .info("Using username " + config.get(InitializationController.MQTT_USERNAME) + " for MQTT");
-                    Logger.getLogger(this.getClass())
+                    Logger.getLogger(this.getClass().getName())
                             .info("Using pass "
                                     + Arrays.toString(config.get(InitializationController.MQTT_PASSWORD).toCharArray())
                                     + " for MQTT");
@@ -122,7 +123,7 @@ public class MQTTService implements MqttCallback {
                 }
 
             } catch (Exception e) {
-                Logger.getLogger(this.getClass()).error("MQTT: error connecting..." + e.getMessage());
+                Logger.getLogger(this.getClass().getName()).severe("MQTT: error connecting..." + e.getMessage());
             }
 
         }
@@ -139,7 +140,7 @@ public class MQTTService implements MqttCallback {
                 client.disconnect();
                 client.close();
             } catch (Exception e) {
-                Logger.getLogger(this.getClass()).error("MQTT: error disconnecting..." + e.getMessage());
+                Logger.getLogger(this.getClass().getName()).severe("MQTT: error disconnecting..." + e.getMessage());
             }
         }
     }
@@ -159,11 +160,11 @@ public class MQTTService implements MqttCallback {
 
     @Override
     public void connectionLost(Throwable throwable) {
-        Logger.getLogger(this.getClass()).warn("MQTT: connectionLost... " + throwable.getMessage());
+        Logger.getLogger(this.getClass().getName()).warning("MQTT: connectionLost... " + throwable.getMessage());
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
-            Logger.getLogger(getClass()).warn(e.getMessage());
+            Logger.getLogger(getClass().getName()).warning(e.getMessage());
         }
         reconnect();
     }
@@ -179,7 +180,7 @@ public class MQTTService implements MqttCallback {
                 Thread.sleep(100);
 
             } catch (Exception ex) {
-                Logger.getLogger(this.getClass()).error(ex.getMessage());
+                Logger.getLogger(this.getClass().getName()).severe(ex.getMessage());
             }
         }
     }
@@ -200,7 +201,7 @@ public class MQTTService implements MqttCallback {
                 handleDataReceivedMessage(topic, mqttMessage);
             }
         } catch (Exception ex) {
-            Logger.getLogger(this.getClass()).error(ex.getMessage());
+            Logger.getLogger(this.getClass().getName()).severe(ex.getMessage());
         }
     }
 
@@ -208,7 +209,7 @@ public class MQTTService implements MqttCallback {
         try {
             client.publish(topic, data, QOS, false);
         } catch (MqttException e) {
-            Logger.getLogger(this.getClass()).error(e.getMessage());
+            Logger.getLogger(this.getClass().getName()).severe(e.getMessage());
         }
     }
 
@@ -258,7 +259,7 @@ public class MQTTService implements MqttCallback {
                 client.publish(resource.getMqttDataReceiveTopic(), new MqttMessage("REGISTERED".getBytes()));
             }
         } catch (Exception ex) {
-            Logger.getLogger(this.getClass()).error(ex.getMessage());
+            Logger.getLogger(this.getClass().getName()).severe(ex.getMessage());
         }
     }
 
@@ -274,7 +275,7 @@ public class MQTTService implements MqttCallback {
                 Resource resource = controller.getResource(uuid, authController.getSystemUser());
                 controller.writeMqttDataReceived(resource, data);
             } catch (Exception ex) {
-                Logger.getLogger(this.getClass()).error(ex.getMessage());
+                Logger.getLogger(this.getClass().getName()).severe(ex.getMessage());
             }
         } else {
             // ignore READ
@@ -304,7 +305,7 @@ public class MQTTService implements MqttCallback {
                 try {
                     client.publish(resource.getMqttDataReceiveTopic(), new MqttMessage("UNREGISTERED".getBytes()));
                 } catch (MqttException e) {
-                    Logger.getLogger(this.getClass()).error(e.getMessage());
+                    Logger.getLogger(this.getClass().getName()).severe(e.getMessage());
                 }
                 break;
             case COMMAND_STARTUP:
@@ -312,7 +313,7 @@ public class MQTTService implements MqttCallback {
                 try {
                     client.publish(resource.getMqttDataReceiveTopic(), new MqttMessage("ONLINE".getBytes()));
                 } catch (MqttException e) {
-                    Logger.getLogger(this.getClass()).error(e.getMessage());
+                    Logger.getLogger(this.getClass().getName()).severe(e.getMessage());
                 }
 
                 break;
@@ -321,7 +322,7 @@ public class MQTTService implements MqttCallback {
                 try {
                     client.publish(resource.getMqttDataReceiveTopic(), new MqttMessage("OFFLINE".getBytes()));
                 } catch (MqttException e) {
-                    Logger.getLogger(this.getClass()).error(e.getMessage());
+                    Logger.getLogger(this.getClass().getName()).severe(e.getMessage());
                 }
 
                 break;
@@ -430,7 +431,7 @@ public class MQTTService implements MqttCallback {
         try {
             this.client.publish(sourceUuid + "/read", scanResult.getBytes(), QOS, false);
         } catch (MqttException e) {
-            Logger.getLogger(this.getClass()).error(e.getMessage());
+            Logger.getLogger(this.getClass().getName()).severe(e.getMessage());
         }
     }
 

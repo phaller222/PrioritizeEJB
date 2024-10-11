@@ -27,7 +27,7 @@ import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
-import org.jboss.resteasy.logging.Logger;
+
 
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
@@ -38,6 +38,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * ResourceController.java - Controls the creation, modification and deletion of
@@ -217,7 +218,7 @@ public class ResourceController {
 				}
 				res.getResourceGroup().removeResource(res);
 			} catch (NullPointerException ex) {
-				Logger.getLogger(this.getClass()).error(ex.getMessage());
+				Logger.getLogger(getClass().getName()).severe(ex.getMessage());
 			}
 
 			for (NameValueEntry entry : res.getMqttValues()) {

@@ -36,7 +36,6 @@ import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
-import org.jboss.resteasy.logging.Logger;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.NodeCollapseEvent;
 import org.primefaces.event.NodeExpandEvent;
@@ -47,6 +46,7 @@ import org.primefaces.util.SerializableSupplier;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * DocumentBean - JSF Backing-Bean to store information about documents.
@@ -371,9 +371,9 @@ public class DocumentBean implements Serializable {
     public void prepDownload() {
 
         FacesContext fc = FacesContext.getCurrentInstance();
-        Map<String,String> params =
+        Map<String, String> params =
                 fc.getExternalContext().getRequestParameterMap();
-        int id =  Integer.valueOf(params.get("docinfoid"));
+        int id = Integer.valueOf(params.get("docinfoid"));
 
         DocumentInfo docToDownload = controller.getDocumentInfo(id, sessionController.getUser());
         Document currentDocument = docToDownload.getCurrentDocument();
@@ -435,7 +435,7 @@ public class DocumentBean implements Serializable {
 
             tmpBytes = out.toByteArray();
         } catch (IOException e) {
-            Logger.getLogger(getClass()).error(e.getMessage());
+            Logger.getLogger(getClass().getName()).severe(e.getMessage());
         }
     }
 

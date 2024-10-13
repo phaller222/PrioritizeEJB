@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.controller.document;
 
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
@@ -105,7 +106,7 @@ public class DocumentController {
                 em.persist(documentInfo);
                 try {
                     logger.log(user.getUsername(), DOCUMENT_LITERAL, Action.CREATE, documentInfo.getId(),
-                            " " + DOCUMENT_LITERAL + " \"" + documentInfo.getCurrentDocument().getName() + "\" created.");
+                        " " + DOCUMENT_LITERAL + " \"" + documentInfo.getCurrentDocument().getName() + "\" created.");
                 } catch (ContextNotActiveException ex) {
                     LogManager.getLogManager().getLogger(getClass().getName()).log(Level.WARNING, ex.getMessage());
                 }
@@ -136,7 +137,7 @@ public class DocumentController {
                 managedDepartment.addDocumentGroup(documentGroup);
                 try {
                     logger.log(sessionController.getUser().getUsername(), "DocumentGroup", Action.CREATE, documentGroup.getId(),
-                            " DocumentGroup \"" + documentGroup.getName() + "\" created.");
+                        " DocumentGroup \"" + documentGroup.getName() + "\" created.");
                 } catch (Exception ex) {
                     LogManager.getLogManager().getLogger(getClass().getName()).log(Level.WARNING, ex.getMessage());
                 }
@@ -270,7 +271,7 @@ public class DocumentController {
             em.flush();
 
             logger.log(user.getUsername(), DOCUMENT_LITERAL, Action.DELETE, info.getId(),
-                    " " + DOCUMENT_LITERAL + "\"" + info.getCurrentDocument().getName() + "\" deleted.");
+                " " + DOCUMENT_LITERAL + "\"" + info.getCurrentDocument().getName() + "\" deleted.");
         }
     }
 
@@ -332,7 +333,7 @@ public class DocumentController {
             em.flush();
             try {
                 logger.log(user.getUsername(), DOCUMENT_LITERAL, Action.UPDATE, managedInfo.getId(),
-                        " " + DOCUMENT_LITERAL + " \"" + managedInfo.getCurrentDocument().getName() + "\" changed.");
+                    " " + DOCUMENT_LITERAL + " \"" + managedInfo.getCurrentDocument().getName() + "\" changed.");
             } catch (ContextNotActiveException ex) {
                 // Omit logging here.
             }
@@ -349,10 +350,10 @@ public class DocumentController {
         managedDocument.setTag(tag);
         if (tag == null || tag.isEmpty()) {
             logger.log(sessionController.getUser().getUsername(), DOCUMENT_LITERAL, Action.UPDATE, document.getId(),
-                    "Tag " + tag + " for " + DOCUMENT_LITERAL + " \"" + document.getName() + "\" has been removed.");
+                "Tag " + tag + " for " + DOCUMENT_LITERAL + " \"" + document.getName() + "\" has been removed.");
         } else {
             logger.log(sessionController.getUser().getUsername(), DOCUMENT_LITERAL, Action.UPDATE, document.getId(),
-                    " Document \"" + document.getName() + "\" has been tagged: " + tag + ".");
+                " Document \"" + document.getName() + "\" has been tagged: " + tag + ".");
         }
         return managedDocument;
     }
@@ -360,10 +361,10 @@ public class DocumentController {
     /**
      * Sets a Document object as most recent version of a DocumentInfo. Also removes the Document from the recent documents list.
      *
-     * @param document
-     * @param documentInfo
-     * @param user
-     * @return
+     * @param document the document to be the recent document
+     * @param documentInfo the corresponding DocumentInfo object
+     * @param user - the User
+     * @return The document to be the new current version.
      */
     public Document setDocumentAsCurrentVersion(Document document, DocumentInfo documentInfo, User user) {
         Document managedDocument = em.find(Document.class, document.getId());

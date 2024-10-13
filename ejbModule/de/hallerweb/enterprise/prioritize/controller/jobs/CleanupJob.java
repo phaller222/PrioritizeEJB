@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.controller.jobs;
 
+import de.hallerweb.enterprise.prioritize.controller.resource.ResourceReservationController;
 import jakarta.ejb.EJB;
 import jakarta.ejb.LocalBean;
 import jakarta.ejb.Schedule;
 import jakarta.ejb.Singleton;
 
-import de.hallerweb.enterprise.prioritize.controller.resource.ResourceReservationController;
 
 /**
  * Session Bean implementation class CleanupJob. This Singleton bean is called every minute to perform different kinds of cleanup jobs e.G.
@@ -30,18 +31,18 @@ import de.hallerweb.enterprise.prioritize.controller.resource.ResourceReservatio
 @LocalBean
 public class CleanupJob {
 
-	@EJB
-	ResourceReservationController resourceReservationController;
+    @EJB
+    ResourceReservationController resourceReservationController;
 
-	/**
-	 * Default constructor.
-	 */
-	public CleanupJob() {
-		// Auto-generated constructor stub
-	}
+    /**
+     * Default constructor.
+     */
+    public CleanupJob() {
+        // Auto-generated constructor stub
+    }
 
-	@Schedule(minute = "*/5", hour = "*", persistent = false)
-	public void cleanup() {
-		resourceReservationController.cleanupReservations();
-	}
+    @Schedule(minute = "*/5", hour = "*", persistent = false)
+    public void cleanup() {
+        resourceReservationController.cleanupReservations();
+    }
 }

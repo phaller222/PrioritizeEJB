@@ -13,44 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.document;
 
 import de.hallerweb.enterprise.prioritize.model.document.DocumentInfo;
 
 public class DocumentTreeInfo {
 
-	private boolean leaf;
-	private String name;
-	private DocumentInfo documentInfo;
-	private String documentGroupId;
-	boolean documentGroupNode;
+    private boolean leaf;
+    private String name;
+    private DocumentInfo documentInfo;
+    private String documentGroupId;
+    boolean documentGroupNode;
 
-	public boolean isDocumentGroupNode() {
-		return documentGroupNode;
-	}
+    public boolean isDocumentGroupNode() {
+        return documentGroupNode;
+    }
 
-	public String getDocumentGroupId() {
-		return documentGroupId;
-	}
+    public String getDocumentGroupId() {
+        return documentGroupId;
+    }
 
-	public String getName() {
-		return this.name;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public DocumentInfo getDocumentInfo() {
-		return this.documentInfo;
-	}
+    public DocumentInfo getDocumentInfo() {
+        return this.documentInfo;
+    }
 
-	public boolean isLeaf() {
-		return this.leaf;
-	}
+    public boolean isLeaf() {
+        return this.leaf;
+    }
 
-	public DocumentTreeInfo(String name, boolean isLeaf, boolean isDocumentGroupNode, String documentGroupId,DocumentInfo info) {
-		this.leaf = isLeaf;
-		this.name = name;
-		this.documentInfo = info;
-		this.documentGroupId = documentGroupId;
-		this.documentGroupNode = isDocumentGroupNode;
-	}
+    public DocumentTreeInfo(String name, boolean isLeaf, boolean isDocumentGroupNode, String documentGroupId, DocumentInfo info) {
+        this.leaf = isLeaf;
+        this.name = name;
+        this.documentInfo = info;
+        this.documentGroupId = documentGroupId;
+        this.documentGroupNode = isDocumentGroupNode;
+    }
 
 }

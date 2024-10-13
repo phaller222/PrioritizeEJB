@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
@@ -283,7 +284,8 @@ public class ResourceService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response setResourceAttributesByUuid(@PathParam(value = "uuid") String uuid, @QueryParam(value = "mqttOnline") String mqttOnline,
                                                 @QueryParam(value = "name") String name, @QueryParam(value = "description") String description,
-                                                @QueryParam(value = "commands") String commands, @QueryParam(value = "geo") String geo, @QueryParam(value = "set") String set,
+                                                @QueryParam(value = "commands") String commands, @QueryParam(value = "geo") String geo,
+                                                @QueryParam(value = "set") String set,
                                                 @QueryParam(value = "apiKey") String apiKey) {
         User user = userRoleController.findUserByApiKey(apiKey);
         Resource resource = mqttResourceController.getResource(uuid, user);
@@ -381,7 +383,8 @@ public class ResourceService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response setResourceAttributesById(@PathParam(value = "id") String id, @QueryParam(value = "mqttOnline") String mqttOnline,
                                               @QueryParam(value = "name") String name, @QueryParam(value = "description") String description,
-                                              @QueryParam(value = "commands") String commands, @QueryParam(value = "geo") String geo, @QueryParam(value = "set") String set,
+                                              @QueryParam(value = "commands") String commands, @QueryParam(value = "geo") String geo,
+                                              @QueryParam(value = "set") String set,
                                               @QueryParam(value = "apiKey") String apiKey) {
         User user = userRoleController.findUserByApiKey(apiKey);
         Resource resource = resourceController.getResource(Integer.parseInt(id), user);
@@ -394,10 +397,8 @@ public class ResourceService {
     }
 
 
-    @POST
-    @Path("create/{departmentToken}/{group}")
-    @Produces(MediaType.APPLICATION_JSON)
     /**
+     * @return Response
      * @api {post} /create/{departmentToken}/{group}?apiKey={apiKey} createResource
      * @apiName createResource
      * @apiGroup /resources
@@ -407,8 +408,7 @@ public class ResourceService {
      * @apiParam {String} group The resource group to put new resource in.
      * @apiSuccess 200 OK.
      * @apiSuccessExample Success-Response:
-     *     HTTP/1.1 200 OK
-     *
+     * HTTP/1.1 200 OK
      * @apiError NotAuthorized  APIKey incorrect.
      * @apiParam uuid - uuid of new resource
      * @apiParam name - name of new resource
@@ -417,12 +417,15 @@ public class ResourceService {
      * @apiParam ip - ip address of new device/resource (if applicable)
      * @apiParam commands - list of commands the device understands
      * @apiParam isAgent - is device an agent?
-     * @return Response
      */
+    @POST
+    @Path("create/{departmentToken}/{group}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response createResource(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "uuid") String uuid,
                                    @PathParam(value = "departmentToken") String departmentToken, @PathParam(value = "group") String group,
                                    @QueryParam(value = "name") String name, @QueryParam(value = "description") String description,
-                                   @QueryParam(value = "slots") String slots, @QueryParam(value = "ip") String ip, @QueryParam(value = "commands") String commands,
+                                   @QueryParam(value = "slots") String slots, @QueryParam(value = "ip") String ip,
+                                   @QueryParam(value = "commands") String commands,
                                    @QueryParam(value = "isAgent") boolean isAgent) {
         User user = accessController.checkApiKey(apiKey);
         if (user == null) {
@@ -489,7 +492,7 @@ public class ResourceService {
             Resource managedResource = mqttResourceController.getResource(uuid, user);
             if (authController.canUpdate(managedResource, user)) {
                 if (resourceReservationController.createResourceReservation(managedResource, new Date(),
-                        new Date(System.currentTimeMillis() + 2000), user) != null) {
+                    new Date(System.currentTimeMillis() + 2000), user) != null) {
                     mqttResourceController.sendCommand(managedResource, command, value);
                     return createPositiveResponse("Command has been send to resource: " + managedResource.getMqttUUID());
                 } else {

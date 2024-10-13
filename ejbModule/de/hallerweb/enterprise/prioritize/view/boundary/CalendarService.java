@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
@@ -27,13 +28,13 @@ import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.model.security.User;
-
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -111,7 +112,8 @@ public class CalendarService {
     @Path("reservations/")
     @Produces(MediaType.APPLICATION_JSON)
     public List<TimeSpan> getTimeSpansForReservations(@QueryParam(value = "departmentToken") String departmentToken,
-                                                      @QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String from, @QueryParam(value = "to") String to) {
+                                                      @QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String from,
+                                                      @QueryParam(value = "to") String to) {
         User user = accessController.checkApiKey(apiKey);
         if (user != null) {
             Department dept = companyController.getDepartmentByToken(departmentToken, user);
@@ -121,7 +123,7 @@ public class CalendarService {
 
                 if (entries.isEmpty()) {
                     throw new NotFoundException(createNegativeResponse("No entries found for department " + dept.getName()
-                            + " and given timespan or no permission to read resource reservations form this department!"));
+                        + " and given timespan or no permission to read resource reservations form this department!"));
                 } else {
                     return entries;
                 }

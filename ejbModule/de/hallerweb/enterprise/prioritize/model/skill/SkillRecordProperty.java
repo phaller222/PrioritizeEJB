@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.skill;
 
 import jakarta.persistence.Entity;
@@ -22,14 +23,14 @@ import jakarta.persistence.OneToOne;
 
 /**
  * JPA entity to represent a {@link SkillRecordProperty}. A SkillRecordProperty is a concrete manifestation of a SkillProperty for a User.
- * 
+ *
  * <p>
  * Copyright: (c) 2014
  * </p>
  * <p>
  * Peter Haller
  * </p>
- * 
+ *
  * @author peter
  */
 @Entity
@@ -37,46 +38,46 @@ import jakarta.persistence.OneToOne;
 // @NamedQuery(name="findSkillPropertiesForSkill", query = "select prop FROM SkillPropertyNumeric prop WHERE prop.skill.id = :skillId"))
 public class SkillRecordProperty {
 
-	@Id
-	@GeneratedValue
-	int id;
+    @Id
+    @GeneratedValue
+    int id;
 
-	@OneToOne
-	SkillProperty property;
+    @OneToOne
+    SkillProperty property;
 
-	int propertyValueNumeric;
-	String propertyValueString;
+    int propertyValueNumeric;
+    String propertyValueString;
 
-	public SkillRecordProperty() {
-		super();
-	}
+    public SkillRecordProperty() {
+        super();
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public SkillProperty getProperty() {
-		return property;
-	}
+    public SkillProperty getProperty() {
+        return property;
+    }
 
-	public void setProperty(SkillProperty property) {
-		this.property = property;
-	}
+    public void setProperty(SkillProperty property) {
+        this.property = property;
+    }
 
-	public int getPropertyValueNumeric() {
-		return propertyValueNumeric;
-	}
+    public int getPropertyValueNumeric() {
+        return propertyValueNumeric;
+    }
 
-	public void setPropertyValueNumeric(int propertyValue) {
-		this.propertyValueNumeric = propertyValue;
-	}
+    public void setPropertyValueNumeric(int propertyValue) {
+        this.propertyValueNumeric = propertyValue;
+    }
 
-	public String getPropertyValueString() {
-		return propertyValueString;
-	}
+    public String getPropertyValueString() {
+        return propertyValueString;
+    }
 
-	public void setPropertyValueString(String propertyValueString) {
-		this.propertyValueString = propertyValueString;
-	}
+    public void setPropertyValueString(String propertyValueString) {
+        this.propertyValueString = propertyValueString;
+    }
 
 }

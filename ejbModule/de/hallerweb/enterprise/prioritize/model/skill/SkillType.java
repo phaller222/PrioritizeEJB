@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.skill;
 
 public interface SkillType {
-	public int getId();
+    public int getId();
 
-	public String getType();
+    public String getType();
 }

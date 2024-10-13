@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model;
 
 import jakarta.persistence.Entity;
@@ -22,49 +23,49 @@ import jakarta.persistence.Id;
 @Entity()
 public class Location {
 
-	@Id
-	@GeneratedValue
-	private int id;
-	String name;
-	double x;
-	double y;
+    @Id
+    @GeneratedValue
+    private int id;
+    String name;
+    double x;
+    double y;
 
-	public Location() {
-		super();
-	}
+    public Location() {
+        super();
+    }
 
-	public Location(double x, double y) {
-		this.x = x;
-		this.y = y;
-	}
+    public Location(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
 
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public double getX() {
-		return x;
-	}
+    public double getX() {
+        return x;
+    }
 
-	public void setX(double x) {
-		this.x = x;
-	}
+    public void setX(double x) {
+        this.x = x;
+    }
 
-	public double getY() {
-		return y;
-	}
+    public double getY() {
+        return y;
+    }
 
-	public void setY(double y) {
-		this.y = y;
-	}
+    public void setY(double y) {
+        this.y = y;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
 }

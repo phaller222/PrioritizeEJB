@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.usersetting;
 
 import java.util.List;
@@ -45,71 +46,71 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 @Entity
 public class UserPreference {
 
-	@Id
-	@GeneratedValue
-	int id;
+    @Id
+    @GeneratedValue
+    int id;
 
-	@OneToOne
-	User owner;
+    @OneToOne
+    User owner;
 
-	@ManyToMany(fetch = FetchType.EAGER)
-	List<Resource> watchedResources;
+    @ManyToMany(fetch = FetchType.EAGER)
+    List<Resource> watchedResources;
 
-	public UserPreference() {
-		// Empty constructor due to EJB requirement
-	}
+    public UserPreference() {
+        // Empty constructor due to EJB requirement
+    }
 
-	public UserPreference(User owner) {
-		this.owner = owner;
+    public UserPreference(User owner) {
+        this.owner = owner;
 
-	}
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public User getOwner() {
-		return owner;
-	}
+    public User getOwner() {
+        return owner;
+    }
 
-	public void setOwner(User owner) {
-		this.owner = owner;
-	}
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
 
-	public List<Resource> getWatchedResources() {
-		return watchedResources;
-	}
+    public List<Resource> getWatchedResources() {
+        return watchedResources;
+    }
 
-	public void setWatchedResources(List<Resource> resources) {
-		this.watchedResources = resources;
-	}
+    public void setWatchedResources(List<Resource> resources) {
+        this.watchedResources = resources;
+    }
 
-	public boolean addWatchedResource(Resource res) {
-		if (!this.watchedResources.contains(res)) {
-			return this.watchedResources.add(res);
-		} else {
-			return false;
-		}
+    public boolean addWatchedResource(Resource res) {
+        if (!this.watchedResources.contains(res)) {
+            return this.watchedResources.add(res);
+        } else {
+            return false;
+        }
 
-	}
+    }
 
-	public boolean removeWatchedResource(Resource res) {
-		Resource resToRemove = null;
-		for (Resource resource : this.watchedResources) {
-			if (res.getId() == resource.getId()) {
-				resToRemove = resource;
-			}
-		}
-		if (resToRemove != null) {
-			try {
-				this.watchedResources.remove(resToRemove);
-				return true;
-			} catch (Exception ex) {
-				Logger.getLogger(getClass().getName()).severe(ex.getMessage());
-			}
-			return true;
-		} else {
-			return false;
-		}
-	}
+    public boolean removeWatchedResource(Resource res) {
+        Resource resToRemove = null;
+        for (Resource resource : this.watchedResources) {
+            if (res.getId() == resource.getId()) {
+                resToRemove = resource;
+            }
+        }
+        if (resToRemove != null) {
+            try {
+                this.watchedResources.remove(resToRemove);
+                return true;
+            } catch (Exception ex) {
+                Logger.getLogger(getClass().getName()).severe(ex.getMessage());
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

@@ -13,109 +13,107 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 
 /**
  * Address.java - JPA class to represent an {@link Address}.
- * 
+ *
  * <p>
  * Copyright: (c) 2014
  * </p>
  * <p>
  * Peter Haller
  * </p>
- * 
+ *
  * @author peter
  */
 @Entity
 @NamedQueries(@NamedQuery(name = "findAllAddresses", query = "SELECT a FROM Address a ORDER BY a.id"))
 public class Address {
 
-	@Id
-	@GeneratedValue
-	int id;
+    @Id
+    @GeneratedValue
+    int id;
 
-	@Size(min = 5, max = 5, message = "ZIP-code must be 5 digits in length!")
-	String zipCode;
-	String phone;
-	String fax;
-	String city;
-	String street;
-	String housenumber;
-	String mobile;
-	String country;
+    @Size(min = 5, max = 5, message = "ZIP-code must be 5 digits in length!")
+    String zipCode;
+    String phone;
+    String fax;
+    String city;
+    String street;
+    String housenumber;
+    String mobile;
+    String country;
 
-	public String getMobile() {
-		return mobile;
-	}
+    public String getMobile() {
+        return mobile;
+    }
 
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
-	}
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public String getStreet() {
-		return street;
-	}
+    public String getStreet() {
+        return street;
+    }
 
-	public void setStreet(String street) {
-		this.street = street;
-	}
+    public void setStreet(String street) {
+        this.street = street;
+    }
 
-	public String getHousenumber() {
-		return housenumber;
-	}
+    public String getHousenumber() {
+        return housenumber;
+    }
 
-	public void setHousenumber(String housenumber) {
-		this.housenumber = housenumber;
-	}
+    public void setHousenumber(String housenumber) {
+        this.housenumber = housenumber;
+    }
 
-	public String getZipCode() {
-		return zipCode;
-	}
+    public String getZipCode() {
+        return zipCode;
+    }
 
-	public void setZipCode(String zipCode) {
-		this.zipCode = zipCode;
-	}
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
+    }
 
-	public String getCity() {
-		return city;
-	}
+    public String getCity() {
+        return city;
+    }
 
-	public void setCity(String city) {
-		this.city = city;
-	}
+    public void setCity(String city) {
+        this.city = city;
+    }
 
-	public String getFax() {
-		return fax;
-	}
+    public String getFax() {
+        return fax;
+    }
 
-	public void setFax(String fax) {
-		this.fax = fax;
-	}
+    public void setFax(String fax) {
+        this.fax = fax;
+    }
 
-	public String getPhone() {
-		return phone;
-	}
+    public String getPhone() {
+        return phone;
+    }
 
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
-	public String getCountry() {
-		return country;
-	}
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 
-	public void setCountry(String country) {
-		this.country = country;
-	}
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
 }

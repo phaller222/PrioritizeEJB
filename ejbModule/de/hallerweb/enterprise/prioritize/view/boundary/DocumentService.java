@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
@@ -86,7 +87,7 @@ public class DocumentService {
 
 
     /**
-     * @return
+     * @return a http Response
      * @apiParam departmentToken
      * @apiParam group
      * @apiParam apiKey
@@ -120,7 +121,7 @@ public class DocumentService {
         byte[] bytes = new byte[1024];
 
         try (FileOutputStream out = new FileOutputStream(
-                new File(uploadedFileLocation));) {
+            new File(uploadedFileLocation));) {
             while ((read = uploadedInputStream.read(bytes)) != -1) {
                 out.write(bytes, 0, read);
             }
@@ -336,7 +337,8 @@ public class DocumentService {
     @Path("id/{id}/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response setDocumentAttributesById(@PathParam(value = "id") String id, @QueryParam(value = "mimeType") String mimeType,
-                                              @QueryParam(value = "name") String name, @QueryParam(value = "tag") String tag, @QueryParam(value = "changes") String changes,
+                                              @QueryParam(value = "name") String name, @QueryParam(value = "tag") String tag,
+                                              @QueryParam(value = "changes") String changes,
                                               @QueryParam(value = "apiKey") String apiKey) {
         User user = accessController.checkApiKey(apiKey);
         if (user == null) {
@@ -412,11 +414,13 @@ public class DocumentService {
                         throw new NotAuthorizedException(Response.serverError());
                     }
                     return createPositiveResponse("Document has been removed.");
-                } else
+                } else {
                     throw new NotFoundException(Response.serverError().build());
+                }
             }
-        } else
+        } else {
             throw new NotAuthorizedException(Response.serverError());
+        }
     }
 
     private Response createPositiveResponse(String responseText) {

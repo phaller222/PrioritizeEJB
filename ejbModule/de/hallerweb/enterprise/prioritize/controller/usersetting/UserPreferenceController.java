@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.controller.usersetting;
 
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.usersetting.UserPreference;
-
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+
 import java.util.List;
 
 /**
@@ -31,46 +32,45 @@ import java.util.List;
 @Stateless
 public class UserPreferenceController {
 
-	@PersistenceContext
-	EntityManager em;
+    @PersistenceContext
+    EntityManager em;
 
-	/**
-	 * Default constructor.
-	 */
-	public UserPreferenceController() {
-		// Auto-generated constructor stub
-	}
-	
-	public UserPreference createUserPreference(User owner) {
-		UserPreference pref = new UserPreference(owner);
-		em.persist(pref);
-		return pref;
-	}
+    /**
+     * Default constructor.
+     */
+    public UserPreferenceController() {
+        // Auto-generated constructor stub
+    }
 
-	
-	
-	public boolean deleteWatchedResource(UserPreference settings, Resource res) {
-		UserPreference managedSettings  = em.find(UserPreference.class, settings.getId());
-		Resource managedResource = em.find(Resource.class, res.getId()); 
-		managedSettings.removeWatchedResource(managedResource);
-		return true;
-	}
-	
-	
-	public boolean addWatchedResource(UserPreference settings, Resource res) {
-		UserPreference managedSettings  = em.find(UserPreference.class, settings.getId());
-		Resource managedResource = em.find(Resource.class, res.getId()); 
-		return managedSettings.addWatchedResource(managedResource);
-	}
-	
-	public boolean isResourceWached(UserPreference settings, Resource res) {
-		UserPreference managedSettings  = em.find(UserPreference.class, settings.getId());
-		Resource managedResource = em.find(Resource.class, res.getId()); 
-		return managedSettings.getWatchedResources().contains(managedResource);
-	}
-	
-	public List<Resource> getWatchedResources(UserPreference settings) {
-		UserPreference managedSettings  = em.find(UserPreference.class, settings.getId());
-		return managedSettings.getWatchedResources();
-	}
+    public UserPreference createUserPreference(User owner) {
+        UserPreference pref = new UserPreference(owner);
+        em.persist(pref);
+        return pref;
+    }
+
+
+    public boolean deleteWatchedResource(UserPreference settings, Resource res) {
+        UserPreference managedSettings = em.find(UserPreference.class, settings.getId());
+        Resource managedResource = em.find(Resource.class, res.getId());
+        managedSettings.removeWatchedResource(managedResource);
+        return true;
+    }
+
+
+    public boolean addWatchedResource(UserPreference settings, Resource res) {
+        UserPreference managedSettings = em.find(UserPreference.class, settings.getId());
+        Resource managedResource = em.find(Resource.class, res.getId());
+        return managedSettings.addWatchedResource(managedResource);
+    }
+
+    public boolean isResourceWached(UserPreference settings, Resource res) {
+        UserPreference managedSettings = em.find(UserPreference.class, settings.getId());
+        Resource managedResource = em.find(Resource.class, res.getId());
+        return managedSettings.getWatchedResources().contains(managedResource);
+    }
+
+    public List<Resource> getWatchedResources(UserPreference settings) {
+        UserPreference managedSettings = em.find(UserPreference.class, settings.getId());
+        return managedSettings.getWatchedResources();
+    }
 }

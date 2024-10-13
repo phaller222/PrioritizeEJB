@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.controller.security;
 
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
@@ -114,7 +115,7 @@ public class UserRoleController {
                 em.flush();
                 try {
                     logger.log(sessionController.getUser().getUsername(), "Role", Action.CREATE, r.getId(),
-                            "Role \"" + r.getName() + LITERAL_CREATED);
+                        "Role \"" + r.getName() + LITERAL_CREATED);
                 } catch (Exception ex) {
                     logger.log(LITERAL_SYSTEM, "Role", Action.CREATE, r.getId(), " Role \"" + r.getName() + LITERAL_CREATED);
                 }
@@ -129,7 +130,7 @@ public class UserRoleController {
     }
 
     private PermissionRecord persistPermissionRecord(PermissionRecord rec) {
-        Department managedDepartment;
+
         PermissionRecord recNew = new PermissionRecord();
         recNew.setCreatePermission(rec.isCreatePermission());
         recNew.setReadPermission(rec.isReadPermission());
@@ -146,7 +147,7 @@ public class UserRoleController {
         // rec.gertDepartment() can be null if permission record set for
         // all departments!
         if (rec.getDepartment() != null) {
-            managedDepartment = em.find(Department.class, rec.getDepartment().getId());
+            Department managedDepartment = em.find(Department.class, rec.getDepartment().getId());
             recNew.setDepartment(managedDepartment);
         }
 
@@ -178,7 +179,7 @@ public class UserRoleController {
             em.flush();
 
             logger.log(sessionController.getUser().getUsername(), "Role", Action.DELETE, r.getId(),
-                    "Role \"" + r.getName() + LITERAL_DELETED);
+                "Role \"" + r.getName() + LITERAL_DELETED);
         }
     }
 
@@ -202,7 +203,7 @@ public class UserRoleController {
             em.flush();
 
             logger.log(sessionController.getUser().getUsername(), LITERAL_PERMISSION_RECORD, Action.DELETE, rec.getId(),
-                    LITERAL_PERMISSION_RECORD + " " + rec.getId() + LITERAL_DELETED);
+                LITERAL_PERMISSION_RECORD + " " + rec.getId() + LITERAL_DELETED);
         }
     }
 
@@ -225,10 +226,10 @@ public class UserRoleController {
             em.flush();
             try {
                 logger.log(sessionController.getUser().getUsername(), LITERAL_PERMISSION_RECORD, Action.CREATE, recNew.getId(),
-                        LITERAL_PERMISSION_RECORD + " " + recNew.getId() + "\" added.");
+                    LITERAL_PERMISSION_RECORD + " " + recNew.getId() + "\" added.");
             } catch (Exception ex) {
                 logger.log(LITERAL_SYSTEM, LITERAL_PERMISSION_RECORD, Action.CREATE, recNew.getId(),
-                        LITERAL_PERMISSION_RECORD + " " + recNew.getId() + "\" added.");
+                    LITERAL_PERMISSION_RECORD + " " + recNew.getId() + "\" added.");
             }
         }
     }
@@ -265,7 +266,7 @@ public class UserRoleController {
                 userToCreate.setAddress(adr);
 
                 actionBoardController.createActionBoard(userToCreate.getName(), userToCreate.getName() + "'s board",
-                        userToCreate);
+                    userToCreate);
 
                 for (Role role : roles) {
                     Role managedRole = em.find(Role.class, role.getId());
@@ -276,10 +277,10 @@ public class UserRoleController {
                 em.flush();
                 try {
                     logger.log(sessionController.getUser().getUsername(), "User", Action.CREATE, newUser.getId(),
-                            LITERAL_USER + " " + newUser.getUsername() + LITERAL_CREATED);
+                        LITERAL_USER + " " + newUser.getUsername() + LITERAL_CREATED);
                 } catch (Exception ex) {
                     logger.log(LITERAL_SYSTEM, "User", Action.CREATE, newUser.getId(),
-                            LITERAL_USER + " " + newUser.getUsername() + LITERAL_CREATED);
+                        LITERAL_USER + " " + newUser.getUsername() + LITERAL_CREATED);
                 }
                 return userToCreate;
             } else {
@@ -315,7 +316,7 @@ public class UserRoleController {
             em.flush();
 
             logger.log(sessionUser.getUsername(), "User", Action.UPDATE, user.getId(),
-                    LITERAL_USER + " " + user.getUsername() + "\" updated.");
+                LITERAL_USER + " " + user.getUsername() + "\" updated.");
         }
     }
 
@@ -440,11 +441,12 @@ public class UserRoleController {
                 }
             }
 
-            Set<BankingAccount> accounts = u.getBankingAccounts();
+
             em.flush();
             em.remove(u);
             em.flush();
 
+            Set<BankingAccount> accounts = u.getBankingAccounts();
             for (BankingAccount account : accounts) {
                 em.remove(account);
             }
@@ -452,7 +454,7 @@ public class UserRoleController {
             int userId = u.getId();
             String userName = u.getUsername();
             logger.log(sessionController.getUser().getUsername(), LITERAL_USER, Action.DELETE, userId,
-                    LITERAL_USER + " " + userName + LITERAL_DELETED);
+                LITERAL_USER + " " + userName + LITERAL_DELETED);
         }
     }
 
@@ -483,10 +485,10 @@ public class UserRoleController {
         }
     }
 
-    public void removeSkillFromUser(SkillRecord sRecord, User user, User sessionUser) {
+    public void removeSkillFromUser(SkillRecord srecord, User user, User sessionUser) {
         User u = em.find(User.class, user.getId());
         if (authController.canUpdate(u, sessionUser)) {
-            SkillRecord skillRecord = em.find(SkillRecord.class, sRecord.getId());
+            SkillRecord skillRecord = em.find(SkillRecord.class, srecord.getId());
             skillRecord.setUser(null);
             u.removeSkill(skillRecord);
             em.remove(skillRecord);
@@ -551,7 +553,7 @@ public class UserRoleController {
                 em.flush();
                 managedUser.addVacation(timespan);
                 logger.log(sessionController.getUser().getUsername(), LITERAL_USER, Action.UPDATE, user.getId(),
-                        "Vacation added for User \"" + user.getUsername() + "\" .");
+                    "Vacation added for User \"" + user.getUsername() + "\" .");
             }
         }
     }
@@ -564,7 +566,7 @@ public class UserRoleController {
             em.remove(managedTimeSpan);
             em.flush();
             logger.log(sessionController.getUser().getUsername(), LITERAL_USER, Action.UPDATE, user.getId(),
-                    "Vacation removed for User \"" + user.getUsername() + "\" .");
+                "Vacation removed for User \"" + user.getUsername() + "\" .");
         }
     }
 
@@ -583,7 +585,7 @@ public class UserRoleController {
             em.flush();
             managedUser.setIllness(timespan);
             logger.log(sessionController.getUser().getUsername(), LITERAL_USER, Action.UPDATE, user.getId(),
-                    "Illness added for User \"" + user.getUsername() + "\" .");
+                "Illness added for User \"" + user.getUsername() + "\" .");
         }
     }
 
@@ -595,7 +597,7 @@ public class UserRoleController {
             em.remove(managedTimeSpan);
             em.flush();
             logger.log(sessionController.getUser().getUsername(), LITERAL_USER, Action.DELETE, user.getId(),
-                    "Illness removed for User \"" + user.getUsername() + "\" .");
+                "Illness removed for User \"" + user.getUsername() + "\" .");
         }
     }
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.controller.security;
 
 import de.hallerweb.enterprise.prioritize.model.Company;
@@ -77,21 +78,23 @@ public class AuthorizationController {
     /**
      * Checks if a given {@link User} can create objects of the target type. Target type must implement {@link PAuthorizedObject}.
      *
-     * @param targetObject
-     * @param user
-     * @return
+     * @param targetObject The PAuthorizedObject to be checked
+     * @param user         User trying to create an instance of that class
+     * @return true if user can create, otherwise false.
      */
     public boolean canCreate(PAuthorizedObject targetObject, User user) {
         boolean x = canCreatePreCheck(targetObject, user);
-        if (!x) return x;
+        if (!x) {
+            return x;
+        }
 
         String absoluteObjectType = targetObject.getClass().getCanonicalName();
         for (Role role : user.getRoles()) {
             for (PermissionRecord perm : role.getPermissions()) {
                 if (perm.isCreatePermission()
-                        && (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
+                    && (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
                     boolean canCreate = perm.getDepartment() == null || user.getDepartment() == null
-                            || (perm.getDepartment().getId() == user.getDepartment().getId());
+                        || (perm.getDepartment().getId() == user.getDepartment().getId());
                     if (canCreate) {
                         return true;
                     }
@@ -100,6 +103,34 @@ public class AuthorizationController {
         }
         return false;
     }
+
+    /**
+     * Generally check create permission of {@link User} for a given {@link Department}
+     *
+     * @param departmentId ID of the department which is beeing checked
+     * @param user         The User to be checked if he or she has general access to this department
+     * @return boolean indicating if user has access or not.
+     */
+    public boolean canCreate(int departmentId, PAuthorizedObject targetObject, User user) {
+        Boolean x = canCreatePreCheck(targetObject, user);
+        if (!x) {
+            return x;
+        }
+        String absoluteObjectType = targetObject.getClass().getCanonicalName();
+        for (Role role : user.getRoles()) {
+            for (PermissionRecord perm : role.getPermissions()) {
+                if (perm.isCreatePermission()
+                    && (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
+                    boolean canCreate = perm.getDepartment() == null || perm.getDepartment().getId() == departmentId;
+                    if (canCreate) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
     private Boolean canCreatePreCheck(PAuthorizedObject targetObject, User user) {
         // if no user provided, always deny permissions!
@@ -124,38 +155,13 @@ public class AuthorizationController {
         return Boolean.FALSE;
     }
 
-    /**
-     * Generally check create permission of {@link User} for a given {@link Department}
-     *
-     * @param departmentId
-     * @param user
-     * @return
-     */
-    public boolean canCreate(int departmentId, PAuthorizedObject targetObject, User user) {
-        Boolean x = canCreatePreCheck(targetObject, user);
-        if (!x) return x;
-
-        String absoluteObjectType = targetObject.getClass().getCanonicalName();
-        for (Role role : user.getRoles()) {
-            for (PermissionRecord perm : role.getPermissions()) {
-                if (perm.isCreatePermission()
-                        && (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
-                    boolean canCreate = perm.getDepartment() == null || perm.getDepartment().getId() == departmentId;
-                    if (canCreate) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
 
     /**
      * Checks if a given {@link User} can read the given {@link PAuthorizedObject}
      *
-     * @param targetObject
-     * @param user
-     * @return
+     * @param targetObject The PAuthorizedObject to be checked
+     * @param user         User to check read access
+     * @return true if user can read
      */
     public boolean canRead(PAuthorizedObject targetObject, User user) {
         // if no user provided, always deny permissions!
@@ -182,7 +188,9 @@ public class AuthorizationController {
         User realUser = userRoleController.findUserByUsername(user.getUsername(), getSystemUser());
         for (Role role : realUser.getRoles()) {
             for (PermissionRecord perm : role.getPermissions()) {
-                if (checkReadPermission(targetObject, absoluteObjectType, perm)) return true;
+                if (checkReadPermission(targetObject, absoluteObjectType, perm)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -190,7 +198,7 @@ public class AuthorizationController {
 
     private boolean checkReadPermission(PAuthorizedObject targetObject, String absoluteObjectType, PermissionRecord perm) {
         if (perm.isReadPermission()
-                && (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
+            && (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
             // Object with this ID is explicitly readable by this role.
             if (perm.getObjectId() == targetObject.getId()) {
                 return true;
@@ -211,9 +219,9 @@ public class AuthorizationController {
     /**
      * Checks if a given {@link User} can update the given {@link PAuthorizedObject}
      *
-     * @param targetObject
-     * @param user
-     * @return
+     * @param targetObject The PAuthorizedObject to be checked
+     * @param user         User to check update access
+     * @return true if user can update
      */
     public boolean canUpdate(PAuthorizedObject targetObject, User user) {
         // if no user provided, always deny permissions!
@@ -240,7 +248,9 @@ public class AuthorizationController {
         User realUser = userRoleController.findUserByUsername(user.getUsername(), getSystemUser());
         for (Role role : realUser.getRoles()) {
             for (PermissionRecord perm : role.getPermissions()) {
-                if (checkUpdatePermission(targetObject, absoluteObjectType, perm)) return true;
+                if (checkUpdatePermission(targetObject, absoluteObjectType, perm)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -248,13 +258,13 @@ public class AuthorizationController {
 
     private boolean checkUpdatePermission(PAuthorizedObject targetObject, String absoluteObjectType, PermissionRecord perm) {
         if (perm.isUpdatePermission()
-                && (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
+            && (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
             // Object with this ID is explicitly updatable by this role.
             if (perm.getObjectId() == targetObject.getId()) {
                 return true;
             }
             boolean canUpdate = perm.getDepartment() == null || targetObject.getDepartment() == null
-                    || (perm.getDepartment().getId() == targetObject.getDepartment().getId());
+                || (perm.getDepartment().getId() == targetObject.getDepartment().getId());
             if (canUpdate) {
                 return true;
             }
@@ -265,9 +275,9 @@ public class AuthorizationController {
     /**
      * Checks if a given {@link User} can delete the given {@link PAuthorizedObject}
      *
-     * @param targetObject
-     * @param user
-     * @return
+     * @param targetObject The PAuthorizedObject to be checked
+     * @param user         User to check delete rights
+     * @return true if user can delete
      */
     public boolean canDelete(PAuthorizedObject targetObject, User user) {
         // if no user provided, always deny permissions!
@@ -294,7 +304,9 @@ public class AuthorizationController {
         User realUser = userRoleController.findUserByUsername(user.getUsername(), getSystemUser());
         for (Role role : realUser.getRoles()) {
             for (PermissionRecord perm : role.getPermissions()) {
-                if (checkDeletePermission(targetObject, absoluteObjectType, perm)) return true;
+                if (checkDeletePermission(targetObject, absoluteObjectType, perm)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -302,13 +314,15 @@ public class AuthorizationController {
 
     private boolean checkDeletePermission(PAuthorizedObject targetObject, String absoluteObjectType, PermissionRecord perm) {
         if (perm.isDeletePermission()
-                && (perm.getAbsoluteObjectType() == null || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
+            && (perm.getAbsoluteObjectType() == null
+            || perm.getAbsoluteObjectType().equals(absoluteObjectType))) {
             // Object with this ID is explicitly deletable by this role.
             if (perm.getObjectId() == targetObject.getId()) {
                 return true;
             }
-            boolean canDelete = perm.getDepartment() == null || targetObject.getDepartment() == null ||
-                    (perm.getDepartment().getId() == targetObject.getDepartment().getId());
+            boolean canDelete = perm.getDepartment() == null
+                || targetObject.getDepartment() == null
+                || (perm.getDepartment().getId() == targetObject.getDepartment().getId());
             if (canDelete) {
                 return true;
             }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.controller.skill;
 
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
@@ -170,7 +171,7 @@ public class SkillController {
     /**
      * Find all {@link SkillCategory} objects at the top level (parent=root).
      *
-     * @return
+     * @return A list with all root SkillCategories
      */
     public List<SkillCategory> getRootCategories() {
         Query query = em.createNamedQuery("findRootCategories");
@@ -272,11 +273,11 @@ public class SkillController {
             // Remove all SkillRecords for that skill from Users and delete them.
             List<SkillRecord> skillRecords = getSkillRecordsForSkill(skill);
             if (!skillRecords.isEmpty()) {
-                for (SkillRecord sRecord : skillRecords) {
-                    if (sRecord.getUser() != null) {
-                        sRecord.getUser().removeSkill(sRecord);
+                for (SkillRecord srecord : skillRecords) {
+                    if (srecord.getUser() != null) {
+                        srecord.getUser().removeSkill(srecord);
                     }
-                    em.remove(sRecord);
+                    em.remove(srecord);
                 }
             }
             em.remove(skill);
@@ -335,11 +336,11 @@ public class SkillController {
                 if (authController.canDelete(skill, sessionUser)) {
                     // first find all instances (skillRecords) of this skill and remove them.
                     List<SkillRecord> records = getSkillRecordsForSkill(skill);
-                    for (SkillRecord sRecord : records) {
-                        if (sRecord.getUser() != null) {
-                            sRecord.getUser().removeSkill(sRecord);
+                    for (SkillRecord srecord : records) {
+                        if (srecord.getUser() != null) {
+                            srecord.getUser().removeSkill(srecord);
                         }
-                        em.remove(sRecord);
+                        em.remove(srecord);
                         em.flush();
                     }
 

@@ -13,34 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.controller.security;
 
 import de.hallerweb.enterprise.prioritize.model.security.User;
-
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 
 /**
  * RestAccessController.java - Authorizes REST users and assigns the session
- * 
- * */
+ */
 @Stateless
 public class RestAccessController {
 
-	@EJB
-	UserRoleController userRoleController;
+    @EJB
+    UserRoleController userRoleController;
 
-	@Inject
-	SessionController sessionController;
+    @Inject
+    SessionController sessionController;
 
-	public User checkApiKey(String key) {
-		User u = userRoleController.findUserByApiKey(key);
-		if (u != null) {
-			sessionController.setUser(u);
-			return u;
-		} else {
-			return null;
-		}
-	}
+    public User checkApiKey(String key) {
+        User u = userRoleController.findUserByApiKey(key);
+        if (u != null) {
+            sessionController.setUser(u);
+            return u;
+        } else {
+            return null;
+        }
+    }
 }

@@ -137,7 +137,7 @@ public class MQTTResourceController {
      * resource getting shut down. The timeout period for this is configured in
      * the config.properties file in the manifest.
      *
-     * @param resource
+     * @param resource The corresponding resource object
      */
     public void updateMqttPing(Resource resource) {
         Resource managedResource = em.find(Resource.class, resource.getId());
@@ -163,8 +163,8 @@ public class MQTTResourceController {
     /**
      * Same as getResource() in ResourceManager, but only returns resources which are MQTT capable.
      *
-     * @param uuid
-     * @return
+     * @param uuid UUID of the resource
+     * @return The resource
      */
     public Resource getResource(String uuid, User sessionUser) {
         Query query = em.createNamedQuery("findResourceByUUId");
@@ -185,9 +185,9 @@ public class MQTTResourceController {
      * Returns all MQTT UUID's currently registered with an MQTT Resource
      * object.
      *
-     * @return
+     * @return A list with all known MQTT UUID's
      */
-    @SuppressWarnings("unchecked")
+
     public List<String> getAllMqttUuids() {
         Query query = em.createNamedQuery("findAllMqttResourceUuids");
         return query.getResultList();
@@ -196,8 +196,8 @@ public class MQTTResourceController {
     /**
      * Checks if an MQTT resource for the given UUID exists.
      *
-     * @param uuid
-     * @return
+     * @param uuid - the UUID
+     * @return boolean true if a resource eith that UUID exists
      */
     public boolean exists(String uuid) {
         Query query = em.createNamedQuery("findResourceByUUId");
@@ -215,8 +215,8 @@ public class MQTTResourceController {
      * Writes streaming data received from an MQTT resource to the resource's
      * common data buffer.
      *
-     * @param res
-     * @param data
+     * @param res The resource to write the data to
+     * @param data - the byte array with the new data.
      */
     public void writeMqttDataReceived(Resource res, byte[] data) {
         Resource managed = em.find(Resource.class, res.getId());
@@ -240,8 +240,8 @@ public class MQTTResourceController {
      * resource's read buffer and sends the data to the specified topic to be
      * received by the resource.
      *
-     * @param res
-     * @param data
+     * @param res The resource
+     * @param data  the MQTT Data
      */
     public void writeMqttDataToSend(Resource res, byte[] data) {
         Resource managedResource = em.find(Resource.class, res.getId());
@@ -272,9 +272,9 @@ public class MQTTResourceController {
     /**
      * Adds a new named value pair to the MQTT resource's NamedValue objects.
      *
-     * @param res
-     * @param name
-     * @param value
+     * @param res The Resource
+     * @param name Name of the property
+     * @param value the value
      */
     public void addMqttValueForResource(Resource res, String name, String value) {
         //TODO: Umstellen auf Apache IOT-DB
@@ -310,8 +310,8 @@ public class MQTTResourceController {
      * Deletes the named value with the given name and all historical data for
      * it from the given Resource.
      *
-     * @param res
-     * @param name
+     * @param res The Resource
+     * @param name The name of the property to be deleted
      */
     public void clearMqttValueForResource(Resource res, String name) {
         //TODO: Umstellen auf Apache IOT-DB
@@ -343,8 +343,8 @@ public class MQTTResourceController {
      * Returns all NameValueEntry objects currently defined for the given
      * resource.
      *
-     * @param res
-     * @return
+     * @param res The resource
+     * @return A Set with NameValueEntries
      */
     public Set<NameValueEntry> getNameValueEntries(Resource res) {
         //TODO: Umstellen auf Apache IOT-DB
@@ -439,9 +439,9 @@ public class MQTTResourceController {
      * Set the current geographic coordinates of a resource (Latitude and
      * Longitude, String, as expected by GoogleEarth)
      *
-     * @param resource
-     * @param latitude
-     * @param longitude
+     * @param resource The resource
+     * @param latitude Current Latitude value stored for the resource
+     * @param longitude Current Longitude value stored for the resource
      */
     public void setCoordinates(Resource resource, String latitude, String longitude) {
         Resource res = em.find(Resource.class, resource.getId());

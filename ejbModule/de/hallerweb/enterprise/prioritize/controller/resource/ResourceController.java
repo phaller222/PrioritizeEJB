@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.controller.resource;
 
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
@@ -27,8 +28,6 @@ import de.hallerweb.enterprise.prioritize.model.resource.ResourceGroup;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import de.hallerweb.enterprise.prioritize.model.skill.SkillRecord;
-
-
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.enterprise.context.ContextNotActiveException;
@@ -37,381 +36,382 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+
 import java.util.*;
 import java.util.logging.Logger;
 
 /**
  * ResourceController.java - Controls the creation, modification and deletion of
  * {@link Resource} and {@link ResourceGroup} objects.
- * 
  */
 @Stateless
 public class ResourceController {
-	@PersistenceContext
-	EntityManager em;
-	@Inject
-	SessionController sessionController;
-	@EJB
-	AuthorizationController authController;
-	@EJB
-	LoggingController logger;
-	@EJB
-	InitializationController initController;
+    @PersistenceContext
+    EntityManager em;
+    @Inject
+    SessionController sessionController;
+    @EJB
+    AuthorizationController authController;
+    @EJB
+    LoggingController logger;
+    @EJB
+    InitializationController initController;
 
 
-	private static final String PARAM_DEPARTMENT_ID = "deptId";
-	private static final String LITERAL_RESOURCE = "Resource";
-	private static final String LITERAL_RESOURCE_SPACE = " Resource \"";
-	private static final String LITERAL_RESOURCE_CREATED = "\" created.";
+    private static final String PARAM_DEPARTMENT_ID = "deptId";
+    private static final String LITERAL_RESOURCE = "Resource";
+    private static final String LITERAL_RESOURCE_SPACE = " Resource \"";
+    private static final String LITERAL_RESOURCE_CREATED = "\" created.";
 
-	
-	public Resource createResource(Resource resourceToCreate, int groupId, User sessionUser) {
-		ResourceGroup managedGroup = em.find(ResourceGroup.class, groupId);
 
-		String name = resourceToCreate.getName();
-		String description = resourceToCreate.getDescription();
-		String ip = resourceToCreate.getIp();
-		int maxSlots = resourceToCreate.getMaxSlots();
-		boolean stationary = resourceToCreate.isStationary();
-		boolean remote = resourceToCreate.isRemote();
+    public Resource createResource(Resource resourceToCreate, int groupId, User sessionUser) {
+        ResourceGroup managedGroup = em.find(ResourceGroup.class, groupId);
 
-		if (findResourceByResourceGroupAndName(managedGroup.getId(), name, sessionUser) == null) {
-			Resource resource = new Resource();
-			if (authController.canCreate(managedGroup.getDepartment().getId(),resource, sessionUser)) {
-				resource.setName(name);
-				resource.setResourceGroup(managedGroup);
-				resource.setDescription(description);
-				resource.setIp(ip);
-				resource.setMaxSlots(maxSlots);
-				resource.setStationary(stationary);
-				resource.setRemote(remote);
-				resource.setDepartment(managedGroup.getDepartment());
+        String name = resourceToCreate.getName();
+        String description = resourceToCreate.getDescription();
+        String ip = resourceToCreate.getIp();
+        int maxSlots = resourceToCreate.getMaxSlots();
+        boolean stationary = resourceToCreate.isStationary();
+        boolean remote = resourceToCreate.isRemote();
 
-				// Add the DocumentInfo to the DocumentGroup
-				managedGroup.addResource(resource);
-				em.persist(resource);
-				em.flush();
-				try {
-					logger.log(sessionUser.getUsername(), LITERAL_RESOURCE, Action.CREATE, resource.getId(),
-							LITERAL_RESOURCE_SPACE + resource.getName() + LITERAL_RESOURCE_CREATED);
-				} catch (Exception ex) {
-					// Log message omitted here because this can only happen during
-					// automatic tests (no session).
-				}
-				return resource;
-			} else {
-				return null;
-			}
-		} else {
-			return null;
-		}
-	}
+        if (findResourceByResourceGroupAndName(managedGroup.getId(), name, sessionUser) == null) {
+            Resource resource = new Resource();
+            if (authController.canCreate(managedGroup.getDepartment().getId(), resource, sessionUser)) {
+                resource.setName(name);
+                resource.setResourceGroup(managedGroup);
+                resource.setDescription(description);
+                resource.setIp(ip);
+                resource.setMaxSlots(maxSlots);
+                resource.setStationary(stationary);
+                resource.setRemote(remote);
+                resource.setDepartment(managedGroup.getDepartment());
 
-	public ResourceGroup createResourceGroup(int departmentId, String name, User sessionUser) {
+                // Add the DocumentInfo to the DocumentGroup
+                managedGroup.addResource(resource);
+                em.persist(resource);
+                em.flush();
+                try {
+                    logger.log(sessionUser.getUsername(), LITERAL_RESOURCE, Action.CREATE, resource.getId(),
+                        LITERAL_RESOURCE_SPACE + resource.getName() + LITERAL_RESOURCE_CREATED);
+                } catch (Exception ex) {
+                    // Log message omitted here because this can only happen during
+                    // automatic tests (no session).
+                }
+                return resource;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
 
-		// first get department and check if group already exists
-		Department managedDepartment = em.find(Department.class, departmentId);
-		if (findResourceGroupByNameAndDepartment(name, managedDepartment.getId(), sessionUser) == null) {
-			ResourceGroup resourceGroup = new ResourceGroup();
-			if (authController.canCreate(resourceGroup, sessionUser)) {
-				resourceGroup.setName(name);
-				resourceGroup.setDepartment(managedDepartment);
-				resourceGroup.setResources(new TreeSet<>());
+    public ResourceGroup createResourceGroup(int departmentId, String name, User sessionUser) {
 
-				em.persist(resourceGroup);
-				managedDepartment.addResourceGroup(resourceGroup);
+        // first get department and check if group already exists
+        Department managedDepartment = em.find(Department.class, departmentId);
+        if (findResourceGroupByNameAndDepartment(name, managedDepartment.getId(), sessionUser) == null) {
+            ResourceGroup resourceGroup = new ResourceGroup();
+            if (authController.canCreate(resourceGroup, sessionUser)) {
+                resourceGroup.setName(name);
+                resourceGroup.setDepartment(managedDepartment);
+                resourceGroup.setResources(new TreeSet<>());
 
-				logger.log(sessionController.getUser().getUsername(), "ResourceGroup", Action.CREATE, resourceGroup.getId(),
-						" Resource Group \"" + resourceGroup.getName() + LITERAL_RESOURCE_CREATED);
+                em.persist(resourceGroup);
+                managedDepartment.addResourceGroup(resourceGroup);
 
-				return resourceGroup;
-			} else {
-				return null;
-			}
-		} else {
-			return null;
-		}
-	}
+                logger.log(sessionController.getUser().getUsername(), "ResourceGroup", Action.CREATE, resourceGroup.getId(),
+                    " Resource Group \"" + resourceGroup.getName() + LITERAL_RESOURCE_CREATED);
 
-	public Set<Resource> getResourcesInResourceGroup(int resourceGroupId, User sessionUser) {
-		ResourceGroup rg = em.find(ResourceGroup.class, resourceGroupId);
-		Set<Resource> result = rg.getResources();
-		if (result.isEmpty()) {
-			return new HashSet<>();
-		} else {
-			Resource res = result.iterator().next();
-			if (authController.canRead(res, sessionUser)) {
-				return result;
-			} else {
-				return new HashSet<>();
-			}
-		}
-	}
+                return resourceGroup;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
 
-	public Resource getResource(int id, User sessionUser) {
-		Query query = em.createNamedQuery("findResourceById");
-		query.setParameter("resId", id);
-		Resource res = (Resource) query.getSingleResult();
-		if (authController.canRead(res, sessionUser)) {
-			return res;
-		} else {
-			return null;
-		}
-	}
+    public Set<Resource> getResourcesInResourceGroup(int resourceGroupId, User sessionUser) {
+        ResourceGroup rg = em.find(ResourceGroup.class, resourceGroupId);
+        Set<Resource> result = rg.getResources();
+        if (result.isEmpty()) {
+            return new HashSet<>();
+        } else {
+            Resource res = result.iterator().next();
+            if (authController.canRead(res, sessionUser)) {
+                return result;
+            } else {
+                return new HashSet<>();
+            }
+        }
+    }
 
-	public List<Resource> getAllResources(User sessionUser) {
-		if (authController.canRead(new Resource(), sessionUser)) {
-			Query query = em.createNamedQuery("findAllResources");
-			return query.getResultList();
-		} else {
-			return new ArrayList<>();
-		}
-	}
+    public Resource getResource(int id, User sessionUser) {
+        Query query = em.createNamedQuery("findResourceById");
+        query.setParameter("resId", id);
+        Resource res = (Resource) query.getSingleResult();
+        if (authController.canRead(res, sessionUser)) {
+            return res;
+        } else {
+            return null;
+        }
+    }
 
-	/**
-	 * Returns the ResourceGroup object with the given id. The parameter User
-	 * will be used later to eventually check the permissions.
-	 * 
-	 * @param id
-	 * @param user
-	 * @return
-	 */
-	public ResourceGroup getResourceGroup(int id, User user) {
-		Query query = em.createNamedQuery("findResourceGroupById");
-		query.setParameter("resourceGroupId", id);
-		return (ResourceGroup) query.getSingleResult();
-	}
+    public List<Resource> getAllResources(User sessionUser) {
+        if (authController.canRead(new Resource(), sessionUser)) {
+            Query query = em.createNamedQuery("findAllResources");
+            return query.getResultList();
+        } else {
+            return new ArrayList<>();
+        }
+    }
 
-	@SuppressWarnings("unchecked")
-	public List<ResourceGroup> getResourceGroupsForDepartment(int departmentId, User sessionUser) {
-		Query query = em.createNamedQuery("findResourceGroupsForDepartment");
-		query.setParameter(PARAM_DEPARTMENT_ID, departmentId);
-		List<ResourceGroup> groups = query.getResultList();
-		ResourceGroup group = groups.get(0);
-		if (authController.canRead(group, sessionUser)) {
-			return groups;
-		} else {
-			return new ArrayList<>();
-		}
-	}
+    /**
+     * Returns the ResourceGroup object with the given id. The parameter User
+     * will be used later to eventually check the permissions.
+     *
+     * @param id   ID of the resource group
+     * @param user User
+     * @return The Resource group with the specific ID or null if not found.
+     */
+    public ResourceGroup getResourceGroup(int id, User user) {
+        Query query = em.createNamedQuery("findResourceGroupById");
+        query.setParameter("resourceGroupId", id);
+        return (ResourceGroup) query.getSingleResult();
+    }
 
-	public ResourceGroup getResourceGroupInDepartment(int departmentId, String groupName, User sessionUser) {
-		Query query = em.createNamedQuery("findResourceGroupInDepartment");
-		query.setParameter(PARAM_DEPARTMENT_ID, departmentId);
-		query.setParameter("groupName", groupName);
-		ResourceGroup group = (ResourceGroup) query.getSingleResult();
-		if (group != null && authController.canRead(group, sessionUser)) {
-			return (ResourceGroup) query.getSingleResult();
-		} else {
-			return null;
-		}
-	}
+    @SuppressWarnings("unchecked")
+    public List<ResourceGroup> getResourceGroupsForDepartment(int departmentId, User sessionUser) {
+        Query query = em.createNamedQuery("findResourceGroupsForDepartment");
+        query.setParameter(PARAM_DEPARTMENT_ID, departmentId);
+        List<ResourceGroup> groups = query.getResultList();
+        ResourceGroup group = groups.get(0);
+        if (authController.canRead(group, sessionUser)) {
+            return groups;
+        } else {
+            return new ArrayList<>();
+        }
+    }
 
-	public void deleteResource(int resourceId, User sessionUser) {
-		Resource res = em.find(Resource.class, resourceId);
-		if (authController.canDelete(res, sessionUser)) {
-			Set<ResourceReservation> reservations = res.getReservations();
-			try {
-				if (!reservations.isEmpty()) {
-					reservations.clear();
-					res.setReservations(reservations);
-				}
-				res.getResourceGroup().removeResource(res);
-			} catch (NullPointerException ex) {
-				Logger.getLogger(getClass().getName()).severe(ex.getMessage());
-			}
+    public ResourceGroup getResourceGroupInDepartment(int departmentId, String groupName, User sessionUser) {
+        Query query = em.createNamedQuery("findResourceGroupInDepartment");
+        query.setParameter(PARAM_DEPARTMENT_ID, departmentId);
+        query.setParameter("groupName", groupName);
+        ResourceGroup group = (ResourceGroup) query.getSingleResult();
+        if (group != null && authController.canRead(group, sessionUser)) {
+            return (ResourceGroup) query.getSingleResult();
+        } else {
+            return null;
+        }
+    }
 
-			for (NameValueEntry entry : res.getMqttValues()) {
-				NameValueEntry managedEntry = em.find(NameValueEntry.class, entry.getId());
-				em.remove(managedEntry);
-			}
-			res.getMqttValues().clear();
+    public void deleteResource(int resourceId, User sessionUser) {
+        Resource res = em.find(Resource.class, resourceId);
+        if (authController.canDelete(res, sessionUser)) {
+            Set<ResourceReservation> reservations = res.getReservations();
+            try {
+                if (!reservations.isEmpty()) {
+                    reservations.clear();
+                    res.setReservations(reservations);
+                }
+                res.getResourceGroup().removeResource(res);
+            } catch (NullPointerException ex) {
+                Logger.getLogger(getClass().getName()).severe(ex.getMessage());
+            }
 
-			em.remove(res);
-			em.flush();
-			try {
-				logger.log(sessionUser.getUsername(), LITERAL_RESOURCE, Action.DELETE, res.getId(),
-						LITERAL_RESOURCE_SPACE + res.getName() + "\" deleted.");
-			} catch (ContextNotActiveException ex) {
-				logger.log("SYSTEM", LITERAL_RESOURCE, Action.DELETE, res.getId(),
-						LITERAL_RESOURCE_SPACE + res.getName() + "\" deleted.");
-			}
-		}
-	}
+            for (NameValueEntry entry : res.getMqttValues()) {
+                NameValueEntry managedEntry = em.find(NameValueEntry.class, entry.getId());
+                em.remove(managedEntry);
+            }
+            res.getMqttValues().clear();
 
-	public void deleteResourceGroup(int resourceGroupId, User user) {
-		ResourceGroup group = em.find(ResourceGroup.class, resourceGroupId);
-		// ------------------ AUTH check-------------------------
-		if (authController.canDelete(group, user)) {
-			Set<Resource> resources = group.getResources();
-			if (resources != null) {
-				for (Resource resource : resources) {
-					deleteResource(resource.getId(), user);
-				}
-			}
+            em.remove(res);
+            em.flush();
+            try {
+                logger.log(sessionUser.getUsername(), LITERAL_RESOURCE, Action.DELETE, res.getId(),
+                    LITERAL_RESOURCE_SPACE + res.getName() + "\" deleted.");
+            } catch (ContextNotActiveException ex) {
+                logger.log("SYSTEM", LITERAL_RESOURCE, Action.DELETE, res.getId(),
+                    LITERAL_RESOURCE_SPACE + res.getName() + "\" deleted.");
+            }
+        }
+    }
 
-			group.getDepartment().getResourceGroups().remove(group);
-			group.setDepartment(null);
-			em.remove(group);
-			em.flush();
-		}
-	}
+    public void deleteResourceGroup(int resourceGroupId, User user) {
+        ResourceGroup group = em.find(ResourceGroup.class, resourceGroupId);
+        // ------------------ AUTH check-------------------------
+        if (authController.canDelete(group, user)) {
+            Set<Resource> resources = group.getResources();
+            if (resources != null) {
+                for (Resource resource : resources) {
+                    deleteResource(resource.getId(), user);
+                }
+            }
 
-	public Resource editResource(Resource resource) {
-		Resource managedResource = em.find(Resource.class, resource.getId());
-		managedResource.setAgent(resource.isAgent());
-		managedResource.setBusy(resource.isBusy());
-		managedResource.setDataReceiveTopic(resource.getMqttDataReceiveTopic());
-		managedResource.setDataSendTopic(resource.getMqttDataSendTopic());
-		managedResource.setDescription(resource.getDescription());
-		managedResource.setIp(resource.getIp());
-		managedResource.setLatitude(resource.getLatitude());
-		managedResource.setLongitude(resource.getLongitude());
-		managedResource.setMaxSlots(resource.getMaxSlots());
-		managedResource.setMqttCommands(resource.getMqttCommands());
-		managedResource.setMqttDataReceiveTopic(resource.getMqttDataReceiveTopic());
-		managedResource.setMqttDataSendTopic(resource.getMqttDataSendTopic());
-		managedResource.setMqttLastPing(resource.getMqttLastPing());
-		managedResource.setMqttOnline(resource.isMqttOnline());
-		managedResource.setMqttResource(resource.isMqttResource());
-		managedResource.setName(resource.getName());
-		managedResource.setRemote(resource.isRemote());
-		managedResource.setSkills(resource.getSkills());
-		managedResource.setStationary(resource.isStationary());
-		return managedResource;
-	}
+            group.getDepartment().getResourceGroups().remove(group);
+            group.setDepartment(null);
+            em.remove(group);
+            em.flush();
+        }
+    }
 
-	public Resource editResource(Resource resourceToEdit, Department newDept, ResourceGroup newGroup, String newName, String newDescription,
-			String newIp, boolean newIsStationary, boolean newIsRemote, int newMaxSlots, User user) {
-		Resource managedResource = em.find(Resource.class, resourceToEdit.getId());
-		Department managedDepartment = null;
-		ResourceGroup managedGroup = null;
-		if (newDept != null) {
-			managedDepartment = em.find(Department.class, newDept.getId());
-			managedGroup = em.find(ResourceGroup.class, newGroup.getId());
-		}
+    public Resource editResource(Resource resource) {
+        Resource managedResource = em.find(Resource.class, resource.getId());
+        managedResource.setAgent(resource.isAgent());
+        managedResource.setBusy(resource.isBusy());
+        managedResource.setDataReceiveTopic(resource.getMqttDataReceiveTopic());
+        managedResource.setDataSendTopic(resource.getMqttDataSendTopic());
+        managedResource.setDescription(resource.getDescription());
+        managedResource.setIp(resource.getIp());
+        managedResource.setLatitude(resource.getLatitude());
+        managedResource.setLongitude(resource.getLongitude());
+        managedResource.setMaxSlots(resource.getMaxSlots());
+        managedResource.setMqttCommands(resource.getMqttCommands());
+        managedResource.setMqttDataReceiveTopic(resource.getMqttDataReceiveTopic());
+        managedResource.setMqttDataSendTopic(resource.getMqttDataSendTopic());
+        managedResource.setMqttLastPing(resource.getMqttLastPing());
+        managedResource.setMqttOnline(resource.isMqttOnline());
+        managedResource.setMqttResource(resource.isMqttResource());
+        managedResource.setName(resource.getName());
+        managedResource.setRemote(resource.isRemote());
+        managedResource.setSkills(resource.getSkills());
+        managedResource.setStationary(resource.isStationary());
+        return managedResource;
+    }
 
-		if (authController.canUpdate(managedResource, user) && managedDepartment != null) {
+    public Resource editResource(Resource resourceToEdit, Department newDept, ResourceGroup newGroup, String newName, String newDescription,
+                                 String newIp, boolean newIsStationary, boolean newIsRemote, int newMaxSlots, User user) {
+        Resource managedResource = em.find(Resource.class, resourceToEdit.getId());
+        Department managedDepartment = null;
+        ResourceGroup managedGroup = null;
+        if (newDept != null) {
+            managedDepartment = em.find(Department.class, newDept.getId());
+            managedGroup = em.find(ResourceGroup.class, newGroup.getId());
+        }
 
-			managedResource.setName(newName);
-			managedResource.setDescription(newDescription);
-			managedResource.setIp(newIp);
-			managedResource.setStationary(newIsStationary);
-			managedResource.setRemote(newIsRemote);
-			managedResource.setMaxSlots(newMaxSlots);
-			managedResource.setDepartment(managedDepartment);
-			managedResource.getResourceGroup().removeResource(managedResource);
-			em.flush();
+        if (authController.canUpdate(managedResource, user) && managedDepartment != null) {
 
-			managedGroup.addResource(managedResource);
-			managedResource.setResourceGroup(managedGroup);
+            managedResource.setName(newName);
+            managedResource.setDescription(newDescription);
+            managedResource.setIp(newIp);
+            managedResource.setStationary(newIsStationary);
+            managedResource.setRemote(newIsRemote);
+            managedResource.setMaxSlots(newMaxSlots);
+            managedResource.setDepartment(managedDepartment);
+            managedResource.getResourceGroup().removeResource(managedResource);
+            em.flush();
 
-			em.flush();
+            managedGroup.addResource(managedResource);
+            managedResource.setResourceGroup(managedGroup);
 
-			logger.log(user.getUsername(), LITERAL_RESOURCE, Action.UPDATE, managedResource.getId(),
-					LITERAL_RESOURCE_SPACE + managedResource.getId() + "\" changed.");
+            em.flush();
 
-			return managedResource;
-		} else {
-			return null;
-		}
-	}
+            logger.log(user.getUsername(), LITERAL_RESOURCE, Action.UPDATE, managedResource.getId(),
+                LITERAL_RESOURCE_SPACE + managedResource.getId() + "\" changed.");
 
-	public void setResourceName(Resource res, String name, User user) {
-		Resource managedResource = em.find(Resource.class, res.getId());
-		if (authController.canUpdate(managedResource, user)) {
-			managedResource.setName(name);
-		}
-	}
+            return managedResource;
+        } else {
+            return null;
+        }
+    }
 
-	public void setResourceDescription(Resource res, String description, User user) {
-		Resource managedResource = em.find(Resource.class, res.getId());
-		if (authController.canUpdate(managedResource, user)) {
-			managedResource.setDescription(description);
-		}
-	}
+    public void setResourceName(Resource res, String name, User user) {
+        Resource managedResource = em.find(Resource.class, res.getId());
+        if (authController.canUpdate(managedResource, user)) {
+            managedResource.setName(name);
+        }
+    }
 
-	
-	public String getLongitude(Resource resource) {
-		Resource res = em.find(Resource.class, resource.getId());
-		if (res.getLongitude() == null) {
-			return "";
-		} else {
-			return resource.getLongitude();
-		}
-	}
+    public void setResourceDescription(Resource res, String description, User user) {
+        Resource managedResource = em.find(Resource.class, res.getId());
+        if (authController.canUpdate(managedResource, user)) {
+            managedResource.setDescription(description);
+        }
+    }
 
-	public void addSkillToResource(int resourceId, int skillRecordId, User sessionUser) {
-		boolean alreadyAssigned = false; // is set to true if skill type already
-										 // assigned
-		Resource res = em.find(Resource.class, resourceId);
-		if (authController.canUpdate(res, sessionUser)) {
-			SkillRecord rec = em.find(SkillRecord.class, skillRecordId);
 
-			for (SkillRecord resSkillRecord : res.getSkills())
-				if (resSkillRecord.getSkill().getId() == rec.getId()) {
-					alreadyAssigned = true;
-					break;
-				}
+    public String getLongitude(Resource resource) {
+        Resource res = em.find(Resource.class, resource.getId());
+        if (res.getLongitude() == null) {
+            return "";
+        } else {
+            return resource.getLongitude();
+        }
+    }
 
-			if (!alreadyAssigned) {
-				res.addSkill(rec);
-				rec.setResource(res);
-				em.flush();
-			}
-		}
+    public void addSkillToResource(int resourceId, int skillRecordId, User sessionUser) {
+        boolean alreadyAssigned = false; // is set to true if skill type already
+        // assigned
+        Resource res = em.find(Resource.class, resourceId);
+        if (authController.canUpdate(res, sessionUser)) {
+            SkillRecord rec = em.find(SkillRecord.class, skillRecordId);
 
-	}
+            for (SkillRecord resSkillRecord : res.getSkills()) {
+                if (resSkillRecord.getSkill().getId() == rec.getId()) {
+                    alreadyAssigned = true;
+                    break;
+                }
+            }
 
-	public void removeSkillFromResource(SkillRecord sRecord, Resource resource, User sessionUser) {
-		Resource res = em.find(Resource.class, resource.getId());
-		if (authController.canUpdate(res, sessionUser)) {
-			SkillRecord skillRecord = em.find(SkillRecord.class, sRecord.getId());
-			skillRecord.setResource(null);
-			res.removeSkill(skillRecord);
-			em.remove(skillRecord);
-			em.flush();
-		}
-	}
+            if (!alreadyAssigned) {
+                res.addSkill(rec);
+                rec.setResource(res);
+                em.flush();
+            }
+        }
 
-	public Set<SkillRecord> getSkillRecordsForResource(int resourceId, User sessionUser) {
-		Resource res = em.find(Resource.class, resourceId);
-		if (authController.canRead(res, sessionUser)) {
-			return res.getSkills();
-		} else {
-			return new HashSet<>();
-		}
-	}
+    }
 
-	public Resource findResourceByResourceGroupAndName(int resourceGroupId, String name, User sessionUser) {
-		Query query = em.createNamedQuery("findResourcesByResourceGroupAndName");
-		query.setParameter("dgid", resourceGroupId);
-		query.setParameter("name", name);
-		try {
-			Resource res = (Resource) query.getSingleResult();
-			if (authController.canRead(res, sessionUser)) {
-				return res;
-			} else {
-				return null;
-			}
-		} catch (NoResultException ex) {
-			return null;
-		}
-	}
+    public void removeSkillFromResource(SkillRecord srecord, Resource resource, User sessionUser) {
+        Resource res = em.find(Resource.class, resource.getId());
+        if (authController.canUpdate(res, sessionUser)) {
+            SkillRecord skillRecord = em.find(SkillRecord.class, srecord.getId());
+            skillRecord.setResource(null);
+            res.removeSkill(skillRecord);
+            em.remove(skillRecord);
+            em.flush();
+        }
+    }
 
-	public ResourceGroup findResourceGroupByNameAndDepartment(String groupName, int deptId, User sessionUser) {
-		Query query = em.createNamedQuery("findResourceGroupByNameAndDepartment");
-		query.setParameter("name", groupName);
-		query.setParameter(PARAM_DEPARTMENT_ID, deptId);
-		try {
-			ResourceGroup group = (ResourceGroup) query.getSingleResult();
-			if (authController.canRead(group, sessionUser)) {
-				return group;
-			} else {
-				return null;
-			}
-		} catch (NoResultException ex) {
-			return null;
-		}
-	}
+    public Set<SkillRecord> getSkillRecordsForResource(int resourceId, User sessionUser) {
+        Resource res = em.find(Resource.class, resourceId);
+        if (authController.canRead(res, sessionUser)) {
+            return res.getSkills();
+        } else {
+            return new HashSet<>();
+        }
+    }
+
+    public Resource findResourceByResourceGroupAndName(int resourceGroupId, String name, User sessionUser) {
+        Query query = em.createNamedQuery("findResourcesByResourceGroupAndName");
+        query.setParameter("dgid", resourceGroupId);
+        query.setParameter("name", name);
+        try {
+            Resource res = (Resource) query.getSingleResult();
+            if (authController.canRead(res, sessionUser)) {
+                return res;
+            } else {
+                return null;
+            }
+        } catch (NoResultException ex) {
+            return null;
+        }
+    }
+
+    public ResourceGroup findResourceGroupByNameAndDepartment(String groupName, int deptId, User sessionUser) {
+        Query query = em.createNamedQuery("findResourceGroupByNameAndDepartment");
+        query.setParameter("name", groupName);
+        query.setParameter(PARAM_DEPARTMENT_ID, deptId);
+        try {
+            ResourceGroup group = (ResourceGroup) query.getSingleResult();
+            if (authController.canRead(group, sessionUser)) {
+                return group;
+            } else {
+                return null;
+            }
+        } catch (NoResultException ex) {
+            return null;
+        }
+    }
 }

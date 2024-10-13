@@ -13,82 +13,81 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.controller;
 
-import java.util.Date;
-import java.util.List;
-
+import de.hallerweb.enterprise.prioritize.model.security.LogEntry;
+import de.hallerweb.enterprise.prioritize.model.security.User;
 import jakarta.ejb.LocalBean;
 import jakarta.ejb.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
-import de.hallerweb.enterprise.prioritize.model.security.LogEntry;
-import de.hallerweb.enterprise.prioritize.model.security.User;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Session Bean implementation class LoggingController. Responsible for logging important business actions like create, update or delete
  * objects. This Bean does not log low level technical events like http connections. Theese things should be covered by the Application
  * Server. Here also methods to analyse existing logs like finding all log entries for a specific user are defined.
- * 
  */
 @Singleton
 @LocalBean
 public class LoggingController {
 
-	private static boolean loggingEnabled = true;
+    private static boolean loggingEnabled = true;
 
-	@PersistenceContext
-	EntityManager em;
+    @PersistenceContext
+    EntityManager em;
 
-	public enum Action {
-		CREATE, UPDATE, DELETE
-	}
+    public enum Action {
+        CREATE, UPDATE, DELETE
+    }
 
-	/**
-	 * Default constructor.
-	 */
-	public LoggingController() {
-		// Auto-generated constructor stub
-	}
+    /**
+     * Default constructor.
+     */
+    public LoggingController() {
+        // Auto-generated constructor stub
+    }
 
-	public void enableLogging() {
-		loggingEnabled = true;
-	}
+    public void enableLogging() {
+        loggingEnabled = true;
+    }
 
-	public void disableLogging() {
-		loggingEnabled = false;
-	}
+    public void disableLogging() {
+        loggingEnabled = false;
+    }
 
-	public boolean isLoggingEnabled() {
-		return loggingEnabled;
-	}
+    public boolean isLoggingEnabled() {
+        return loggingEnabled;
+    }
 
-	public void log(String user, String relatedObject, Action what, int objectId) {
-		log(user, relatedObject, what, objectId, "");
-	}
+    public void log(String user, String relatedObject, Action what, int objectId) {
+        log(user, relatedObject, what, objectId, "");
+    }
 
-	public void log(String user, String relatedObject, Action what, int objectId, String description) {
-		// Log action to database
-		if (loggingEnabled) {
-			LogEntry entry = new LogEntry();
-			entry.setUser(user);
-			entry.setRelatedObject(relatedObject);
-			entry.setWhat(what.toString());
-			entry.setObjectId(objectId);
-			entry.setDescription(description);
-			entry.setTimestamp(new Date());
-			em.persist(entry);
-			em.flush();
-		}
-	}
+    public void log(String user, String relatedObject, Action what, int objectId, String description) {
+        // Log action to database
+        if (loggingEnabled) {
+            LogEntry entry = new LogEntry();
+            entry.setUser(user);
+            entry.setRelatedObject(relatedObject);
+            entry.setWhat(what.toString());
+            entry.setObjectId(objectId);
+            entry.setDescription(description);
+            entry.setTimestamp(new Date());
+            em.persist(entry);
+            em.flush();
+        }
+    }
 
-	@SuppressWarnings("unchecked")
-	public List<LogEntry> findLogEntriesByUser(User user) {
-		Query q = em.createNamedQuery("findLogEntryByUser");
-		q.setParameter("username",user.getUsername());
-		return q.getResultList();
-	}
+    @SuppressWarnings("unchecked")
+    public List<LogEntry> findLogEntriesByUser(User user) {
+        Query q = em.createNamedQuery("findLogEntryByUser");
+        q.setParameter("username", user.getUsername());
+        return q.getResultList();
+    }
 
 }

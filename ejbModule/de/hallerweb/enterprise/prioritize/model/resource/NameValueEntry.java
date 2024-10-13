@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.resource;
 
 import jakarta.persistence.Entity;
@@ -35,47 +36,47 @@ import jakarta.persistence.Id;
 @Entity
 public class NameValueEntry implements Comparable<Object> {
 
-	@Id
-	@GeneratedValue
-	int id;
+    @Id
+    @GeneratedValue
+    int id;
 
-	private String mqttValues; // comma separated mqttValues (if historic data).
-	private String mqttName; // Name of the mqttName/value pair.
+    private String mqttValues; // comma separated mqttValues (if historic data).
+    private String mqttName; // Name of the mqttName/value pair.
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public String getName() {
-		return mqttName;
-	}
+    public String getName() {
+        return mqttName;
+    }
 
-	public void setName(String name) {
-		this.mqttName = name;
-	}
+    public void setName(String name) {
+        this.mqttName = name;
+    }
 
-	public String getValues() {
-		return mqttValues;
-	}
+    public String getValues() {
+        return mqttValues;
+    }
 
-	public void setValues(String values) {
-		this.mqttValues = values;
-	}
+    public void setValues(String values) {
+        this.mqttValues = values;
+    }
 
-	@Override
-	public int compareTo(Object obj) {
-		NameValueEntry e = (NameValueEntry) obj;
-		return mqttName.compareTo(e.getName());
-	}
+    @Override
+    public int compareTo(Object obj) {
+        NameValueEntry e = (NameValueEntry) obj;
+        return mqttName.compareTo(e.getName());
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
 
-	@Override
-	public String toString() {
-		return this.mqttName;
-	}
+    @Override
+    public String toString() {
+        return this.mqttName;
+    }
 
 }

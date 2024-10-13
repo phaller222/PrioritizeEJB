@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.document;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -88,7 +89,7 @@ public class DocumentGroup implements PAuthorizedObject {
     /**
      * Removed the given {@link DocumentInfo} and so the concrete {@link Document} From this {@link DocumentGroup}
      *
-     * @param info
+     * @param info DocuumentInfo to be removed from this DocumentGroup
      */
     public void removeDocument(DocumentInfo info) {
         DocumentInfo documentToRemove = null;

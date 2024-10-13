@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.security;
 
 import jakarta.persistence.*;
 
-@Entity
-@NamedQuery(name = "findAllObjectTypes", query = "select ot FROM ObservedObjectType ot")
 /**
  * Holds all canonical (absolute) packages names of objects which can be secured by Prioritize PermissionRecord entrys.
  * By adding a new object type (e.g. my.absolute.package.MyEntity) this entity will appear in the administration GUI as
  * an object which can be selected to define permissions on.
- * @author peter
  *
+ * @author peter
  */
+@Entity
+@NamedQuery(name = "findAllObjectTypes", query = "select ot FROM ObservedObjectType ot")
 public class ObservedObjectType {
 
     @Id

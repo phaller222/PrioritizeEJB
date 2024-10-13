@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.project.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -30,10 +31,11 @@ import java.util.Set;
 @Entity
 @NamedQuery(name = "findTaskById", query = "select t FROM Task t WHERE t.id = :taskId")
 @NamedQuery(name = "findTasksByAssignee", query = "select t FROM Task t WHERE :assignee = t.assignee")
-@NamedQuery(name = "findTasksInProjectNotAssignedToUser", query = "select DISTINCT t FROM Task t " +
-        "LEFT JOIN ProjectGoalRecord PGR2 ON PGR2.project = :project WHERE " + "NOT :assignee = t.assignee OR t.assignee IS NULL AND PGR2.project = :project")
-@NamedQuery(name = "findTasksInProjectAssignedToUser", query = "select pgr.task AS t FROM ProjectGoalRecord pgr " + "WHERE " +
-        ":assignee = pgr.task.assignee AND pgr.project = :project")
+@NamedQuery(name = "findTasksInProjectNotAssignedToUser", query = "select DISTINCT t FROM Task t "
+    + "LEFT JOIN ProjectGoalRecord PGR2 ON PGR2.project = :project WHERE "
+    + "NOT :assignee = t.assignee OR t.assignee IS NULL AND PGR2.project = :project")
+@NamedQuery(name = "findTasksInProjectAssignedToUser", query = "select pgr.task AS t FROM ProjectGoalRecord pgr "
+    + "WHERE :assignee = pgr.task.assignee AND pgr.project = :project")
 public class Task extends PObject implements Comparable<Object> {
 
     private int priority;

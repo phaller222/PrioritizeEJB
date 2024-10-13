@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.project.task;
 
 public enum TaskStatus {
-	   CREATED,
-	   ESTIMATED,
-	   OPEN,
-	   ASSIGNED,
-	   STARTED,
-	   STOPPED,
-	   FINISHED,
-	   CANCELLED,
-	   CLOSED
-	}
+    CREATED,
+    ESTIMATED,
+    OPEN,
+    ASSIGNED,
+    STARTED,
+    STOPPED,
+    FINISHED,
+    CANCELLED,
+    CLOSED
+}

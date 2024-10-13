@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.document;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -49,7 +50,8 @@ import java.util.Set;
 @NamedQuery(name = "findDocumentInfoById", query = "select di FROM DocumentInfo di WHERE di.id = :docInfoId")
 @NamedQuery(name = "findAllDocumentInfos", query = "select di FROM DocumentInfo di")
 @NamedQuery(name = "findDocumentInfoByDocumentId", query = "select di FROM DocumentInfo di WHERE di.currentDocument.id = :documentId")
-@NamedQuery(name = "findDocumentInfoByDocumentGroupAndName", query = "select di FROM DocumentInfo di WHERE di.documentGroup.id = :groupId AND di.currentDocument.name = :name")
+@NamedQuery(name = "findDocumentInfoByDocumentGroupAndName", query =
+    "select di FROM DocumentInfo di WHERE di.documentGroup.id = :groupId AND di.currentDocument.name = :name")
 @NamedQuery(name = "findDocumentGroupByNameAndDepartment", query = "select dg FROM DocumentGroup dg WHERE dg.name = :name AND dg.department.id = :deptId")
 public class DocumentInfo extends PObject implements PAuthorizedObject, PSearchable {
 
@@ -99,7 +101,7 @@ public class DocumentInfo extends PObject implements PAuthorizedObject, PSearcha
         result.setResult(this);
         result.setResultType(SearchResultType.DOCUMENT);
         result.setExcerpt(this.currentDocument.getName() + " Version: " + this.getCurrentDocument().getVersion() + " "
-                + this.getCurrentDocument().getChanges());
+            + this.getCurrentDocument().getChanges());
         result.setProvidesExcerpt(true);
         result.setSubresults(new HashSet<>());
         return result;

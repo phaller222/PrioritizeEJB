@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.inbox;
 
 import de.hallerweb.enterprise.prioritize.model.security.User;
@@ -34,7 +35,8 @@ import java.util.Date;
  */
 @Entity
 @NamedQuery(name = "findReceivedMessagesForUser", query = "SELECT msg FROM Message msg WHERE msg.to.id = :userId ORDER BY msg.dateReceived")
-@NamedQuery(name = "findUnreadMessagesForUser", query = "SELECT msg FROM Message msg WHERE msg.to.id = :userId AND msg.messageRead = false ORDER BY msg.dateReceived")
+@NamedQuery(name = "findUnreadMessagesForUser", query =
+    "SELECT msg FROM Message msg WHERE msg.to.id = :userId AND msg.messageRead = false ORDER BY msg.dateReceived")
 @NamedQuery(name = "findSentMessagesForUser", query = "SELECT msg FROM Message msg WHERE msg.from.id = :userId ORDER BY msg.dateReceived")
 public class Message {
 

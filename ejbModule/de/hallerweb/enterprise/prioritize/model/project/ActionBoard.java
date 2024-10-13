@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.hallerweb.enterprise.prioritize.model.project;
+ package de.hallerweb.enterprise.prioritize.model.project;
 
 import de.hallerweb.enterprise.prioritize.model.PObject;
 import jakarta.persistence.*;

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.project.goal;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -30,7 +31,8 @@ import jakarta.persistence.*;
 @Entity
 @NamedQuery(name = "findProjectGoalRecordById", query = "select pgr FROM ProjectGoalRecord pgr WHERE pgr.id = :projectGoalRecordId")
 @NamedQuery(name = "findProjectGoalRecordsByProject", query = "select pgr FROM ProjectGoalRecord pgr WHERE pgr.project.id = :projectId")
-@NamedQuery(name = "findActiveProjectGoalRecordsByProject", query = "select pgr FROM ProjectGoalRecord pgr WHERE pgr.project.id = :projectId AND pgr.task IS NOT NULL")
+@NamedQuery(name = "findActiveProjectGoalRecordsByProject",
+    query = "select pgr FROM ProjectGoalRecord pgr WHERE pgr.project.id = :projectId AND pgr.task IS NOT NULL")
 public class ProjectGoalRecord {
 
     @Id

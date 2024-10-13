@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.controller.calendar;
 
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
@@ -23,7 +24,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.TemporalType;
-
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -34,47 +34,47 @@ import java.util.List;
 @Stateless
 public class CalendarController {
 
-	@PersistenceContext
-	EntityManager em;
+    @PersistenceContext
+    EntityManager em;
 
-	public void updateTimeSpan(TimeSpan newTimeSpan) {
-		TimeSpan managedTimeSpan = em.find(TimeSpan.class, newTimeSpan.getId());
-		managedTimeSpan.setDateFrom(newTimeSpan.getDateFrom());
-		managedTimeSpan.setDateUntil(newTimeSpan.getDateUntil());
-	}
+    public void updateTimeSpan(TimeSpan newTimeSpan) {
+        TimeSpan managedTimeSpan = em.find(TimeSpan.class, newTimeSpan.getId());
+        managedTimeSpan.setDateFrom(newTimeSpan.getDateFrom());
+        managedTimeSpan.setDateUntil(newTimeSpan.getDateUntil());
+    }
 
-	public List<TimeSpan> getTimeSpansForUser(User user) {
-		Query query = em.createNamedQuery("findTimeSpansByUser");
-		query.setParameter("user", user);
-		List<TimeSpan> timespans = query.getResultList();
-		if (timespans.isEmpty()) {
-			return Collections.emptyList();
-		} else {
-			return timespans;
-		}
-	}
+    public List<TimeSpan> getTimeSpansForUser(User user) {
+        Query query = em.createNamedQuery("findTimeSpansByUser");
+        query.setParameter("user", user);
+        List<TimeSpan> timespans = query.getResultList();
+        if (timespans.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return timespans;
+        }
+    }
 
-	public List<TimeSpan> getTimeSpansForUser(User user, TimeSpanType type) {
-		Query query = em.createNamedQuery("findTimeSpansByUserAndType");
-		query.setParameter("user", user);
-		query.setParameter("type", type);
-		List<TimeSpan> timespans = query.getResultList();
-		if (timespans.isEmpty()) {
-			return Collections.emptyList();
-		} else {
-			return timespans;
-		}
-	}
+    public List<TimeSpan> getTimeSpansForUser(User user, TimeSpanType type) {
+        Query query = em.createNamedQuery("findTimeSpansByUserAndType");
+        query.setParameter("user", user);
+        query.setParameter("type", type);
+        List<TimeSpan> timespans = query.getResultList();
+        if (timespans.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return timespans;
+        }
+    }
 
-	public List<TimeSpan> getTimeSpansForDate(Date d) {
-		Query query = em.createNamedQuery("findTimeSpansByDate");
-		query.setParameter("date", d, TemporalType.DATE);
-		List<TimeSpan> timespans = query.getResultList();
-		if (timespans.isEmpty()) {
-			return Collections.emptyList();
-		} else {
-			return timespans;
-		}
-	}
+    public List<TimeSpan> getTimeSpansForDate(Date d) {
+        Query query = em.createNamedQuery("findTimeSpansByDate");
+        query.setParameter("date", d, TemporalType.DATE);
+        List<TimeSpan> timespans = query.getResultList();
+        if (timespans.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return timespans;
+        }
+    }
 
 }

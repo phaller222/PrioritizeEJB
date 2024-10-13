@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.controller.project.task;
 
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
@@ -26,155 +27,155 @@ import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.project.task.TaskStatus;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
-
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * TaskController - Manages tasks.
- * @author peter
  *
+ * @author peter
  */
 @Stateless
-public class TaskController  {
+public class TaskController {
 
-	@PersistenceContext
-	EntityManager em;
+    @PersistenceContext
+    EntityManager em;
 
-	@EJB
-	UserRoleController userRoleController;
+    @EJB
+    UserRoleController userRoleController;
 
-	@EJB
-	ProjectController projectController;
+    @EJB
+    ProjectController projectController;
 
-	@EJB
-	InitializationController initController;
+    @EJB
+    InitializationController initController;
 
-	private static final String LITERAL_ASSIGNEE = "assignee";
+    private static final String LITERAL_ASSIGNEE = "assignee";
 
-	public Task findTaskById(int id) {
-		Query q = em.createNamedQuery("findTaskById");
-		q.setParameter("taskId", id);
-		return (Task) q.getSingleResult();
-	}
+    public Task findTaskById(int id) {
+        Query q = em.createNamedQuery("findTaskById");
+        q.setParameter("taskId", id);
+        return (Task) q.getSingleResult();
+    }
 
-	public List<Task> findTasksByAssignee(PActor assignee) {
-		Query q = em.createNamedQuery("findTasksByAssignee");
-		q.setParameter(LITERAL_ASSIGNEE, assignee);
-		List<Task> tasks = q.getResultList();
-		if (tasks.isEmpty()) {
-			return new ArrayList<>();
-		} else {
-			return tasks;
-		}
-	}
-	
-	public List<Task> findTasksAssignedToUser(PActor assignee, Project p) {
-		Query q = em.createNamedQuery("findTasksInProjectAssignedToUser");
-		q.setParameter(LITERAL_ASSIGNEE, assignee);
-		q.setParameter("project", p);
-		List<Task> tasks = q.getResultList();
-		if (tasks.isEmpty()) {
-			return new ArrayList<>();
-		} else {
-			return tasks;
-		}
-	}
-	
+    public List<Task> findTasksByAssignee(PActor assignee) {
+        Query q = em.createNamedQuery("findTasksByAssignee");
+        q.setParameter(LITERAL_ASSIGNEE, assignee);
+        List<Task> tasks = q.getResultList();
+        if (tasks.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            return tasks;
+        }
+    }
 
-	public List<Task> findTasksNotAssignedToUser(PActor assignee,Project p) {
-		Query q = em.createNamedQuery("findTasksInProjectNotAssignedToUser");
-		q.setParameter(LITERAL_ASSIGNEE, assignee);
-		q.setParameter("project", p);
-		List<Task> tasks = q.getResultList();
-		if (tasks.isEmpty()) {
-			return new ArrayList<>();
-		} else {
-			return tasks;
-		}
-	}
+    public List<Task> findTasksAssignedToUser(PActor assignee, Project p) {
+        Query q = em.createNamedQuery("findTasksInProjectAssignedToUser");
+        q.setParameter(LITERAL_ASSIGNEE, assignee);
+        q.setParameter("project", p);
+        List<Task> tasks = q.getResultList();
+        if (tasks.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            return tasks;
+        }
+    }
 
-	public Task createTask(Task task) {
-		em.persist(task);
-		return task;
-	}
 
-	public void removeTask(int taskId) {
-		Task task = findTaskById(taskId);
-		em.remove(task);
-	}
+    public List<Task> findTasksNotAssignedToUser(PActor assignee, Project p) {
+        Query q = em.createNamedQuery("findTasksInProjectNotAssignedToUser");
+        q.setParameter(LITERAL_ASSIGNEE, assignee);
+        q.setParameter("project", p);
+        List<Task> tasks = q.getResultList();
+        if (tasks.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            return tasks;
+        }
+    }
 
-	public void editTask(int taskId, Task detachedTask) {
-		Task task = findTaskById(taskId);
-		task.setName(detachedTask.getName());
-		task.setDescription(detachedTask.getDescription());
-		task.setPriority(detachedTask.getPriority());
-		task.setTaskStatus(detachedTask.getTaskStatus());
-		if (detachedTask.getAssignee() != null) {
-			task.setAssignee(detachedTask.getAssignee());
-		}
-	}
+    public Task createTask(Task task) {
+        em.persist(task);
+        return task;
+    }
 
-	public void setTaskAssignee(Task task, PActor assignee) {
-		findTaskById(task.getId()).setAssignee(assignee);
-	}
+    public void removeTask(int taskId) {
+        Task task = findTaskById(taskId);
+        em.remove(task);
+    }
 
-	public void removeTaskAssignee(int taskId) {
-		Task task = findTaskById(taskId);
-		task.removeAssignee();
-	}
+    public void editTask(int taskId, Task detachedTask) {
+        Task task = findTaskById(taskId);
+        task.setName(detachedTask.getName());
+        task.setDescription(detachedTask.getDescription());
+        task.setPriority(detachedTask.getPriority());
+        task.setTaskStatus(detachedTask.getTaskStatus());
+        if (detachedTask.getAssignee() != null) {
+            task.setAssignee(detachedTask.getAssignee());
+        }
+    }
 
-	public void addTaskResource(int taskId, Resource resource) {
-		Task task = findTaskById(taskId);
-		List<Resource> resources = task.getResources();
-		resources.add(resource);
-		task.setResources(resources);
-	}
+    public void setTaskAssignee(Task task, PActor assignee) {
+        findTaskById(task.getId()).setAssignee(assignee);
+    }
 
-	public void addTaskDocument(int taskId, Document document) {
-		Task task = findTaskById(taskId);
-		List<Document> documents = task.getDocuments();
-		documents.add(document);
-		task.setDocuments(documents);
-	}
+    public void removeTaskAssignee(int taskId) {
+        Task task = findTaskById(taskId);
+        task.removeAssignee();
+    }
 
-	public void updateTaskStatus(int taskId, TaskStatus newStatus) {
-		Task task = findTaskById(taskId);
-		task.setTaskStatus(newStatus);
-	}
+    public void addTaskResource(int taskId, Resource resource) {
+        Task task = findTaskById(taskId);
+        List<Resource> resources = task.getResources();
+        resources.add(resource);
+        task.setResources(resources);
+    }
 
-	public void resolveTask(Task task, User user) {
-		Task managedTask = findTaskById(task.getId());
-		ProjectGoalRecord rec = managedTask.getProjectGoalRecord();
-		rec.setPercentage(100);
+    public void addTaskDocument(int taskId, Document document) {
+        Task task = findTaskById(taskId);
+        List<Document> documents = task.getDocuments();
+        documents.add(document);
+        task.setDocuments(documents);
+    }
 
-		removeTaskAssignee(managedTask.getId());
-		userRoleController.removeAssignedTask(user, managedTask, user);
-		updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
-		projectController.updateProjectProgress(task.getProjectGoalRecord().getProject().getId());
-	}
+    public void updateTaskStatus(int taskId, TaskStatus newStatus) {
+        Task task = findTaskById(taskId);
+        task.setTaskStatus(newStatus);
+    }
 
-	public void setTaskProgress(Task task, User user, int percentage) {
-		if (percentage < 0 || percentage > 100) {
-			return;
-		}
-		Task managedTask = findTaskById(task.getId());
-		ProjectGoalRecord rec = managedTask.getProjectGoalRecord();
-		rec.setPercentage(percentage);
-		if (percentage == 100) {
-			removeTaskAssignee(managedTask.getId());
-			userRoleController.removeAssignedTask(user, managedTask, user);
-			updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
-		} else if (percentage > 0) {
-			updateTaskStatus(managedTask.getId(), TaskStatus.STARTED);
-		} else {
-			updateTaskStatus(managedTask.getId(), TaskStatus.STOPPED);
-		}
-		projectController.updateProjectProgress(task.getProjectGoalRecord().getProject().getId());
-	}
+    public void resolveTask(Task task, User user) {
+        Task managedTask = findTaskById(task.getId());
+        ProjectGoalRecord rec = managedTask.getProjectGoalRecord();
+        rec.setPercentage(100);
+
+        removeTaskAssignee(managedTask.getId());
+        userRoleController.removeAssignedTask(user, managedTask, user);
+        updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
+        projectController.updateProjectProgress(task.getProjectGoalRecord().getProject().getId());
+    }
+
+    public void setTaskProgress(Task task, User user, int percentage) {
+        if (percentage < 0 || percentage > 100) {
+            return;
+        }
+        Task managedTask = findTaskById(task.getId());
+        ProjectGoalRecord rec = managedTask.getProjectGoalRecord();
+        rec.setPercentage(percentage);
+        if (percentage == 100) {
+            removeTaskAssignee(managedTask.getId());
+            userRoleController.removeAssignedTask(user, managedTask, user);
+            updateTaskStatus(managedTask.getId(), TaskStatus.FINISHED);
+        } else if (percentage > 0) {
+            updateTaskStatus(managedTask.getId(), TaskStatus.STARTED);
+        } else {
+            updateTaskStatus(managedTask.getId(), TaskStatus.STOPPED);
+        }
+        projectController.updateProjectProgress(task.getProjectGoalRecord().getProject().getId());
+    }
 }

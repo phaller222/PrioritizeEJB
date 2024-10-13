@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.controller.project.task;
 
 import de.hallerweb.enterprise.prioritize.controller.nfc.NFCUnitController;
@@ -66,7 +67,7 @@ public class TimeTrackerController implements Serializable {
      * - Assigns the task to the sessionUser
      * - Sets the underlying task to "ASSIGNED" or "STARTED" depending on the previous state.
      *
-     * @param sessionUser
+     * @param sessionUser User of the curretn session
      */
     public void startTracking(TimeTracker tracker, User sessionUser) {
         tracker.setActive(true);
@@ -104,7 +105,7 @@ public class TimeTrackerController implements Serializable {
      * - Sets active to "true" again.
      * - Sets task status to "STARTED".
      *
-     * @param sessionUser
+     * @param sessionUser User of the current Session.
      */
     public void stopTracking(TimeTracker tracker, User sessionUser) {
         // User is the same who started tracking

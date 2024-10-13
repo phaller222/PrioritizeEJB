@@ -328,8 +328,7 @@
     </module>
     <module name="NonEmptyAtclauseDescription"/>
     <module name="InvalidJavadocPosition"/>
-    <module name="JavadocTagContinuationIndentation"/>
-  
+   
     <module name="JavadocParagraph">
       <property name="allowNewlineParagraph" value="false"/>
     </module>

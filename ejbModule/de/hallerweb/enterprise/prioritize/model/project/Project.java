@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.project;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -63,9 +64,6 @@ public class Project {
     @OneToMany
     List<SkillGroup> requiredSkills;                    // The skills required to fullfill this project
 
-    //@JsonIgnore
-    //@OneToMany
-    //List<SkillRecord> availableSkills;					// Skills already assigned to the project (=available)
 
     @JsonIgnore
     @OneToOne

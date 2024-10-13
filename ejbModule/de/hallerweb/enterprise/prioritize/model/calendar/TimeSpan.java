@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.calendar;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -42,7 +43,7 @@ import java.util.Set;
 @Entity
 @NamedQuery(name = "findTimeSpansByUser", query = "select ts FROM TimeSpan ts WHERE :user MEMBER OF ts.involvedUsers")
 @NamedQuery(name = "findTimeSpansByUserAndType", query = "select ts FROM TimeSpan ts WHERE :user MEMBER OF ts.involvedUsers AND ts.type = :type")
-@NamedQuery(name = "findTimeSpansByDate", query="select ts FROM TimeSpan ts WHERE :date between ts.dateFrom and ts.dateUntil ")
+@NamedQuery(name = "findTimeSpansByDate", query = "select ts FROM TimeSpan ts WHERE :date between ts.dateFrom and ts.dateUntil ")
 public class TimeSpan implements PAuthorizedObject {
 
     public enum TimeSpanType {
@@ -160,7 +161,9 @@ public class TimeSpan implements PAuthorizedObject {
 
         if (from.after(this.dateUntil)) {
             return false;
-        } else return !until.before(this.dateFrom);
+        } else {
+            return !until.before(this.dateFrom);
+        }
     }
 
     @Override

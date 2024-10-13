@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.security;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -56,7 +57,7 @@ import java.util.*;
 @NamedQuery(name = "findAllUserNames", query = "SELECT u.name FROM User u ORDER BY u.name")
 @NamedQuery(name = "findUserByUsername", query = "SELECT u FROM User u WHERE u.username=?1 ORDER BY u.name")
 @NamedQuery(name = "findUserByApiKey", query = "select u FROM User u WHERE u.apiKey = :apiKey")
-@JsonIgnoreProperties(value = {"vacation", "searchProperties",})
+@JsonIgnoreProperties(value = {"vacation", "searchProperties"})
 public class User extends PActor implements PAuthorizedObject, PSearchable, Serializable {
 
     public static final String PROPERTY_NAME = "name";
@@ -136,6 +137,11 @@ public class User extends PActor implements PAuthorizedObject, PSearchable, Seri
     public User(String username) {
         this.username = username;
         this.name = username;
+    }
+
+    public User() {
+        super();
+        roles = new HashSet<>();
     }
 
     public Gender getGender() {
@@ -279,11 +285,6 @@ public class User extends PActor implements PAuthorizedObject, PSearchable, Seri
 
     public void setPreference(UserPreference preference) {
         this.preference = preference;
-    }
-
-    public User() {
-        super();
-        roles = new HashSet<>();
     }
 
     public String getName() {

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.skill;
 
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
@@ -132,7 +133,7 @@ public class SkillBean implements Serializable {
     /**
      * Build the skill hierarchy and return a DefaultTreeNode.
      *
-     * @return
+     * @return Root Node
      */
     public DefaultTreeNode<Object> getRoot() {
         Skill sk = new Skill();
@@ -181,7 +182,7 @@ public class SkillBean implements Serializable {
         if (selectedNode.getData() instanceof SkillCategory) {
             SkillCategory category = (SkillCategory) selectedNode.getData();
             controller.createSkillCategory(newSkillCategory.getName(), newSkillCategory.getDescription(), category,
-                    sessionController.getUser());
+                sessionController.getUser());
         }
     }
 
@@ -199,8 +200,6 @@ public class SkillBean implements Serializable {
 
     /**
      * Creates dummy data for debugging Purposes.
-     *
-     * @return
      */
     public void createDummyData() {
 
@@ -208,9 +207,9 @@ public class SkillBean implements Serializable {
         if (skills.isEmpty()) {
 
             SkillCategory catCoaching = controller.createSkillCategory("Coaching", "Schulungen/Workshops/Coaching", null,
-                    authController.getSystemUser());
+                authController.getSystemUser());
             controller.createSkill("Workshops", "Durchführung von Workshops", "coaching,workshops", catCoaching, null,
-                    authController.getSystemUser());
+                authController.getSystemUser());
 
             SkillPropertyNumeric prop1 = new SkillPropertyNumeric();
             prop1.setName("JPA");
@@ -256,9 +255,9 @@ public class SkillBean implements Serializable {
             props2.add(prop4);
 
             SkillCategory cat2 = controller.createSkillCategory("Programmierung", "Programmierung/Programmiersprachen", null,
-                    authController.getSystemUser());
+                authController.getSystemUser());
             SkillCategory cat22 = controller.createSkillCategory("Java", "Kenntnisse im Bereich Java", cat2,
-                    authController.getSystemUser());
+                authController.getSystemUser());
             SkillCategory cat23 = controller.createSkillCategory("Apple", "Apple Kenntnisse", cat2, authController.getSystemUser());
 
             controller.createSkill("J2EE", "J2EE Kenntnisse", "JPA, JavaMail, EJB", cat22, props, authController.getSystemUser());

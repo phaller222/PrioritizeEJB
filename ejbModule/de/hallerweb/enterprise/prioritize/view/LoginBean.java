@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view;
 
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
@@ -146,7 +147,7 @@ public class LoginBean implements Serializable {
     /**
      * Perform a login for clients only.
      *
-     * @return
+     * @return Navigation:  dashboard or login again if login failed.
      */
     public String clientLogin() {
         return initializeBasicSession();
@@ -197,7 +198,7 @@ public class LoginBean implements Serializable {
             ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
             try {
                 context.redirect("https://localhost:8443/auth/realms/master/protocol/openid-connect/logout?"
-                        + "redirect_uri=https://localhost/PrioritizeWeb/client/dashboard/dashboard.xhtml");
+                    + "redirect_uri=https://localhost/PrioritizeWeb/client/dashboard/dashboard.xhtml");
             } catch (IOException e) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
             }

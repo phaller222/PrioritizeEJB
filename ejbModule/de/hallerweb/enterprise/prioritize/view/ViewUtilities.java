@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view;
 
 import jakarta.faces.application.FacesMessage;
@@ -20,12 +21,12 @@ import jakarta.faces.context.FacesContext;
 
 public final class ViewUtilities {
 
-	private ViewUtilities() {
+    private ViewUtilities() {
 
-	}
+    }
 
-	public static void addErrorMessage(String component, String message) {
-		FacesContext.getCurrentInstance().addMessage(component, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error!", message));
-	}
+    public static void addErrorMessage(String component, String message) {
+        FacesContext.getCurrentInstance().addMessage(component, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error!", message));
+    }
 
 }

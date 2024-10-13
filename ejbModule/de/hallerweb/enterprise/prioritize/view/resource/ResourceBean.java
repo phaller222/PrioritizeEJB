@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.resource;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
@@ -190,7 +191,7 @@ public class ResourceBean implements Serializable {
         }
         Date oneMinute = new Date(System.currentTimeMillis() + 60000L);
         this.aquiredReservation = resourceReservationController.createResourceReservation(resource, new Date(), oneMinute,
-                sessionController.getUser());
+            sessionController.getUser());
         return NAVIGATION_RESOURCES;
     }
 
@@ -255,7 +256,7 @@ public class ResourceBean implements Serializable {
     public Set<Resource> getResources() {
         if ((this.selectedResourceGroupId != null) && (!this.selectedResourceGroupId.isEmpty())) {
             return resourceController.getResourcesInResourceGroup(Integer.parseInt(this.selectedResourceGroupId),
-                    sessionController.getUser());
+                sessionController.getUser());
         } else {
             return new HashSet<>();
         }
@@ -269,7 +270,7 @@ public class ResourceBean implements Serializable {
             updateResourceTree();
         } else {
             ViewUtilities.addErrorMessage("name", "Problems creating resource with the name " + resource.getName()
-                    + "!");
+                + "!");
         }
         return NAVIGATION_RESOURCES;
     }
@@ -301,7 +302,7 @@ public class ResourceBean implements Serializable {
         if ((departmentId != null) && (departmentId.length() > 0)) {
 
             this.resourceGroups = resourceController.getResourceGroupsForDepartment(Integer.parseInt(departmentId),
-                    sessionController.getUser());
+                sessionController.getUser());
             String id = String.valueOf(this.resourceGroups.get(0).getId());
             setSelectedResourceGroup(id);
 
@@ -322,7 +323,7 @@ public class ResourceBean implements Serializable {
         }
         if (this.selectedResourceGroupId != null) {
             this.resources = resourceController.getResourcesInResourceGroup(Integer.parseInt(this.selectedResourceGroupId),
-                    sessionController.getUser());
+                sessionController.getUser());
         }
 
     }
@@ -338,7 +339,7 @@ public class ResourceBean implements Serializable {
     @Named
     public String createResourceGroup() {
         if (resourceController.createResourceGroup(Integer.parseInt(selectedDepartmentId), resourceGroupName,
-                sessionController.getUser()) != null) {
+            sessionController.getUser()) != null) {
             init();
         } else {
             ViewUtilities.addErrorMessage("name", "A resource group with the name " + resourceGroupName + " already exists!");
@@ -348,8 +349,8 @@ public class ResourceBean implements Serializable {
 
     public String deleteResourceGroup() {
         resourceController.deleteResourceGroup(
-                resourceController.getResourceGroup(Integer.parseInt(this.selectedResourceGroupId), sessionController.getUser()).getId(),
-                sessionController.getUser());
+            resourceController.getResourceGroup(Integer.parseInt(this.selectedResourceGroupId), sessionController.getUser()).getId(),
+            sessionController.getUser());
         return "documents";
     }
 
@@ -367,7 +368,7 @@ public class ResourceBean implements Serializable {
      * Calls the reservations for a {@link Resource} object.
      *
      * @param res - {@link Resource} object.
-     * @return
+     * @return resourcereservations.xhtml
      */
     public String reservations(Resource res) {
         this.resource = res;
@@ -379,7 +380,7 @@ public class ResourceBean implements Serializable {
      * Calls "editresource" for the given {@link Resource} object.
      *
      * @param resource {@link Resource} object to be edited.
-     * @return
+     * @return editresource.xhtml
      */
     @Named
     public String edit(Resource resource) {
@@ -412,10 +413,10 @@ public class ResourceBean implements Serializable {
     public String commitEdits() {
         selectedDepartment = companyController.findDepartmentById(Integer.parseInt(this.selectedDepartmentId));
         ResourceGroup selectedResourceGroupObject = resourceController.getResourceGroup(Integer.parseInt(this.selectedResourceGroupId),
-                sessionController.getUser());
+            sessionController.getUser());
         resourceController.editResource(resource, selectedDepartment, selectedResourceGroupObject, resource.getName(),
-                resource.getDescription(), resource.getIp(), resource.isStationary(), resource.isRemote(), resource.getMaxSlots(),
-                sessionController.getUser());
+            resource.getDescription(), resource.getIp(), resource.isStationary(), resource.isRemote(), resource.getMaxSlots(),
+            sessionController.getUser());
         return NAVIGATION_RESOURCES;
     }
 
@@ -555,7 +556,7 @@ public class ResourceBean implements Serializable {
      * Returns the model for a JSF(Primefaces) line chart to represent
      * historical data of a resource's NamedValue.
      *
-     * @param entry
+     * @param entry A NameValueEntry
      */
     private void createValueModel(NameValueEntry entry) {
         valueModel = new LineChartModel();
@@ -570,23 +571,23 @@ public class ResourceBean implements Serializable {
         float min = 1000.0f;
         for (String value : propertyValues) {
             String[] entryValue = value.split(",");
-            float fValue = Float.parseFloat(entryValue[1]);
+            float fvalue = Float.parseFloat(entryValue[1]);
             Date d = new Date(Long.parseLong(entryValue[0]));
-            if (fValue > max) {
-                max = fValue;
+            if (fvalue > max) {
+                max = fvalue;
             }
-            if (fValue < min) {
-                min = fValue;
+            if (fvalue < min) {
+                min = fvalue;
             }
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(d);
             String hourString = calendar.get(Calendar.HOUR) < 10 ? "0" + calendar.get(Calendar.HOUR) : "" + calendar.get(Calendar.HOUR);
             String minuteString = calendar.get(Calendar.MINUTE) < 10 ? "0" + calendar.get(Calendar.MINUTE)
-                    : "" + calendar.get(Calendar.MINUTE);
+                : "" + calendar.get(Calendar.MINUTE);
             String secondString = calendar.get(Calendar.SECOND) < 10 ? "0" + calendar.get(Calendar.SECOND)
-                    : "" + calendar.get(Calendar.SECOND);
+                : "" + calendar.get(Calendar.SECOND);
 
-            values.set(hourString + ":" + minuteString + ":" + secondString, fValue);
+            values.set(hourString + ":" + minuteString + ":" + secondString, fvalue);
         }
 
         valueModel.addSeries(values);
@@ -598,21 +599,21 @@ public class ResourceBean implements Serializable {
         valueModel.setShowPointLabels(true);
         valueModel.setTitle(entry.getName());
 
-        Axis xAxis = new CategoryAxis("Time");
-        valueModel.getAxes().put(AxisType.X, xAxis);
-        Axis yAxis = valueModel.getAxis(AxisType.Y);
-        yAxis.setLabel("Value");
-        yAxis.setMin(min);
-        yAxis.setMax(max);
+        Axis xaxis = new CategoryAxis("Time");
+        valueModel.getAxes().put(AxisType.X, xaxis);
+        Axis yaxis = valueModel.getAxis(AxisType.Y);
+        yaxis.setLabel("Value");
+        yaxis.setMin(min);
+        yaxis.setMax(max);
     }
 
     /**
-     * Returns a MapModel for a Primefaces <gmap> tag. Basically the coordinates
+     * Returns a MapModel for a Primefaces gmap tag. Basically the coordinates
      * (Latitude / Longitude) are returned. This method checks if
      * latitude/longitude information is available and creates a Marker based on
      * that information.
      *
-     * @return
+     * @return MapModel for gmap
      */
     public MapModel getResourcesMapModel() {
         MapModel simpleModel = new DefaultMapModel();
@@ -641,7 +642,7 @@ public class ResourceBean implements Serializable {
             for (Resource res : allResources) {
                 if (authController.canRead(res, sessionController.getUser()) && res.isAgent()) {
                     root.addNode(
-                            new DefaultMindmapNode(res.getName() + " " + res.getIp(), res, res.isMqttOnline() ? "00C000" : "C0C0C0", true));
+                        new DefaultMindmapNode(res.getName() + " " + res.getIp(), res, res.isMqttOnline() ? "00C000" : "C0C0C0", true));
                 }
             }
             return root;
@@ -671,7 +672,7 @@ public class ResourceBean implements Serializable {
             for (NameValueEntry entry : data) {
                 String values = entry.getValues();
                 currentEntry.append(entry.getName()).append(" : ").append(values.substring(values.lastIndexOf(',')))
-                        .append("\n");
+                    .append("\n");
             }
             return currentEntry.toString();
         } else {
@@ -682,7 +683,7 @@ public class ResourceBean implements Serializable {
     @Named
     public void addResourceToItemCollection(Resource resource) {
         ItemCollection managedCollection = itemCollectionController.getItemCollection(sessionController.getUser(),
-                selectedItemCollectionName);
+            selectedItemCollectionName);
         if (managedCollection != null) {
             Resource managedResource = resourceController.getResource(resource.getId(), sessionController.getUser());
             itemCollectionController.addResource(managedCollection, managedResource);
@@ -723,8 +724,8 @@ public class ResourceBean implements Serializable {
             TreeNode<Object> groupTreeNode;
             if (authController.canCreate(resourceGroup, sessionController.getUser())) {
                 groupTreeNode = new DefaultTreeNode<>(
-                        new ResourceTreeInfo(resourceGroup.getName(), false, true, String.valueOf(resourceGroup.getId()), null),
-                        department);
+                    new ResourceTreeInfo(resourceGroup.getName(), false, true, String.valueOf(resourceGroup.getId()), null),
+                    department);
             } else {
                 groupTreeNode = new DefaultTreeNode<>(new ResourceTreeInfo(resourceGroup.getName(), false, false, null, null), department);
             }
@@ -762,8 +763,8 @@ public class ResourceBean implements Serializable {
             TreeNode<Object> groupTreeNode;
             if (authController.canCreate(resourceGroup, sessionController.getUser())) {
                 groupTreeNode = new DefaultTreeNode<>(
-                        new ResourceTreeInfo(resourceGroup.getName(), false, true, String.valueOf(resourceGroup.getId()), null),
-                        department);
+                    new ResourceTreeInfo(resourceGroup.getName(), false, true, String.valueOf(resourceGroup.getId()), null),
+                    department);
             } else {
                 groupTreeNode = new DefaultTreeNode<>(new ResourceTreeInfo(resourceGroup.getName(), false, false, null, null), department);
             }
@@ -826,7 +827,7 @@ public class ResourceBean implements Serializable {
     /**
      * Watches or unwatches the given {@link Resource} for the current User.
      *
-     * @param res
+     * @param res The resource
      */
     public void toggleWatch(Resource res) {
         Resource managedResource = resourceController.getResource(res.getId(), sessionController.getUser());

@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.project;
+
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Named;
+import org.primefaces.PrimeFaces;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import jakarta.enterprise.context.SessionScoped;
-import jakarta.inject.Named;
-
-import org.primefaces.PrimeFaces;
-
 @Named
 @SessionScoped
 public class ShowTaskDetails implements Serializable {
 
-	public void viewTask() {
-        Map<String,Object> options = new HashMap<>();
+    public void viewTask() {
+        Map<String, Object> options = new HashMap<>();
         options.put("width", 640);
         options.put("height", 340);
         options.put("contentWidth", "100%");

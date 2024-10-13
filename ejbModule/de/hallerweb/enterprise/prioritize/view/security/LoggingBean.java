@@ -13,50 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.security;
 
-import java.io.Serializable;
-
+import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Named;
 
-import de.hallerweb.enterprise.prioritize.controller.LoggingController;
+import java.io.Serializable;
 
 /**
- *LoggingBean - JSF Backing-Bean to switch logging
- * 
+ * LoggingBean - JSF Backing-Bean to switch logging
+ *
  * <p>
  * Copyright: (c) 2015
  * </p>
  * <p>
  * Peter Haller
  * </p>
- * 
+ *
  * @author peter
  */
 @Named
 @SessionScoped
 public class LoggingBean implements Serializable {
 
-	@EJB
-	transient LoggingController controller;
+    @EJB
+    transient LoggingController controller;
 
-	boolean loggingEnabled;
+    boolean loggingEnabled;
 
-	public String enableLogging() {
-		controller.enableLogging();
-		return "index";
-	}
+    public String enableLogging() {
+        controller.enableLogging();
+        return "index";
+    }
 
-	public String disableLogging() {
-		controller.disableLogging();
-		return "index";
-	}
+    public String disableLogging() {
+        controller.disableLogging();
+        return "index";
+    }
 
-	@Named
-	public boolean isLoggingEnabled() {
-		return controller.isLoggingEnabled();
-	}
+    @Named
+    public boolean isLoggingEnabled() {
+        return controller.isLoggingEnabled();
+    }
 
 }

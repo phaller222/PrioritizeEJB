@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
@@ -108,10 +109,10 @@ public class BasicTimelineController {
                 selectedDate = cal.getTime();
             }
             selectedTime = TimelineEvent.builder()
-                    .title(TIMETRAVEL_DRAG)
-                    .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
-                    .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
-                    .editable(true).build();
+                .title(TIMETRAVEL_DRAG)
+                .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
+                .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
+                .editable(true).build();
             model.add(selectedTime);
 
             // Add the current Users vacation to the Timeline
@@ -119,10 +120,10 @@ public class BasicTimelineController {
             if (vacation != null) {
                 for (TimeSpan span : vacation) {
                     TimelineEvent<Object> ev = TimelineEvent.builder()
-                            .title("Vacation")
-                            .startDate(DateTimeUtil.toLocalDateTime(span.getDateFrom()))
-                            .endDate(DateTimeUtil.toLocalDateTime(span.getDateUntil()))
-                            .editable(false).build();
+                        .title("Vacation")
+                        .startDate(DateTimeUtil.toLocalDateTime(span.getDateFrom()))
+                        .endDate(DateTimeUtil.toLocalDateTime(span.getDateUntil()))
+                        .editable(false).build();
                     model.add(ev);
                 }
             }
@@ -131,10 +132,10 @@ public class BasicTimelineController {
             TimeSpan illness = userController.getIllness(sessionController.getUser(), sessionController.getUser());
             if (illness != null) {
                 TimelineEvent<Object> ev = TimelineEvent.builder()
-                        .title("Illness")
-                        .startDate(DateTimeUtil.toLocalDateTime(illness.getDateFrom()))
-                        .endDate(DateTimeUtil.toLocalDateTime(illness.getDateUntil()))
-                        .editable(false).build();
+                    .title("Illness")
+                    .startDate(DateTimeUtil.toLocalDateTime(illness.getDateFrom()))
+                    .endDate(DateTimeUtil.toLocalDateTime(illness.getDateUntil()))
+                    .editable(false).build();
                 model.add(ev);
             }
 
@@ -149,9 +150,9 @@ public class BasicTimelineController {
     public void displayResourcesTimeline() {
         model = new TimelineModel<>();
         selectedTime = TimelineEvent.builder().title("TimeMachine(Beta)")
-                .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
-                .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
-                .editable(true).build();
+            .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
+            .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
+            .editable(true).build();
         model.add(selectedTime);
 
         List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
@@ -180,14 +181,14 @@ public class BasicTimelineController {
                 for (ResourceReservation res : resource.getReservations()) {
                     if (resource.isMqttResource() && resource.isMqttOnline()) {
                         model.add(TimelineEvent.builder().title(resource.getName())
-                                .startDate(DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateFrom()))
-                                .endDate(DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateUntil()))
-                                .editable(false).styleClass("resourcereservationonline").build());
+                            .startDate(DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateFrom()))
+                            .endDate(DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateUntil()))
+                            .editable(false).styleClass("resourcereservationonline").build());
                     } else {
                         model.add(TimelineEvent.builder().title(resource.getName())
-                                .startDate(DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateFrom()))
-                                .endDate(DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateUntil()))
-                                .editable(false).styleClass("resourcereservationoffline").build());
+                            .startDate(DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateFrom()))
+                            .endDate(DateTimeUtil.toLocalDateTime(res.getTimeSpan().getDateUntil()))
+                            .editable(false).styleClass("resourcereservationoffline").build());
                     }
 
                 }
@@ -211,9 +212,9 @@ public class BasicTimelineController {
     public void displayAgentsTimeline() {
         model = new TimelineModel<>();
         selectedTime = TimelineEvent.builder().title("TimeMachine(Beta)")
-                .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
-                .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
-                .editable(true).build();
+            .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
+            .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
+            .editable(true).build();
         model.add(selectedTime);
 
         List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
@@ -238,9 +239,9 @@ public class BasicTimelineController {
         for (Resource resource : resources) {
             if (resource.isAgent() && authController.canRead(resource, sessionController.getUser()) && resource.getMqttLastPing() != null) {
                 model.add(TimelineEvent.builder().title(resource.getName())
-                        .startDate(DateTimeUtil.toLocalDateTime(resource.getMqttLastPing()))
-                        .endDate(DateTimeUtil.toLocalDateTime(resource.getMqttLastPing()))
-                        .editable(false).styleClass("resourcereservation").build());
+                    .startDate(DateTimeUtil.toLocalDateTime(resource.getMqttLastPing()))
+                    .endDate(DateTimeUtil.toLocalDateTime(resource.getMqttLastPing()))
+                    .editable(false).styleClass("resourcereservation").build());
             }
 
         }
@@ -249,8 +250,8 @@ public class BasicTimelineController {
     public void displayDocumentsTimeline() {
         model = new TimelineModel<>();
         selectedTime = TimelineEvent.builder().title(TIMETRAVEL_DRAG).startDate(DateTimeUtil.toLocalDateTime(selectedDate))
-                .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
-                .editable(true).build();
+            .endDate(DateTimeUtil.toLocalDateTime(selectedDate))
+            .editable(true).build();
         model.add(selectedTime);
 
         List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
@@ -274,10 +275,10 @@ public class BasicTimelineController {
                     if (docInfo.getCurrentDocument().getLastModified().before(selectedDate)) {
                         String iconName = lookupMimeIcon(docInfo.getCurrentDocument().getMimeType());
                         model.add(TimelineEvent.builder().title("<div>" + docInfo.getCurrentDocument().getName() + "</div><img src='" + contextPath + "/images/"
-                                        + iconName + ".png' style='width:26px;height:26px;'>")
-                                .startDate(DateTimeUtil.toLocalDateTime(docInfo.getCurrentDocument().getLastModified()))
-                                .endDate(DateTimeUtil.toLocalDateTime(docInfo.getCurrentDocument().getLastModified()))
-                                .build());
+                                + iconName + ".png' style='width:26px;height:26px;'>")
+                            .startDate(DateTimeUtil.toLocalDateTime(docInfo.getCurrentDocument().getLastModified()))
+                            .endDate(DateTimeUtil.toLocalDateTime(docInfo.getCurrentDocument().getLastModified()))
+                            .build());
                     }
                     documentBean.updateDocumentTree();
                 }
@@ -315,8 +316,8 @@ public class BasicTimelineController {
     public void onChanged(TimelineModificationEvent<Object> event) {
         this.selectedDate = DateTimeUtil.toDate(event.getTimelineEvent().getStartDate());
         selectedTime = TimelineEvent.builder().title(TIMETRAVEL_DRAG)
-                .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
-                .endDate(DateTimeUtil.toLocalDateTime(selectedDate)).editable(true).build();
+            .startDate(DateTimeUtil.toLocalDateTime(selectedDate))
+            .endDate(DateTimeUtil.toLocalDateTime(selectedDate)).editable(true).build();
     }
 
     public TimelineModel<Object, Object> getModel() {

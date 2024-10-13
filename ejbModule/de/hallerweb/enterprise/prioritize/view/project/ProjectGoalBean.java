@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.project;
 
 import de.hallerweb.enterprise.prioritize.controller.project.ProjectController;
@@ -76,7 +77,6 @@ public class ProjectGoalBean implements Serializable {
         if (selectedProjectGoalItem instanceof ProjectGoal) {
             this.selectedGoal = selectedProjectGoal;
         }
-
     }
 
 
@@ -112,7 +112,7 @@ public class ProjectGoalBean implements Serializable {
     /**
      * Build the goal hierarchy and return a DefaultTreeNode.
      *
-     * @return
+     * @return root tree node
      */
     public DefaultTreeNode<Object> getRoot() {
         // Decide if ProjectGoals are AuthorizedObjects or if permission is

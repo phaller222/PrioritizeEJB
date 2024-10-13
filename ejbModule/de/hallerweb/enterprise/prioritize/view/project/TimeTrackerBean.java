@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.project;
 
 import de.hallerweb.enterprise.prioritize.controller.project.task.TaskController;
@@ -21,11 +22,11 @@ import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.project.task.Task;
 import de.hallerweb.enterprise.prioritize.model.project.task.TimeTracker;
-
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
@@ -35,21 +36,21 @@ import java.util.Set;
 public class TimeTrackerBean implements Serializable {
 
 
-	@Inject
-	SessionController sessionController;
-	@EJB
-	TimeTrackerController timeTrackerController;
-	@EJB
-	transient TaskController taskController;
+    @Inject
+    SessionController sessionController;
+    @EJB
+    TimeTrackerController timeTrackerController;
+    @EJB
+    transient TaskController taskController;
 
-	@Named
-	public List<TimeTracker> getTrackers() {
-		return timeTrackerController.getAllTimeTrackers(sessionController.getUser());
-	}
+    @Named
+    public List<TimeTracker> getTrackers() {
+        return timeTrackerController.getAllTimeTrackers(sessionController.getUser());
+    }
 
-	public Set<TimeSpan> getTimeSpentForTask(Task task) {
-		Task managedTask = taskController.findTaskById(task.getId());
-		return managedTask.getTimeSpent();
-	}
+    public Set<TimeSpan> getTimeSpentForTask(Task task) {
+        Task managedTask = taskController.findTaskById(task.getId());
+        return managedTask.getTimeSpent();
+    }
 
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view;
 
 import jakarta.annotation.PostConstruct;
@@ -38,16 +39,16 @@ public class DashboardView implements Serializable {
     @PostConstruct
     public void init() {
         model = new DefaultDashboardModel();
-        DashboardColumn column1 = new DefaultDashboardColumn();
-        DashboardColumn column2 = new DefaultDashboardColumn();
-        DashboardColumn column3 = new DefaultDashboardColumn();
 
+        DashboardColumn column1 = new DefaultDashboardColumn();
         column1.addWidget("sports");
         column1.addWidget("finance");
 
+        DashboardColumn column2 = new DefaultDashboardColumn();
         column2.addWidget("lifestyle");
         column2.addWidget("weather");
 
+        DashboardColumn column3 = new DefaultDashboardColumn();
         column3.addWidget("politics");
 
         model.addColumn(column1);
@@ -59,7 +60,8 @@ public class DashboardView implements Serializable {
         FacesMessage message = new FacesMessage();
         message.setSeverity(FacesMessage.SEVERITY_INFO);
         message.setSummary("Reordered: " + event.getWidgetId());
-        message.setDetail("Item index: " + event.getItemIndex() + ", Column index: " + event.getColumnIndex() + ", Sender index: " + event.getSenderColumnIndex());
+        message.setDetail("Item index: " + event.getItemIndex() + ", Column index: " + event.getColumnIndex()
+            + ", Sender index: " + event.getSenderColumnIndex());
 
         addMessage(message);
     }

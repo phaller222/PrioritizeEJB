@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.security;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;

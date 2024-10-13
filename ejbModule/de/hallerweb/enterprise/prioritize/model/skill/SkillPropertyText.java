@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.skill;
 
 import jakarta.persistence.Entity;
@@ -21,14 +22,14 @@ import jakarta.persistence.InheritanceType;
 
 /**
  * JPA entity to represent a textual {@link SkillProperty}.
- * 
+ *
  * <p>
  * Copyright: (c) 2014
  * </p>
  * <p>
  * Peter Haller
  * </p>
- * 
+ *
  * @author peter
  */
 @Entity
@@ -36,28 +37,28 @@ import jakarta.persistence.InheritanceType;
 public class SkillPropertyText extends SkillProperty implements SkillType {
 
 
-	private String text;
-	private String type;
+    private String text;
+    private String type;
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public void setType(String type) {
+        this.type = type;
+    }
 
-	public String getText() {
-		return text;
-	}
+    public String getText() {
+        return text;
+    }
 
-	public void setText(String text) {
-		this.text = text;
-	}
+    public void setText(String text) {
+        this.text = text;
+    }
 
-	@Override
-	public String toString() {
+    @Override
+    public String toString() {
 
-		return name;
-	}
+        return name;
+    }
 
-	public String getType() {
-		return "TEXT";
-	}
+    public String getType() {
+        return "TEXT";
+    }
 }

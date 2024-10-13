@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.document;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
@@ -183,7 +184,7 @@ public class DocumentBean implements Serializable {
             updateDocumentTree();
         } else {
             ViewUtilities.addErrorMessage("name",
-                    "A document with the name " + document.getName() + " already exists in this document group!");
+                "A document with the name " + document.getName() + " already exists in this document group!");
         }
         return NAVIGATION_DOCUMENTS;
     }
@@ -243,7 +244,7 @@ public class DocumentBean implements Serializable {
             this.documentInfos.clear();
         }
         this.documentInfos = controller.getDocumentInfosInDocumentGroup(Integer.parseInt(this.selectedDocumentGroup),
-                sessionController.getUser());
+            sessionController.getUser());
     }
 
     public List<DocumentGroup> getDocumentGroups() {
@@ -263,19 +264,19 @@ public class DocumentBean implements Serializable {
     @Named
     public String createDocumentGroup() {
         if (controller.createDocumentGroup(Integer.parseInt(selectedDepartmentId), documentGroupName,
-                sessionController.getUser()) != null) {
+            sessionController.getUser()) != null) {
             init();
         } else {
             ViewUtilities.addErrorMessage(null,
-                    "A document group with the name " + documentGroupName + " already exists in this department!");
+                "A document group with the name " + documentGroupName + " already exists in this department!");
         }
         return NAVIGATION_DOCUMENTS;
     }
 
     public String deleteDocumentGroup() {
         controller.deleteDocumentGroup(
-                controller.getDocumentGroup(Integer.parseInt(this.selectedDocumentGroup), sessionController.getUser()).getId(),
-                sessionController.getUser());
+            controller.getDocumentGroup(Integer.parseInt(this.selectedDocumentGroup), sessionController.getUser()).getId(),
+            sessionController.getUser());
         return NAVIGATION_DOCUMENTS;
     }
 
@@ -299,7 +300,7 @@ public class DocumentBean implements Serializable {
      * Calls "editdocument" for the given {@link DocumentInfo} object.
      *
      * @param info {@link DocumentInfo} object to be edited.
-     * @return
+     * @return page to be dsplayed next editdocument.xhtml
      */
     @Named
     public String edit(DocumentInfo info) {
@@ -318,7 +319,7 @@ public class DocumentBean implements Serializable {
      * Calls the History of the given {@link DocumentInfo} object.
      *
      * @param info The {@link DocumentInfo} object to ge the history for.
-     * @return
+     * @return next page
      */
     @Named
     public String history(DocumentInfo info) {
@@ -366,13 +367,13 @@ public class DocumentBean implements Serializable {
     /**
      * Prepare a download of current document (DocumentInfo)
      *
-     * @throws Exception
+     * @throws Exception if error
      */
     public void prepDownload() {
 
         FacesContext fc = FacesContext.getCurrentInstance();
         Map<String, String> params =
-                fc.getExternalContext().getRequestParameterMap();
+            fc.getExternalContext().getRequestParameterMap();
         int id = Integer.valueOf(params.get("docinfoid"));
 
         DocumentInfo docToDownload = controller.getDocumentInfo(id, sessionController.getUser());
@@ -380,33 +381,33 @@ public class DocumentBean implements Serializable {
 
         ByteArrayInputStream in = new ByteArrayInputStream(currentDocument.getData(), 0, currentDocument.getData().length);
 
-        setDownload(new DefaultStreamedContent().builder().
-                contentType(currentDocument.getMimeType())
-                .name(currentDocument.getName()).stream(new SerializableSupplier<InputStream>() {
-                    @Override
-                    public InputStream get() {
-                        return in;
-                    }
-                }).build());
+        setDownload(new DefaultStreamedContent().builder()
+            .contentType(currentDocument.getMimeType())
+            .name(currentDocument.getName()).stream(new SerializableSupplier<InputStream>() {
+                @Override
+                public InputStream get() {
+                    return in;
+                }
+            }).build());
     }
 
     /**
      * Prepare a download from the history (Document)
      *
-     * @param id
-     * @throws Exception
+     * @param id id of the download
+     * @throws Exception if error
      */
     public void prepDownloadHistory(int id) {
         Document docToDownload = controller.getDocument(id);
         ByteArrayInputStream in = new ByteArrayInputStream(docToDownload.getData(), 0, docToDownload.getData().length);
-        setDownload(new DefaultStreamedContent().builder().
-                contentType(docToDownload.getMimeType())
-                .name(docToDownload.getName()).stream(new SerializableSupplier<InputStream>() {
-                    @Override
-                    public InputStream get() {
-                        return in;
-                    }
-                }).build());
+        setDownload(new DefaultStreamedContent().builder()
+            .contentType(docToDownload.getMimeType())
+            .name(docToDownload.getName()).stream(new SerializableSupplier<InputStream>() {
+                @Override
+                public InputStream get() {
+                    return in;
+                }
+            }).build());
     }
 
     public void handleFileUpload(FileUploadEvent event) {
@@ -508,7 +509,7 @@ public class DocumentBean implements Serializable {
     @Named
     public void addDocumentToItemCollection(DocumentInfo docInfo) {
         ItemCollection managedCollection = itemCollectionController.getItemCollection(sessionController.getUser(),
-                selectedItemCollectionName);
+            selectedItemCollectionName);
         if (managedCollection != null) {
             DocumentInfo managedDocInfo = controller.getDocumentInfo(docInfo.getId(), sessionController.getUser());
             itemCollectionController.addDocumentInfo(managedCollection, managedDocInfo);
@@ -545,7 +546,7 @@ public class DocumentBean implements Serializable {
                 TreeNode<Object> group;
                 if (authController.canCreate(g, sessionController.getUser())) {
                     group = new DefaultTreeNode<>(new DocumentTreeInfo(g.getName(), false, true, String.valueOf(g.getId()), null),
-                            department);
+                        department);
                 } else {
                     group = new DefaultTreeNode<>(new DocumentTreeInfo(g.getName(), false, false, null, null), department);
                 }
@@ -558,7 +559,7 @@ public class DocumentBean implements Serializable {
                         // present at a given time.
                         //if (docInfo.getCurrentDocument().getLastModified().before(timelineBean.getSelectedDate())) {
                         new DefaultTreeNode(new DocumentTreeInfo(docInfo.getCurrentDocument().getName(), true, false, null, docInfo),
-                                group);
+                            group);
                         //}
                     }
                 }

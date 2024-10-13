@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.calendar;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
@@ -138,10 +139,10 @@ public class CalendarView implements Serializable {
 
                 if (reservationTimeSpan.intersects(requestedTimeSpan)) {
                     DefaultScheduleEvent<Object> scheduleEvent = DefaultScheduleEvent.builder()
-                            .description(reservationTimeSpan.getDescription())
-                            .startDate(DateTimeUtil.toLocalDateTime(reservationTimeSpan.getDateFrom()))
-                            .endDate(DateTimeUtil.toLocalDateTime(reservationTimeSpan.getDateUntil()))
-                            .data(reservationTimeSpan).build();
+                        .description(reservationTimeSpan.getDescription())
+                        .startDate(DateTimeUtil.toLocalDateTime(reservationTimeSpan.getDateFrom()))
+                        .endDate(DateTimeUtil.toLocalDateTime(reservationTimeSpan.getDateUntil()))
+                        .data(reservationTimeSpan).build();
                     scheduleEvent.setStyleClass("resourcereservation");
                     lazyEventModel.addEvent(scheduleEvent);
                 }
@@ -171,10 +172,10 @@ public class CalendarView implements Serializable {
                 TimeSpan illnessTimeSpan = user.getIllness();
                 if (illnessTimeSpan.intersects(requestedTimeSpan)) {
                     DefaultScheduleEvent<Object> scheduleEvent = DefaultScheduleEvent.builder()
-                            .description(illnessTimeSpan.getDescription())
-                            .startDate(DateTimeUtil.toLocalDateTime(illnessTimeSpan.getDateFrom()))
-                            .endDate(DateTimeUtil.toLocalDateTime(illnessTimeSpan.getDateUntil()))
-                            .data(illnessTimeSpan).build();
+                        .description(illnessTimeSpan.getDescription())
+                        .startDate(DateTimeUtil.toLocalDateTime(illnessTimeSpan.getDateFrom()))
+                        .endDate(DateTimeUtil.toLocalDateTime(illnessTimeSpan.getDateUntil()))
+                        .data(illnessTimeSpan).build();
                     scheduleEvent.setStyleClass("illness");
                     lazyEventModel.addEvent(scheduleEvent);
                     lazyEventModelIllness.addEvent(scheduleEvent);
@@ -204,10 +205,10 @@ public class CalendarView implements Serializable {
             for (TimeSpan vacationTimespan : user.getVacation()) {
                 if (vacationTimespan.intersects(requestedTimeSpan)) {
                     DefaultScheduleEvent<Object> scheduleEvent = DefaultScheduleEvent.builder()
-                            .description(vacationTimespan.getDescription())
-                            .startDate(DateTimeUtil.toLocalDateTime(vacationTimespan.getDateFrom()))
-                            .endDate(DateTimeUtil.toLocalDateTime(vacationTimespan.getDateUntil()))
-                            .data(vacationTimespan).build();
+                        .description(vacationTimespan.getDescription())
+                        .startDate(DateTimeUtil.toLocalDateTime(vacationTimespan.getDateFrom()))
+                        .endDate(DateTimeUtil.toLocalDateTime(vacationTimespan.getDateUntil()))
+                        .data(vacationTimespan).build();
                     scheduleEvent.setStyleClass("vacations");
                     lazyEventModel.addEvent(scheduleEvent);
                     lazyEventModelVacations.addEvent(scheduleEvent);

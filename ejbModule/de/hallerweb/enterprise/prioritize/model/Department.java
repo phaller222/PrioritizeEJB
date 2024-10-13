@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -49,8 +50,8 @@ import java.util.Set;
 @NamedQuery(name = "findAllDepartments", query = "SELECT d FROM Department d ORDER BY d.company.name")
 @NamedQuery(name = "findDepartmentById", query = "SELECT d FROM Department d WHERE d.id = ?1 ORDER BY d.name")
 @NamedQuery(name = "findDepartmentByName", query = "SELECT d FROM Department d WHERE d.name = ?1 ORDER BY d.name")
-@NamedQuery(name = "findDepartmentByPhrase", query = "SELECT d FROM Department d WHERE d.name LIKE :phrase " +
-        "OR d.description LIKE :phrase")
+@NamedQuery(name = "findDepartmentByPhrase", query = "SELECT d FROM Department d WHERE d.name LIKE :phrase "
+    + "OR d.description LIKE :phrase")
 @NamedQuery(name = "findDepartmentByToken", query = "SELECT d FROM Department d WHERE d.token = ?1 ORDER BY d.name")
 @NamedQuery(name = "findDepartmentsByCompany", query = "SELECT d FROM Department d WHERE d.company.id = ?1 ORDER BY d.name")
 @NamedQuery(name = "findResourceGroupInDepartment", query = "SELECT g FROM ResourceGroup g WHERE g.department.id= :deptId AND g.name=:groupName")
@@ -146,8 +147,9 @@ public class Department extends PObject implements PAuthorizedObject, PSearchabl
     }
 
     public void addDocumentGroup(DocumentGroup documentGroup) {
-        if (this.documentGroups.isEmpty()) documentGroups.add(documentGroup);
-        else {
+        if (this.documentGroups.isEmpty()) {
+            documentGroups.add(documentGroup);
+        } else {
             for (DocumentGroup g : documentGroups) {
                 if (g.getId() == documentGroup.getId()) {
                     return;

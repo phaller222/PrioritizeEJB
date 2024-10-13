@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.skill;
 
 import jakarta.persistence.Entity;
@@ -22,18 +23,18 @@ import jakarta.persistence.OneToOne;
 
 /**
  * SkillGroup - A collection of SkillRecords indicating required skills
- * @author peter
  *
+ * @author peter
  */
 @Entity
 public class SkillGroup {
 
-	@Id
-	@GeneratedValue
-	int id;
-	
-	@OneToOne
-	Skill skill;
-	int amount;
-	
+    @Id
+    @GeneratedValue
+    int id;
+
+    @OneToOne
+    Skill skill;
+    int amount;
+
 }

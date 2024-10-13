@@ -13,79 +13,79 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.skill;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.*;
 
 /**
  * JPA entity to represent a basic {@link SkillProperty}. Skills can have properties. A property can be numeric or a String.
- * 
+ *
  * <p>
  * Copyright: (c) 2014
  * </p>
  * <p>
  * Peter Haller
  * </p>
- * 
+ *
  * @author peter
  */
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class SkillProperty implements SkillType {
 
-	@Id
-	@GeneratedValue
-	int id;
+    @Id
+    @GeneratedValue
+    int id;
 
 
-	String name;
-	String description;
-	boolean numericProperty; // Is the property numeric? If set to false then it is a String property.
+    String name;
+    String description;
+    boolean numericProperty; // Is the property numeric? If set to false then it is a String property.
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JsonBackReference(value="skillBackRef")
-	Skill skill;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonBackReference(value = "skillBackRef")
+    Skill skill;
 
-	public boolean getNumericProperty() {
-		return numericProperty;
-	}
+    public boolean getNumericProperty() {
+        return numericProperty;
+    }
 
-	public void setNumericProperty(boolean numeric) {
-		this.numericProperty = numeric;
-	}
+    public void setNumericProperty(boolean numeric) {
+        this.numericProperty = numeric;
+    }
 
-	public Skill getSkill() {
-		return skill;
-	}
+    public Skill getSkill() {
+        return skill;
+    }
 
-	public void setSkill(Skill skill) {
-		this.skill = skill;
-	}
+    public void setSkill(Skill skill) {
+        this.skill = skill;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
 }

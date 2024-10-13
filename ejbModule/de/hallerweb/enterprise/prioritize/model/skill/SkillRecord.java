@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.model.skill;
 
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
-
 import jakarta.persistence.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,86 +28,86 @@ import java.util.Set;
  * be only one Skill "X", but many SkillRecords of type "X" for different users. Demo-Scenario: A {@link Skill}: "Java" with a
  * {@link SkillPropertyNumeric} named "Level" ranging from 1 to 10. User 1: {@link SkillRecord} of Type "Java" with Level=3 (
  * {@link SkillRecordProperty} ) User 2: {@link SkillRecord} of Type "Java" with Level=10 ( {@link SkillRecordProperty} )
- * 
+ *
  * <p>
  * Copyright: (c) 2014
  * </p>
  * <p>
  * Peter Haller
  * </p>
- * 
+ *
  * @author peter
  */
 @Entity
 public class SkillRecord {
 
-	@Id
-	@GeneratedValue
-	int id;
+    @Id
+    @GeneratedValue
+    int id;
 
-	@OneToOne
-	Skill skill;
+    @OneToOne
+    Skill skill;
 
-	@OneToOne
-	User user;
+    @OneToOne
+    User user;
 
-	@OneToOne
-	Resource resource;
+    @OneToOne
+    Resource resource;
 
-	@OneToMany(fetch = FetchType.EAGER)
-	Set<SkillRecordProperty> skillProperties;
+    @OneToMany(fetch = FetchType.EAGER)
+    Set<SkillRecordProperty> skillProperties;
 
-	int enthusiasm; // How much does the User "love" to perform tasks needing that skill?
+    int enthusiasm; // How much does the User "love" to perform tasks needing that skill?
 
-	public SkillRecord() {
-		super();
-		this.skillProperties = new HashSet<>();
-	}
+    public SkillRecord() {
+        super();
+        this.skillProperties = new HashSet<>();
+    }
 
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public int getEnthusiasm() {
-		return enthusiasm;
-	}
+    public int getEnthusiasm() {
+        return enthusiasm;
+    }
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-	public User getUser() {
-		return this.user;
-	}
+    public User getUser() {
+        return this.user;
+    }
 
-	public void setResource(Resource res) {
-		this.resource = res;
-	}
+    public void setResource(Resource res) {
+        this.resource = res;
+    }
 
-	public Resource getResource() {
-		return this.resource;
-	}
+    public Resource getResource() {
+        return this.resource;
+    }
 
-	public void setEnthusiasm(int enthusiasm) {
-		if (enthusiasm >= 0 && enthusiasm <= 10) {
-			this.enthusiasm = enthusiasm;
-		}
-	}
+    public void setEnthusiasm(int enthusiasm) {
+        if (enthusiasm >= 0 && enthusiasm <= 10) {
+            this.enthusiasm = enthusiasm;
+        }
+    }
 
-	public Skill getSkill() {
-		return skill;
-	}
+    public Skill getSkill() {
+        return skill;
+    }
 
-	public void setSkill(Skill skill) {
-		this.skill = skill;
-	}
+    public void setSkill(Skill skill) {
+        this.skill = skill;
+    }
 
-	public Set<SkillRecordProperty> getSkillProperties() {
-		return skillProperties;
-	}
+    public Set<SkillRecordProperty> getSkillProperties() {
+        return skillProperties;
+    }
 
-	public void setSkillProperties(Set<SkillRecordProperty> skillProperties) {
-		this.skillProperties = skillProperties;
-	}
+    public void setSkillProperties(Set<SkillRecordProperty> skillProperties) {
+        this.skillProperties = skillProperties;
+    }
 
 }

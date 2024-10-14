@@ -27,16 +27,16 @@ public class Location {
     @GeneratedValue
     private int id;
     String name;
-    double x;
-    double y;
+    double locationX;
+    double locationY;
 
     public Location() {
         super();
     }
 
     public Location(double x, double y) {
-        this.x = x;
-        this.y = y;
+        this.locationX = x;
+        this.locationY = y;
     }
 
 

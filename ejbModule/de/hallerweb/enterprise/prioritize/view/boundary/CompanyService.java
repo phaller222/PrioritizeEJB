@@ -42,7 +42,8 @@ import java.util.Set;
  * <p>
  * Copyright: (c) 2015
  * </p>
- * <p>
+ *
+ *  <p>
  * Peter Haller
  * </p>
  *

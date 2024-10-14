@@ -20,14 +20,13 @@ import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 
 /**
- * 
  * <p>
  * Copyright: (c) 2015
  * </p>
  * <p>
  * Peter Haller
  * </p>
- * 
+ *
  * @author peter
  */
 @ApplicationPath("/api")

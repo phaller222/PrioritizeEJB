@@ -32,7 +32,7 @@ import jakarta.persistence.Id;
  * </p>
  * 
  * @author peter
- */
+ * /
 @Entity
 public class NameValueEntry implements Comparable<Object> {
 

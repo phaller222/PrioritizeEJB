@@ -13,65 +13,65 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package de.hallerweb.enterprise.prioritize.view.nfc.counter;
-
-import java.io.Serializable;
-import java.util.List;
-
-import jakarta.ejb.EJB;
-import jakarta.enterprise.context.SessionScoped;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
 
 import de.hallerweb.enterprise.prioritize.controller.nfc.counter.IndustrieCounterController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.model.nfc.NFCCounter;
 import de.hallerweb.enterprise.prioritize.model.nfc.counter.IndustrieCounter;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+
+import java.io.Serializable;
+import java.util.List;
 
 @Named
 @SessionScoped
 public class IndustrieCounterBean implements Serializable {
 
-	@Inject
-	SessionController sessionController;
+    @Inject
+    SessionController sessionController;
 
-	@EJB
-	IndustrieCounterController industrieCounterController;
+    @EJB
+    IndustrieCounterController industrieCounterController;
 
-	@Named
-	public List<IndustrieCounter> getCounters() {
-		return industrieCounterController.getAllCounters(sessionController.getUser());
-	}
+    @Named
+    public List<IndustrieCounter> getCounters() {
+        return industrieCounterController.getAllCounters(sessionController.getUser());
+    }
 
-	public void createDummyCounter() {
-		industrieCounterController.createCounter(0);
-	}
+    public void createDummyCounter() {
+        industrieCounterController.createCounter(0);
+    }
 
-	public void createCounter(String uuid) {
-		industrieCounterController.createCounter(uuid, sessionController.getUser());
-	}
+    public void createCounter(String uuid) {
+        industrieCounterController.createCounter(uuid, sessionController.getUser());
+    }
 
-	public String incCounter(String uuid) {
-		industrieCounterController.incCounter(industrieCounterController.getIndustrieCounter(uuid));
-		return "index";
-	}
+    public String incCounter(String uuid) {
+        industrieCounterController.incCounter(industrieCounterController.getIndustrieCounter(uuid));
+        return "index";
+    }
 
-	public String decCounter(String uuid) {
-		industrieCounterController.decCounter(industrieCounterController.getIndustrieCounter(uuid));
-		return "index";
-	}
+    public String decCounter(String uuid) {
+        industrieCounterController.decCounter(industrieCounterController.getIndustrieCounter(uuid));
+        return "index";
+    }
 
-	public long getCounterValue(String uuid) {
-		try {
-			NFCCounter c = (NFCCounter) industrieCounterController.getIndustrieCounter(uuid).getCounter();
-			if (c != null && c.getNfcUnit().getPayload().length() > 0) {
-				return c.getValue();
-			} else {
-				return 10;
-			}
-		} catch (Exception ex) {
-			return -1;
-		}
-	}
+    public long getCounterValue(String uuid) {
+        try {
+            NFCCounter c = (NFCCounter) industrieCounterController.getIndustrieCounter(uuid).getCounter();
+            if (c != null && c.getNfcUnit().getPayload().length() > 0) {
+                return c.getValue();
+            } else {
+                return 10;
+            }
+        } catch (Exception ex) {
+            return -1;
+        }
+    }
 
 }

@@ -16,31 +16,23 @@
 
 package de.hallerweb.enterprise.prioritize.model.usersetting;
 
-import java.util.List;
-import java.util.logging.Logger;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToOne;
-
-
-
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
 import de.hallerweb.enterprise.prioritize.model.security.User;
+import jakarta.persistence.*;
+
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * JPA entity to represent an {@link UserPreference}.
  * UserPreferences store the current user settings.
- * 
+ *
  * <p> Copyright: (c) 2014
  * </p>
  * <p>
  * Peter Haller
  * </p>
- * 
+ *
  * @author peter
  */
 @Entity

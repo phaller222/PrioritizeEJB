@@ -29,10 +29,9 @@ import jakarta.persistence.InheritanceType;
  * <p>
  * Peter Haller
  * </p>
- * 
- * @author peter
  *
- */
+ *
+ * @author peter*/
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class SkillPropertyNumeric extends SkillProperty implements SkillType {

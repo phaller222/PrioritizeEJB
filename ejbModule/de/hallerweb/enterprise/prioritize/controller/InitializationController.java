@@ -63,8 +63,8 @@ public class InitializationController {
 
     static final String LITERAL_ADMIN = "admin";
     static final String LITERAL_LOCALHOST = "localhost";
-    static final String LITERAL_FALSE = "false";
-    static final String LITERAL_TRUE = "true";
+    static final String FALSE = "false";
+    static final String TRUE = "true";
 
     // Deployment configuration keys
     public static final String CREATE_DEFAULT_COMPANY = "CREATE_DEFAULT_COMPANY"; // Create a default company on deployment?
@@ -102,7 +102,7 @@ public class InitializationController {
     // Keycloak logout URL
     public static final String KEYCLOAK_LOGOUT_URL = "KEYCLOAK_LOGOUT_URL";
 
-    public static final Map<String, String> config = new HashMap<>();
+    protected static final Map<String, String> config = new HashMap<>();
 
     @PostConstruct
     public void initialize() {
@@ -116,10 +116,10 @@ public class InitializationController {
         config.clear();
         config.put(CREATE_DEFAULT_COMPANY, "true");
         config.put(CREATE_DEFAULT_DEPARTMENT, "true");
-        config.put(CREATE_DEFAULT_APIKEY, LITERAL_FALSE);
+        config.put(CREATE_DEFAULT_APIKEY, "false");
         config.put(MAXIMUM_FILE_UPLOAD_SIZE, "50000000");
 
-        config.put(ENABLE_MQTT_SERVICE, LITERAL_FALSE);
+        config.put(ENABLE_MQTT_SERVICE, "false");
         config.put(MQTT_HOST, LITERAL_LOCALHOST);
         config.put(MQTT_PORT, "1883");
         config.put(MQTT_HOST_WRITE, LITERAL_LOCALHOST);
@@ -138,18 +138,20 @@ public class InitializationController {
         config.put(EVENT_DEFAULT_TIMEOUT, "120000"); // Default is 2 minutes
         config.put(EVENT_DEFAULT_STRATEGY, "IMMEDIATE"); // Default is IMMEDIATE
         config.put(LISTENER_DEFAULT_TIMEOUT, "120000"); // Default is 2 minutes
-        config.put(FIRE_RESOURCE_EVENTS, LITERAL_TRUE);
-        config.put(FIRE_DOCUMENT_EVENTS, LITERAL_TRUE);
-        config.put(FIRE_USER_EVENTS, LITERAL_TRUE);
-        config.put(FIRE_DEPARTMENT_EVENTS, LITERAL_TRUE);
-        config.put(FIRE_ACTIONBOARD_EVENTS, LITERAL_TRUE);
-        config.put(FIRE_TASK_EVENTS, LITERAL_TRUE);
+        config.put(FIRE_RESOURCE_EVENTS, "true");
+        config.put(FIRE_DOCUMENT_EVENTS, "true");
+        config.put(FIRE_USER_EVENTS, "true");
+        config.put(FIRE_DEPARTMENT_EVENTS, "true");
+        config.put(FIRE_ACTIONBOARD_EVENTS, "true");
+        config.put(FIRE_TASK_EVENTS, "true");
 
-        config.put(USE_KEYCLOAK_AUTH, LITERAL_FALSE);
+        config.put(USE_KEYCLOAK_AUTH, "false");
         config.put(KEYCLOAK_LOGOUT_URL,
             "https://localhost:8443/auth/realms/master/protocol/openid-connect/logout?"
                 + "redirect_uri=https://localhost/PrioritizeWeb/client/dashboard/dashboard.xhtml");
 
+
+        // Read config.properties and update configuration
         try {
             BufferedReader reader = new BufferedReader(
                 new InputStreamReader(getClass().getResourceAsStream("/META-INF/resources/config.properties")));
@@ -199,33 +201,40 @@ public class InitializationController {
         Logger.getLogger(this.getClass().getName()).log(Level.INFO,
             "Checking if admin user exists...");
         User adminUser = userRoleController.findUserByUsername(LITERAL_ADMIN, authController.getSystemUser());
+
+        // If no admin user can be found the system had not been started and configured before
+        // The admin-User and the initial minimum number of objects like the default company and
+        // department objects must be created. admin user gets the default password "admin".
+        // ATTENTION: admin user password should be changed as soon as possible!
+
         if (Objects.isNull(adminUser)) {
             Department d = null;
-            // No user present yet. Create admin user...
             Logger.getLogger(this.getClass().getName()).log(Level.INFO,
                 "No admin user present. recreating admin user...");
 
 
-            // Create default company and default department
+            // If configured, a default company and default department is created.
             boolean createDefaultCompany = Boolean.parseBoolean(config.get(CREATE_DEFAULT_COMPANY));
             if (createDefaultCompany) {
+
                 Address adr = new Address();
                 adr.setCity("City of Admin");
                 adr.setFax("00000-00000");
                 adr.setPhone("00000-00000");
                 adr.setStreet("Street of Admins");
                 adr.setZipCode("00000");
-                Company c = companyController.createCompany("Default Company", adr, authController.getSystemUser());
-                c.setMainAddress(adr);
+                Company company = companyController.createCompany("Default Company", adr, authController.getSystemUser());
+                company.setMainAddress(adr);
 
-
+                // If configured, a default department is created for the company.
                 if (Boolean.parseBoolean(config.get(CREATE_DEFAULT_DEPARTMENT))) {
-                    d = companyController.createDepartment(c, "default", "Auto generated default department", adr,
+                    d = companyController.createDepartment(company, "default", "Auto generated default department", adr,
                         authController.getSystemUser());
                 }
             }
 
             // Admin will get all permissions on all objects!
+            // A PermissionRecord-Set is used to store that information.
             HashSet<PermissionRecord> records = new HashSet<>();
 
             PermissionRecord adminCompanies = new PermissionRecord(true, true, true, true, Company.class.getCanonicalName());
@@ -233,17 +242,13 @@ public class InitializationController {
             PermissionRecord adminRoles = new PermissionRecord(true, true, true, true, Role.class.getCanonicalName());
             PermissionRecord adminUsers = new PermissionRecord(true, true, true, true, User.class.getCanonicalName());
             PermissionRecord adminPermissions = new PermissionRecord(true, true, true, true, PermissionRecord.class.getCanonicalName());
-
             PermissionRecord adminDocumentGroups = new PermissionRecord(true, true, true, true, DocumentGroup.class.getCanonicalName());
             PermissionRecord adminDocumentInfos = new PermissionRecord(true, true, true, true, DocumentInfo.class.getCanonicalName());
             PermissionRecord adminDocuments = new PermissionRecord(true, true, true, true, Document.class.getCanonicalName());
-
             PermissionRecord adminResourceGroups = new PermissionRecord(true, true, true, true, ResourceGroup.class.getCanonicalName());
             PermissionRecord adminResources = new PermissionRecord(true, true, true, true, Resource.class.getCanonicalName());
-
             PermissionRecord adminSkills = new PermissionRecord(true, true, true, true, Skill.class.getCanonicalName());
             PermissionRecord adminSkillCategories = new PermissionRecord(true, true, true, true, SkillCategory.class.getCanonicalName());
-
             PermissionRecord adminTimeTracker = new PermissionRecord(true, true, true, true, TimeTracker.class.getCanonicalName());
             PermissionRecord adminCounter = new PermissionRecord(true, true, true, true, IndustrieCounter.class.getCanonicalName());
 
@@ -262,16 +267,18 @@ public class InitializationController {
             records.add(adminTimeTracker);
             records.add(adminCounter);
 
+            // A Role "admin" must be created to hold the PermissionRecord.
             Role r = userRoleController.createRole(LITERAL_ADMIN, "admin Role", records, authController.getSystemUser());
             userRoleController.setRoleDepartment(r, d);
             Set<Role> roles = new HashSet<>();
             roles.add(r);
 
+            // Now we create the admin user including his/her address.
             User admin = new User();
             admin.setName(LITERAL_ADMIN);
             admin.setUsername(LITERAL_ADMIN);
             admin.setEmail("nobody@localhost");
-            admin.setPassword("admin");
+            admin.setPassword(LITERAL_ADMIN);
             admin.setOccupation("Systemadministrator");
 
             Address adr = new Address();
@@ -283,15 +290,16 @@ public class InitializationController {
             adr.setHousenumber("0");
             adr.setCountry("DE");
             adr.setMobile("0");
-
             admin.setAddress(adr);
+
             if (Boolean.parseBoolean(config.get(CREATE_DEFAULT_APIKEY))) {
                 admin.setApiKey("ABCDEFG");
-                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "--- ATTENTION: DEFAULT API-KEY HJAS BEEN CREATED: ABCDEFG. DON'T USE THIS"
-                    + " INSTALLATION IN PRODUCTION---");
+                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "--- ATTENTION: DEFAULT API-KEY HAS BEEN CREATED: ABCDEFG. DON'T USE THIS"
+                    + " INSTALLATION IN PRODUCTION! ---");
 
             }
 
+            // Finally the admin user is created with the admin-role including all possible permissions.
             userRoleController.createUser(admin, null, roles, authController.getSystemUser());
 
         } else {

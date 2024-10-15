@@ -24,7 +24,6 @@ import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationContr
 import de.hallerweb.enterprise.prioritize.controller.security.RestAccessController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
-import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.calendar.TimeSpan;
 import de.hallerweb.enterprise.prioritize.model.resource.ResourceReservation;
 import de.hallerweb.enterprise.prioritize.model.security.User;
@@ -79,19 +78,21 @@ public class CalendarService {
 
     private static final String TIMESPAN_ILLNESS = "ILLNESS";
     private static final String TIMESPAN_VACATION = "VACATION";
+    private static final String TIMESPAN_RESOURCE_RESERVATION = "RESOURCE_RESERVATION";
+    private static final String TIMESPAN_ALL = "ALL";
+
 
     /**
-     * Returns {@link TimeSpan} objects with {@link ResourceReservation} objects for the given department. It must be narrowed down by
+     * Returns {@link TimeSpan} objects with {@link ResourceReservation} objects for the given Resource. It must be narrowed down by
      * providing from and to parameters as Timestamp.
      *
      * @return JSON object with {@link TimeSpan} objects for that department.
-     * @api {get} /calendar/reservations reservations
-     * @apiName getTimeSpansForReservations
+     * @api {get} /calendar/resource/reservations getTimeSpansForResourceReservations
+     * @apiName getTimeSpansForResourceReservations
      * @apiGroup /calendar
-     * @apiDescription Searches for all resource reservations to resources (devices) within a department.
-     * The department is given by the departmentToken parameter. Parameters "from" and "to" indicate the
-     * the timespan to search.
-     * @apiParam {String} departmentToken Department token to use.
+     * @apiDescription Searches for all resource reservations for the specific resource (devices).
+     * Parameters "from" and "to" indicate the timespan to search. If from and to are omitted all entries for the resource are returned.
+     * @apiParam {Long} resourceId The ID of the Resource to look for reservations.
      * @apiParam {String} apiKey The API-Key of the user accessing the service.
      * @apiParam {long} from Java timestamp to indicate the start date from which to search for resevations.
      * @apiParam {long} to Java timestamp to indicate the end date to search for resevations.
@@ -106,33 +107,29 @@ public class CalendarService {
      * "dateFrom" : 1479164400000,
      * "dateUntil" : 1485817200000,
      * "type" : "RESOURCE_RESERVATION",
-     * "department" : ...list of departments...
+     * ...
      * }
      * ]
-     * @apiError NotAuthorized  DepartmentToken or APIKey incorrect.
+     * @apiError NotAuthorized  APIKey incorrect.
      */
     @GET
-    @Path("reservations/")
+    @Path("resource/reservations/{resourceID}")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<TimeSpan> getTimeSpansForReservations(@QueryParam(value = "departmentToken") String departmentToken,
-                                                      @QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String from,
-                                                      @QueryParam(value = "to") String to) {
+    public List<TimeSpan> getTimeSpansForResourceReservations(@QueryParam(value = "resourceId") int resourceId,
+                                                              @QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String from,
+                                                              @QueryParam(value = "to") String to) {
         User user = accessController.checkApiKey(apiKey);
         if (user != null) {
-            Department dept = companyController.getDepartmentByToken(departmentToken, user);
-            if (dept != null) {
-                List<ResourceReservation> reservations = resourceReservationController.getResourceReservationsForDepartment(dept.getId());
-                List<TimeSpan> entries = findIntersectingTimeSpansInReservations(from, to, user, reservations);
+            List<ResourceReservation> reservations = resourceReservationController.getResourceReservationsForResource(resourceId);
+            List<TimeSpan> entries = findIntersectingTimeSpansInReservations(from, to, user, reservations);
 
-                if (entries.isEmpty()) {
-                    throw new NotFoundException(createNegativeResponse("No entries found for department " + dept.getName()
-                        + " and given timespan or no permission to read resource reservations form this department!"));
-                } else {
-                    return entries;
-                }
+            if (entries.isEmpty()) {
+                throw new NotFoundException(createNegativeResponse("No entries found for resource " + resourceId
+                    + " and given timespan or no permission to read resource reservations form this department!"));
             } else {
-                throw new NotFoundException(createNegativeResponse("Department not found or department token invalid!"));
+                return entries;
             }
+
         } else {
             throw new NotAuthorizedException(Response.serverError());
         }
@@ -140,9 +137,11 @@ public class CalendarService {
 
 
     /**
+     * /**
+     *
      * @return JSON object with {@link TimeSpan} objects for this user.
-     * @api {get} /calendar/self self (sessionUser)
-     * @apiName getTimeSpansForUser
+     * @api {get} /calendar/user/self getTimeSpansForCurrentUser
+     * @apiName getTimeSpansForCurrentUser
      * @apiGroup /calendar
      * @apiDescription Searches for all Timespan entries for the user with the given apiKey. This includes resource reservations
      * initiated by this user, illness and vacation entries.
@@ -159,17 +158,17 @@ public class CalendarService {
      * "description" : "default:aaaa[admin]",
      * "dateFrom" : 1479164400000,
      * "dateUntil" : 1485817200000,
-     * "type" : "RESOURCE_RESERVATION",
+     * "type" : "...",
      * "department" : ...list of departments...
      * }
      * ]
      * @apiError NotAuthorized  DepartmentToken or APIKey incorrect.
      */
     @GET
-    @Path("self/")
+    @Path("user/self/")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<TimeSpan> getTimeSpansForUser(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String from,
-                                              @QueryParam(value = "to") String to) {
+    public List<TimeSpan> getTimeSpansForCurrentUser(@QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String from,
+                                                     @QueryParam(value = "to") String to) {
         User user = accessController.checkApiKey(apiKey);
         if (user == null) {
             throw new NotAuthorizedException(Response.serverError());
@@ -190,13 +189,13 @@ public class CalendarService {
      * providing from and to parameters as Timestamp.
      *
      * @return JSON object with {@link TimeSpan} objects for that user.
-     * @endpoint {get} /calendar/illness/{username}  illness
+     * @api {get} /calendar/user/illness/{username} getIllnessEntriesForUser
      * @apiName getIllnessEntriesForUser
      * @apiGroup /calendar
      * @apiDescription Searches for all illness entries of the given user.
      * The department is given by the departmentToken parameter. Parameters "from" and "to" indicate
      * the timespan to search.
-     * @pathParam {String} username     The user to use for the search.
+     * @apiParam {String} username     The user to use for the search.
      * @apiParam {String}   apiKey The API-Key of the user accessing the service.
      * @apiParam {long} from    Java timestamp to indicate the start date from which to search for illness entries.
      * @apiParam {long} to Java timestamp to indicate the end date to search for illness entries.
@@ -210,14 +209,14 @@ public class CalendarService {
      * "description" : "default:aaaa[admin]",
      * "dateFrom" : 1479164400000,
      * "dateUntil" : 1485817200000,
-     * "type" : "RESOURCE_RESERVATION",
+     * "type" : "ILLNESS",
      * "department" : ...list of departments...
      * }
      * ]
      * @apiError NotAuthorized  DepartmentToken or APIKey incorrect.
      */
     @GET
-    @Path("illness/{username}")
+    @Path("user/illness/{username}")
     @Produces(MediaType.APPLICATION_JSON)
     public List<TimeSpan> getIllnessEntriesForUser(@PathParam(value = "username") String username,
                                                    @QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String from,
@@ -242,7 +241,7 @@ public class CalendarService {
      * providing from and to parameters as Timestamp.
      *
      * @return JSON object with {@link TimeSpan} objects for that user.
-     * @api {get} /calendar/vacation/{username} vacation
+     * @api {get} /calendar/user/vacation/{username} getVacationEntriesForUser
      * @apiName getVacationEntriesForUser
      * @apiGroup /calendar
      * @apiDescription Searches for all vacation entries of the given user.
@@ -262,14 +261,14 @@ public class CalendarService {
      * "description" : "default:aaaa[admin]",
      * "dateFrom" : 1479164400000,
      * "dateUntil" : 1485817200000,
-     * "type" : "RESOURCE_RESERVATION",
+     * "type" : "VACATION",
      * "department" : ...list of departments...
      * }
      * ]
      * @apiError NotAuthorized  DepartmentToken or APIKey incorrect.
      */
     @GET
-    @Path("vacation/{username}")
+    @Path("user/vacation/{username}")
     @Produces(MediaType.APPLICATION_JSON)
     public List<TimeSpan> getVacationEntriesForUser(@PathParam(value = "username") String username,
                                                     @QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String from,
@@ -288,6 +287,57 @@ public class CalendarService {
         }
     }
 
+    /**
+     * Returns all {@link TimeSpan} objects for the given {@link User} within the given date range. This search searches for
+     * resource reservation entries only. Search must be narrowed down by
+     * providing from and to parameters as Timestamp.
+     *
+     * @return JSON object with {@link TimeSpan} objects for that user.
+     * @api {get} /calendar/user/reservations/{username} getResourceReservationsForUser
+     * @apiName getResourceReservationsForUser
+     * @apiGroup /calendar
+     * @apiDescription Searches for all resource reservation entries of the given user.
+     * Parameters "from" and "to" indicate the timespan to search.
+     * @apiParam {String} username     The user to use for the search.
+     * @apiParam {String}   apiKey The API-Key of the user accessing the service.
+     * @apiParam {long} from    Java timestamp to indicate the start date from which to search for illness entries.
+     * @apiParam {long} to Java timestamp to indicate the end date to search for illness entries.
+     * @apiSuccess {TimeSpan} timespan JSON Objects with all timespans currently registered for reservations.
+     * @apiSuccessExample Success-Response:
+     * HTTP/1.1 200 OK
+     * [
+     * {
+     * "id" : 76,
+     * "title" : "aaaa",
+     * "description" : "default:aaaa[admin]",
+     * "dateFrom" : 1479164400000,
+     * "dateUntil" : 1485817200000,
+     * "type" : "RESOURCE_RESERVATION",
+     * ...
+     * }
+     * ]
+     * @apiError NotAuthorized or APIKey incorrect.
+     */
+    @GET
+    @Path("user/reservations/{username}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<TimeSpan> getResourceReservationsForUser(@PathParam(value = "username") String username,
+                                                         @QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String from,
+                                                         @QueryParam(value = "to") String to) {
+        User user = accessController.checkApiKey(apiKey);
+        if (user != null) {
+            List<TimeSpan> entries = findTimeSpansForUser(TIMESPAN_RESOURCE_RESERVATION, from, to, user, username);
+            if (entries.isEmpty()) {
+                throw new NotFoundException(createNegativeResponse("No resource reservation entries found for user " + user.getName()
+                    + " and given timespan or no permission to read user data."));
+            } else {
+                return entries;
+            }
+        } else {
+            throw new NotAuthorizedException(Response.serverError());
+        }
+    }
+
 
     private List<TimeSpan> findTimeSpansForUser(String type, String timeSpanFrom, String timeSpanTo, User sessionUser,
                                                 String username) {
@@ -296,35 +346,54 @@ public class CalendarService {
 
         User user = userRoleController.findUserByUsername(username, sessionUser);
         if (authController.canRead(user, sessionUser)) {
-            TimeSpan searchSpan = new TimeSpan();
-            try {
-                searchSpan.setDateFrom(new Date(Long.parseLong(timeSpanFrom)));
-                searchSpan.setDateUntil(new Date(Long.parseLong(timeSpanTo)));
-            } catch (Exception ex) {
-                throw new NotFoundException(createNegativeResponse("Missing or invalid Date parameters 'from' or 'to'!"));
-            }
-
-            if (type.equalsIgnoreCase("ILLNESS")) {
+            if (type.equalsIgnoreCase(TIMESPAN_ILLNESS) || type.equalsIgnoreCase(TIMESPAN_ALL)) {
                 if (user.getIllness() != null) {
                     userTimeSpans.add(user.getIllness());
                 }
-            } else if (type.equalsIgnoreCase("VACATION")) {
+            }
+
+            if (type.equalsIgnoreCase(TIMESPAN_VACATION) || type.equalsIgnoreCase(TIMESPAN_ALL)) {
                 if (!user.getVacations().isEmpty()) {
                     userTimeSpans.addAll(user.getVacations());
                 }
             }
 
+            if (type.equalsIgnoreCase(TIMESPAN_RESOURCE_RESERVATION) || type.equalsIgnoreCase(TIMESPAN_ALL)) {
+                List<ResourceReservation> reservations = resourceReservationController.getResourceReservationsForUser(user);
+                if (null != reservations && !reservations.isEmpty()) {
+                    for (ResourceReservation res : reservations) {
+                        userTimeSpans.add(res.getTimeSpan());
+                    }
 
-            for (TimeSpan span : userTimeSpans) {
-                // Add to search result if TimeSpan objects intersect
-                if (span.intersects(searchSpan)) {
-                    entries.add(span);
                 }
+            }
+
+            // If parameters "from" and "to" are present limit the search
+            if (null != timeSpanFrom && null != timeSpanTo) {
+                TimeSpan searchSpan = new TimeSpan();
+                try {
+                    searchSpan.setDateFrom(new Date(Long.parseLong(timeSpanFrom)));
+                    searchSpan.setDateUntil(new Date(Long.parseLong(timeSpanTo)));
+                } catch (Exception ex) {
+                    throw new NotFoundException(createNegativeResponse("Missing or invalid Date parameters 'from' or 'to'!"));
+                }
+                for (TimeSpan span : userTimeSpans) {
+                    // Add to search result if TimeSpan objects intersect
+                    if (span.intersects(searchSpan)) {
+                        entries.add(span);
+                    }
+                }
+            } else {
+                entries.addAll(userTimeSpans);
             }
         }
         return entries;
     }
 
+
+    private Response createNegativeResponse(String responseText) {
+        return Response.status(404).entity("{\"response\" : \"" + responseText + "\"}").build();
+    }
 
     private List<TimeSpan> findIntersectingTimeSpansInReservations(String timeSpanFrom, String timeSpanTo, User sessionUser,
                                                                    List<ResourceReservation> reservations) {
@@ -351,7 +420,15 @@ public class CalendarService {
         return entries;
     }
 
-    private Response createNegativeResponse(String responseText) {
-        return Response.status(404).entity("{\"response\" : \"" + responseText + "\"}").build();
+    private List<TimeSpan> findAllTimeSpansForReservations(User sessionUser, List<ResourceReservation> reservations) {
+        List<TimeSpan> entries = new ArrayList<>();
+        for (ResourceReservation res : reservations) {
+            if (authController.canRead(res.getResource(), sessionUser)) {
+                TimeSpan reservationTimeSpan = res.getTimeSpan();
+                entries.add(reservationTimeSpan);
+            }
+        }
+        return entries;
     }
+
 }

@@ -8,4 +8,4 @@ REM If you run a linux or mac machine please feel free to install nodejs there a
 REM If you'd like write a corresponding .sh-File and make a merge request at the prioritize GitHub pages.
 
 
-apidoc -i ./ejbModule/de/hallerweb/enterprise/prioritize/view/boundary -o ./ejbModule/de/hallerweb/enterprise/prioritize/view/boundary/apidoc/
+apidoc -i ./ejbModule/de/hallerweb/enterprise/prioritize/view/boundary  -o ./ejbModule/de/hallerweb/enterprise/prioritize/view/boundary/apidoc/

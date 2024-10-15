@@ -40,6 +40,7 @@ import jakarta.persistence.*;
 @NamedQuery(name = "findAllResourceReservations", query = "select rr FROM ResourceReservation rr")
 @NamedQuery(name = "findResourceReservationsForResourceGroup",
     query = "select rr FROM ResourceReservation rr WHERE rr.resource.resourceGroup.id = :resourceGroupId")
+@NamedQuery(name = "findResourceReservationsForResource", query = "select rr FROM ResourceReservation rr WHERE rr.resource.id = :resourceId")
 @NamedQuery(name = "findResourceReservationsForDepartment", query = "select rr FROM ResourceReservation rr WHERE rr.resource.department.id = :departmentId")
 @NamedQuery(name = "findResourceReservationsForUser", query = "select rr FROM ResourceReservation rr WHERE rr.reservedBy.id = :userId")
 public class ResourceReservation implements ITimeSpan {

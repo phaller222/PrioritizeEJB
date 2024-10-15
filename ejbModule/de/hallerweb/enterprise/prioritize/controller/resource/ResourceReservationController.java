@@ -131,6 +131,23 @@ public class ResourceReservationController {
         return reservations;
     }
 
+
+    /**
+     * Return all ResourceReservation entries for the given resource.
+     *
+     * @param resourceId The ID of the resource
+     * @return A List with ResourceReservations for the Resource.
+     */
+    public List<ResourceReservation> getResourceReservationsForResource(int resourceId) {
+
+        Query query = em.createNamedQuery("findResourceReservationsForResource");
+        query.setParameter("resourceId", resourceId);
+
+        @SuppressWarnings("unchecked")
+        List<ResourceReservation> reservations = query.getResultList();
+        return reservations;
+    }
+
     public List<ResourceReservation> getResourceReservationsForDepartment(int departmentId) {
         Query query = em.createNamedQuery("findResourceReservationsForDepartment");
         query.setParameter("departmentId", departmentId);

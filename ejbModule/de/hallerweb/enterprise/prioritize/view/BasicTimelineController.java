@@ -280,8 +280,7 @@ public class BasicTimelineController {
                             .endDate(DateTimeUtil.toLocalDateTime(docInfo.getCurrentDocument().getLastModified()))
                             .build());
                     }
-                    documentBean.updateDocumentTree();
-                }
+                 }
             }
 
         }

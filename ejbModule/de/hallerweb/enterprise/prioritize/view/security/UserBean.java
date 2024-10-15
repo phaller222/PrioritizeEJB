@@ -338,8 +338,8 @@ public class UserBean implements Serializable {
 
         controller.addVacation(user, ts, sessionController.getUser());
         boolean intersects = false;
-        if (!user.getVacation().isEmpty()) {
-            for (TimeSpan tsView : user.getVacation()) {
+        if (!user.getVacations().isEmpty()) {
+            for (TimeSpan tsView : user.getVacations()) {
                 if (tsView.intersects(ts)) {
                     intersects = true; // Don't add vacation, it's a doublette
                 }

@@ -23,16 +23,16 @@ import jakarta.persistence.Id;
 /**
  * JPA entity to represent a {@link NameValueEntry} pair. This entity is used to represent data variables sent from MQTT IoT devices (e.g.
  * SET:value:100)
- * 
+ *
  * <p>
  * Copyright: (c) 2015
  * </p>
  * <p>
  * Peter Haller
  * </p>
- * 
+ *
  * @author peter
- * /
+ */
 @Entity
 public class NameValueEntry implements Comparable<Object> {
 
@@ -72,6 +72,11 @@ public class NameValueEntry implements Comparable<Object> {
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
     @Override

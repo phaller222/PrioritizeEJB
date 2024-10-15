@@ -32,7 +32,6 @@ import de.hallerweb.enterprise.prioritize.view.ViewUtilities;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
-import jakarta.faces.bean.ManagedBean;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -63,7 +62,6 @@ import java.util.logging.Logger;
  */
 @Named
 @SessionScoped
-@ManagedBean
 public class DocumentBean implements Serializable {
 
     private static final long serialVersionUID = -9021544577054017322L;

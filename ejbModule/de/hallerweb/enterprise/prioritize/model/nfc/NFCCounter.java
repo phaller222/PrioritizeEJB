@@ -18,7 +18,6 @@ package de.hallerweb.enterprise.prioritize.model.nfc;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,7 +46,7 @@ public class NFCCounter extends PCounter {
     @Override
     public long getValue() {
         String payload = nfcUnit.getPayload();
-        if (StringUtils.isNumeric(payload)) {
+        if (isNumeric(payload)) {
             return Long.parseLong(payload);
         } else {
             return -1;
@@ -62,7 +61,7 @@ public class NFCCounter extends PCounter {
     @Override
     public void incCounter() {
         String payload = nfcUnit.getPayload();
-        if (StringUtils.isNumeric(payload)) {
+        if (isNumeric(payload)) {
             long newValue = Long.parseLong(payload) + 1;
             Logger.getLogger(getClass().getName()).log(Level.INFO, "SET: " + newValue);
             nfcUnit.setPayload(String.valueOf(newValue));
@@ -72,7 +71,7 @@ public class NFCCounter extends PCounter {
     @Override
     public void decCounter() {
         String payload = nfcUnit.getPayload();
-        if (StringUtils.isNumeric(payload)) {
+        if (isNumeric(payload)) {
             long newValue = Long.parseLong(payload) - 1;
             nfcUnit.setPayload(String.valueOf(newValue));
         }
@@ -81,6 +80,15 @@ public class NFCCounter extends PCounter {
     @Override
     public String getUuid() {
         return nfcUnit.getUuid();
+    }
+
+    private boolean isNumeric(String s) {
+        try {
+            Long.valueOf(s);
+            return true;
+        } catch (NumberFormatException ex) {
+            return false;
+        }
     }
 
 }

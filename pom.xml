@@ -37,9 +37,6 @@
             <version>2.17.0</version>
         </dependency>
 
-
-
-
         <dependency>
             <groupId>org.eclipse.paho</groupId>
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
@@ -48,12 +45,14 @@
 
         <!-- https://mvnrepository.com/artifact/org.primefaces/primefaces -->
 
+        <!-- https://mvnrepository.com/artifact/org.primefaces/primefaces -->
         <dependency>
             <groupId>org.primefaces</groupId>
             <artifactId>primefaces</artifactId>
             <version>12.0.0</version>
             <classifier>jakarta</classifier>
         </dependency>
+
 
 
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->

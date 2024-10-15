@@ -24,7 +24,6 @@ import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationContr
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
 import de.hallerweb.enterprise.prioritize.controller.usersetting.ItemCollectionController;
 import de.hallerweb.enterprise.prioritize.controller.usersetting.UserPreferenceController;
-import de.hallerweb.enterprise.prioritize.model.Company;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.resource.NameValueEntry;
 import de.hallerweb.enterprise.prioritize.model.resource.Resource;
@@ -42,18 +41,6 @@ import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
-import org.primefaces.event.NodeCollapseEvent;
-import org.primefaces.event.NodeExpandEvent;
-import org.primefaces.event.SelectEvent;
-import org.primefaces.model.DefaultTreeNode;
-import org.primefaces.model.TreeNode;
-import org.primefaces.model.chart.*;
-import org.primefaces.model.map.DefaultMapModel;
-import org.primefaces.model.map.LatLng;
-import org.primefaces.model.map.MapModel;
-import org.primefaces.model.map.Marker;
-import org.primefaces.model.mindmap.DefaultMindmapNode;
-import org.primefaces.model.mindmap.MindmapNode;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -109,9 +96,6 @@ public class ResourceBean implements Serializable {
     String mqttDataSentAsString = "";                                // Represents the MQTT data sent as String
     String lastMqttValue;
     transient Set<String> mqttCommands;                            // A list of commands a MQTT resource understands (e.g. ON, OFF....)
-    LineChartModel valueModel;                                        // LineChartModel for the primefaces <gmap> tag (Resource location).
-
-    private transient MindmapNode selectedNode;                    // selectedNode for agent mindmap.
 
     transient Department selectedDepartment = null;                // Department to change resource to
     transient Department selectedResourceGroup = null;                // ResourceGroup to change resource to
@@ -120,8 +104,6 @@ public class ResourceBean implements Serializable {
 
     String selectedItemCollectionName;                                // Selected ItemCollection to add a resource to
 
-    transient TreeNode<Object> resourceTreeRoot;                            // Tree for resources
-    transient TreeNode<Object> agentTreeRoot;                                // Tree for agent resources
 
     transient Resource currentAgent;                                // If in agent view the currently select agent for viewing its data
 
@@ -236,7 +218,7 @@ public class ResourceBean implements Serializable {
     public void init() {
         resource = new Resource();
         selectedResourceGroupId = "";
-        this.resourceTreeRoot = createResourceTree();
+
     }
 
     @Named
@@ -267,7 +249,7 @@ public class ResourceBean implements Serializable {
         int resourceGroupId = Integer.parseInt(selectedResourceGroupId);
 
         if (resourceController.createResource(resource, resourceGroupId, sessionController.getUser()) != null) {
-            updateResourceTree();
+
         } else {
             ViewUtilities.addErrorMessage("name", "Problems creating resource with the name " + resource.getName()
                 + "!");
@@ -546,139 +528,6 @@ public class ResourceBean implements Serializable {
         return res.getLatitude() + "," + res.getLongitude();
     }
 
-    @Named
-    public LineChartModel getValueModel(NameValueEntry entry) {
-        createValueModel(entry);
-        return valueModel;
-    }
-
-    /**
-     * Returns the model for a JSF(Primefaces) line chart to represent
-     * historical data of a resource's NamedValue.
-     *
-     * @param entry A NameValueEntry
-     */
-    private void createValueModel(NameValueEntry entry) {
-        valueModel = new LineChartModel();
-
-        LineChartSeries values = new LineChartSeries();
-        values.setFill(true);
-        values.setLabel(entry.getName());
-
-        String[] propertyValues = entry.getValues().split(";");
-
-        float max = 0.0f;
-        float min = 1000.0f;
-        for (String value : propertyValues) {
-            String[] entryValue = value.split(",");
-            float fvalue = Float.parseFloat(entryValue[1]);
-            Date d = new Date(Long.parseLong(entryValue[0]));
-            if (fvalue > max) {
-                max = fvalue;
-            }
-            if (fvalue < min) {
-                min = fvalue;
-            }
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(d);
-            String hourString = calendar.get(Calendar.HOUR) < 10 ? "0" + calendar.get(Calendar.HOUR) : "" + calendar.get(Calendar.HOUR);
-            String minuteString = calendar.get(Calendar.MINUTE) < 10 ? "0" + calendar.get(Calendar.MINUTE)
-                : "" + calendar.get(Calendar.MINUTE);
-            String secondString = calendar.get(Calendar.SECOND) < 10 ? "0" + calendar.get(Calendar.SECOND)
-                : "" + calendar.get(Calendar.SECOND);
-
-            values.set(hourString + ":" + minuteString + ":" + secondString, fvalue);
-        }
-
-        valueModel.addSeries(values);
-        valueModel.setTitle("Values");
-        valueModel.setShadow(true);
-        valueModel.setMouseoverHighlight(true);
-        valueModel.setShowDatatip(true);
-        valueModel.setZoom(true);
-        valueModel.setShowPointLabels(true);
-        valueModel.setTitle(entry.getName());
-
-        Axis xaxis = new CategoryAxis("Time");
-        valueModel.getAxes().put(AxisType.X, xaxis);
-        Axis yaxis = valueModel.getAxis(AxisType.Y);
-        yaxis.setLabel("Value");
-        yaxis.setMin(min);
-        yaxis.setMax(max);
-    }
-
-    /**
-     * Returns a MapModel for a Primefaces gmap tag. Basically the coordinates
-     * (Latitude / Longitude) are returned. This method checks if
-     * latitude/longitude information is available and creates a Marker based on
-     * that information.
-     *
-     * @return MapModel for gmap
-     */
-    public MapModel getResourcesMapModel() {
-        MapModel simpleModel = new DefaultMapModel();
-
-        // Shared coordinates
-        LatLng coord;
-        if ((resource.getLatitude() != null) && (resource.getLongitude() != null)) {
-            try {
-                coord = new LatLng(Float.parseFloat(resource.getLatitude()), Float.parseFloat(resource.getLongitude()));
-
-                // Basic marker
-                simpleModel.addOverlay(new Marker(coord, resource.getName()));
-            } catch (Exception ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
-            }
-
-        }
-
-        return simpleModel;
-    }
-
-    public MindmapNode getNetworkRoot() {
-        List<Resource> allResources = resourceController.getAllResources(sessionController.getUser());
-        if (allResources != null) {
-            MindmapNode root = new DefaultMindmapNode("Origin", "Root", "C0C0FF", false);
-            for (Resource res : allResources) {
-                if (authController.canRead(res, sessionController.getUser()) && res.isAgent()) {
-                    root.addNode(
-                        new DefaultMindmapNode(res.getName() + " " + res.getIp(), res, res.isMqttOnline() ? "00C000" : "C0C0C0", true));
-                }
-            }
-            return root;
-        } else {
-            return new DefaultMindmapNode("No department selected");
-        }
-    }
-
-    public MindmapNode getSelectedNode() {
-        return selectedNode;
-    }
-
-    public void setSelectedNode(MindmapNode selectedNode) {
-        this.selectedNode = selectedNode;
-    }
-
-    public void onNodeDblselect(SelectEvent<Object> event) {
-        this.selectedNode = (MindmapNode) event.getObject();
-    }
-
-    @Named
-    public String getSelectedNodeData() {
-        if (this.selectedNode != null) {
-            Resource res = (Resource) this.selectedNode.getData();
-            Set<NameValueEntry> data = res.getMqttValues();
-            StringBuilder currentEntry = new StringBuilder();
-            for (NameValueEntry entry : data) {
-                String values = entry.getValues();
-                currentEntry.append(entry.getName()).append(" : ").append(values.substring(values.lastIndexOf(',')))
-                    .append("\n");
-            }
-            return currentEntry.toString();
-        } else {
-            return "";
-        }
-    }
 
     @Named
     public void addResourceToItemCollection(Resource resource) {
@@ -690,113 +539,6 @@ public class ResourceBean implements Serializable {
         }
     }
 
-    // --------------------------------- Client view ---------------------------------
-
-    public TreeNode<Object> getResourceTree() {
-        return this.resourceTreeRoot;
-    }
-
-    public TreeNode<Object> getAgentTree() {
-        return this.agentTreeRoot;
-    }
-
-    // Create Tree for resources view
-    public TreeNode<Object> createResourceTree() {
-        TreeNode<Object> root = new DefaultTreeNode<>("My Devices", null);
-
-        List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
-        for (Company company : companies) {
-            TreeNode<Object> companyTreeNode = new DefaultTreeNode<>(new ResourceTreeInfo(company.getName(), false, false, null, null), root);
-            List<Department> companyDepartments = company.getDepartments();
-            for (Department d : companyDepartments) {
-                TreeNode<Object> department = new DefaultTreeNode<>(new ResourceTreeInfo(d.getName(), false, false, null, null), companyTreeNode);
-                Set<ResourceGroup> groups = d.getResourceGroups();
-                for (ResourceGroup g : groups) {
-                    buildGroupResourceSubtree(department, g);
-                }
-            }
-        }
-        return root;
-    }
-
-    private void buildGroupResourceSubtree(TreeNode<Object> department, ResourceGroup resourceGroup) {
-        if (authController.canRead(resourceGroup, sessionController.getUser())) {
-            TreeNode<Object> groupTreeNode;
-            if (authController.canCreate(resourceGroup, sessionController.getUser())) {
-                groupTreeNode = new DefaultTreeNode<>(
-                    new ResourceTreeInfo(resourceGroup.getName(), false, true, String.valueOf(resourceGroup.getId()), null),
-                    department);
-            } else {
-                groupTreeNode = new DefaultTreeNode<>(new ResourceTreeInfo(resourceGroup.getName(), false, false, null, null), department);
-            }
-            Set<Resource> resourcesInGroup = resourceGroup.getResources();
-            for (Resource res : resourcesInGroup) {
-                if (!res.isAgent() && authController.canRead(res, sessionController.getUser())) {
-                    new DefaultTreeNode<>(new ResourceTreeInfo(res.getName(), true, false, null, res), groupTreeNode);
-                }
-            }
-        }
-    }
-
-    // Create Tree for resources view
-    public TreeNode<Object> createAgentTree() {
-        TreeNode<Object> root = new DefaultTreeNode<>("My Agents", null);
-
-        List<Company> companies = companyController.getAllCompanies(sessionController.getUser());
-        for (Company c : companies) {
-            TreeNode<Object> company = new DefaultTreeNode<>(new ResourceTreeInfo(c.getName(), false, false, null, null), root);
-            List<Department> companyDepartments = c.getDepartments();
-            for (Department d : companyDepartments) {
-                TreeNode<Object> department = new DefaultTreeNode<>(new ResourceTreeInfo(d.getName(), false, false, null, null), company);
-                Set<ResourceGroup> groups = d.getResourceGroups();
-                for (ResourceGroup g : groups) {
-                    buildGroupAgentSubtree(department, g);
-                }
-
-            }
-        }
-        return root;
-    }
-
-    private void buildGroupAgentSubtree(TreeNode<Object> department, ResourceGroup resourceGroup) {
-        if (authController.canRead(resourceGroup, sessionController.getUser())) {
-            TreeNode<Object> groupTreeNode;
-            if (authController.canCreate(resourceGroup, sessionController.getUser())) {
-                groupTreeNode = new DefaultTreeNode<>(
-                    new ResourceTreeInfo(resourceGroup.getName(), false, true, String.valueOf(resourceGroup.getId()), null),
-                    department);
-            } else {
-                groupTreeNode = new DefaultTreeNode<>(new ResourceTreeInfo(resourceGroup.getName(), false, false, null, null), department);
-            }
-            Set<Resource> groupResources = resourceGroup.getResources();
-            for (Resource res : groupResources) {
-                if (res.isAgent() && authController.canRead(res, sessionController.getUser())) {
-                    new DefaultTreeNode<Object>(new ResourceTreeInfo(res.getName(), true, false, null, res), groupTreeNode);
-                }
-            }
-
-        }
-    }
-
-    public void updateResourceTree() {
-        if (isNewRequest()) {
-            this.resourceTreeRoot = createResourceTree();
-        }
-    }
-
-    public void updateAgentTree() {
-        if (isNewRequest()) {
-            this.agentTreeRoot = createAgentTree();
-        }
-    }
-
-    public void nodeExpand(NodeExpandEvent event) {
-        event.getTreeNode().setExpanded(true);
-    }
-
-    public void nodeCollapse(NodeCollapseEvent event) {
-        event.getTreeNode().setExpanded(false);
-    }
 
     public boolean isNewRequest() {
         final FacesContext fc = FacesContext.getCurrentInstance();

@@ -102,7 +102,7 @@ public class InitializationController {
     // Keycloak logout URL
     public static final String KEYCLOAK_LOGOUT_URL = "KEYCLOAK_LOGOUT_URL";
 
-    protected static final Map<String, String> config = new HashMap<>();
+    public static final Map<String, String> config = new HashMap<>();
 
     @PostConstruct
     public void initialize() {

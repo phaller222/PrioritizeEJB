@@ -77,12 +77,15 @@ public class CalendarService {
     @EJB
     AuthorizationController authController;
 
+    private static final String TIMESPAN_ILLNESS = "ILLNESS";
+    private static final String TIMESPAN_VACATION = "VACATION";
+
     /**
      * Returns {@link TimeSpan} objects with {@link ResourceReservation} objects for the given department. It must be narrowed down by
      * providing from and to parameters as Timestamp.
      *
      * @return JSON object with {@link TimeSpan} objects for that department.
-     * @api {get} /calendar/reservations getTimeSpansForReservations
+     * @api {get} /calendar/reservations reservations
      * @apiName getTimeSpansForReservations
      * @apiGroup /calendar
      * @apiDescription Searches for all resource reservations to resources (devices) within a department.
@@ -135,39 +138,17 @@ public class CalendarService {
         }
     }
 
-    private List<TimeSpan> findIntersectingTimeSpansInReservations(String timeSpanFrom, String timeSpanTo, User sessionUser,
-                                                                   List<ResourceReservation> reservations) {
-        List<TimeSpan> entries = new ArrayList<>();
-        for (ResourceReservation res : reservations) {
-            if (authController.canRead(res.getResource(), sessionUser)) {
-                TimeSpan reservationTimeSpan = res.getTimeSpan();
-                TimeSpan searchSpan = new TimeSpan();
-                try {
-                    searchSpan.setDateFrom(new Date(Long.parseLong(timeSpanFrom)));
-                    searchSpan.setDateUntil(new Date(Long.parseLong(timeSpanTo)));
-                } catch (Exception ex) {
-                    throw new NotFoundException(createNegativeResponse("Missing or invalid Date parameters 'from' or 'to'!"));
-                }
-
-                // Add to search result if TimeSpan objects intersect
-                if (reservationTimeSpan.intersects(searchSpan)) {
-                    entries.add(reservationTimeSpan);
-                }
-            } else {
-                break;
-            }
-        }
-        return entries;
-    }
 
     /**
      * @return JSON object with {@link TimeSpan} objects for this user.
-     * @api {get} /calendar/self getTimeSpansForUser
+     * @api {get} /calendar/self self (sessionUser)
      * @apiName getTimeSpansForUser
      * @apiGroup /calendar
      * @apiDescription Searches for all Timespan entries for the user with the given apiKey. This includes resource reservations
      * initiated by this user, illness and vacation entries.
      * @apiParam {String} apiKey The API-Key of the user accessing the service.
+     * @apiParam {long} from Java timestamp to indicate the start date from which to search for entries.
+     * @apiParam {long} to Java timestamp to indicate the end date to search for entries.
      * @apiSuccess {TimeSpan} timespan JSON Objects with all timespans currently registered for the user.
      * @apiSuccessExample Success-Response:
      * HTTP/1.1 200 OK
@@ -200,6 +181,174 @@ public class CalendarService {
                 throw new NotFoundException(createNegativeResponse("No entries found!"));
             }
         }
+    }
+
+
+    /**
+     * Returns all {@link TimeSpan} objects for the given {@link User} within the given date range. This search searches for
+     * illness entries only. Search must be narrowed down by
+     * providing from and to parameters as Timestamp.
+     *
+     * @return JSON object with {@link TimeSpan} objects for that user.
+     * @endpoint {get} /calendar/illness/{username}  illness
+     * @apiName getIllnessEntriesForUser
+     * @apiGroup /calendar
+     * @apiDescription Searches for all illness entries of the given user.
+     * The department is given by the departmentToken parameter. Parameters "from" and "to" indicate
+     * the timespan to search.
+     * @pathParam {String} username     The user to use for the search.
+     * @apiParam {String}   apiKey The API-Key of the user accessing the service.
+     * @apiParam {long} from    Java timestamp to indicate the start date from which to search for illness entries.
+     * @apiParam {long} to Java timestamp to indicate the end date to search for illness entries.
+     * @apiSuccess {TimeSpan} timespan JSON Objects with all timespans currently registered for reservations.
+     * @apiSuccessExample Success-Response:
+     * HTTP/1.1 200 OK
+     * [
+     * {
+     * "id" : 76,
+     * "title" : "aaaa",
+     * "description" : "default:aaaa[admin]",
+     * "dateFrom" : 1479164400000,
+     * "dateUntil" : 1485817200000,
+     * "type" : "RESOURCE_RESERVATION",
+     * "department" : ...list of departments...
+     * }
+     * ]
+     * @apiError NotAuthorized  DepartmentToken or APIKey incorrect.
+     */
+    @GET
+    @Path("illness/{username}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<TimeSpan> getIllnessEntriesForUser(@PathParam(value = "username") String username,
+                                                   @QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String from,
+                                                   @QueryParam(value = "to") String to) {
+        User user = accessController.checkApiKey(apiKey);
+        if (user != null) {
+            List<TimeSpan> entries = findTimeSpansForUser(TIMESPAN_ILLNESS, from, to, user, username);
+            if (entries.isEmpty()) {
+                throw new NotFoundException(createNegativeResponse("No illness entries found for user " + user.getName()
+                    + " and given timespan or no permission to read user data."));
+            } else {
+                return entries;
+            }
+        } else {
+            throw new NotAuthorizedException(Response.serverError());
+        }
+    }
+
+    /**
+     * Returns all {@link TimeSpan} objects for the given {@link User} within the given date range. This search searches for
+     * vacation entries only. Search must be narrowed down by
+     * providing from and to parameters as Timestamp.
+     *
+     * @return JSON object with {@link TimeSpan} objects for that user.
+     * @api {get} /calendar/vacation/{username} vacation
+     * @apiName getVacationEntriesForUser
+     * @apiGroup /calendar
+     * @apiDescription Searches for all vacation entries of the given user.
+     * The department is given by the departmentToken parameter. Parameters "from" and "to" indicate
+     * the timespan to search.
+     * @apiParam {String} username The user to use for the search.
+     * @apiParam {String} apiKey The API-Key of the user accessing the service.
+     * @apiParam {long} from Java timestamp to indicate the start date from which to search for vacation entries.
+     * @apiParam {long} to Java timestamp to indicate the end date to search for resevations.
+     * @apiSuccess {TimeSpan} timespan JSON Objects with all timespans currently registered for vacationentries.
+     * @apiSuccessExample Success-Response:
+     * HTTP/1.1 200 OK
+     * [
+     * {
+     * "id" : 76,
+     * "title" : "aaaa",
+     * "description" : "default:aaaa[admin]",
+     * "dateFrom" : 1479164400000,
+     * "dateUntil" : 1485817200000,
+     * "type" : "RESOURCE_RESERVATION",
+     * "department" : ...list of departments...
+     * }
+     * ]
+     * @apiError NotAuthorized  DepartmentToken or APIKey incorrect.
+     */
+    @GET
+    @Path("vacation/{username}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<TimeSpan> getVacationEntriesForUser(@PathParam(value = "username") String username,
+                                                    @QueryParam(value = "apiKey") String apiKey, @QueryParam(value = "from") String from,
+                                                    @QueryParam(value = "to") String to) {
+        User user = accessController.checkApiKey(apiKey);
+        if (user != null) {
+            List<TimeSpan> entries = findTimeSpansForUser(TIMESPAN_VACATION, from, to, user, username);
+            if (entries.isEmpty()) {
+                throw new NotFoundException(createNegativeResponse("No vacation entries found for user " + user.getName()
+                    + " and given timespan or no permission to read user data."));
+            } else {
+                return entries;
+            }
+        } else {
+            throw new NotAuthorizedException(Response.serverError());
+        }
+    }
+
+
+    private List<TimeSpan> findTimeSpansForUser(String type, String timeSpanFrom, String timeSpanTo, User sessionUser,
+                                                String username) {
+        List<TimeSpan> entries = new ArrayList<>();
+        List<TimeSpan> userTimeSpans = new ArrayList<>();
+
+        User user = userRoleController.findUserByUsername(username, sessionUser);
+        if (authController.canRead(user, sessionUser)) {
+            TimeSpan searchSpan = new TimeSpan();
+            try {
+                searchSpan.setDateFrom(new Date(Long.parseLong(timeSpanFrom)));
+                searchSpan.setDateUntil(new Date(Long.parseLong(timeSpanTo)));
+            } catch (Exception ex) {
+                throw new NotFoundException(createNegativeResponse("Missing or invalid Date parameters 'from' or 'to'!"));
+            }
+
+            if (type.equalsIgnoreCase("ILLNESS")) {
+                if (user.getIllness() != null) {
+                    userTimeSpans.add(user.getIllness());
+                }
+            } else if (type.equalsIgnoreCase("VACATION")) {
+                if (!user.getVacations().isEmpty()) {
+                    userTimeSpans.addAll(user.getVacations());
+                }
+            }
+
+
+            for (TimeSpan span : userTimeSpans) {
+                // Add to search result if TimeSpan objects intersect
+                if (span.intersects(searchSpan)) {
+                    entries.add(span);
+                }
+            }
+        }
+        return entries;
+    }
+
+
+    private List<TimeSpan> findIntersectingTimeSpansInReservations(String timeSpanFrom, String timeSpanTo, User sessionUser,
+                                                                   List<ResourceReservation> reservations) {
+        List<TimeSpan> entries = new ArrayList<>();
+        for (ResourceReservation res : reservations) {
+            if (authController.canRead(res.getResource(), sessionUser)) {
+                TimeSpan reservationTimeSpan = res.getTimeSpan();
+                TimeSpan searchSpan = new TimeSpan();
+                try {
+                    searchSpan.setDateFrom(new Date(Long.parseLong(timeSpanFrom)));
+                    searchSpan.setDateUntil(new Date(Long.parseLong(timeSpanTo)));
+                } catch (Exception ex) {
+                    throw new NotFoundException(createNegativeResponse("Missing or invalid Date parameters 'from' or 'to'!"));
+                }
+
+                // Add to search result if TimeSpan objects intersect
+                if (reservationTimeSpan.intersects(searchSpan)) {
+                    entries.add(reservationTimeSpan);
+                }
+            } else {
+                break;
+            }
+        }
+        return entries;
     }
 
     private Response createNegativeResponse(String responseText) {

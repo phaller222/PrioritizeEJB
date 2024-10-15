@@ -540,7 +540,7 @@ public class UserRoleController {
         if (authController.canUpdate(user, sessionUser)) {
             boolean intersects = false;
             User managedUser = em.find(User.class, user.getId());
-            Set<TimeSpan> userVacation = managedUser.getVacation();
+            Set<TimeSpan> userVacation = managedUser.getVacations();
             if (!userVacation.isEmpty()) {
                 for (TimeSpan ts : userVacation) {
                     if (timespan.intersects(ts)) {
@@ -572,7 +572,7 @@ public class UserRoleController {
 
     public Set<TimeSpan> getVacation(User user, User sessionUser) {
         if (authController.canRead(user, sessionUser)) {
-            return user.getVacation();
+            return user.getVacations();
         } else {
             return new HashSet<>();
         }

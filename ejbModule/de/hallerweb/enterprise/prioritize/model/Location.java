@@ -49,19 +49,19 @@ public class Location {
     }
 
     public double getX() {
-        return x;
+        return locationX;
     }
 
     public void setX(double x) {
-        this.x = x;
+        this.locationX = x;
     }
 
     public double getY() {
-        return y;
+        return locationY;
     }
 
     public void setY(double y) {
-        this.y = y;
+        this.locationY = y;
     }
 
     public int getId() {

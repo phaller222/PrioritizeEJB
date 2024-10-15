@@ -202,7 +202,7 @@ public class CalendarView implements Serializable {
         updateLazyModel();
         updateLazyVacationsModel();
         for (User user : users) {
-            for (TimeSpan vacationTimespan : user.getVacation()) {
+            for (TimeSpan vacationTimespan : user.getVacations()) {
                 if (vacationTimespan.intersects(requestedTimeSpan)) {
                     DefaultScheduleEvent<Object> scheduleEvent = DefaultScheduleEvent.builder()
                         .description(vacationTimespan.getDescription())

@@ -227,13 +227,7 @@ public class User extends PActor implements PAuthorizedObject, PSearchable, Seri
         this.illness = illness;
     }
 
-    public Set<TimeSpan> getVacation() {
-        return vacations;
-    }
 
-    public void setVacation(Set<TimeSpan> vacation) {
-        this.vacations = vacation;
-    }
 
     public void addVacation(TimeSpan timespan) {
         this.vacations.add(timespan);

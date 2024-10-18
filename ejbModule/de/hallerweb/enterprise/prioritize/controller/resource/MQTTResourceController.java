@@ -17,6 +17,7 @@
 package de.hallerweb.enterprise.prioritize.controller.resource;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
+import de.hallerweb.enterprise.prioritize.controller.DepartmentController;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController;
 import de.hallerweb.enterprise.prioritize.controller.LoggingController.Action;
@@ -57,7 +58,7 @@ public class MQTTResourceController {
     @PersistenceContext
     EntityManager em;
     @EJB
-    CompanyController companyController;
+    DepartmentController departmentController;
     @Inject
     SessionController sessionController;
     @EJB
@@ -75,7 +76,7 @@ public class MQTTResourceController {
 
     public Resource createMqttResource(Resource resourceToCreate, String departmentToken, String resourceGroupName, User sessionUser) {
 
-        Department departmentToAddResource = companyController.getDepartmentByToken(departmentToken, sessionUser);
+        Department departmentToAddResource = departmentController.getDepartmentByToken(departmentToken, sessionUser);
         String name = resourceToCreate.getName();
         String description = resourceToCreate.getDescription();
         String ip = resourceToCreate.getIp();

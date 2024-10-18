@@ -16,13 +16,12 @@
 
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
-import de.hallerweb.enterprise.prioritize.controller.CompanyController;
+import de.hallerweb.enterprise.prioritize.controller.DepartmentController;
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
 import de.hallerweb.enterprise.prioritize.controller.search.SearchController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.RestAccessController;
 import de.hallerweb.enterprise.prioritize.controller.security.SessionController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.document.Document;
 import de.hallerweb.enterprise.prioritize.model.document.DocumentGroup;
@@ -64,22 +63,14 @@ public class DocumentService {
 
     @EJB
     RestAccessController accessController;
-
     @EJB
-    CompanyController companyController;
-
+    DepartmentController departmentController;
     @EJB
     DocumentController documentController;
-
-    @EJB
-    UserRoleController userRoleController;
-
     @EJB
     SearchController searchController;
-
     @Inject
     SessionController sessionController;
-
     @EJB
     AuthorizationController authController;
 
@@ -153,7 +144,7 @@ public class DocumentService {
         if (user == null) {
             throw new NotAuthorizedException(Response.serverError());
         } else {
-            Department dept = companyController.getDepartmentByToken(departmentToken, user);
+            Department dept = departmentController.getDepartmentByToken(departmentToken, user);
             if (dept != null) {
                 DocumentGroup documentGroup = documentController.findDocumentGroupByNameAndDepartment(dept.getId(), group, user);
                 if (documentGroup == null) {
@@ -191,7 +182,7 @@ public class DocumentService {
                                                  @QueryParam(value = "apiKey") String apiKey) {
         User user = accessController.checkApiKey(apiKey);
         if (user != null) {
-            Department dept = companyController.getDepartmentByToken(departmentToken, user);
+            Department dept = departmentController.getDepartmentByToken(departmentToken, user);
             if (dept == null) {
                 throw new NotFoundException(createNegativeResponse("Department not found or department token invalid!"));
             } else {
@@ -226,7 +217,7 @@ public class DocumentService {
                                              @QueryParam(value = "phrase") String phrase) {
         User user = accessController.checkApiKey(apiKey);
         if (user != null) {
-            Department dept = companyController.getDepartmentByToken(departmentToken, user);
+            Department dept = departmentController.getDepartmentByToken(departmentToken, user);
             if (dept == null) {
                 throw new NotAuthorizedException(Response.serverError());
             } else {
@@ -397,7 +388,7 @@ public class DocumentService {
                                    @QueryParam(value = "departmentToken") String departmentToken, @PathParam(value = "id") String id) {
         User user = accessController.checkApiKey(apiKey);
         if (user != null) {
-            Department dept = companyController.getDepartmentByToken(departmentToken, user);
+            Department dept = departmentController.getDepartmentByToken(departmentToken, user);
             if (dept == null) {
                 throw new NotAuthorizedException(Response.serverError());
             } else {

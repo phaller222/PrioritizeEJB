@@ -17,6 +17,7 @@
 package de.hallerweb.enterprise.prioritize.service.mqtt;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
+import de.hallerweb.enterprise.prioritize.controller.DepartmentController;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.resource.MQTTResourceController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
@@ -80,7 +81,7 @@ public class MQTTService implements MqttCallback {
     @EJB
     MQTTResourceController controller;
     @EJB
-    CompanyController companyController;
+    DepartmentController departmentController;
     @EJB
     InitializationController initController;
     @EJB
@@ -399,7 +400,7 @@ public class MQTTService implements MqttCallback {
         String departmentKey = scanDevicesData[2];
         StringBuilder scanResult = new StringBuilder();
         if (controller.exists(deviceUuid)) {
-            Department department = companyController.getDepartmentByToken(departmentKey,
+            Department department = departmentController.getDepartmentByToken(departmentKey,
                 authController.getSystemUser());
             Set<ResourceGroup> groups = department.getResourceGroups();
             List<Resource> devicesFound = scanDevices(deviceUuid, groups);

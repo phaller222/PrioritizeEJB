@@ -17,10 +17,9 @@
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
-import de.hallerweb.enterprise.prioritize.controller.search.SearchController;
+import de.hallerweb.enterprise.prioritize.controller.DepartmentController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.RestAccessController;
-import de.hallerweb.enterprise.prioritize.controller.security.UserRoleController;
 import de.hallerweb.enterprise.prioritize.model.Department;
 import de.hallerweb.enterprise.prioritize.model.security.User;
 import jakarta.ejb.EJB;
@@ -32,7 +31,6 @@ import jakarta.ws.rs.core.Response;
 import java.util.List;
 
 /**
- *
  * <p>
  * Copyright: (c) 2015
  * </p>
@@ -54,9 +52,8 @@ public class DepartmentService {
     @EJB
     CompanyController companyController;
     @EJB
-    UserRoleController userRoleController;
-    @EJB
-    SearchController searchController;
+    DepartmentController departmentController;
+
     @EJB
     RestAccessController accessController;
     @EJB
@@ -78,7 +75,7 @@ public class DepartmentService {
     @Produces(MediaType.APPLICATION_JSON)
     public Department getDepartment(@PathParam(value = "id") int id, @QueryParam(value = "apiKey") String apiKey) {
         if (accessController.checkApiKey(apiKey) != null) {
-            return companyController.findDepartmentById(id);
+            return departmentController.findDepartmentById(id);
         } else {
             throw new NotAuthorizedException(Response.serverError());
         }
@@ -91,7 +88,7 @@ public class DepartmentService {
                                                         @QueryParam(value = "apiKey") String apiKey) {
         User user = accessController.checkApiKey(apiKey);
         if (user != null) {
-            return companyController.findDepartmentsByCompany(
+            return departmentController.findDepartmentsByCompany(
                 companyController.findCompanyByName(companyName).getId(), user);
         } else {
             throw new NotAuthorizedException(Response.serverError());

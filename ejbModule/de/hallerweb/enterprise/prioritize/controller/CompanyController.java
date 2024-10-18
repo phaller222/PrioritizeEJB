@@ -210,37 +210,6 @@ public class CompanyController {
         return companies.stream().filter(b -> authController.canRead(b, sessionUser)).collect(Collectors.toList());
     }
 
-    public Company getCompanyByName(String name, User sessionUser) {
-        Query query = em.createNamedQuery("findCompanyByName");
-        query.setParameter("name", name);
-        try {
-            Company company = (Company) query.getSingleResult();
-            if (company != null && authController.canRead(company, sessionUser)) {
-                return company;
-            } else {
-                return null;
-            }
-        } catch (NoResultException ex) {
-            return null;
-        }
-    }
-
-    public Company getCompanyById(int companyId, User sessionUser) {
-        Query query = em.createNamedQuery("findCompanyById");
-        query.setParameter(1, companyId);
-        try {
-            Company company = (Company) query.getSingleResult();
-            if (company != null && authController.canRead(company, sessionUser)) {
-                return company;
-            } else {
-                return null;
-            }
-        } catch (NoResultException ex) {
-            return null;
-        }
-    }
-
-
     public Company findCompanyById(int id) {
         return em.find(Company.class, id);
     }

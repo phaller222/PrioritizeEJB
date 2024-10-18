@@ -17,6 +17,7 @@
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
+import de.hallerweb.enterprise.prioritize.controller.DepartmentController;
 import de.hallerweb.enterprise.prioritize.controller.search.SearchController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
 import de.hallerweb.enterprise.prioritize.controller.security.RestAccessController;
@@ -56,7 +57,7 @@ public class UserRoleService {
     AuthorizationController authController;
 
     @EJB
-    CompanyController companyController;
+    DepartmentController departmentController;
 
     @EJB
     UserRoleController userRoleController;
@@ -97,7 +98,7 @@ public class UserRoleService {
     public List<User> getUsers(@PathParam(value = "departmentToken") String departmentToken, @QueryParam(value = "apiKey") String apiKey) {
         User user = accessController.checkApiKey(apiKey);
         if (user != null) {
-            Department dept = companyController.getDepartmentByToken(departmentToken, user);
+            Department dept = departmentController.getDepartmentByToken(departmentToken, user);
             if (dept != null) {
                 return userRoleController.getUsersForDepartment(dept, user);
             }

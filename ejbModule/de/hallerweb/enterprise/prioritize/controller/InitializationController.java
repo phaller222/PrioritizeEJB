@@ -59,6 +59,8 @@ public class InitializationController {
     @EJB
     CompanyController companyController;
     @EJB
+    DepartmentController departmentController;
+    @EJB
     AuthorizationController authController;
 
     static final String LITERAL_ADMIN = "admin";
@@ -228,7 +230,7 @@ public class InitializationController {
 
                 // If configured, a default department is created for the company.
                 if (Boolean.parseBoolean(config.get(CREATE_DEFAULT_DEPARTMENT))) {
-                    d = companyController.createDepartment(company, "default", "Auto generated default department", adr,
+                    d = departmentController.createDepartment(company, "default", "Auto generated default department", adr,
                         authController.getSystemUser());
                 }
             }

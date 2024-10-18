@@ -17,6 +17,7 @@
 package de.hallerweb.enterprise.prioritize.controller.search;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
+import de.hallerweb.enterprise.prioritize.controller.DepartmentController;
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
 import de.hallerweb.enterprise.prioritize.controller.security.AuthorizationController;
@@ -52,7 +53,7 @@ public class SearchController {
     @EJB
     ResourceController resourceController;
     @EJB
-    CompanyController companyController;
+    DepartmentController departmentController;
     @EJB
     SkillController skillController;
     @EJB
@@ -117,7 +118,7 @@ public class SearchController {
 
     public List<SearchResult> searchDepartments(String phrase, User user) {
         List<SearchResult> result = new ArrayList<>();
-        List<Department> departments = companyController.getAllDepartments(sessionController.getUser());
+        List<Department> departments = departmentController.getAllDepartments(sessionController.getUser());
         for (Department dept : departments) {
             if (authController.canRead(dept, user)) {
                 result.addAll(dept.find(phrase));

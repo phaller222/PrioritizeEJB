@@ -17,6 +17,7 @@
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import de.hallerweb.enterprise.prioritize.controller.CompanyController;
+import de.hallerweb.enterprise.prioritize.controller.DepartmentController;
 import de.hallerweb.enterprise.prioritize.controller.InitializationController;
 import de.hallerweb.enterprise.prioritize.controller.resource.MQTTResourceController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
@@ -61,6 +62,8 @@ public class ResourceService {
     @EJB
     CompanyController companyController;
     @EJB
+    DepartmentController departmentController;
+    @EJB
     ResourceController resourceController;
     @EJB
     MQTTResourceController mqttResourceController;
@@ -102,7 +105,7 @@ public class ResourceService {
         if (user == null) {
             throw new NotAuthorizedException(Response.serverError());
         } else {
-            Department dept = companyController.getDepartmentByToken(departmentToken, user);
+            Department dept = departmentController.getDepartmentByToken(departmentToken, user);
             if (dept != null) {
                 List<ResourceGroup> groups = resourceController.getResourceGroupsForDepartment(dept.getId(), user);
                 if (groups != null) {
@@ -140,7 +143,7 @@ public class ResourceService {
                                       @QueryParam(value = "apiKey") String apiKey, @PathParam(value = "group") String group) {
         User user = accessController.checkApiKey(apiKey);
         if (user != null) {
-            Department dept = companyController.getDepartmentByToken(departmentToken, user);
+            Department dept = departmentController.getDepartmentByToken(departmentToken, user);
             if (dept != null) {
                 ResourceGroup grp = resourceController.findResourceGroupByNameAndDepartment(group, dept.getId(), user);
                 if (authController.canRead(grp, user)) {
@@ -177,7 +180,7 @@ public class ResourceService {
         if (user == null) {
             throw new NotAuthorizedException(Response.serverError());
         } else {
-            Department dept = companyController.getDepartmentByToken(departmentToken, user);
+            Department dept = departmentController.getDepartmentByToken(departmentToken, user);
             if (dept == null) {
                 throw new NotAuthorizedException(Response.serverError());
             } else {
@@ -431,7 +434,7 @@ public class ResourceService {
         if (user == null) {
             throw new NotAuthorizedException(Response.serverError());
         } else {
-            Department dept = companyController.getDepartmentByToken(departmentToken, user);
+            Department dept = departmentController.getDepartmentByToken(departmentToken, user);
             if (authController.canCreate(dept.getId(), new Resource(), user)) {
                 Resource tempResource = new Resource();
                 tempResource.setName(name);
@@ -524,7 +527,7 @@ public class ResourceService {
                                    @QueryParam(value = "departmentToken") String departmentToken, @PathParam("uuid") String uuid) {
         User user = accessController.checkApiKey(apiKey);
         if (user != null) {
-            Department dept = companyController.getDepartmentByToken(departmentToken, user);
+            Department dept = departmentController.getDepartmentByToken(departmentToken, user);
             if (dept != null) {
                 Resource resource = mqttResourceController.getResource(uuid, user);
                 if (resource != null) {
@@ -565,7 +568,7 @@ public class ResourceService {
                                    @QueryParam(value = "departmentToken") String departmentToken, @PathParam("id") int id) {
         User user = accessController.checkApiKey(apiKey);
         if (user != null) {
-            Department dept = companyController.getDepartmentByToken(departmentToken, user);
+            Department dept = departmentController.getDepartmentByToken(departmentToken, user);
             if (dept != null) {
                 Resource resource = resourceController.getResource(id, user);
                 if (resource != null) {

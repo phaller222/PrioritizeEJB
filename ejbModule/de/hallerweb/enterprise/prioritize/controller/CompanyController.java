@@ -131,55 +131,6 @@ public class CompanyController {
         }
     }
 
-    public Address createAddress(String country, String street, String housenumber, String zipCode, String city, String phone, String fax, String mobile) {
-        Address adr = new Address();
-        adr.setCountry(country);
-        adr.setStreet(street);
-        adr.setHousenumber(housenumber);
-        adr.setZipCode(zipCode);
-        adr.setCity(city);
-        adr.setPhone(phone);
-        adr.setFax(fax);
-        adr.setMobile(mobile);
-
-        em.persist(adr);
-        em.flush();
-        try {
-            if (sessionController.getUser() != null) {
-                logger.log(sessionController.getUser().getUsername(), LITERAL_ADDRESS, Action.CREATE, adr.getId(),
-                    " New Address \"" + adr.getId() + LITERAL_CREATED);
-            }
-        } catch (ContextNotActiveException ex) {
-            logger.log(LITERAL_SYSTEM, LITERAL_ADDRESS, Action.CREATE, adr.getId(), " New Address \"" + adr.getId() + LITERAL_CREATED);
-        }
-        return adr;
-    }
-
-    /**
-     * Returns a {@link List} of all adresses.
-     *
-     * @return List of Companies adresses.
-     * @throws EJBException thrown exception if any errors
-     */
-    @SuppressWarnings("unchecked")
-    public List<Address> getAllAddresses() {
-        Query query = em.createNamedQuery("findAllAddresses");
-        return query.getResultList();
-    }
-
-    /**
-     * Deletes the {@link Address} with the given ID.
-     *
-     * @param id - The primary key (int) of the {@link Department} to be deleted.
-     */
-    public void deleteAddress(int id) {
-        Address managedAddress = findAddressById(id);
-        em.remove(managedAddress);
-        logger.log(sessionController.getUser().getUsername(), LITERAL_ADDRESS, Action.DELETE, managedAddress.getId(),
-            " Address \"" + managedAddress.getId() + "\" deleted.");
-    }
-
-
     public Department createDepartment(Company company, String name, String description, Address adr, User sessionUser) {
         if (authController.canCreate(AuthorizationController.DEPARTMENT_TYPE, sessionUser)) {
             Department dept = new Department();
@@ -565,10 +516,6 @@ public class CompanyController {
         } catch (NoResultException ex) {
             return null;
         }
-    }
-
-    public Address findAddressById(int id) {
-        return em.find(Address.class, id);
     }
 
     public Department findDepartmentById(int id) {

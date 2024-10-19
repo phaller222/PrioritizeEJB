@@ -81,6 +81,19 @@ public class DepartmentService {
         }
     }
 
+
+    /**
+     * @api {get} /departments/list getDepartments
+     * @apiName getDepartments
+     * @apiGroup /department
+     * @apiDescription Returns all department within the given company name.
+     * @apiParam {String} apiKey The API-Key of the user accessing the service.
+     * @apiParam {String} companyName The name of the company for which to list the departments.
+     * @apiSuccess {Department[]} All departments within that company.
+     * @apiSuccessExample Success-Response:
+     * HTTP/1.1 200 OK
+     * @apiError NotAuthorized APIKey incorrect.
+     */
     @GET
     @Path("list/")
     @Produces(MediaType.APPLICATION_JSON)

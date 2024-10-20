@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020 Peter Michael Haller and contributors
+ * Copyright 2015-2024 Peter Michael Haller and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package de.hallerweb.enterprise.prioritize.controller.search;
 
-import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.DepartmentController;
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
@@ -127,23 +126,11 @@ public class SearchController {
         return result;
     }
 
-    public List<SearchResult> search(String phrase, User user) {
-        List<SearchResult> result = new ArrayList<>();
-        result.addAll(searchUsers(phrase, user));
-        result.addAll(searchDocuments(phrase, user));
-        result.addAll(searchResources(phrase, user));
-        result.addAll(searchRoles(phrase, user));
-        result.addAll(searchDepartments(phrase, user));
-        result.addAll(searchSkills(phrase, user));
-        return result;
-    }
-
     /**
      * Search all Users on the systems.
      *
-     *  @param phrase String the phrase to search for
-     *  @return List with SearchResults
-     *
+     * @param phrase String the phrase to search for
+     * @return List with SearchResults
      */
     public List<SearchResult> searchUser(String phrase, SearchProperty property, User sessionUser) {
         List<SearchResult> result = new ArrayList<>();
@@ -155,4 +142,17 @@ public class SearchController {
         }
         return result;
     }
+
+
+    public List<SearchResult> search(String phrase, User user) {
+        List<SearchResult> result = new ArrayList<>();
+        result.addAll(searchUsers(phrase, user));
+        result.addAll(searchDocuments(phrase, user));
+        result.addAll(searchResources(phrase, user));
+        result.addAll(searchRoles(phrase, user));
+        result.addAll(searchDepartments(phrase, user));
+        result.addAll(searchSkills(phrase, user));
+        return result;
+    }
+
 }

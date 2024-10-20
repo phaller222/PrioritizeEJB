@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020 Peter Michael Haller and contributors
+ * Copyright 2015-2024 Peter Michael Haller and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import jakarta.ws.rs.core.Application;
 
 /**
  * <p>
- * Copyright: (c) 2015
+ * Copyright: (c) 2015-2024
  * </p>
  * <p>
  * Peter Haller

@@ -16,7 +16,6 @@
 
 package de.hallerweb.enterprise.prioritize.controller.search;
 
-import de.hallerweb.enterprise.prioritize.controller.CompanyController;
 import de.hallerweb.enterprise.prioritize.controller.DepartmentController;
 import de.hallerweb.enterprise.prioritize.controller.document.DocumentController;
 import de.hallerweb.enterprise.prioritize.controller.resource.ResourceController;
@@ -127,23 +126,11 @@ public class SearchController {
         return result;
     }
 
-    public List<SearchResult> search(String phrase, User user) {
-        List<SearchResult> result = new ArrayList<>();
-        result.addAll(searchUsers(phrase, user));
-        result.addAll(searchDocuments(phrase, user));
-        result.addAll(searchResources(phrase, user));
-        result.addAll(searchRoles(phrase, user));
-        result.addAll(searchDepartments(phrase, user));
-        result.addAll(searchSkills(phrase, user));
-        return result;
-    }
-
     /**
      * Search all Users on the systems.
      *
-     *  @param phrase String the phrase to search for
-     *  @return List with SearchResults
-     *
+     * @param phrase String the phrase to search for
+     * @return List with SearchResults
      */
     public List<SearchResult> searchUser(String phrase, SearchProperty property, User sessionUser) {
         List<SearchResult> result = new ArrayList<>();
@@ -155,4 +142,17 @@ public class SearchController {
         }
         return result;
     }
+
+
+    public List<SearchResult> search(String phrase, User user) {
+        List<SearchResult> result = new ArrayList<>();
+        result.addAll(searchUsers(phrase, user));
+        result.addAll(searchDocuments(phrase, user));
+        result.addAll(searchResources(phrase, user));
+        result.addAll(searchRoles(phrase, user));
+        result.addAll(searchDepartments(phrase, user));
+        result.addAll(searchSkills(phrase, user));
+        return result;
+    }
+
 }

@@ -56,6 +56,7 @@ public class TimeTrackerController implements Serializable {
             tracker.setNfcUnit(unit);
             tracker.setTask(task);
             em.persist(tracker);
+            return tracker;
         }
         return null;
     }

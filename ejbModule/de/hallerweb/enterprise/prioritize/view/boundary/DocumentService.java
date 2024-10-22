@@ -311,7 +311,7 @@ public class DocumentService {
 
     /**
      * @api {put} /id/{id}?apiKey={apiKey}&name={name}&mimeType={mimeType}&tag={tag}&changes={changes} setDocumentAttributes
-     * @apiName setDocumentAttributes
+     * @apiName setDocumentAttributesById
      * @apiGroup /documents
      * @apiDescription Changes different attributes of a document
      * @apiParam {String} apiKey The API-Key of the user accessing the service.
@@ -334,38 +334,38 @@ public class DocumentService {
         User user = accessController.checkApiKey(apiKey);
         if (user == null) {
             throw new NotAuthorizedException(Response.serverError());
-        } else {
-            DocumentInfo docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
-            if (authController.canUpdate(docInfo, user)) {
-                boolean processed = false;
-                Document doc = docInfo.getCurrentDocument();
-                if (name != null) {
-                    doc.setName(name);
-                    processed = true;
-                }
-                if (mimeType != null) {
-                    doc.setMimeType(mimeType);
-                    processed = true;
-                }
-                if (tag != null) {
-                    doc.setTag(tag);
-                    processed = true;
-                }
-                if (changes != null) {
-                    doc.setChanges(changes);
-                    processed = true;
-                }
-                if (processed) {
-                    documentController.editDocumentInfo(docInfo, doc, doc.getData(), mimeType, user, doc.isEncrypted());
-                    return createPositiveResponse("OK");
-                } else {
-                    return createNegativeResponse("ERROR: None of the given document property names found! Nothing changed.");
-                }
-
-            } else {
-                throw new NotAuthorizedException(Response.serverError());
-            }
         }
+        DocumentInfo docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
+        if (authController.canUpdate(docInfo, user)) {
+            boolean processed = false;
+            Document doc = docInfo.getCurrentDocument();
+            if (name != null) {
+                doc.setName(name);
+                processed = true;
+            }
+            if (mimeType != null) {
+                doc.setMimeType(mimeType);
+                processed = true;
+            }
+            if (tag != null) {
+                doc.setTag(tag);
+                processed = true;
+            }
+            if (changes != null) {
+                doc.setChanges(changes);
+                processed = true;
+            }
+            if (processed) {
+                documentController.editDocumentInfo(docInfo, doc, doc.getData(), mimeType, user, doc.isEncrypted());
+                return createPositiveResponse("OK");
+            } else {
+                return createNegativeResponse("ERROR: None of the given document property names found! Nothing changed.");
+            }
+
+        } else {
+            throw new NotAuthorizedException(Response.serverError());
+        }
+
     }
 
     /**
@@ -391,24 +391,24 @@ public class DocumentService {
             Department dept = departmentController.getDepartmentByToken(departmentToken, user);
             if (dept == null) {
                 throw new NotAuthorizedException(Response.serverError());
-            } else {
-                DocumentInfo docInfo;
-                try {
-                    docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
-                } catch (Exception ex) {
-                    return createNegativeResponse(LITERAL_NOT_FOUND);
-                }
-                if (docInfo != null) {
-                    if (authController.canDelete(docInfo, user)) {
-                        documentController.deleteDocumentInfo(docInfo.getId(), user);
-                    } else {
-                        throw new NotAuthorizedException(Response.serverError());
-                    }
-                    return createPositiveResponse("Document has been removed.");
-                } else {
-                    throw new NotFoundException(Response.serverError().build());
-                }
             }
+            DocumentInfo docInfo;
+            try {
+                docInfo = documentController.getDocumentInfo(Integer.parseInt(id), user);
+            } catch (Exception ex) {
+                return createNegativeResponse(LITERAL_NOT_FOUND);
+            }
+            if (docInfo != null) {
+                if (authController.canDelete(docInfo, user)) {
+                    documentController.deleteDocumentInfo(docInfo.getId(), user);
+                } else {
+                    throw new NotAuthorizedException(Response.serverError());
+                }
+                return createPositiveResponse("Document has been removed.");
+            } else {
+                throw new NotFoundException(Response.serverError().build());
+            }
+
         } else {
             throw new NotAuthorizedException(Response.serverError());
         }

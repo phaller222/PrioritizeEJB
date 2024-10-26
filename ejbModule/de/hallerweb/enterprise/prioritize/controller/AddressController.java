@@ -58,18 +58,18 @@ public class AddressController {
     public static final String LITERAL_CREATED = "\" created.";
 
 
-    public Address createAddress(String country, String street, String housenumber, String zipCode, String city, String phone, String fax, String mobile) {
-        Address adr = new Address();
-        adr.setCountry(country);
-        adr.setStreet(street);
-        adr.setHousenumber(housenumber);
-        adr.setZipCode(zipCode);
-        adr.setCity(city);
-        adr.setPhone(phone);
-        adr.setFax(fax);
-        adr.setMobile(mobile);
+    public Address createAddress(Address adr) {
+        Address adress = new Address();
+        adress.setCountry(adr.getCountry());
+        adress.setStreet(adr.getStreet());
+        adress.setHousenumber(adr.getHousenumber());
+        adress.setZipCode(adr.getZipCode());
+        adress.setCity(adr.getCity());
+        adress.setPhone(adr.getPhone());
+        adress.setFax(adr.getFax());
+        adress.setMobile(adr.getMobile());
 
-        em.persist(adr);
+        em.persist(adress);
         em.flush();
         try {
             if (sessionController.getUser() != null) {

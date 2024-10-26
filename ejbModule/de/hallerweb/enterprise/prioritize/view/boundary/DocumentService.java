@@ -484,6 +484,12 @@ public class DocumentService {
         }
     }
 
+    //TODO: Not implemented yet!
+    public Response createNewDocument(@FormDataParam("file") InputStream uploadedInputStream,
+                                      @FormDataParam("file") FormDataContentDisposition fileDetail) {
+        return null;
+    }
+
 
     private Response createPositiveResponse(String responseText) {
         return Response.status(200).entity("{\"response\" : \"" + responseText + "\"}").build();

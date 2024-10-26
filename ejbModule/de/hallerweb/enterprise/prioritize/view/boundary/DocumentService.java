@@ -275,6 +275,42 @@ public class DocumentService {
     }
 
     /**
+     * Return the {@link Document} object with the given tag.
+     *
+     * @api {get} /tag/{tag}?apiKey={apiKey} getDocumentByTag
+     * @apiName getDocumentByTag
+     * @apiGroup /documents
+     * @apiDescription returns the document with the given tag
+     * @apiParam {String} apiKey The API-Key of the user accessing the service.
+     * @apiSuccess {Document} document  JSON DocumentInfo-Object.
+     * @apiSuccessExample Success-Response:
+     * HTTP/1.1 200 OK
+     * @apiError NotAuthorized  APIKey incorrect.
+     */
+    @GET
+    @Path("tag/{tag}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDocumentByTag(@PathParam(value = "tag") String tag, @QueryParam(value = "apiKey") String apiKey) {
+        User user = accessController.checkApiKey(apiKey);
+        Document document;
+        if (user == null) {
+            throw new NotAuthorizedException(Response.serverError());
+        } else {
+            try {
+                document = documentController.getDocumentByTag(tag);
+            } catch (Exception ex) {
+                return createNegativeResponse(LITERAL_NOT_FOUND);
+            }
+            if (authController.canRead(documentController.getDocumentInfoByDocumentId(document.getId(), user), user)) {
+                return Response.ok(document, MediaType.APPLICATION_JSON).build();
+            } else {
+                throw new NotAuthorizedException(Response.serverError());
+            }
+        }
+    }
+
+
+    /**
      * Return the {@link Document} object with the given id.
      *
      * @api {get} /id/{id}/content?apiKey={apiKey} getDocumentContent
@@ -413,6 +449,7 @@ public class DocumentService {
             throw new NotAuthorizedException(Response.serverError());
         }
     }
+
 
     private Response createPositiveResponse(String responseText) {
         return Response.status(200).entity("{\"response\" : \"" + responseText + "\"}").build();

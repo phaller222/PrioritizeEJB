@@ -194,6 +194,40 @@ public class DocumentService {
         }
     }
 
+
+    /**
+     * @api {get} /documents/{departmentToken}/group/{group}?apiKey={apiKey} getDocumentGroup
+     * @apiName getDocumentGroup
+     * @apiGroup /documents
+     * @apiDescription gets the document group within the given id.
+     * @apiParam {String} apiKey The API-Key of the user accessing the service.
+     * @apiParam {String} departmentToken The department token of the department.
+     * @apiParam {String} group The DocumentGroup to retrieve
+     * @apiSuccess {Document} documents JSON DocumentInfo-Objects with information about found documents.
+     * @apiSuccessExample Success-Response:
+     * HTTP/1.1 200 OK
+     * @apiError NotAuthorized  APIKey incorrect.
+     */
+    @GET
+    @Path("/{departmentToken}/group/{groupid}/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public DocumentGroup getDocumentGroup(@PathParam(value = "departmentToken") String departmentToken,
+                                          @PathParam(value = "groupid") int groupid,
+                                          @QueryParam(value = "apiKey") String apiKey) {
+        User user = accessController.checkApiKey(apiKey);
+        if (user != null) {
+            Department dept = departmentController.getDepartmentByToken(departmentToken, user);
+            if (dept == null) {
+                throw new NotFoundException(createNegativeResponse("Department not found or department token invalid!"));
+            } else {
+                DocumentGroup groupFound = documentController.getDocumentGroup(groupid, user);
+                return groupFound != null ? groupFound : new DocumentGroup();
+            }
+        } else {
+            throw new NotAuthorizedException(Response.serverError());
+        }
+    }
+
     /**
      * Returns all the documents in the given department and document group matching the search phrase.
      *
@@ -240,10 +274,10 @@ public class DocumentService {
     }
 
     /**
-     * Return the {@link Document} object with the given id.
+     * Return the {@link DocumentInfo} object with the given id.
      *
-     * @api {get} /id/{id}?apiKey={apiKey} getDocumentById
-     * @apiName getDocumentById
+     * @api {get} /id/{id}?apiKey={apiKey} getDocumentInfoById
+     * @apiName getDocumentInfoById
      * @apiGroup /documents
      * @apiDescription returns the document with the given id
      * @apiParam {String} apiKey The API-Key of the user accessing the service.
@@ -255,7 +289,7 @@ public class DocumentService {
     @GET
     @Path("id/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDocumentById(@PathParam(value = "id") String id, @QueryParam(value = "apiKey") String apiKey) {
+    public Response getDocumentInfoById(@PathParam(value = "id") String id, @QueryParam(value = "apiKey") String apiKey) {
         User user = accessController.checkApiKey(apiKey);
         DocumentInfo docInfo;
         if (user == null) {

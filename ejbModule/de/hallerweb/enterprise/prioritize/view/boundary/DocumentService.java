@@ -32,6 +32,7 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.security.enterprise.AuthenticationException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -495,8 +496,8 @@ public class DocumentService {
      * HTTP/1.1 200 OK
      * @apiError NotAuthorized  APIKey incorrect.
      */
-    @DELETE
-    @Path("remove/{id}")
+    @POST
+    @Path("create/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response createNewDocument(@FormDataParam("file") InputStream uploadedInputStream,
                                       @FormDataParam("file") FormDataContentDisposition fileDetail,
@@ -534,9 +535,10 @@ public class DocumentService {
             } catch (Exception ex) {
                 return Response.serverError().build();
             }
+        } else {
+            throw new NotAuthorizedException(Response.serverError());
         }
 
-        return null;
     }
 
 

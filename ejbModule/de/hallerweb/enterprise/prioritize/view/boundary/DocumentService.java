@@ -32,7 +32,6 @@ import de.hallerweb.enterprise.prioritize.model.security.User;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import jakarta.security.enterprise.AuthenticationException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -500,12 +499,11 @@ public class DocumentService {
     @Path("create/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response createNewDocument(@FormDataParam("file") InputStream uploadedInputStream,
-                                      @FormDataParam("file") FormDataContentDisposition fileDetail,
-                                      @FormDataParam(value = "mimeType") String mimeType,
-                                      @FormDataParam(value = "name") String name,
-                                      @FormDataParam(value = "apiKey") String apiKey,
-                                      @FormDataParam(value = "departmentToken") String departmentToken,
-                                      @FormDataParam(value = "documentGroup") String documentGroup) {
+                                      @FormParam(value = "mimeType") String mimeType,
+                                      @FormParam(value = "name") String name,
+                                      @FormParam(value = "apiKey") String apiKey,
+                                      @FormParam(value = "departmentToken") String departmentToken,
+                                      @FormParam(value = "documentGroup") String documentGroup) {
 
         User user = accessController.checkApiKey(apiKey);
         if (user != null) {

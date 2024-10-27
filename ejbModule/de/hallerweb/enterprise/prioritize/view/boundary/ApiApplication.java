@@ -17,7 +17,8 @@
 package de.hallerweb.enterprise.prioritize.view.boundary;
 
 import jakarta.ws.rs.ApplicationPath;
-import jakarta.ws.rs.core.Application;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.server.ResourceConfig;
 
 /**
  * <p>
@@ -30,5 +31,16 @@ import jakarta.ws.rs.core.Application;
  * @author peter
  */
 @ApplicationPath("/api")
-public class ApiApplication extends Application {
+public class ApiApplication extends ResourceConfig {
+
+    public ApiApplication() {
+        super();
+
+        register(MultiPartFeature.class);
+        // Register your resource classes here
+        register(DocumentService.class);
+
+    }
+
+
 }

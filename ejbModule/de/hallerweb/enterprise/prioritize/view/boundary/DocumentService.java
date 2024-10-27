@@ -38,7 +38,10 @@ import jakarta.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -495,9 +498,10 @@ public class DocumentService {
      * HTTP/1.1 200 OK
      * @apiError NotAuthorized  APIKey incorrect.
      */
-    @POST
+    @PUT
     @Path("create/")
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response createNewDocument(@FormDataParam("file") InputStream uploadedInputStream,
                                       @FormParam(value = "mimeType") String mimeType,
                                       @FormParam(value = "name") String name,
@@ -519,7 +523,7 @@ public class DocumentService {
             doc.setVersion(1);
             byte[] buff = new byte[4096];
 
-            try (ByteArrayOutputStream outb = new ByteArrayOutputStream()) {
+            /*try (ByteArrayOutputStream outb = new ByteArrayOutputStream()) {
                 while (uploadedInputStream.read(buff) > 0) {
                     outb.write(buff);
                 }
@@ -532,11 +536,11 @@ public class DocumentService {
 
             } catch (Exception ex) {
                 return Response.serverError().build();
-            }
+            }*/
         } else {
             throw new NotAuthorizedException(Response.serverError());
         }
-
+        return createPositiveResponse("OK");
     }
 
 

@@ -38,14 +38,8 @@ import jakarta.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 
 /**
  * <p>
@@ -484,9 +478,64 @@ public class DocumentService {
         }
     }
 
-    //TODO: Not implemented yet!
+
+    /**
+     * @api {post} /create
+     * @apiName createDocument
+     * @apiGroup /documents
+     * @apiDescription Creates a document
+     * @apiParam {String} apiKey The API-Key of the user accessing the service.
+     * @apiParam {String} name The name of the document to create.
+     * @apiParam {String} mimeType The MimeType of the document to create.
+     * @apiParam {String} departmentToken The Token for the department where to create the document.
+     * @apiParam {byte[]} uploadedInputStream - binary data of document (FormDataParam)
+     * @apiParam {String} fileDetail ContentDisposition of the file.
+     * @apiSuccess OK
+     * @apiSuccessExample Success-Response:
+     * HTTP/1.1 200 OK
+     * @apiError NotAuthorized  APIKey incorrect.
+     */
+    @DELETE
+    @Path("remove/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response createNewDocument(@FormDataParam("file") InputStream uploadedInputStream,
-                                      @FormDataParam("file") FormDataContentDisposition fileDetail) {
+                                      @FormDataParam("file") FormDataContentDisposition fileDetail,
+                                      @FormDataParam(value = "mimeType") String mimeType,
+                                      @FormDataParam(value = "name") String name,
+                                      @FormDataParam(value = "apiKey") String apiKey,
+                                      @FormDataParam(value = "departmentToken") String departmentToken,
+                                      @FormDataParam(value = "documentGroup") String documentGroup) {
+
+        User user = accessController.checkApiKey(apiKey);
+        if (user != null) {
+
+            // Create document classes
+            Document doc = new Document();
+            doc.setEncrypted(false);
+            doc.setChanges("");
+            doc.setName(name);
+            doc.setTag("");
+            doc.setMimeType(mimeType);
+            doc.setLastModified(new Date());
+            doc.setVersion(1);
+            byte[] buff = new byte[4096];
+
+            try (ByteArrayOutputStream outb = new ByteArrayOutputStream()) {
+                while (uploadedInputStream.read(buff) > 0) {
+                    outb.write(buff);
+                }
+                doc.setData(outb.toByteArray());
+
+                Department dept = departmentController.getDepartmentByToken(departmentToken, user);
+                DocumentGroup group = documentController.findDocumentGroupByNameAndDepartment(dept.getId(), documentGroup, user);
+                documentController.createDocumentInfo(doc, user, group.getId());
+                return createPositiveResponse("Document created.");
+
+            } catch (Exception ex) {
+                return Response.serverError().build();
+            }
+        }
+
         return null;
     }
 

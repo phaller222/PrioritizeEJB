@@ -501,27 +501,28 @@ public class DocumentService {
     @PUT
     @Path("create/")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response createNewDocument(@FormDataParam("file") InputStream uploadedInputStream,
-                                      @FormParam(value = "mimeType") String mimeType,
-                                      @FormParam(value = "name") String name,
-                                      @FormParam(value = "apiKey") String apiKey,
-                                      @FormParam(value = "departmentToken") String departmentToken,
-                                      @FormParam(value = "documentGroup") String documentGroup) {
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response createNewDocument(@FormParam("mimeType") String mimeType,
+                                      @FormParam("name") String name,
+                                      @FormParam("apiKey") String apiKey,
+                                      @FormParam("departmentToken") String departmentToken,
+                                      @FormParam("documentGroup") String documentGroup,
+                                      @FormParam("content") String content) {
 
         User user = accessController.checkApiKey(apiKey);
         if (user != null) {
+            try {
+                // Create document classes
+                Document doc = new Document();
+                doc.setEncrypted(false);
+                doc.setChanges("");
+                doc.setName(name);
+                doc.setTag("");
+                doc.setMimeType(mimeType);
+                doc.setLastModified(new Date());
+                doc.setVersion(1);
 
-            // Create document classes
-            Document doc = new Document();
-            doc.setEncrypted(false);
-            doc.setChanges("");
-            doc.setName(name);
-            doc.setTag("");
-            doc.setMimeType(mimeType);
-            doc.setLastModified(new Date());
-            doc.setVersion(1);
-            byte[] buff = new byte[4096];
+                byte[] buff = new byte[4096];
 
             /*try (ByteArrayOutputStream outb = new ByteArrayOutputStream()) {
                 while (uploadedInputStream.read(buff) > 0) {
@@ -529,6 +530,12 @@ public class DocumentService {
                 }
                 doc.setData(outb.toByteArray());
 
+
+             */
+
+
+                //TODO: remove Dummy implementation
+                doc.setData(content.getBytes());
                 Department dept = departmentController.getDepartmentByToken(departmentToken, user);
                 DocumentGroup group = documentController.findDocumentGroupByNameAndDepartment(dept.getId(), documentGroup, user);
                 documentController.createDocumentInfo(doc, user, group.getId());
@@ -536,11 +543,10 @@ public class DocumentService {
 
             } catch (Exception ex) {
                 return Response.serverError().build();
-            }*/
+            }
         } else {
             throw new NotAuthorizedException(Response.serverError());
         }
-        return createPositiveResponse("OK");
     }
 
 

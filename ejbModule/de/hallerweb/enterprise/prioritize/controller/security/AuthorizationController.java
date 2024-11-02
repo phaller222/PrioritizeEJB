@@ -152,7 +152,7 @@ public class AuthorizationController {
             // User must not create foreign companies!
             return false;
         }
-        return Boolean.FALSE;
+        return Boolean.TRUE;
     }
 
 

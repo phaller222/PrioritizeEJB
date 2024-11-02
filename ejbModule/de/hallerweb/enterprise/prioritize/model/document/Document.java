@@ -54,7 +54,7 @@ public class Document extends PObject implements Comparable<Object> {
     private boolean encrypted; // Is the document encrpted?
     private String changes; // Description of the last changes made.
 
-    @OneToOne
+    @ManyToOne
     private User lastModifiedBy; // Who last modified this document
     @OneToOne
     private User encryptedBy; // Who encrypted this document

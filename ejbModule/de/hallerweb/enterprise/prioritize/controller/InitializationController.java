@@ -225,7 +225,8 @@ public class InitializationController {
                 adr.setPhone("00000-00000");
                 adr.setStreet("Street of Admins");
                 adr.setZipCode("00000");
-                Company company = companyController.createCompany("Default Company", adr, authController.getSystemUser());
+                User systemUser = authController.getSystemUser();
+                Company company = companyController.createCompany("Default Company", adr, systemUser);
                 company.setMainAddress(adr);
 
                 // If configured, a default department is created for the company.

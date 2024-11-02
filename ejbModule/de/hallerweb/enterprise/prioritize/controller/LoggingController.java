@@ -70,7 +70,8 @@ public class LoggingController {
 
     public void log(String user, String relatedObject, Action what, int objectId, String description) {
         // Log action to database
-        if (loggingEnabled) {
+        //TODO: Reenable lgging
+        /*if (loggingEnabled) {
             LogEntry entry = new LogEntry();
             entry.setUser(user);
             entry.setRelatedObject(relatedObject);
@@ -80,7 +81,7 @@ public class LoggingController {
             entry.setTimestamp(new Date());
             em.persist(entry);
             em.flush();
-        }
+        }*/
     }
 
     @SuppressWarnings("unchecked")

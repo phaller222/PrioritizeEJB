@@ -70,6 +70,7 @@ public class AuthorizationController {
         if (systemUser == null) {
             systemUser = new User();
             systemUser.setUsername("system");
+            systemUser.setName("system");
             systemUser.setApiKey(SYSTEM_USER_API_KEY);
         }
         return systemUser;
@@ -83,10 +84,14 @@ public class AuthorizationController {
      * @return true if user can create, otherwise false.
      */
     public boolean canCreate(PAuthorizedObject targetObject, User user) {
+        if (user.getUsername().equals("system")) {
+            return true;
+        }
         boolean x = canCreatePreCheck(targetObject, user);
         if (!x) {
             return x;
         }
+
 
         String absoluteObjectType = targetObject.getClass().getCanonicalName();
         for (Role role : user.getRoles()) {

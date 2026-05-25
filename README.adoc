@@ -3,8 +3,8 @@
 image::http://www.prioritize-iot.de/logo.png[]
 
 
-**NEW: REST API docs now available (First version):**
-http://www.prioritize-iot.de/apiDoc
+**PLEASE NOTE: THIS Project is discontinued and undergoes a complete redesign in Spring. If notable sopurcecode
+is available there will be a new repository for priotitize here on github. Stay tuned!**<p>
 
 If you have contributed code which has already been merged/accepted you can watch the build state here:
 <p></p>

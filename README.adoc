@@ -3,8 +3,9 @@
 image::http://www.prioritize-iot.de/logo.png[]
 
 
-[red]#**PLEASE NOTE: THIS Project is discontinued and undergoes a complete redesign in Spring. If notable sopurcecode
-is available there will be a new repository for priotitize here on github. Stay tuned!**#
+
+[red]#**PLEASE NOTE: THIS PROJECT IS DISCONTINUED AND UNDERGOING A COMPLETE REDESIGN USING SPRING! IF A FIRST VERSION
+IS AVAILABLE IT WILL MADE AVAILABLE AS A SEPARATE REPOSITORY. STRAY TUNED!**#
 
 
 

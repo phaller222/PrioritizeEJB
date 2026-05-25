@@ -4,12 +4,8 @@ image::http://www.prioritize-iot.de/logo.png[]
 
 
 **PLEASE NOTE: THIS Project is discontinued and undergoes a complete redesign in Spring. If notable sopurcecode
-is available there will be a new repository for priotitize here on github. Stay tuned!**<p>
+is available there will be a new repository for priotitize here on github. Stay tuned!**
 
-If you have contributed code which has already been merged/accepted you can watch the build state here:
-<p></p>
-http://jenkins.prioauth.com:8080/
- 
 
 
 ## What it is:
@@ -26,12 +22,7 @@ Prioritize is an open source JakartaEE-Framework to accomplish basically the fol
 * Assign tasks from projects to users **and** devices!
 * 
 
-It can be installed as a JakartaEE-Application. 
 It comes with a ready to use REST-API. You can perform different tasks by calling the REST-API Endpoint and provide the correct credentials (Department-Token, User-Token).
-
-IMPORTANT: A local or remote Database, Application Server (e.G. Wildfly) and a persistence unit must be installed/configured.
-See the files persistence.xml as an example.
-
  
 
 ## Getting started (Quickstart)
@@ -146,7 +137,7 @@ It is very good documented and should explain all relevant details.
 
 
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Project is discontinued. Please wait for the spring version to be released.
 
 ## License
 [Apache] (http://www.apache.org/licenses/LICENSE-2.0)
